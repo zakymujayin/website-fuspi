@@ -4,5 +4,56 @@
     "description": "This scaffold validates multilingual routing, writing direction, and quality gates before the three AI lanes begin.",
     "languageLabel": "Choose a language",
     "status": "English locale is active (LTR)."
+  },
+  "Nav": {
+    "skipToContent": "Skip to main content",
+    "menu": "Menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "languageLabel": "Choose a language",
+    "primaryLabel": "Main menu",
+    "contentLabel": "Content channels",
+    "utilityLabel": "Campus systems",
+    "profile": "Profile",
+    "studyPrograms": "Study Programs",
+    "academics": "Academics",
+    "research": "Research & Community Service",
+    "services": "Services",
+    "contact": "Contact",
+    "news": "News",
+    "announcements": "Announcements",
+    "columns": "Columns",
+    "agenda": "Agenda",
+    "albums": "Albums",
+    "documents": "Documents",
+    "pmb": "Admissions",
+    "siakad": "SIAKAD",
+    "elearning": "E-Learning",
+    "gkm": "Quality Assurance",
+    "complaints": "Complaints",
+    "booking": "Room Booking",
+    "ppid": "PPID",
+    "faq": "FAQ",
+    "program": {
+      "IAT": "Qur’anic Studies and Exegesis",
+      "IH": "Hadith Studies",
+      "AFI": "Islamic Theology and Philosophy",
+      "SAA": "Religious Studies",
+      "TASPI": "Sufism and Psychotherapy"
+    }
+  },
+  "Footer": {
+    "quickLinks": "Quick Links",
+    "contact": "Contact",
+    "contactHint": "Campus addresses, email, and phone numbers appear once site settings are available.",
+    "legalLabel": "Policy links",
+    "privacy": "Privacy",
+    "accessibility": "Accessibility",
+    "sitemap": "Sitemap"
+  },
+  "StudyPrograms": {
+    "title": "Study Programs",
+    "description": "Five undergraduate programs at the Faculty of Ushuluddin and Islamic Thought, from Qur’an and hadith studies to Sufism and psychotherapy.",
+    "readMore": "Read more"
   }
 }

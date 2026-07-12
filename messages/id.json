@@ -4,5 +4,56 @@
     "description": "Scaffold ini memvalidasi routing multibahasa, arah tulisan, dan quality gate sebelum tiga lane AI mulai bekerja.",
     "languageLabel": "Pilih bahasa",
     "status": "Locale Indonesia aktif (LTR)."
+  },
+  "Nav": {
+    "skipToContent": "Lompat ke konten utama",
+    "menu": "Menu",
+    "openMenu": "Buka menu",
+    "closeMenu": "Tutup menu",
+    "languageLabel": "Pilih bahasa",
+    "primaryLabel": "Menu utama",
+    "contentLabel": "Kanal konten",
+    "utilityLabel": "Layanan sistem",
+    "profile": "Profil",
+    "studyPrograms": "Program Studi",
+    "academics": "Akademik",
+    "research": "Riset & PkM",
+    "services": "Layanan",
+    "contact": "Kontak",
+    "news": "Berita",
+    "announcements": "Pengumuman",
+    "columns": "Kolom",
+    "agenda": "Agenda",
+    "albums": "Album",
+    "documents": "Dokumen",
+    "pmb": "PMB",
+    "siakad": "SIAKAD",
+    "elearning": "E-Learning",
+    "gkm": "GKM",
+    "complaints": "Pengaduan",
+    "booking": "Peminjaman Ruang",
+    "ppid": "PPID",
+    "faq": "FAQ",
+    "program": {
+      "IAT": "Ilmu Al-Qur’an dan Tafsir",
+      "IH": "Ilmu Hadis",
+      "AFI": "Aqidah dan Filsafat Islam",
+      "SAA": "Studi Agama-Agama",
+      "TASPI": "Tasawuf dan Psikoterapi"
+    }
+  },
+  "Footer": {
+    "quickLinks": "Tautan Cepat",
+    "contact": "Kontak",
+    "contactHint": "Alamat kampus, surel, dan telepon fakultas ditampilkan setelah pengaturan situs tersedia.",
+    "legalLabel": "Tautan kebijakan",
+    "privacy": "Privasi",
+    "accessibility": "Aksesibilitas",
+    "sitemap": "Peta Situs"
+  },
+  "StudyPrograms": {
+    "title": "Program Studi",
+    "description": "Lima program studi sarjana di Fakultas Ushuluddin dan Pemikiran Islam, dari kajian Al-Qur’an dan hadis hingga tasawuf dan psikoterapi.",
+    "readMore": "Selengkapnya"
   }
 }
