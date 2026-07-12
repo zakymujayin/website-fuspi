@@ -17,11 +17,13 @@ enum TranslationStatus {
   DRAFT
   REVIEWED
   PUBLISHED
+  STALE
 }
 
 enum GovernanceStatus {
   CURRENT
   REVIEW_DUE
+  STALE
   EXPIRED
   ARCHIVED
 }
@@ -200,7 +202,7 @@ enum SurveyQuestionType {
 enum PrivacyRequestType {
   ACCESS
   CORRECTION
-  DELETION
+  ERASURE
   RESTRICTION
   OBJECTION
 }
@@ -211,6 +213,28 @@ enum PrivacyRequestStatus {
   IN_PROGRESS
   COMPLETED
   REJECTED
+}
+
+enum VerificationState {
+  PENDING
+  VERIFIED
+  FAILED
+  EXPIRED
+}
+
+enum DataIncidentStatus {
+  OPEN
+  CONTAINED
+  INVESTIGATING
+  RESOLVED
+}
+
+enum AccessibilityIssueStatus {
+  OPEN
+  IN_PROGRESS
+  FIXED
+  VERIFIED
+  ACCEPTED_RISK
 }
 
 enum IncidentSeverity {
@@ -231,6 +255,25 @@ enum AlertLevel {
   INFO
   WARNING
   CRITICAL
+}
+
+enum AlertAudience {
+  ALL
+  PUBLIC
+  ADMIN
+}
+
+enum ServiceIncidentStatus {
+  INVESTIGATING
+  IDENTIFIED
+  MONITORING
+  RESOLVED
+}
+
+enum RetentionDisposition {
+  DELETE
+  ANONYMIZE
+  HOLD
 }
 
 enum ServiceHealth {
@@ -431,6 +474,7 @@ model Page {
   slug             String            @unique
   status           ContentStatus     @default(DRAFT)
   order            Int               @default(0)
+  version          Int               @default(1)
   parentId         String?
   heroMediaId      String?
   contentOwnerId   String?
@@ -445,6 +489,8 @@ model Page {
   children         Page[]            @relation("PageTree")
   heroMedia        Media?            @relation("PageHero", fields: [heroMediaId], references: [id], onDelete: Restrict)
   translations     PageTranslation[]
+
+  @@index([contentOwnerId, reviewDueAt])
 }
 
 model PageTranslation {
@@ -514,6 +560,15 @@ model StudyProgram {
   brochureDocumentId   String?
   isActive             Boolean                   @default(true)
   order                Int                       @default(0)
+  version              Int                       @default(1)
+  contentOwnerId       String?
+  governanceStatus     GovernanceStatus          @default(CURRENT)
+  lastReviewedAt       DateTime?
+  lastReviewedById     String?
+  reviewDueAt          DateTime?
+  expiresAt            DateTime?
+  createdAt            DateTime                  @default(now())
+  updatedAt            DateTime                  @updatedAt
   logoMedia            Media?                    @relation("StudyProgramLogo", fields: [logoMediaId], references: [id], onDelete: Restrict)
   curriculumDocument   Document?                 @relation("ProgramCurriculum", fields: [curriculumDocumentId], references: [id], onDelete: SetNull)
   brochureDocument     Document?                 @relation("ProgramBrochure", fields: [brochureDocumentId], references: [id], onDelete: SetNull)
@@ -521,6 +576,8 @@ model StudyProgram {
   lecturers            Lecturer[]
   posts                StudyProgramPost[]
   albums               StudyProgramAlbum[]
+
+  @@index([contentOwnerId, reviewDueAt])
 }
 
 model StudyProgramTranslation {
@@ -725,14 +782,25 @@ model StudyProgramPost {
 }
 
 model Unit {
-  id           String            @id @default(cuid())
-  slug         String            @unique
-  type         UnitType
-  email        String?
-  phone        String?
-  externalUrl  String?
-  isActive     Boolean           @default(true)
-  translations UnitTranslation[]
+  id               String            @id @default(cuid())
+  slug             String            @unique
+  type             UnitType
+  email            String?
+  phone            String?
+  externalUrl      String?
+  isActive         Boolean           @default(true)
+  version          Int               @default(1)
+  contentOwnerId   String?
+  governanceStatus GovernanceStatus  @default(CURRENT)
+  lastReviewedAt   DateTime?
+  lastReviewedById String?
+  reviewDueAt      DateTime?
+  expiresAt        DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  translations     UnitTranslation[]
+
+  @@index([contentOwnerId, reviewDueAt])
 }
 
 model UnitTranslation {
@@ -753,13 +821,24 @@ model UnitTranslation {
 }
 
 model Service {
-  id           String               @id @default(cuid())
-  slug         String               @unique
-  category     ServiceCategory
-  url          String?
-  isActive     Boolean              @default(true)
-  order        Int                  @default(0)
-  translations ServiceTranslation[]
+  id               String               @id @default(cuid())
+  slug             String               @unique
+  category         ServiceCategory
+  url              String?
+  isActive         Boolean              @default(true)
+  order            Int                  @default(0)
+  version          Int                  @default(1)
+  contentOwnerId   String?
+  governanceStatus GovernanceStatus     @default(CURRENT)
+  lastReviewedAt   DateTime?
+  lastReviewedById String?
+  reviewDueAt      DateTime?
+  expiresAt        DateTime?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  translations     ServiceTranslation[]
+
+  @@index([contentOwnerId, reviewDueAt])
 }
 
 model ServiceTranslation {
@@ -902,17 +981,27 @@ model ActivityImage {
 }
 
 model Document {
-  id            String                @id @default(cuid())
-  slug          String                @unique
-  storageKey    String
-  storageClass  StorageClass          @default(PUBLIC)
-  mimeType      String
-  size          Int
-  publishedAt   DateTime?
-  createdAt     DateTime              @default(now())
-  translations  DocumentTranslation[]
-  curriculumFor StudyProgram[]        @relation("ProgramCurriculum")
-  brochureFor   StudyProgram[]        @relation("ProgramBrochure")
+  id               String                @id @default(cuid())
+  slug             String                @unique
+  storageKey       String
+  storageClass     StorageClass          @default(PUBLIC)
+  mimeType         String
+  size             Int
+  publishedAt      DateTime?
+  version          Int                   @default(1)
+  contentOwnerId   String?
+  governanceStatus GovernanceStatus      @default(CURRENT)
+  lastReviewedAt   DateTime?
+  lastReviewedById String?
+  reviewDueAt      DateTime?
+  expiresAt        DateTime?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  translations     DocumentTranslation[]
+  curriculumFor    StudyProgram[]        @relation("ProgramCurriculum")
+  brochureFor      StudyProgram[]        @relation("ProgramBrochure")
+
+  @@index([contentOwnerId, reviewDueAt])
 }
 
 model DocumentTranslation {
@@ -1148,19 +1237,29 @@ model ExternalLinkTranslation {
 }
 
 model SiteSetting {
-  id           String                   @id @default("singleton")
-  deanName     String?
-  deanPhotoId  String?
-  videoUrl     String?
-  email        String?
-  phone        String?
-  facebookUrl  String?
-  instagramUrl String?
-  youtubeUrl   String?
-  xUrl         String?
-  updatedAt    DateTime                 @updatedAt
-  deanPhoto    Media?                   @relation("DeanPhoto", fields: [deanPhotoId], references: [id], onDelete: Restrict)
-  translations SiteSettingTranslation[]
+  id               String                   @id @default("singleton")
+  deanName         String?
+  deanPhotoId      String?
+  videoUrl         String?
+  email            String?
+  phone            String?
+  facebookUrl      String?
+  instagramUrl     String?
+  youtubeUrl       String?
+  xUrl             String?
+  version          Int                      @default(1)
+  contentOwnerId   String?
+  governanceStatus GovernanceStatus         @default(CURRENT)
+  lastReviewedAt   DateTime?
+  lastReviewedById String?
+  reviewDueAt      DateTime?
+  expiresAt        DateTime?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  deanPhoto        Media?                   @relation("DeanPhoto", fields: [deanPhotoId], references: [id], onDelete: Restrict)
+  translations     SiteSettingTranslation[]
+
+  @@index([contentOwnerId, reviewDueAt])
 }
 
 model SiteSettingTranslation {
@@ -1187,15 +1286,26 @@ model SiteSettingTranslation {
 }
 
 model Event {
-  id              String             @id @default(cuid())
-  slug            String             @unique
-  startAt         DateTime
-  endAt           DateTime?
-  registrationUrl String?
-  sourceBookingId String?            @unique
-  isPublished     Boolean            @default(false)
-  sourceBooking   Booking?           @relation(fields: [sourceBookingId], references: [id], onDelete: SetNull)
-  translations    EventTranslation[]
+  id               String             @id @default(cuid())
+  slug             String             @unique
+  startAt          DateTime
+  endAt            DateTime?
+  registrationUrl  String?
+  sourceBookingId  String?            @unique
+  isPublished      Boolean            @default(false)
+  version          Int                @default(1)
+  contentOwnerId   String?
+  governanceStatus GovernanceStatus   @default(CURRENT)
+  lastReviewedAt   DateTime?
+  lastReviewedById String?
+  reviewDueAt      DateTime?
+  expiresAt        DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  sourceBooking    Booking?           @relation(fields: [sourceBookingId], references: [id], onDelete: SetNull)
+  translations     EventTranslation[]
+
+  @@index([contentOwnerId, reviewDueAt])
 }
 
 model EventTranslation {
@@ -1217,10 +1327,21 @@ model EventTranslation {
 }
 
 model Faq {
-  id           String           @id @default(cuid())
-  order        Int              @default(0)
-  isVisible    Boolean          @default(true)
-  translations FaqTranslation[]
+  id               String           @id @default(cuid())
+  order            Int              @default(0)
+  isVisible        Boolean          @default(true)
+  version          Int              @default(1)
+  contentOwnerId   String?
+  governanceStatus GovernanceStatus @default(CURRENT)
+  lastReviewedAt   DateTime?
+  lastReviewedById String?
+  reviewDueAt      DateTime?
+  expiresAt        DateTime?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  translations     FaqTranslation[]
+
+  @@index([contentOwnerId, reviewDueAt])
 }
 
 model FaqTranslation {
@@ -1376,15 +1497,26 @@ model TicketHistory {
 }
 
 model Room {
-  id             String              @id @default(cuid())
-  slug           String              @unique
-  capacity       Int
-  bufferMinutes  Int                 @default(30)
-  isActive       Boolean             @default(true)
-  translations   RoomTranslation[]
-  operatingHours RoomOperatingHour[]
-  blackouts      RoomBlackout[]
-  bookings       Booking[]
+  id               String              @id @default(cuid())
+  slug             String              @unique
+  capacity         Int
+  bufferMinutes    Int                 @default(30)
+  isActive         Boolean             @default(true)
+  version          Int                 @default(1)
+  contentOwnerId   String?
+  governanceStatus GovernanceStatus    @default(CURRENT)
+  lastReviewedAt   DateTime?
+  lastReviewedById String?
+  reviewDueAt      DateTime?
+  expiresAt        DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  translations     RoomTranslation[]
+  operatingHours   RoomOperatingHour[]
+  blackouts        RoomBlackout[]
+  bookings         Booking[]
+
+  @@index([contentOwnerId, reviewDueAt])
 }
 
 model RoomTranslation {
@@ -1507,13 +1639,14 @@ model ContentRevision {
   resourceType  String
   resourceId    String
   locale        Locale?
+  scopeKey      String   @default("root")
   version       Int
   snapshotJson  Json
   changeSummary String?
   actorId       String?
   createdAt     DateTime @default(now())
 
-  @@unique([resourceType, resourceId, locale, version])
+  @@unique([resourceType, resourceId, scopeKey, version])
   @@index([resourceType, resourceId, version])
 }
 
@@ -1574,20 +1707,27 @@ model RateLimitBucket {
 }
 
 model NotificationOutbox {
-  id               String       @id @default(cuid())
-  type             String
-  recipient        String
-  locale           Locale       @default(id)
-  template         String
-  payload          Json
-  payloadEncrypted Boolean      @default(false)
-  idempotencyKey   String       @unique
-  status           OutboxStatus @default(PENDING)
-  attempts         Int          @default(0)
-  nextAttemptAt    DateTime     @default(now())
-  sentAt           DateTime?
-  lastError        String?
-  createdAt        DateTime     @default(now())
+  id                String       @id @default(cuid())
+  type              String
+  recipient         String
+  locale            Locale       @default(id)
+  template          String
+  payload           Json?
+  payloadEncrypted  Boolean      @default(false)
+  payloadCiphertext String?      @db.LongText
+  encryptionNonce   String?
+  encryptionTag     String?
+  keyVersion        Int?
+  idempotencyKey    String       @unique
+  status            OutboxStatus @default(PENDING)
+  attempts          Int          @default(0)
+  nextAttemptAt     DateTime     @default(now())
+  sentAt            DateTime?
+  lastError         String?
+  lockedAt          DateTime?
+  lockedBy          String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 
   @@index([status, nextAttemptAt])
 }
@@ -1610,35 +1750,52 @@ model GlossaryTerm {
 }
 
 model GlossaryTranslation {
-  id             String       @id @default(cuid())
+  id             String            @id @default(cuid())
   glossaryTermId String
   locale         Locale
   term           String
-  definition     String?      @db.Text
-  glossaryTerm   GlossaryTerm @relation(fields: [glossaryTermId], references: [id], onDelete: Cascade)
+  definition     String?           @db.Text
+  status         TranslationStatus @default(DRAFT)
+  sourceVersion  Int               @default(1)
+  translatorId   String?
+  reviewerId     String?
+  reviewedAt     DateTime?
+  glossaryTerm   GlossaryTerm      @relation(fields: [glossaryTermId], references: [id], onDelete: Cascade)
 
   @@unique([glossaryTermId, locale])
   @@index([locale])
 }
 
 model SiteAlert {
-  id           String                 @id @default(cuid())
-  level        AlertLevel
-  startsAt     DateTime
-  endsAt       DateTime?
-  isActive     Boolean                @default(true)
-  translations SiteAlertTranslation[]
+  id            String                 @id @default(cuid())
+  severity      AlertLevel
+  audience      AlertAudience          @default(PUBLIC)
+  startsAt      DateTime
+  endsAt        DateTime?
+  isDismissible Boolean                @default(true)
+  isActive      Boolean                @default(true)
+  createdById   String?
+  createdAt     DateTime               @default(now())
+  updatedAt     DateTime               @updatedAt
+  translations  SiteAlertTranslation[]
+
+  @@index([isActive, startsAt, endsAt])
 }
 
 model SiteAlertTranslation {
-  id          String    @id @default(cuid())
-  siteAlertId String
-  locale      Locale
-  title       String
-  message     String    @db.Text
-  linkLabel   String?
-  linkUrl     String?
-  siteAlert   SiteAlert @relation(fields: [siteAlertId], references: [id], onDelete: Cascade)
+  id            String            @id @default(cuid())
+  siteAlertId   String
+  locale        Locale
+  title         String
+  message       String            @db.Text
+  linkLabel     String?
+  linkUrl       String?
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  siteAlert     SiteAlert         @relation(fields: [siteAlertId], references: [id], onDelete: Cascade)
 
   @@unique([siteAlertId, locale])
   @@index([locale])
@@ -1649,6 +1806,8 @@ model ServiceEndpoint {
   slug      String            @unique
   name      String
   url       String?
+  ownerId   String?
+  isActive  Boolean           @default(true)
   isPublic  Boolean           @default(true)
   incidents ServiceIncident[]
 }
@@ -1656,7 +1815,8 @@ model ServiceEndpoint {
 model ServiceIncident {
   id                String                       @id @default(cuid())
   serviceEndpointId String
-  status            ServiceHealth
+  severity          IncidentSeverity
+  status            ServiceIncidentStatus        @default(INVESTIGATING)
   startedAt         DateTime
   resolvedAt        DateTime?
   serviceEndpoint   ServiceEndpoint              @relation(fields: [serviceEndpointId], references: [id], onDelete: Restrict)
@@ -1665,30 +1825,37 @@ model ServiceIncident {
 }
 
 model ServiceIncidentTranslation {
-  id                String          @id @default(cuid())
+  id                String            @id @default(cuid())
   serviceIncidentId String
   locale            Locale
   title             String
-  summary           String          @db.Text
-  serviceIncident   ServiceIncident @relation(fields: [serviceIncidentId], references: [id], onDelete: Cascade)
+  summary           String            @db.Text
+  status            TranslationStatus @default(DRAFT)
+  sourceVersion     Int               @default(1)
+  translatorId      String?
+  reviewerId        String?
+  reviewedAt        DateTime?
+  serviceIncident   ServiceIncident   @relation(fields: [serviceIncidentId], references: [id], onDelete: Cascade)
 
   @@unique([serviceIncidentId, locale])
   @@index([locale])
 }
 
 model ServiceIncidentUpdate {
-  id                String          @id @default(cuid())
+  id                String                @id @default(cuid())
   serviceIncidentId String
-  status            ServiceHealth
-  message           String          @db.Text
-  createdAt         DateTime        @default(now())
-  serviceIncident   ServiceIncident @relation(fields: [serviceIncidentId], references: [id], onDelete: Cascade)
+  status            ServiceIncidentStatus
+  locale            Locale                @default(id)
+  message           String                @db.Text
+  createdAt         DateTime              @default(now())
+  serviceIncident   ServiceIncident       @relation(fields: [serviceIncidentId], references: [id], onDelete: Cascade)
 }
 
 model PrivacyNotice {
   id           String                     @id @default(cuid())
   version      Int                        @unique
   effectiveAt  DateTime
+  retiredAt    DateTime?
   isCurrent    Boolean                    @default(false)
   createdAt    DateTime                   @default(now())
   translations PrivacyNoticeTranslation[]
@@ -1696,12 +1863,17 @@ model PrivacyNotice {
 }
 
 model PrivacyNoticeTranslation {
-  id              String        @id @default(cuid())
+  id              String            @id @default(cuid())
   privacyNoticeId String
   locale          Locale
   title           String
-  content         String        @db.LongText
-  privacyNotice   PrivacyNotice @relation(fields: [privacyNoticeId], references: [id], onDelete: Cascade)
+  content         String            @db.LongText
+  status          TranslationStatus @default(DRAFT)
+  sourceVersion   Int               @default(1)
+  translatorId    String?
+  reviewerId      String?
+  reviewedAt      DateTime?
+  privacyNotice   PrivacyNotice     @relation(fields: [privacyNoticeId], references: [id], onDelete: Cascade)
 
   @@unique([privacyNoticeId, locale])
   @@index([locale])
@@ -1713,6 +1885,8 @@ model ConsentRecord {
   subjectHash     String
   purpose         String
   granted         Boolean
+  userId          String?
+  sessionId       String?
   createdAt       DateTime      @default(now())
   privacyNotice   PrivacyNotice @relation(fields: [privacyNoticeId], references: [id], onDelete: Restrict)
 
@@ -1720,58 +1894,89 @@ model ConsentRecord {
 }
 
 model DataSubjectRequest {
-  id                  String               @id @default(cuid())
-  trackingTokenHash   String               @unique
-  type                PrivacyRequestType
-  status              PrivacyRequestStatus @default(RECEIVED)
-  requesterCiphertext String               @db.LongText
-  requestCiphertext   String               @db.LongText
-  createdAt           DateTime             @default(now())
-  completedAt         DateTime?
+  id                   String               @id @default(cuid())
+  requestNumber        String               @unique
+  trackingTokenHash    String               @unique
+  type                 PrivacyRequestType
+  status               PrivacyRequestStatus @default(RECEIVED)
+  verificationState    VerificationState    @default(PENDING)
+  requesterCiphertext  String               @db.LongText
+  requestCiphertext    String               @db.LongText
+  assigneeId           String?
+  resolutionCiphertext String?              @db.LongText
+  dueAt                DateTime?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  completedAt          DateTime?
 }
 
 model DataIncident {
-  id                String           @id @default(cuid())
-  severity          IncidentSeverity
-  occurredAt        DateTime
-  discoveredAt      DateTime
-  summaryCiphertext String           @db.LongText
-  resolvedAt        DateTime?
-  createdAt         DateTime         @default(now())
+  id                    String             @id @default(cuid())
+  severity              IncidentSeverity
+  occurredAt            DateTime
+  discoveredAt          DateTime
+  systemsAffected       Json
+  dataCategories        Json
+  containmentCiphertext String?            @db.LongText
+  summaryCiphertext     String             @db.LongText
+  status                DataIncidentStatus @default(OPEN)
+  ownerId               String?
+  resolvedAt            DateTime?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
 }
 
 model DataExportLog {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   actorId      String?
   resourceType String
   resourceId   String?
   purpose      String
-  createdAt    DateTime @default(now())
+  recordCount  Int
+  storageKey   String?
+  expiresAt    DateTime?
+  downloadedAt DateTime?
+  createdAt    DateTime  @default(now())
 
   @@index([actorId, createdAt])
 }
 
 model RetentionPolicy {
-  id            String   @id @default(cuid())
-  resourceType  String   @unique
-  retentionDays Int?
-  legalHold     Boolean  @default(false)
-  rationale     String   @db.Text
-  updatedAt     DateTime @updatedAt
+  id           String               @id @default(cuid())
+  resourceType String               @unique
+  legalBasis   String               @db.Text
+  activeDays   Int?
+  archiveDays  Int?
+  disposition  RetentionDisposition
+  legalHold    Boolean              @default(false)
+  approverId   String?
+  approvedAt   DateTime?
+  rationale    String               @db.Text
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
 }
 
 model AccessibilityIssue {
-  id         String           @id @default(cuid())
-  route      String
-  summary    String
-  severity   IncidentSeverity
-  status     String
-  createdAt  DateTime         @default(now())
-  resolvedAt DateTime?
+  id            String                   @id @default(cuid())
+  route         String
+  wcagCriterion String
+  description   String                   @db.Text
+  summary       String
+  severity      IncidentSeverity
+  status        AccessibilityIssueStatus @default(OPEN)
+  evidence      Json?
+  ownerId       String?
+  targetDate    DateTime?
+  fixedAt       DateTime?
+  retestResult  String?                  @db.Text
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+  resolvedAt    DateTime?
 }
 
 model AccessibilityRequest {
   id                  String                     @id @default(cuid())
+  requestNumber       String                     @unique
   trackingTokenHash   String                     @unique
   status              AccessibilityRequestStatus @default(RECEIVED)
   requesterCiphertext String                     @db.LongText

@@ -11,6 +11,9 @@ const adapter = new PrismaMariaDb({
   password: decodeURIComponent(databaseUrl.password),
   database: databaseUrl.pathname.slice(1),
   connectionLimit: 5,
+  allowPublicKeyRetrieval: ["127.0.0.1", "localhost"].includes(
+    databaseUrl.hostname,
+  ),
 });
 const prisma = new PrismaClient({adapter});
 
@@ -26,7 +29,7 @@ async function main() {
     throw new Error("SEED_ADMIN_EMAIL dan SEED_ADMIN_PASSWORD (minimal 12 karakter) wajib diisi.");
   }
 
-  await prisma.user.upsert({
+  const admin = await prisma.user.upsert({
     where: {email},
     update: {},
     create: {
@@ -40,10 +43,11 @@ async function main() {
 
   await prisma.siteSetting.upsert({
     where: {id: "singleton"},
-    update: {},
+    update: {contentOwnerId: admin.id},
     create: {
       id: "singleton",
       email: "fuspi@uinbanten.ac.id",
+      contentOwnerId: admin.id,
       translations: {
         create: {
           locale: "id",
@@ -57,12 +61,13 @@ async function main() {
   for (const [index, {code, slug, name}] of institution.studyPrograms.entries()) {
     await prisma.studyProgram.upsert({
       where: {code},
-      update: {slug, externalUrl: null, order: index},
+      update: {slug, externalUrl: null, order: index, contentOwnerId: admin.id},
       create: {
         code,
         slug,
         degree: "S1",
         order: index,
+        contentOwnerId: admin.id,
         translations: {create: {locale: "id", name, status: "PUBLISHED"}},
       },
     });

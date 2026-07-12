@@ -1,0 +1,6 @@
+-- AlterTable
+ALTER TABLE `GlossaryTranslation` ADD COLUMN `reviewedAt` DATETIME(3) NULL,
+    ADD COLUMN `reviewerId` VARCHAR(191) NULL,
+    ADD COLUMN `sourceVersion` INTEGER NOT NULL DEFAULT 1,
+    ADD COLUMN `status` ENUM('DRAFT', 'REVIEWED', 'PUBLISHED', 'STALE') NOT NULL DEFAULT 'DRAFT',
+    ADD COLUMN `translatorId` VARCHAR(191) NULL;
