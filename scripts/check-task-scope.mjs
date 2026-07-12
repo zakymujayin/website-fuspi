@@ -18,6 +18,7 @@ const match = manifest.match(/allowed_paths:\s*\n((?:\s+- .+\n?)*)/);
 const allowed = (match?.[1] ?? "")
   .split("\n")
   .map((line) => line.replace(/^\s+-\s+/, "").trim())
+  .map((value) => value.replace(/^(['"])(.*)\1$/, "$2"))
   .filter(Boolean);
 
 if (allowed.length === 0) {
