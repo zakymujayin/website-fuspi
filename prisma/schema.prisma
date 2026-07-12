@@ -1,0 +1,1832 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum Locale {
+  id
+  en
+  ar
+}
+
+enum TranslationStatus {
+  DRAFT
+  REVIEWED
+  PUBLISHED
+}
+
+enum GovernanceStatus {
+  CURRENT
+  REVIEW_DUE
+  EXPIRED
+  ARCHIVED
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  PETUGAS
+  SATGAS_PPKS
+}
+
+enum PostType {
+  BERITA
+  PENGUMUMAN
+  INFORMASI
+  KOLOM
+}
+
+enum ColumnType {
+  DEKAN
+  DOSEN
+  MAHASISWA
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum StorageClass {
+  PUBLIC
+  PRIVATE
+  PPKS_PRIVATE
+}
+
+enum UnitType {
+  PUSAT_STUDI
+  LABORATORIUM
+  ORGANISASI_MAHASISWA
+  LEMBAGA
+}
+
+enum PartnershipLevel {
+  INTERNASIONAL
+  NASIONAL
+  LOKAL
+}
+
+enum ServiceCategory {
+  AKADEMIK
+  LABORATORIUM
+  UMUM
+}
+
+enum AchievementLevel {
+  INTERNASIONAL
+  NASIONAL
+  REGIONAL
+  LOKAL
+}
+
+enum MenuLocation {
+  CONTENT_BAR
+  TOPBAR
+  HEADER
+  FOOTER
+}
+
+enum LinkCategory {
+  TERKAIT
+  JURNAL
+}
+
+enum HomeSectionKey {
+  HERO
+  QUICKLINK
+  DEAN
+  STATS
+  NEWS
+  ANNOUNCEMENT
+  PRODI
+  PARTNERSHIP
+  VIDEO
+  AGENDA
+  TESTIMONIAL
+  COLUMN
+  CTA
+}
+
+enum ComplaintCategory {
+  AKADEMIK
+  FASILITAS
+  LAYANAN
+  KEUANGAN
+  PELECEHAN_SEKSUAL
+  LAINNYA
+}
+
+enum TicketPriority {
+  RENDAH
+  NORMAL
+  TINGGI
+  DARURAT
+}
+
+enum TicketStatus {
+  BARU
+  DIPROSES
+  MENUNGGU_PELAPOR
+  SELESAI
+  DITUTUP
+}
+
+enum TicketAccessAction {
+  VIEW
+  EXPORT
+  REPLY
+  ASSIGN
+  STATUS_CHANGE
+  ATTACHMENT_DOWNLOAD
+}
+
+enum TicketEvent {
+  CREATED
+  ASSIGNED
+  REPLIED
+  STATUS_CHANGED
+  PRIORITY_CHANGED
+  PAUSED
+  RESUMED
+  CLOSED
+}
+
+enum BookingStatus {
+  MENUNGGU
+  DISETUJUI
+  DITOLAK
+  DIBATALKAN
+  SELESAI
+}
+
+enum ActivityAction {
+  CREATE
+  UPDATE
+  PUBLISH
+  ARCHIVE
+  LOGIN
+  LOGIN_FAILED
+  VIEW_SENSITIVE
+  EXPORT
+  CHANGE_ROLE
+  CHANGE_PASSWORD
+}
+
+enum SequenceKind {
+  TICKET
+  BOOKING
+}
+
+enum OutboxStatus {
+  PENDING
+  PROCESSING
+  SENT
+  FAILED
+}
+
+enum SurveyQuestionType {
+  SHORT_TEXT
+  LONG_TEXT
+  SINGLE_CHOICE
+  MULTIPLE_CHOICE
+  RATING
+}
+
+enum PrivacyRequestType {
+  ACCESS
+  CORRECTION
+  DELETION
+  RESTRICTION
+  OBJECTION
+}
+
+enum PrivacyRequestStatus {
+  RECEIVED
+  VERIFYING
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
+enum IncidentSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AccessibilityRequestStatus {
+  RECEIVED
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
+enum AlertLevel {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum ServiceHealth {
+  OPERATIONAL
+  DEGRADED
+  PARTIAL_OUTAGE
+  MAJOR_OUTAGE
+  MAINTENANCE
+}
+
+model User {
+  id                 String            @id @default(cuid())
+  name               String
+  email              String            @unique
+  emailVerified      DateTime?
+  passwordHash       String?
+  image              String?
+  role               Role              @default(EDITOR)
+  isActive           Boolean           @default(true)
+  mustChangePassword Boolean           @default(false)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  accounts           Account[]
+  sessions           Session[]
+  authenticators     Authenticator[]
+  posts              Post[]            @relation("PostAuthor")
+  media              Media[]           @relation("MediaUploader")
+  assignedTickets    Ticket[]          @relation("TicketAssignee")
+  ticketReplies      TicketReply[]     @relation("TicketReplyAuthor")
+  ticketAccessLogs   TicketAccessLog[]
+  approvedBookings   Booking[]         @relation("BookingApprover")
+  activityLogs       ActivityLog[]
+}
+
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refreshToken      String? @db.Text
+  accessToken       String? @db.Text
+  expiresAt         Int?
+  tokenType         String?
+  scope             String?
+  idToken           String? @db.Text
+  sessionState      String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([sessionToken])
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String  @db.Text
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+  user                 User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, credentialID])
+}
+
+model Post {
+  id               String             @id @default(cuid())
+  type             PostType           @default(BERITA)
+  columnType       ColumnType?
+  slug             String             @unique
+  status           ContentStatus      @default(DRAFT)
+  isFeatured       Boolean            @default(false)
+  viewCount        Int                @default(0)
+  publishedAt      DateTime?
+  version          Int                @default(1)
+  categoryId       String?
+  authorId         String?
+  coverMediaId     String?
+  contentOwnerId   String?
+  governanceStatus GovernanceStatus   @default(CURRENT)
+  lastReviewedAt   DateTime?
+  lastReviewedById String?
+  reviewDueAt      DateTime?
+  expiresAt        DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  category         Category?          @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  author           User?              @relation("PostAuthor", fields: [authorId], references: [id], onDelete: SetNull)
+  coverMedia       Media?             @relation("PostCover", fields: [coverMediaId], references: [id], onDelete: Restrict)
+  translations     PostTranslation[]
+  tags             PostTag[]
+  lecturers        LecturerPost[]
+  studyPrograms    StudyProgramPost[]
+
+  @@index([type, status, publishedAt])
+  @@index([contentOwnerId, reviewDueAt])
+}
+
+model PostTranslation {
+  id            String            @id @default(cuid())
+  postId        String
+  locale        Locale
+  title         String            @db.VarChar(255)
+  excerpt       String?           @db.VarChar(500)
+  content       String            @db.LongText
+  metaTitle     String?
+  metaDesc      String?           @db.VarChar(500)
+  coverCaption  String?
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  post          Post              @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, locale])
+  @@index([locale])
+}
+
+model Category {
+  id           String                @id @default(cuid())
+  slug         String                @unique
+  createdAt    DateTime              @default(now())
+  posts        Post[]
+  translations CategoryTranslation[]
+}
+
+model CategoryTranslation {
+  id            String            @id @default(cuid())
+  categoryId    String
+  locale        Locale
+  name          String
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  category      Category          @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@unique([categoryId, locale])
+  @@index([locale])
+}
+
+model Tag {
+  id           String           @id @default(cuid())
+  slug         String           @unique
+  posts        PostTag[]
+  translations TagTranslation[]
+}
+
+model TagTranslation {
+  id            String            @id @default(cuid())
+  tagId         String
+  locale        Locale
+  name          String
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  tag           Tag               @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([tagId, locale])
+  @@index([locale])
+}
+
+model PostTag {
+  postId    String
+  tagId     String
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([postId, tagId])
+}
+
+model Page {
+  id               String            @id @default(cuid())
+  slug             String            @unique
+  status           ContentStatus     @default(DRAFT)
+  order            Int               @default(0)
+  parentId         String?
+  heroMediaId      String?
+  contentOwnerId   String?
+  governanceStatus GovernanceStatus  @default(CURRENT)
+  lastReviewedAt   DateTime?
+  lastReviewedById String?
+  reviewDueAt      DateTime?
+  expiresAt        DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  parent           Page?             @relation("PageTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children         Page[]            @relation("PageTree")
+  heroMedia        Media?            @relation("PageHero", fields: [heroMediaId], references: [id], onDelete: Restrict)
+  translations     PageTranslation[]
+}
+
+model PageTranslation {
+  id            String            @id @default(cuid())
+  pageId        String
+  locale        Locale
+  title         String            @db.VarChar(255)
+  content       String            @db.LongText
+  metaTitle     String?
+  metaDesc      String?           @db.VarChar(500)
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  page          Page              @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@unique([pageId, locale])
+  @@index([locale])
+}
+
+model Media {
+  id                 String          @id @default(cuid())
+  storageKey         String          @unique
+  storageClass       StorageClass    @default(PUBLIC)
+  checksumSha256     String
+  originalName       String
+  mimeType           String
+  size               Int
+  alt                String?
+  isDecorative       Boolean         @default(false)
+  width              Int?
+  height             Int?
+  encryptionNonce    String?
+  encryptionTag      String?
+  keyVersion         Int?
+  uploaderId         String?
+  createdAt          DateTime        @default(now())
+  uploader           User?           @relation("MediaUploader", fields: [uploaderId], references: [id], onDelete: SetNull)
+  postCovers         Post[]          @relation("PostCover")
+  pageHeroes         Page[]          @relation("PageHero")
+  lecturerPhotos     Lecturer[]      @relation("LecturerPhoto")
+  staffPhotos        Staff[]         @relation("StaffPhoto")
+  programLogos       StudyProgram[]  @relation("StudyProgramLogo")
+  partnershipLogos   Partnership[]   @relation("PartnershipLogo")
+  albumCovers        Album[]         @relation("AlbumCover")
+  albumPhotos        AlbumPhoto[]    @relation("AlbumPhotoMedia")
+  sliderImages       HomeSlider[]    @relation("SliderImage")
+  sectionBackgrounds HomeSection[]   @relation("SectionBackground")
+  testimonialPhotos  Testimonial[]   @relation("TestimonialPhoto")
+  activityImages     ActivityImage[] @relation("ActivityImageMedia")
+  deanPhotos         SiteSetting[]   @relation("DeanPhoto")
+}
+
+model StudyProgram {
+  id                   String                    @id @default(cuid())
+  code                 String                    @unique
+  slug                 String                    @unique
+  degree               String
+  accreditation        String?
+  accreditationExpiry  DateTime?
+  externalUrl          String?
+  email                String?
+  phone                String?
+  logoMediaId          String?
+  curriculumDocumentId String?
+  brochureDocumentId   String?
+  isActive             Boolean                   @default(true)
+  order                Int                       @default(0)
+  logoMedia            Media?                    @relation("StudyProgramLogo", fields: [logoMediaId], references: [id], onDelete: Restrict)
+  curriculumDocument   Document?                 @relation("ProgramCurriculum", fields: [curriculumDocumentId], references: [id], onDelete: SetNull)
+  brochureDocument     Document?                 @relation("ProgramBrochure", fields: [brochureDocumentId], references: [id], onDelete: SetNull)
+  translations         StudyProgramTranslation[]
+  lecturers            Lecturer[]
+  posts                StudyProgramPost[]
+  albums               StudyProgramAlbum[]
+}
+
+model StudyProgramTranslation {
+  id               String            @id @default(cuid())
+  studyProgramId   String
+  locale           Locale
+  name             String
+  description      String?           @db.LongText
+  vision           String?           @db.LongText
+  mission          String?           @db.LongText
+  objectives       String?           @db.LongText
+  graduateProfile  String?           @db.LongText
+  careerProspects  String?           @db.LongText
+  learningOutcomes String?           @db.LongText
+  status           TranslationStatus @default(DRAFT)
+  sourceVersion    Int               @default(1)
+  translatorId     String?
+  reviewerId       String?
+  reviewedAt       DateTime?
+  studyProgram     StudyProgram      @relation(fields: [studyProgramId], references: [id], onDelete: Cascade)
+
+  @@unique([studyProgramId, locale])
+  @@index([locale])
+}
+
+model Lecturer {
+  id                String                     @id @default(cuid())
+  name              String
+  slug              String                     @unique
+  nidn              String?                    @unique
+  nip               String?                    @unique
+  orcid             String?                    @unique
+  googleScholarUrl  String?
+  sintaUrl          String?
+  email             String?
+  phone             String?
+  photoMediaId      String?
+  studyProgramId    String?
+  order             Int                        @default(0)
+  isActive          Boolean                    @default(true)
+  photoMedia        Media?                     @relation("LecturerPhoto", fields: [photoMediaId], references: [id], onDelete: Restrict)
+  studyProgram      StudyProgram?              @relation(fields: [studyProgramId], references: [id], onDelete: SetNull)
+  translations      LecturerTranslation[]
+  research          LecturerResearch[]
+  communityServices LecturerCommunityService[]
+  posts             LecturerPost[]
+}
+
+model LecturerTranslation {
+  id            String            @id @default(cuid())
+  lecturerId    String
+  locale        Locale
+  position      String?
+  expertise     String?
+  bio           String?           @db.LongText
+  officeHours   String?
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  lecturer      Lecturer          @relation(fields: [lecturerId], references: [id], onDelete: Cascade)
+
+  @@unique([lecturerId, locale])
+  @@index([locale])
+}
+
+model Staff {
+  id           String             @id @default(cuid())
+  name         String
+  slug         String             @unique
+  nip          String?            @unique
+  email        String?
+  phone        String?
+  photoMediaId String?
+  order        Int                @default(0)
+  isActive     Boolean            @default(true)
+  photoMedia   Media?             @relation("StaffPhoto", fields: [photoMediaId], references: [id], onDelete: Restrict)
+  translations StaffTranslation[]
+}
+
+model StaffTranslation {
+  id            String            @id @default(cuid())
+  staffId       String
+  locale        Locale
+  position      String?
+  unit          String?
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  staff         Staff             @relation(fields: [staffId], references: [id], onDelete: Cascade)
+
+  @@unique([staffId, locale])
+  @@index([locale])
+}
+
+model Research {
+  id              String                @id @default(cuid())
+  slug            String                @unique
+  year            Int
+  publicationType String?
+  doi             String?
+  repositoryUrl   String?
+  publisher       String?
+  journal         String?
+  volume          String?
+  issue           String?
+  pages           String?
+  publicationDate DateTime?
+  language        Locale?
+  peerReviewed    Boolean               @default(false)
+  documentUrl     String?
+  createdAt       DateTime              @default(now())
+  translations    ResearchTranslation[]
+  lecturers       LecturerResearch[]
+}
+
+model ResearchTranslation {
+  id            String            @id @default(cuid())
+  researchId    String
+  locale        Locale
+  title         String            @db.VarChar(500)
+  abstract      String?           @db.Text
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  research      Research          @relation(fields: [researchId], references: [id], onDelete: Cascade)
+
+  @@unique([researchId, locale])
+  @@index([locale])
+}
+
+model CommunityService {
+  id           String                        @id @default(cuid())
+  slug         String                        @unique
+  year         Int
+  location     String?
+  documentUrl  String?
+  translations CommunityServiceTranslation[]
+  lecturers    LecturerCommunityService[]
+}
+
+model CommunityServiceTranslation {
+  id                 String            @id @default(cuid())
+  communityServiceId String
+  locale             Locale
+  title              String            @db.VarChar(500)
+  description        String?           @db.Text
+  status             TranslationStatus @default(DRAFT)
+  sourceVersion      Int               @default(1)
+  translatorId       String?
+  reviewerId         String?
+  reviewedAt         DateTime?
+  communityService   CommunityService  @relation(fields: [communityServiceId], references: [id], onDelete: Cascade)
+
+  @@unique([communityServiceId, locale])
+  @@index([locale])
+}
+
+model LecturerResearch {
+  lecturerId String
+  researchId String
+  createdAt  DateTime @default(now())
+  lecturer   Lecturer @relation(fields: [lecturerId], references: [id], onDelete: Cascade)
+  research   Research @relation(fields: [researchId], references: [id], onDelete: Cascade)
+
+  @@id([lecturerId, researchId])
+}
+
+model LecturerCommunityService {
+  lecturerId         String
+  communityServiceId String
+  createdAt          DateTime         @default(now())
+  lecturer           Lecturer         @relation(fields: [lecturerId], references: [id], onDelete: Cascade)
+  communityService   CommunityService @relation(fields: [communityServiceId], references: [id], onDelete: Cascade)
+
+  @@id([lecturerId, communityServiceId])
+}
+
+model LecturerPost {
+  lecturerId String
+  postId     String
+  createdAt  DateTime @default(now())
+  lecturer   Lecturer @relation(fields: [lecturerId], references: [id], onDelete: Cascade)
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([lecturerId, postId])
+}
+
+model StudyProgramPost {
+  studyProgramId String
+  postId         String
+  createdAt      DateTime     @default(now())
+  studyProgram   StudyProgram @relation(fields: [studyProgramId], references: [id], onDelete: Cascade)
+  post           Post         @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@id([studyProgramId, postId])
+}
+
+model Unit {
+  id           String            @id @default(cuid())
+  slug         String            @unique
+  type         UnitType
+  email        String?
+  phone        String?
+  externalUrl  String?
+  isActive     Boolean           @default(true)
+  translations UnitTranslation[]
+}
+
+model UnitTranslation {
+  id            String            @id @default(cuid())
+  unitId        String
+  locale        Locale
+  name          String
+  description   String?           @db.LongText
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  unit          Unit              @relation(fields: [unitId], references: [id], onDelete: Cascade)
+
+  @@unique([unitId, locale])
+  @@index([locale])
+}
+
+model Service {
+  id           String               @id @default(cuid())
+  slug         String               @unique
+  category     ServiceCategory
+  url          String?
+  isActive     Boolean              @default(true)
+  order        Int                  @default(0)
+  translations ServiceTranslation[]
+}
+
+model ServiceTranslation {
+  id            String            @id @default(cuid())
+  serviceId     String
+  locale        Locale
+  name          String
+  description   String?           @db.Text
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  service       Service           @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([serviceId, locale])
+  @@index([locale])
+}
+
+model Partnership {
+  id           String                   @id @default(cuid())
+  slug         String                   @unique
+  partnerName  String
+  level        PartnershipLevel
+  startDate    DateTime?
+  endDate      DateTime?
+  documentUrl  String?
+  websiteUrl   String?
+  logoMediaId  String?
+  isActive     Boolean                  @default(true)
+  logoMedia    Media?                   @relation("PartnershipLogo", fields: [logoMediaId], references: [id], onDelete: Restrict)
+  translations PartnershipTranslation[]
+}
+
+model PartnershipTranslation {
+  id            String            @id @default(cuid())
+  partnershipId String
+  locale        Locale
+  category      String?
+  description   String?           @db.Text
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  partnership   Partnership       @relation(fields: [partnershipId], references: [id], onDelete: Cascade)
+
+  @@unique([partnershipId, locale])
+  @@index([locale])
+}
+
+model Scholarship {
+  id              String                   @id @default(cuid())
+  slug            String                   @unique
+  startDate       DateTime?
+  endDate         DateTime?
+  registrationUrl String?
+  isActive        Boolean                  @default(true)
+  translations    ScholarshipTranslation[]
+}
+
+model ScholarshipTranslation {
+  id            String            @id @default(cuid())
+  scholarshipId String
+  locale        Locale
+  title         String
+  provider      String?
+  description   String?           @db.Text
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  scholarship   Scholarship       @relation(fields: [scholarshipId], references: [id], onDelete: Cascade)
+
+  @@unique([scholarshipId, locale])
+  @@index([locale])
+}
+
+model Achievement {
+  id           String                   @id @default(cuid())
+  slug         String                   @unique
+  studentName  String
+  level        AchievementLevel
+  achievedAt   DateTime?
+  translations AchievementTranslation[]
+}
+
+model AchievementTranslation {
+  id            String            @id @default(cuid())
+  achievementId String
+  locale        Locale
+  title         String
+  description   String?           @db.Text
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  achievement   Achievement       @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([achievementId, locale])
+  @@index([locale])
+}
+
+model StudentActivity {
+  id           String                       @id @default(cuid())
+  slug         String                       @unique
+  date         DateTime?
+  translations StudentActivityTranslation[]
+  images       ActivityImage[]
+}
+
+model StudentActivityTranslation {
+  id                String            @id @default(cuid())
+  studentActivityId String
+  locale            Locale
+  title             String
+  description       String?           @db.LongText
+  status            TranslationStatus @default(DRAFT)
+  sourceVersion     Int               @default(1)
+  translatorId      String?
+  reviewerId        String?
+  reviewedAt        DateTime?
+  studentActivity   StudentActivity   @relation(fields: [studentActivityId], references: [id], onDelete: Cascade)
+
+  @@unique([studentActivityId, locale])
+  @@index([locale])
+}
+
+model ActivityImage {
+  id                String          @id @default(cuid())
+  studentActivityId String
+  mediaId           String
+  order             Int             @default(0)
+  activity          StudentActivity @relation(fields: [studentActivityId], references: [id], onDelete: Cascade)
+  media             Media           @relation("ActivityImageMedia", fields: [mediaId], references: [id], onDelete: Restrict)
+
+  @@unique([studentActivityId, mediaId])
+}
+
+model Document {
+  id            String                @id @default(cuid())
+  slug          String                @unique
+  storageKey    String
+  storageClass  StorageClass          @default(PUBLIC)
+  mimeType      String
+  size          Int
+  publishedAt   DateTime?
+  createdAt     DateTime              @default(now())
+  translations  DocumentTranslation[]
+  curriculumFor StudyProgram[]        @relation("ProgramCurriculum")
+  brochureFor   StudyProgram[]        @relation("ProgramBrochure")
+}
+
+model DocumentTranslation {
+  id            String            @id @default(cuid())
+  documentId    String
+  locale        Locale
+  title         String
+  category      String?
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  document      Document          @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, locale])
+  @@index([locale])
+}
+
+model Album {
+  id            String              @id @default(cuid())
+  slug          String              @unique
+  coverMediaId  String?
+  eventDate     DateTime?
+  isPublished   Boolean             @default(false)
+  coverMedia    Media?              @relation("AlbumCover", fields: [coverMediaId], references: [id], onDelete: Restrict)
+  translations  AlbumTranslation[]
+  photos        AlbumPhoto[]
+  studyPrograms StudyProgramAlbum[]
+}
+
+model AlbumTranslation {
+  id            String            @id @default(cuid())
+  albumId       String
+  locale        Locale
+  title         String
+  description   String?           @db.Text
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  album         Album             @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@unique([albumId, locale])
+  @@index([locale])
+}
+
+model AlbumPhoto {
+  id      String  @id @default(cuid())
+  albumId String
+  mediaId String
+  caption String?
+  order   Int     @default(0)
+  album   Album   @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  media   Media   @relation("AlbumPhotoMedia", fields: [mediaId], references: [id], onDelete: Restrict)
+
+  @@unique([albumId, mediaId])
+}
+
+model StudyProgramAlbum {
+  studyProgramId String
+  albumId        String
+  createdAt      DateTime     @default(now())
+  studyProgram   StudyProgram @relation(fields: [studyProgramId], references: [id], onDelete: Cascade)
+  album          Album        @relation(fields: [albumId], references: [id], onDelete: Cascade)
+
+  @@id([studyProgramId, albumId])
+}
+
+model MenuItem {
+  id           String                @id @default(cuid())
+  location     MenuLocation
+  url          String?
+  pageId       String?
+  parentId     String?
+  order        Int                   @default(0)
+  isVisible    Boolean               @default(true)
+  parent       MenuItem?             @relation("MenuTree", fields: [parentId], references: [id], onDelete: Cascade)
+  children     MenuItem[]            @relation("MenuTree")
+  translations MenuItemTranslation[]
+
+  @@index([location, order])
+}
+
+model MenuItemTranslation {
+  id            String            @id @default(cuid())
+  menuItemId    String
+  locale        Locale
+  label         String
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  menuItem      MenuItem          @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+
+  @@unique([menuItemId, locale])
+  @@index([locale])
+}
+
+model HomeSlider {
+  id           String                  @id @default(cuid())
+  imageMediaId String
+  ctaUrl       String?
+  order        Int                     @default(0)
+  isVisible    Boolean                 @default(true)
+  imageMedia   Media                   @relation("SliderImage", fields: [imageMediaId], references: [id], onDelete: Restrict)
+  translations HomeSliderTranslation[]
+}
+
+model HomeSliderTranslation {
+  id            String            @id @default(cuid())
+  homeSliderId  String
+  locale        Locale
+  title         String?
+  subtitle      String?
+  ctaLabel      String?
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  homeSlider    HomeSlider        @relation(fields: [homeSliderId], references: [id], onDelete: Cascade)
+
+  @@unique([homeSliderId, locale])
+  @@index([locale])
+}
+
+model HomeSection {
+  id                String                   @id @default(cuid())
+  key               HomeSectionKey           @unique
+  isVisible         Boolean                  @default(true)
+  order             Int                      @default(0)
+  itemLimit         Int                      @default(4)
+  ctaUrl            String?
+  backgroundMediaId String?
+  backgroundMedia   Media?                   @relation("SectionBackground", fields: [backgroundMediaId], references: [id], onDelete: Restrict)
+  translations      HomeSectionTranslation[]
+}
+
+model HomeSectionTranslation {
+  id            String            @id @default(cuid())
+  homeSectionId String
+  locale        Locale
+  title         String
+  subtitle      String?
+  ctaLabel      String?
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  homeSection   HomeSection       @relation(fields: [homeSectionId], references: [id], onDelete: Cascade)
+
+  @@unique([homeSectionId, locale])
+  @@index([locale])
+}
+
+model Statistic {
+  id           String                 @id @default(cuid())
+  value        String
+  icon         String?
+  order        Int                    @default(0)
+  isVisible    Boolean                @default(true)
+  translations StatisticTranslation[]
+}
+
+model StatisticTranslation {
+  id            String            @id @default(cuid())
+  statisticId   String
+  locale        Locale
+  label         String
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  statistic     Statistic         @relation(fields: [statisticId], references: [id], onDelete: Cascade)
+
+  @@unique([statisticId, locale])
+  @@index([locale])
+}
+
+model QuickLink {
+  id           String                 @id @default(cuid())
+  url          String
+  icon         String?
+  order        Int                    @default(0)
+  isVisible    Boolean                @default(true)
+  translations QuickLinkTranslation[]
+}
+
+model QuickLinkTranslation {
+  id            String            @id @default(cuid())
+  quickLinkId   String
+  locale        Locale
+  label         String
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  quickLink     QuickLink         @relation(fields: [quickLinkId], references: [id], onDelete: Cascade)
+
+  @@unique([quickLinkId, locale])
+  @@index([locale])
+}
+
+model ExternalLink {
+  id           String                    @id @default(cuid())
+  category     LinkCategory
+  url          String
+  order        Int                       @default(0)
+  isVisible    Boolean                   @default(true)
+  translations ExternalLinkTranslation[]
+}
+
+model ExternalLinkTranslation {
+  id             String            @id @default(cuid())
+  externalLinkId String
+  locale         Locale
+  label          String
+  status         TranslationStatus @default(DRAFT)
+  sourceVersion  Int               @default(1)
+  translatorId   String?
+  reviewerId     String?
+  reviewedAt     DateTime?
+  externalLink   ExternalLink      @relation(fields: [externalLinkId], references: [id], onDelete: Cascade)
+
+  @@unique([externalLinkId, locale])
+  @@index([locale])
+}
+
+model SiteSetting {
+  id           String                   @id @default("singleton")
+  deanName     String?
+  deanPhotoId  String?
+  videoUrl     String?
+  email        String?
+  phone        String?
+  facebookUrl  String?
+  instagramUrl String?
+  youtubeUrl   String?
+  xUrl         String?
+  updatedAt    DateTime                 @updatedAt
+  deanPhoto    Media?                   @relation("DeanPhoto", fields: [deanPhotoId], references: [id], onDelete: Restrict)
+  translations SiteSettingTranslation[]
+}
+
+model SiteSettingTranslation {
+  id            String            @id @default(cuid())
+  siteSettingId String
+  locale        Locale
+  facultyName   String
+  tagline       String?
+  address1      String?           @db.Text
+  address2      String?           @db.Text
+  deanPosition  String?
+  deanMessage   String?           @db.Text
+  videoTitle    String?
+  videoDesc     String?           @db.Text
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  siteSetting   SiteSetting       @relation(fields: [siteSettingId], references: [id], onDelete: Cascade)
+
+  @@unique([siteSettingId, locale])
+  @@index([locale])
+}
+
+model Event {
+  id              String             @id @default(cuid())
+  slug            String             @unique
+  startAt         DateTime
+  endAt           DateTime?
+  registrationUrl String?
+  sourceBookingId String?            @unique
+  isPublished     Boolean            @default(false)
+  sourceBooking   Booking?           @relation(fields: [sourceBookingId], references: [id], onDelete: SetNull)
+  translations    EventTranslation[]
+}
+
+model EventTranslation {
+  id            String            @id @default(cuid())
+  eventId       String
+  locale        Locale
+  title         String
+  description   String?           @db.LongText
+  location      String?
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  event         Event             @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, locale])
+  @@index([locale])
+}
+
+model Faq {
+  id           String           @id @default(cuid())
+  order        Int              @default(0)
+  isVisible    Boolean          @default(true)
+  translations FaqTranslation[]
+}
+
+model FaqTranslation {
+  id            String            @id @default(cuid())
+  faqId         String
+  locale        Locale
+  category      String?
+  question      String
+  answer        String            @db.LongText
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  faq           Faq               @relation(fields: [faqId], references: [id], onDelete: Cascade)
+
+  @@unique([faqId, locale])
+  @@index([locale])
+}
+
+model Testimonial {
+  id           String                   @id @default(cuid())
+  name         String
+  photoMediaId String?
+  order        Int                      @default(0)
+  isVisible    Boolean                  @default(true)
+  photoMedia   Media?                   @relation("TestimonialPhoto", fields: [photoMediaId], references: [id], onDelete: Restrict)
+  translations TestimonialTranslation[]
+}
+
+model TestimonialTranslation {
+  id            String            @id @default(cuid())
+  testimonialId String
+  locale        Locale
+  currentRole   String?
+  quote         String            @db.Text
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  testimonial   Testimonial       @relation(fields: [testimonialId], references: [id], onDelete: Cascade)
+
+  @@unique([testimonialId, locale])
+  @@index([locale])
+}
+
+model FormSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  subject   String?
+  message   String   @db.Text
+  locale    Locale   @default(id)
+  createdAt DateTime @default(now())
+}
+
+model Ticket {
+  id                         String             @id @default(cuid())
+  ticketNumber               String             @unique
+  trackingTokenHash          String             @unique
+  category                   ComplaintCategory
+  priority                   TicketPriority     @default(NORMAL)
+  status                     TicketStatus       @default(BARU)
+  subjectCiphertext          String?            @db.LongText
+  descriptionCiphertext      String             @db.LongText
+  reporterIdentityCiphertext String?            @db.LongText
+  resolutionCiphertext       String?            @db.LongText
+  encryptionNonce            String?
+  encryptionTag              String?
+  keyVersion                 Int?
+  assigneeId                 String?
+  responseDueAt              DateTime?
+  resolutionDueAt            DateTime?
+  firstRespondedAt           DateTime?
+  closedAt                   DateTime?
+  pausedAt                   DateTime?
+  totalPausedSeconds         Int                @default(0)
+  createdAt                  DateTime           @default(now())
+  updatedAt                  DateTime           @updatedAt
+  assignee                   User?              @relation("TicketAssignee", fields: [assigneeId], references: [id], onDelete: Restrict)
+  replies                    TicketReply[]
+  attachments                TicketAttachment[]
+  accessLogs                 TicketAccessLog[]
+  history                    TicketHistory[]
+
+  @@index([category, status, createdAt])
+  @@index([assigneeId, status])
+}
+
+model TicketReply {
+  id              String   @id @default(cuid())
+  ticketId        String
+  authorId        String?
+  bodyCiphertext  String   @db.LongText
+  encryptionNonce String?
+  encryptionTag   String?
+  keyVersion      Int?
+  createdAt       DateTime @default(now())
+  ticket          Ticket   @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  author          User?    @relation("TicketReplyAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([ticketId, createdAt])
+}
+
+model TicketAttachment {
+  id              String       @id @default(cuid())
+  ticketId        String
+  storageKey      String       @unique
+  storageClass    StorageClass
+  originalName    String
+  mimeType        String
+  size            Int
+  checksumSha256  String
+  encryptionNonce String?
+  encryptionTag   String?
+  keyVersion      Int?
+  createdAt       DateTime     @default(now())
+  ticket          Ticket       @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+
+  @@index([ticketId])
+}
+
+model TicketAccessLog {
+  id         String             @id @default(cuid())
+  ticketId   String
+  userId     String
+  action     TicketAccessAction
+  allowed    Boolean
+  reasonCode String?
+  createdAt  DateTime           @default(now())
+  ticket     Ticket             @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+  user       User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+
+  @@index([ticketId, createdAt])
+  @@index([userId, createdAt])
+}
+
+model TicketHistory {
+  id           String          @id @default(cuid())
+  ticketId     String
+  actorId      String?
+  event        TicketEvent
+  fromStatus   TicketStatus?
+  toStatus     TicketStatus?
+  fromPriority TicketPriority?
+  toPriority   TicketPriority?
+  reason       String?
+  createdAt    DateTime        @default(now())
+  ticket       Ticket          @relation(fields: [ticketId], references: [id], onDelete: Restrict)
+
+  @@index([ticketId, createdAt])
+}
+
+model Room {
+  id             String              @id @default(cuid())
+  slug           String              @unique
+  capacity       Int
+  bufferMinutes  Int                 @default(30)
+  isActive       Boolean             @default(true)
+  translations   RoomTranslation[]
+  operatingHours RoomOperatingHour[]
+  blackouts      RoomBlackout[]
+  bookings       Booking[]
+}
+
+model RoomTranslation {
+  id            String            @id @default(cuid())
+  roomId        String
+  locale        Locale
+  name          String
+  location      String?
+  facilities    String?           @db.Text
+  status        TranslationStatus @default(DRAFT)
+  sourceVersion Int               @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  room          Room              @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, locale])
+  @@index([locale])
+}
+
+model RoomOperatingHour {
+  id             String @id @default(cuid())
+  roomId         String
+  dayOfWeek      Int
+  opensAtMinute  Int
+  closesAtMinute Int
+  room           Room   @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, dayOfWeek])
+}
+
+model RoomBlackout {
+  id        String   @id @default(cuid())
+  roomId    String
+  startTime DateTime
+  endTime   DateTime
+  reason    String
+  createdAt DateTime @default(now())
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  @@index([roomId, startTime, endTime])
+}
+
+model Booking {
+  id                    String           @id @default(cuid())
+  bookingNumber         String           @unique
+  trackingTokenHash     String           @unique
+  roomId                String
+  requesterName         String
+  requesterEmail        String
+  requesterPhone        String?
+  organization          String?
+  purpose               String           @db.Text
+  participantCount      Int
+  startTime             DateTime
+  endTime               DateTime
+  status                BookingStatus    @default(MENUNGGU)
+  version               Int              @default(1)
+  applicationStorageKey String?
+  approvedById          String?
+  approvedAt            DateTime?
+  cancelledAt           DateTime?
+  cancelReason          String?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  room                  Room             @relation(fields: [roomId], references: [id], onDelete: Restrict)
+  approvedBy            User?            @relation("BookingApprover", fields: [approvedById], references: [id], onDelete: Restrict)
+  history               BookingHistory[]
+  event                 Event?
+
+  @@index([roomId, status, startTime, endTime])
+}
+
+model BookingHistory {
+  id         String         @id @default(cuid())
+  bookingId  String
+  actorId    String?
+  fromStatus BookingStatus?
+  toStatus   BookingStatus
+  reason     String?
+  createdAt  DateTime       @default(now())
+  booking    Booking        @relation(fields: [bookingId], references: [id], onDelete: Restrict)
+
+  @@index([bookingId, createdAt])
+}
+
+model AnnualSequence {
+  id        String       @id @default(cuid())
+  kind      SequenceKind
+  year      Int
+  value     Int          @default(0)
+  updatedAt DateTime     @updatedAt
+
+  @@unique([kind, year])
+}
+
+model Holiday {
+  id       String   @id @default(cuid())
+  date     DateTime @unique @db.Date
+  name     String
+  isActive Boolean  @default(true)
+}
+
+model ActivityLog {
+  id           String         @id @default(cuid())
+  actorId      String?
+  action       ActivityAction
+  resourceType String
+  resourceId   String?
+  metadata     Json?
+  createdAt    DateTime       @default(now())
+  actor        User?          @relation(fields: [actorId], references: [id], onDelete: Restrict)
+
+  @@index([actorId, createdAt])
+  @@index([resourceType, resourceId, createdAt])
+}
+
+model ContentRevision {
+  id            String   @id @default(cuid())
+  resourceType  String
+  resourceId    String
+  locale        Locale?
+  version       Int
+  snapshotJson  Json
+  changeSummary String?
+  actorId       String?
+  createdAt     DateTime @default(now())
+
+  @@unique([resourceType, resourceId, locale, version])
+  @@index([resourceType, resourceId, version])
+}
+
+model SurveyDefinition {
+  id          String             @id @default(cuid())
+  slug        String             @unique
+  title       String
+  version     Int                @default(1)
+  isActive    Boolean            @default(false)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  questions   SurveyQuestion[]
+  submissions SurveySubmission[]
+}
+
+model SurveyQuestion {
+  id           String             @id @default(cuid())
+  definitionId String
+  prompt       String             @db.Text
+  type         SurveyQuestionType
+  options      Json?
+  isRequired   Boolean            @default(false)
+  order        Int                @default(0)
+  definition   SurveyDefinition   @relation(fields: [definitionId], references: [id], onDelete: Cascade)
+  answers      SurveyAnswer[]
+}
+
+model SurveySubmission {
+  id                String           @id @default(cuid())
+  definitionId      String
+  definitionVersion Int
+  locale            Locale           @default(id)
+  createdAt         DateTime         @default(now())
+  definition        SurveyDefinition @relation(fields: [definitionId], references: [id], onDelete: Restrict)
+  answers           SurveyAnswer[]
+}
+
+model SurveyAnswer {
+  id           String           @id @default(cuid())
+  submissionId String
+  questionId   String
+  value        Json
+  submission   SurveySubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  question     SurveyQuestion   @relation(fields: [questionId], references: [id], onDelete: Restrict)
+
+  @@unique([submissionId, questionId])
+}
+
+model RateLimitBucket {
+  id           String    @id @default(cuid())
+  keyHash      String
+  scope        String
+  windowStart  DateTime
+  count        Int       @default(0)
+  blockedUntil DateTime?
+
+  @@unique([keyHash, scope, windowStart])
+}
+
+model NotificationOutbox {
+  id               String       @id @default(cuid())
+  type             String
+  recipient        String
+  locale           Locale       @default(id)
+  template         String
+  payload          Json
+  payloadEncrypted Boolean      @default(false)
+  idempotencyKey   String       @unique
+  status           OutboxStatus @default(PENDING)
+  attempts         Int          @default(0)
+  nextAttemptAt    DateTime     @default(now())
+  sentAt           DateTime?
+  lastError        String?
+  createdAt        DateTime     @default(now())
+
+  @@index([status, nextAttemptAt])
+}
+
+model Redirect {
+  id              String   @id @default(cuid())
+  sourcePath      String   @unique
+  destinationPath String
+  statusCode      Int      @default(301)
+  isActive        Boolean  @default(true)
+  hitCount        Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model GlossaryTerm {
+  id           String                @id @default(cuid())
+  key          String                @unique
+  translations GlossaryTranslation[]
+}
+
+model GlossaryTranslation {
+  id             String       @id @default(cuid())
+  glossaryTermId String
+  locale         Locale
+  term           String
+  definition     String?      @db.Text
+  glossaryTerm   GlossaryTerm @relation(fields: [glossaryTermId], references: [id], onDelete: Cascade)
+
+  @@unique([glossaryTermId, locale])
+  @@index([locale])
+}
+
+model SiteAlert {
+  id           String                 @id @default(cuid())
+  level        AlertLevel
+  startsAt     DateTime
+  endsAt       DateTime?
+  isActive     Boolean                @default(true)
+  translations SiteAlertTranslation[]
+}
+
+model SiteAlertTranslation {
+  id          String    @id @default(cuid())
+  siteAlertId String
+  locale      Locale
+  title       String
+  message     String    @db.Text
+  linkLabel   String?
+  linkUrl     String?
+  siteAlert   SiteAlert @relation(fields: [siteAlertId], references: [id], onDelete: Cascade)
+
+  @@unique([siteAlertId, locale])
+  @@index([locale])
+}
+
+model ServiceEndpoint {
+  id        String            @id @default(cuid())
+  slug      String            @unique
+  name      String
+  url       String?
+  isPublic  Boolean           @default(true)
+  incidents ServiceIncident[]
+}
+
+model ServiceIncident {
+  id                String                       @id @default(cuid())
+  serviceEndpointId String
+  status            ServiceHealth
+  startedAt         DateTime
+  resolvedAt        DateTime?
+  serviceEndpoint   ServiceEndpoint              @relation(fields: [serviceEndpointId], references: [id], onDelete: Restrict)
+  translations      ServiceIncidentTranslation[]
+  updates           ServiceIncidentUpdate[]
+}
+
+model ServiceIncidentTranslation {
+  id                String          @id @default(cuid())
+  serviceIncidentId String
+  locale            Locale
+  title             String
+  summary           String          @db.Text
+  serviceIncident   ServiceIncident @relation(fields: [serviceIncidentId], references: [id], onDelete: Cascade)
+
+  @@unique([serviceIncidentId, locale])
+  @@index([locale])
+}
+
+model ServiceIncidentUpdate {
+  id                String          @id @default(cuid())
+  serviceIncidentId String
+  status            ServiceHealth
+  message           String          @db.Text
+  createdAt         DateTime        @default(now())
+  serviceIncident   ServiceIncident @relation(fields: [serviceIncidentId], references: [id], onDelete: Cascade)
+}
+
+model PrivacyNotice {
+  id           String                     @id @default(cuid())
+  version      Int                        @unique
+  effectiveAt  DateTime
+  isCurrent    Boolean                    @default(false)
+  createdAt    DateTime                   @default(now())
+  translations PrivacyNoticeTranslation[]
+  consents     ConsentRecord[]
+}
+
+model PrivacyNoticeTranslation {
+  id              String        @id @default(cuid())
+  privacyNoticeId String
+  locale          Locale
+  title           String
+  content         String        @db.LongText
+  privacyNotice   PrivacyNotice @relation(fields: [privacyNoticeId], references: [id], onDelete: Cascade)
+
+  @@unique([privacyNoticeId, locale])
+  @@index([locale])
+}
+
+model ConsentRecord {
+  id              String        @id @default(cuid())
+  privacyNoticeId String
+  subjectHash     String
+  purpose         String
+  granted         Boolean
+  createdAt       DateTime      @default(now())
+  privacyNotice   PrivacyNotice @relation(fields: [privacyNoticeId], references: [id], onDelete: Restrict)
+
+  @@index([subjectHash, purpose])
+}
+
+model DataSubjectRequest {
+  id                  String               @id @default(cuid())
+  trackingTokenHash   String               @unique
+  type                PrivacyRequestType
+  status              PrivacyRequestStatus @default(RECEIVED)
+  requesterCiphertext String               @db.LongText
+  requestCiphertext   String               @db.LongText
+  createdAt           DateTime             @default(now())
+  completedAt         DateTime?
+}
+
+model DataIncident {
+  id                String           @id @default(cuid())
+  severity          IncidentSeverity
+  occurredAt        DateTime
+  discoveredAt      DateTime
+  summaryCiphertext String           @db.LongText
+  resolvedAt        DateTime?
+  createdAt         DateTime         @default(now())
+}
+
+model DataExportLog {
+  id           String   @id @default(cuid())
+  actorId      String?
+  resourceType String
+  resourceId   String?
+  purpose      String
+  createdAt    DateTime @default(now())
+
+  @@index([actorId, createdAt])
+}
+
+model RetentionPolicy {
+  id            String   @id @default(cuid())
+  resourceType  String   @unique
+  retentionDays Int?
+  legalHold     Boolean  @default(false)
+  rationale     String   @db.Text
+  updatedAt     DateTime @updatedAt
+}
+
+model AccessibilityIssue {
+  id         String           @id @default(cuid())
+  route      String
+  summary    String
+  severity   IncidentSeverity
+  status     String
+  createdAt  DateTime         @default(now())
+  resolvedAt DateTime?
+}
+
+model AccessibilityRequest {
+  id                  String                     @id @default(cuid())
+  trackingTokenHash   String                     @unique
+  status              AccessibilityRequestStatus @default(RECEIVED)
+  requesterCiphertext String                     @db.LongText
+  requestedFormat     String
+  resourcePath        String
+  createdAt           DateTime                   @default(now())
+  completedAt         DateTime?
+}
+
+model AdmissionInfo {
+  id             String                     @id @default(cuid())
+  slug           String                     @unique
+  sourceUrl      String
+  lastReviewedAt DateTime
+  reviewDueAt    DateTime?
+  expiresAt      DateTime?
+  isActive       Boolean                    @default(true)
+  translations   AdmissionInfoTranslation[]
+}
+
+model AdmissionInfoTranslation {
+  id              String            @id @default(cuid())
+  admissionInfoId String
+  locale          Locale
+  title           String
+  content         String            @db.LongText
+  status          TranslationStatus @default(DRAFT)
+  sourceVersion   Int               @default(1)
+  translatorId    String?
+  reviewerId      String?
+  reviewedAt      DateTime?
+  admissionInfo   AdmissionInfo     @relation(fields: [admissionInfoId], references: [id], onDelete: Cascade)
+
+  @@unique([admissionInfoId, locale])
+  @@index([locale])
+}
+
+model PageFeedback {
+  id        String   @id @default(cuid())
+  pageType  String
+  pageId    String
+  locale    Locale
+  helpful   Boolean
+  reason    String?
+  comment   String?  @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([pageType, pageId, locale])
+}
+
+model Subscriber {
+  id                   String   @id @default(cuid())
+  email                String   @unique
+  locale               Locale   @default(id)
+  isActive             Boolean  @default(true)
+  unsubscribeTokenHash String   @unique
+  createdAt            DateTime @default(now())
+}

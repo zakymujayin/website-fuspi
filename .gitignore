@@ -1,0 +1,36 @@
+# Dependencies and build output
+node_modules/
+.next/
+out/
+dist/
+coverage/
+playwright-report/
+test-results/
+*.tsbuildinfo
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Runtime uploads and temporary files
+.uploads/
+uploads/
+private_uploads/
+ppks_private/
+tmp/
+*.log
+
+# Generated database client
+src/generated/prisma/
+
+# Local tooling / agent state
+.agents/
+.codex/
+.claude/
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db

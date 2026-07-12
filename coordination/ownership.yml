@@ -1,0 +1,58 @@
+version: 1
+coordinator: human
+lanes:
+  gpt:
+    owns:
+      - package.json
+      - package-lock.json
+      - prisma/**
+      - .github/**
+      - src/contracts/**
+      - src/lib/auth/**
+      - src/lib/security/**
+      - src/lib/storage/**
+      - src/features/tickets/**
+      - src/features/booking/**
+      - src/proxy.ts
+  claude:
+    owns:
+      - src/app/[locale]/(public)/**
+      - src/components/public/**
+      - src/components/ui/**
+      - src/app/globals.css
+      - messages/**
+  deepseek:
+    owns:
+      - src/app/[locale]/admin/content/**
+      - src/components/admin/**
+      - src/features/content/**
+      - scripts/migration/**
+      - src/**/*.test.ts
+hotspots:
+  single_writer: gpt
+  paths:
+    - package.json
+    - package-lock.json
+    - prisma/**
+    - .env.example
+    - next.config.ts
+    - src/proxy.ts
+    - src/contracts/**
+    - src/config/navigation.ts
+    - .github/**
+ui_hotspots:
+  single_writer: claude
+  paths:
+    - src/app/globals.css
+    - src/components/ui/**
+    - messages/**
+active_leases:
+  - task: M1-GPT-PLATFORM
+    owner: gpt
+    paths: ["prisma/**", "src/contracts/**", "src/lib/db/**", "src/lib/audit/**", "src/lib/outbox/**", "tests/platform/**"]
+  - task: M1-CLAUDE-EXPERIENCE
+    owner: claude
+    paths: ["src/app/[locale]/(public)/**", "src/components/public/**", "src/components/ui/**", "src/app/globals.css", "messages/**", "e2e/experience/**"]
+  - task: M1-DEEPSEEK-QA
+    owner: deepseek
+    paths: ["tests/foundation/**", "src/test/**", "e2e/foundation/**"]

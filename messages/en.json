@@ -1,0 +1,8 @@
+{
+  "M0": {
+    "title": "The FUSPI website foundation is ready",
+    "description": "This scaffold validates multilingual routing, writing direction, and quality gates before the three AI lanes begin.",
+    "languageLabel": "Choose a language",
+    "status": "English locale is active (LTR)."
+  }
+}

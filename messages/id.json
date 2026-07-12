@@ -1,0 +1,8 @@
+{
+  "M0": {
+    "title": "Fondasi website FUSPI siap dikembangkan",
+    "description": "Scaffold ini memvalidasi routing multibahasa, arah tulisan, dan quality gate sebelum tiga lane AI mulai bekerja.",
+    "languageLabel": "Pilih bahasa",
+    "status": "Locale Indonesia aktif (LTR)."
+  }
+}
