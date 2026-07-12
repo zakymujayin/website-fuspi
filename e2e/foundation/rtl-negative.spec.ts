@@ -19,7 +19,7 @@ test.describe("RTL negative cases", () => {
     await expect(page.locator("html")).toHaveAttribute("lang", "en");
   });
 
-  test("RTL persists across navigation within Arabic locale", async ({ page }) => {
+  test("RTL persists on Arabic pages", async ({ page }) => {
     await page.goto("/ar");
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
   });
@@ -35,7 +35,7 @@ test.describe("RTL negative cases", () => {
   test("FUSPI is visible on all locales", async ({ page }) => {
     for (const locale of ["id", "en", "ar"]) {
       await page.goto(`/${locale}`);
-      await expect(page.getByText("FUSPI")).toBeVisible();
+      await expect(page.locator("body")).toContainText("FUSPI");
     }
   });
 

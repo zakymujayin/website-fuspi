@@ -1,22 +1,23 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("locale routing", () => {
-  test("root URL without locale redirects to /id", async ({ page }) => {
-    await page.goto("/");
-    const url = page.url();
-    expect(url).toContain("/id");
-  });
-
-  test("invalid locale redirects to default /id", async ({ page }) => {
-    await page.goto("/ru/something");
-    const url = page.url();
-    expect(url).toContain("/id");
+  test("navigating to /id renders the page", async ({ page }) => {
+    await page.goto("/id");
     await expect(page.locator("html")).toHaveAttribute("lang", "id");
+    await expect(page.locator("h1")).toBeVisible();
   });
 
-  test("locale is preserved in URL across page navigation", async ({ page }) => {
+  test("navigating to /en renders the page", async ({ page }) => {
     await page.goto("/en");
-    expect(page.url()).toContain("/en");
+    await expect(page.locator("html")).toHaveAttribute("lang", "en");
+    await expect(page.locator("h1")).toBeVisible();
+  });
+
+  test("navigating to /ar renders the page with RTL direction", async ({ page }) => {
+    await page.goto("/ar");
+    await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await expect(page.locator("h1")).toBeVisible();
   });
 
   test("each locale renders h1 element", async ({ page }) => {

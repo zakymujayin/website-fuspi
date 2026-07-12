@@ -1,12 +1,8 @@
+import { institution } from "@/config/institution";
+
 let studyProgramIdCounter = 0;
 
-const programs = [
-  { code: "IAT" as const, slug: "ilmu-al-quran-dan-tafsir", name: "Ilmu Al-Qur'an dan Tafsir" },
-  { code: "IH" as const, slug: "ilmu-hadis", name: "Ilmu Hadis" },
-  { code: "AFI" as const, slug: "aqidah-dan-filsafat-islam", name: "Aqidah dan Filsafat Islam" },
-  { code: "SAA" as const, slug: "studi-agama-agama", name: "Studi Agama-Agama" },
-  { code: "TASPI" as const, slug: "tasawuf-dan-psikoterapi", name: "Tasawuf dan Psikoterapi" },
-] as const;
+const programs = institution.studyPrograms;
 
 export interface FixtureStudyProgram {
   id: string;
