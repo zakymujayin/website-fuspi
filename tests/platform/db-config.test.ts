@@ -24,6 +24,7 @@ describe("database URL contract", () => {
     expect(parseDatabaseUrl("mysql://u:p@127.0.0.1/db").allowPublicKeyRetrieval).toBe(
       true,
     );
+    expect(parseDatabaseUrl("mysql://u:p@[::1]/db").allowPublicKeyRetrieval).toBe(true);
     expect(parseDatabaseUrl("mysql://u:p@db.example.edu/db").allowPublicKeyRetrieval).toBe(
       false,
     );

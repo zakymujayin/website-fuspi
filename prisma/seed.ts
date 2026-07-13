@@ -2,19 +2,11 @@ import bcrypt from "bcryptjs";
 import {PrismaClient} from "../src/generated/prisma/client";
 import {PrismaMariaDb} from "@prisma/adapter-mariadb";
 import {institution} from "../src/config/institution";
+import {parseDatabaseUrl} from "../src/lib/db/config";
 
-const databaseUrl = new URL(process.env.DATABASE_URL ?? "");
-const adapter = new PrismaMariaDb({
-  host: databaseUrl.hostname,
-  port: Number(databaseUrl.port || 3306),
-  user: decodeURIComponent(databaseUrl.username),
-  password: decodeURIComponent(databaseUrl.password),
-  database: databaseUrl.pathname.slice(1),
-  connectionLimit: 5,
-  allowPublicKeyRetrieval: ["127.0.0.1", "localhost"].includes(
-    databaseUrl.hostname,
-  ),
-});
+const adapter = new PrismaMariaDb(
+  parseDatabaseUrl(process.env.DATABASE_URL ?? ""),
+);
 const prisma = new PrismaClient({adapter});
 
 const sections = [

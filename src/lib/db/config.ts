@@ -9,7 +9,7 @@ export type DatabaseConnectionConfig = {
   ssl: boolean;
 };
 
-const LOCAL_DATABASE_HOSTS = new Set(["127.0.0.1", "localhost", "::1"]);
+const LOCAL_DATABASE_HOSTS = new Set(["127.0.0.1", "localhost", "[::1]"]);
 
 export function parseDatabaseUrl(value: string): DatabaseConnectionConfig {
   const url = new URL(value);

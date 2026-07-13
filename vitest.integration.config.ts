@@ -5,7 +5,10 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
-    include: ["src/**/*.integration.test.ts"],
+    include: [
+      "src/**/*.integration.test.ts",
+      "tests/**/*.integration.test.ts",
+    ],
     fileParallelism: false,
   },
 });
