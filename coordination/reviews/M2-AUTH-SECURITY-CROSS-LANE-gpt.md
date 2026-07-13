@@ -119,4 +119,3 @@ The two revision branches may enter the merge queue only when:
 - the files contain no FUDA identity or production PII;
 - GPT verifies the revised documents against this decision;
 - worker branches are committed and pushed with updated handoffs.
-
