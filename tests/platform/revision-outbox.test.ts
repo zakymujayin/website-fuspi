@@ -43,6 +43,19 @@ describe("content revision contract", () => {
     ).toThrow("forbidden data");
   });
 
+  it("rejects sensitive snapshot fields nested inside objects and arrays", () => {
+    expect(() =>
+      prepareRevision({
+        resourceType: "Post",
+        resourceId: "post-1",
+        version: 1,
+        snapshot: {
+          metadata: {blocks: [{content: {passwordHash: "must-not-persist"}}]},
+        },
+      }),
+    ).toThrow("snapshot.metadata.blocks[0].content.passwordHash");
+  });
+
   it("rejects snapshots that are not JSON serializable", () => {
     const snapshot: Record<string, unknown> = {};
     snapshot.circular = snapshot;
