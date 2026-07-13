@@ -50,9 +50,9 @@ active_leases:
   - task: M2-GPT-AUTH-CONTRACT
     owner: gpt
     paths: ["package.json", "package-lock.json", ".env.example", "src/contracts/auth.ts", "src/lib/auth/permission-matrix.ts", "tests/platform/auth-contracts/**", "coordination/adr/ADR-0002-auth-dependency-contract.md"]
-  - task: M2-CLAUDE-AUTH-UX-SPEC
+  - task: M2-CLAUDE-AUTH-UX-SPEC-REVISION
     owner: claude
-    paths: ["coordination/reviews/M2-AUTH-UX-SPEC-claude.md"]
-  - task: M2-DEEPSEEK-SECURITY-TEST-DESIGN
+    paths: ["coordination/reviews/M2-AUTH-UX-SPEC-claude.md", "coordination/handoffs/M2-CLAUDE-AUTH-UX-SPEC-claude.md"]
+  - task: M2-DEEPSEEK-SECURITY-TEST-DESIGN-REVISION
     owner: deepseek
-    paths: ["tests/security/m2-threat-plan.ts", "tests/security/m2-threat-plan.test.ts"]
+    paths: ["tests/security/m2-threat-plan.ts", "tests/security/m2-threat-plan.test.ts", "coordination/handoffs/M2-DEEPSEEK-SECURITY-TEST-DESIGN-deepseek.md"]
