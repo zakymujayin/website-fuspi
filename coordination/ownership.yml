@@ -47,12 +47,6 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
-  - task: M1-GPT-PLATFORM
+  - task: M1-GPT-PLATFORM-HARDENING
     owner: gpt
-    paths: ["prisma/**", "src/contracts/**", "src/lib/db/**", "src/lib/audit/**", "src/lib/outbox/**", "tests/platform/**"]
-  - task: M1-CLAUDE-EXPERIENCE
-    owner: claude
-    paths: ["src/app/[locale]/(public)/**", "src/components/public/**", "src/components/ui/**", "src/app/globals.css", "messages/**", "e2e/experience/**"]
-  - task: M1-DEEPSEEK-QA
-    owner: deepseek
-    paths: ["tests/foundation/**", "src/test/**", "e2e/foundation/**"]
+    paths: [".github/CODEOWNERS", "package.json", "prisma/seed.ts", "src/lib/db/config.ts", "tests/platform/**", "vitest.integration.config.ts"]
