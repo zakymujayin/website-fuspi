@@ -10,7 +10,7 @@ M2-DEEPSEEK-SECURITY-TEST-DESIGN
 `18a26dd` (integration/m2-security)
 
 ## Head SHA
-TBD after commit
+`d995fc4`
 
 ## Summary
 
@@ -58,6 +58,7 @@ Created a typed, executable M2 security test plan with 32 test cases spanning al
 |---|---|---|
 | `tests/security/m2-threat-plan.ts` | Added | 32 cases, 30+ export functions |
 | `tests/security/m2-threat-plan.test.ts` | Added | 20 meta-tests |
+| `coordination/handoffs/M2-DEEPSEEK-SECURITY-TEST-DESIGN-deepseek.md` | Added | 82 lines |
 
 ## Acceptance Commands Results
 | Command | Result |
