@@ -4,7 +4,7 @@
 - **Owner:** claude (Public Experience)
 - **Branch:** `ai/claude/m1-homepage-shell`
 - **Base SHA:** `0c90627` (branch tip at start; manifest `base_sha: 2da38f7` is its parent)
-- **Head SHA:** `<HEAD>`
+- **Head SHA:** `a1f392e` (implementation commit; this handoff's SHA note lands in the commit after it)
 - **Status:** implementation + tests complete, committed, pushed. Not merged.
 
 ## Summary
