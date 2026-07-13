@@ -9,75 +9,83 @@ M2-DEEPSEEK-SECURITY-TEST-DESIGN
 ## Base SHA
 `18a26dd` (integration/m2-security)
 
-## Head SHA
+## Head SHA (original implementation)
 `d995fc4`
+
+## Revision Branch
+`ai/deepseek/m2-security-test-design-revision`
+
+## Revision Head SHA
+`00476f0`
+
+## Revision Summary
+
+GPT cross-lane review (`coordination/reviews/M2-AUTH-SECURITY-CROSS-LANE-gpt.md`) identified eight corrections. All applied:
+
+1. **Execution readiness state** — added `executable: boolean` field to `M2SecurityTestCase`; exported `VALID_DEPENDENCIES` set and `validateM2Readiness()` function; 4 meta-tests prove rejection of ready cases with missing dependencies.
+2. **All cases blocked** — every case has `executable: false`; meta-test asserts zero ready cases.
+3. **FUSPI domain in PII guard** — removed `fuspi.uinbanten.ac.id` from PII exclusion regex; added dedicated FUSPI_DOMAIN_PATTERN test that rejects production FUSPI emails.
+4. **Equal rate-limit** — M2-AUTH-006 now requires identical behaviour for existing, non-existing, and inactive accounts; M2-AUTH-007 references dummy bcrypt and statistical timing tolerance.
+5. **Outbox tampering corrected** — M2-OBX-002 tests encrypted payload tampering (decryption integrity failure), not key-change/unique-constraint collision.
+6. **PPKS detail access frozen** — M2-IDOR-003 outcome is deterministic 404 with zero bytes, denied-access audit entry; aggregate statistics via separate authorized query.
+7. **Ambiguous alternatives removed** — M2-ENC-004 expects explicit nonce-uniqueness rejection; all "X or Y" expected outcomes replaced with single deterministic result.
+8. **Follow-ups remain M2** — no M3 references in test plan or handoff.
 
 ## Summary
 
-Created a typed, executable M2 security test plan with 32 test cases spanning all required areas. Two files added:
+Created a typed, executable M2 security test plan with 32 test cases spanning all required areas. Two files added. Revision from GPT cross-lane review applied: added execution readiness state + validator, fixed rate-limit coverage, removed production FUSPI domain, corrected outbox and PPKS cases, eliminated ambiguous outcomes.
 
-### `tests/security/m2-threat-plan.ts` (29.2 KB)
-- `M2SecurityTestCase` interface with 11 fields: id, area, severity, actor, precondition, attack, invariant, expectedOutcome, requiredFixture, dependsOn, testLevel
-- 32 test cases covering:
-  - **Session Revocation** (M2-AUTH-001 to M2-AUTH-004): password change, deactivation, role change, stolen cookie
-  - **Inactive User** (M2-AUTH-005): stale-session rejection
-  - **Login Enumeration** (M2-AUTH-006, M2-AUTH-007): rate limiting, timing side-channel
-  - **Ownership IDOR** (M2-IDOR-001): cross-editor post access
-  - **Role Escalation** (M2-IDOR-002): self-role-change prevention
-  - **PPKS IDOR** (M2-IDOR-003, M2-IDOR-004): ADMIN/PETUGAS firewall
-  - **CSRF** (M2-CSRF-001): cross-origin Server Action protection
-  - **Upload Path Traversal** (M2-UPLOAD-001): path sanitization, canonical check
-  - **Upload MIME Spoof** (M2-UPLOAD-002): magic byte validation
-  - **Upload Decompression Bomb** (M2-UPLOAD-003): pixel limit enforcement
-  - **Upload Null Byte** (M2-UPLOAD-004, M2-UPLOAD-006): null byte rejection, Unicode safety
-  - **Encryption Tampering** (M2-ENC-001 to M2-ENC-004): ciphertext, tag, key version, nonce reuse
-  - **PPKS Isolation** (M2-PPKS-001 to M2-PPKS-004): CSV export, TicketAccessLog, search filter, log immutability
-  - **Concurrency** (M2-SEQ-001 to M2-SEQ-003): parallel tickets, year boundary, cross-kind isolation
-  - **Outbox** (M2-OBX-001 to M2-OBX-003): idempotency, encrypted payload, atomic transaction
-  - **CSV Injection** (M2-CSV-001 to M2-CSV-003): formula injection, benign passthrough
-  - **PPKS Email Privacy** (M2-EMAIL-001): no sensitive data in SMTP
-  - **Upload Atomicity** (M2-UPLOAD-005): file/DB rollback on failure
-- Severity distribution: 12 critical, 14 high, 2 medium, 4 low
-- Test level distribution: 4 unit, 27 integration, 1 e2e
-- 10 dependency contracts declared: auth.session-revocation, auth.rate-limit, auth.csrf, lib.authorization, lib.upload, lib.ppks-encryption, lib.ppks-isolation, lib.outbox, lib.sanitizer, db.annual-sequence
-- Export functions: getM2Plan, getM2ByArea, getM2BySeverity, getM2ByTestLevel, getM2ByDependsOn, countM2BySeverity, getM2Dependencies
+### `tests/security/m2-threat-plan.ts`
+- `M2SecurityTestCase` interface with 12 fields including `executable: boolean`
+- `VALID_DEPENDENCIES` — canonical set of 10 known dependency contracts
+- `validateM2Readiness()` — rejects cases marked executable when dependency is unavailable
+- 32 test cases covering all required areas (same count, updated content)
+- Export functions: getM2Plan, getM2ByArea, getM2BySeverity, getM2ByTestLevel, getM2ByDependsOn, countM2BySeverity, getM2Dependencies, validateM2Readiness
 
-### `tests/security/m2-threat-plan.test.ts` (6.5 KB)
-- 20 meta-tests validating the plan:
-  - Minimum 30 cases, no duplicate IDs, all fields filled
-  - ID naming convention check, valid severity/level enums
-  - Critical/High invariants present
-  - No real PII, no FUDA domain references
-  - All dependsOn references are known contracts
-  - All required areas covered
-  - Severity/level balance validation
-  - Filter/aggregation function correctness
+### `tests/security/m2-threat-plan.test.ts`
+- 25 meta-tests (was 20) including:
+  - 4 new execution readiness validator tests
+  - FUSPI production domain rejection test
+- Updated PII guard to reject `@fuspi.uinbanten.ac.id`
 
 ## Files Changed
-| File | Status | Lines |
+| File | Status | Notes |
 |---|---|---|
-| `tests/security/m2-threat-plan.ts` | Added | 32 cases, 30+ export functions |
-| `tests/security/m2-threat-plan.test.ts` | Added | 20 meta-tests |
-| `coordination/handoffs/M2-DEEPSEEK-SECURITY-TEST-DESIGN-deepseek.md` | Added | 82 lines |
+| `tests/security/m2-threat-plan.ts` | Added (revised) | 32 cases, 8 exports, execution readiness |
+| `tests/security/m2-threat-plan.test.ts` | Added (revised) | 25 meta-tests, FUSPI domain guard |
+| `coordination/handoffs/M2-DEEPSEEK-SECURITY-TEST-DESIGN-deepseek.md` | Added (revised) | Revision details documented |
 
 ## Acceptance Commands Results
+
+### Original implementation (`d995fc4`)
 | Command | Result |
 |---|---|
 | `npm run lint` | PASS (no errors) |
 | `npm run typecheck` | PASS (no errors) |
 | `npm test` | 108 passed, 2 skipped, 0 failed |
 
+### Revision
+| Command | Result |
+|---|---|
+| `npm run lint` | PASS (no errors) |
+| `npm run typecheck` | PASS (no errors) |
+| `npm test` | 114 passed (26 threat-plan meta-tests), 2 skipped, 0 failed |
+| `git diff --check` | clean |
+| `npm run check:scope` | 3 changed file(s) are within lease |
+
 ## API/Schema/Migration Impact
-None. This is a test plan definition only. No schema, migration, or implementation code changed.
+None. Test plan definitions only. No schema, migration, or implementation code changed.
 
 ## Implementation Dependencies
-All 32 test cases reference one of 10 known contract IDs. No test case is executable yet — they await M2 GPT platform security implementation.
+All 32 test cases reference one of 10 known contract IDs (declared in `VALID_DEPENDENCIES`). All cases marked `executable: false`. They become actionable only after GPT merges the corresponding M2 security implementation.
 
 ## Risks & Untested Areas
-- Test cases are definitions, not executable tests. They become actionable only after GPT merges the corresponding security helpers.
+- Test cases are typed definitions, not executable tests. They become actionable only after GPT merges the corresponding security helpers.
 - No E2E tests can be run until the complete auth/RBAC/upload/PPKS stack is in place.
 - Concurrency tests (M2-SEQ-*) require MariaDB Serializable isolation — verified compatible with MariaDB 10.11.14 during M1 hardening.
+- Timing-equalized rejection (M2-AUTH-007) requires a pre-generated dummy bcrypt hash constant in the platform module.
 
-## Follow-ups
+## Follow-ups (all M2)
 - GPT should verify all 10 dependency contracts in `dependsOn` match the actual implementation module names.
 - After M2 platform merge, convert each test case into an executable Vitest/Playwright test.
+- When a dependency contract is fulfilled, mark the corresponding cases `executable: true` and re-run `validateM2Readiness`.
