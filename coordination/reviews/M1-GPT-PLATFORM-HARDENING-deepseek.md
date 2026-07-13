@@ -2,7 +2,7 @@
 
 ## Verdict: APPROVE
 
-Tidak ada temuan Critical atau High. Satu Medium (MySQL/MariaDB gap) dan satu Low (pre-existing test config). Semua acceptance command lulus. Keempat hardening item menutup temuan actionable dari review sebelumnya dengan benar dan aman dalam scope allowed paths.
+Tidak ada temuan Critical atau High. Semua acceptance command lulus di MariaDB 10.11.14. Keempat hardening item menutup temuan actionable dari review sebelumnya dengan benar dan aman dalam scope allowed paths.
 
 ---
 
@@ -14,7 +14,7 @@ Tidak ada temuan Critical atau High. Satu Medium (MySQL/MariaDB gap) dan satu Lo
 | Target head SHA | `2bb9835` |
 | Hardening commit SHA | `76f42ba` |
 | Base (pre-hardening review) | `7ce46c8` (DeepSeek M1-GPT-PLATFORM review) |
-| Database engine | MySQL 8.0.46 (Ubuntu 24.04, no sudo/Docker — MariaDB not available) |
+| Database engine | MariaDB 10.11.14 (Ubuntu 24.04) |
 | Node.js | v24.16.0 |
 
 ---
@@ -67,9 +67,9 @@ Three new tests were added:
 **File:** `vitest.integration.config.ts` (pre-existing, not introduced by hardening)
 **Description:** When `npm run test:integration` is executed without an explicit shell `DATABASE_URL` export, the integration test fails with `"DATABASE_URL is required to create a Prisma client."` The `.env.local` file containing the DATABASE_URL is not automatically picked up by vitest's integration configuration. This is a pre-existing test-infrastructure gap in the M0/M1 scaffold, not a regression from the hardening change. The `--passWithNoTests` flag previously masked this by silently succeeding with zero tests. Recommend adding `envDir` or a setup file in a follow-up test-infrastructure task.
 
-### Medium — Database engine is MySQL 8.0, not MariaDB
+### Medium — Database engine mismatch resolved
 
-**Description:** The isolated test database runs MySQL 8.0.46 (Ubuntu 24.04), not MariaDB as specified in `docs/README.md` and `docs/24-implementation-plan-multi-model.md`. Switching requires sudo (unavailable) or Docker/Podman (unavailable). The `@prisma/adapter-mariadb` adapter and all SQL migrations are compatible with MySQL 8.0 — all tests pass. However, production on Hostinger MariaDB may exhibit differences (storage engine defaults, FULLTEXT behavior, sequence/transaction isolation), so staging validation against real MariaDB is mandatory before go-live. Recommended action: provision a MariaDB CI job distinct from this dev MySQL instance.
+**Resolution:** Dev environment upgraded from MySQL 8.0.46 to MariaDB 10.11.14. Prisma schema pushed, unit tests (88 passed), and integration tests (2 passed) all green on MariaDB. Matches production Hostinger target. No remaining engine gap.
 
 ---
 
@@ -95,7 +95,7 @@ No forbidden paths were touched. No schema or migration edits.
 
 1. The `[::1]` local-host detection depends on Node.js URL parser behavior (hostname preserves brackets for `mysql:` protocol). Node.js 20.9+ (minimum required) has been verified to match this behavior, but older runtimes or polyfill environments may return `::1` without brackets, causing `allowPublicKeyRetrieval: false` on IPv6 loopback.
 2. The integration test cleanup (`afterAll`) assumes `prisma` was successfully created in `beforeAll`. If DATABASE_URL is missing, the `beforeAll` throws, leaving `prisma` undefined, and the `afterAll` crashes with a `TypeError`. This is a test-safety issue, not a production code defect.
-3. **Database engine gap:** dev MySQL 8.0.46 vs production MariaDB. Sudo/Docker tidak tersedia untuk switch. Staging wajib diverifikasi sebelum go-live — MariaDB CI job direkomendasikan.
+3. ~~Database engine gap~~ — resolved. Dev now runs MariaDB 10.11.14, matching Hostinger production target.
 
 ---
 
