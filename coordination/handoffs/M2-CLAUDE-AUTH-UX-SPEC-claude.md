@@ -1,77 +1,59 @@
-# Handoff — M2-CLAUDE-AUTH-UX-SPEC — claude
+# Handoff — M2-CLAUDE-AUTH-UX-SPEC-REVISION — claude
 
-- Branch: `ai/claude/m2-auth-ux-spec`
-- Base SHA: `18a26dd`
-- Head SHA: `01573f5` (dokumen spesifikasi) — lihat commit terakhir branch untuk handoff ini
+- Branch: `ai/claude/m2-auth-ux-spec-revision`
+- Base: `coordination/m2-revision-assignment` (`c8550d8`)
+- Manifest base_sha: `18a26dd`
+- Head SHA: commit revisi pada branch ini (`docs(review): align M2 auth UX spec with GPT security decision`)
+- Menggantikan handoff task pendahulu `M2-CLAUDE-AUTH-UX-SPEC` (branch `ai/claude/m2-auth-ux-spec` @ `9817ebc`)
 
 ## Result
 
-Spesifikasi UX & aksesibilitas read-only untuk sebelas state autentikasi FUSPI: login normal, submitting, invalid credentials, pencegahan account enumeration, rate limit, akun inactive, mandatory first password change, session expired, session revoked, safe redirect recovery, logout, dan unsaved-work messaging. Setiap state menetapkan copy intent ID/EN/AR, perilaku RTL, destinasi fokus keyboard, pengumuman screen reader, perilaku loading/submission, error recovery, larangan informasi sensitif, dan acceptance criteria yang dapat diuji.
+Spesifikasi UX & aksesibilitas autentikasi direvisi agar tunduk penuh pada keputusan mengikat GPT di `coordination/reviews/M2-AUTH-SECURITY-CROSS-LANE-gpt.md` §A1–A5, dan diselaraskan dengan schema beku `src/contracts/auth.ts`.
 
-Tidak ada route, page, component, message file, konfigurasi Auth.js, proxy, skema, dependensi, atau perilaku keamanan yang diimplementasikan.
+Perubahan substantif terhadap versi sebelumnya:
 
-Dokumen: **`coordination/reviews/M2-AUTH-UX-SPEC-claude.md`**
+1. **Kosakata state diselaraskan ke kontrak.** `AUTH_REJECTED`/`AUTH_RATE_LIMITED` buatan sendiri diganti kode publik resmi dari `PublicLoginFailureCodeSchema`: `INVALID_CREDENTIALS`, `TRY_AGAIN_LATER`, `AUTH_UNAVAILABLE`. UI tidak lagi menciptakan kode kegagalan sendiri.
+2. **Mandatory password change kini tiga field** (§8), sesuai `PasswordChangeInputSchema`: `currentPassword`, `newPassword`, `confirmPassword`. Ditambahkan copy intent ID/EN/AR untuk "Kata sandi saat ini", urutan Tab, autofocus ke field itu, asosiasi `aria-describedby` tersendiri (mencegah pengguna mengira diminta mengetik password baru dua kali), pemetaan error per `path` schema, aturan pengosongan field, dan konsekuensi §A4 (perubahan sukses mencabut seluruh sesi lama secara transaksional).
+3. **Unsaved-work ditulis ulang total** (§13). Escape hatch "salin pekerjaan saya" pada sesi mati **dicabut**. Aturan §A3 sekarang berlaku: expired + form CMS non-sensitif boleh menahan state **di memori saja** di balik kunci re-autentikasi dan **tanpa janji** sampai ada test yang mengeksekusinya; revoked/nonaktif/role berubah/izin hilang → kunci keras tanpa escape hatch; PPKS → jalur ketat selalu, tanpa draf client; sesi yang tak terbukti sekadar expired diperlakukan sebagai revoked. Tidak ada satu pun copy yang menjanjikan pemulihan otomatis draf.
+4. **Tiga pertanyaan kontrak dicatat sebagai TERSELESAIKAN** (§14), bukan pertanyaan terbuka: rate-limit non-oracle (§A1), hasil session-invalid bertipe (§A3), penyeimbangan waktu bcrypt cost 12 dengan konstanta dummy hash (§A2). Acceptance timing ditulis sebagai perbandingan **distribusi dengan toleransi**, bukan kesetaraan nanodetik.
+5. **Safe redirect menyerahkan validasi ke `SafeInternalPathSchema`** (§12) alih-alih menulis ulang aturannya; ditambahkan interaksi dengan `requiresPasswordChange` (ganti password mendahului `redirectTo`).
+6. **Semua follow-up auth berlabel M2**, tidak ada rujukan M3 (§A5). Setiap blok acceptance kini bertajuk "Acceptance (M2)".
 
 ## Files changed
 
-- `coordination/reviews/M2-AUTH-UX-SPEC-claude.md` (baru) — spesifikasi
-- `coordination/handoffs/M2-CLAUDE-AUTH-UX-SPEC-claude.md` (baru) — dokumen ini
+- `coordination/reviews/M2-AUTH-UX-SPEC-claude.md` — direvisi
+- `coordination/handoffs/M2-CLAUDE-AUTH-UX-SPEC-claude.md` — dokumen ini
 
-Tidak ada perubahan pada `src/**`, `messages/**`, `prisma/**`, `e2e/**`, dependensi, atau root config.
-
-> **Catatan lease.** `allowed_paths` pada manifest hanya memuat file review, dan instruksi task meminta metadata handoff dimuat di dalam dokumen review itu sendiri (§15). File handoff terpisah ini dibuat **atas permintaan eksplisit pemilik proyek** agar lane GPT menemukan pertanyaan kontrak di lokasi konvensional. Ia hanya berisi ringkasan dan penunjuk; sumber kebenaran tetap dokumen review. Tidak ada lease agent lain yang tersentuh.
+Tidak ada perubahan pada `src/**`, `messages/**`, `prisma/**`, `e2e/**`, dependensi, atau root config. Keduanya berada di dalam `allowed_paths` manifest revisi.
 
 ## Contract/schema/migration impact
 
-Tidak ada. Dokumen ini **mengonsumsi** kontrak `docs/06-autentikasi-role.md` (session database 8 jam, rate limit 5 gagal/15 menit per HMAC IP + HMAC email, `mustChangePassword`, pencabutan sesi saat user nonaktif/role/password berubah) dan tidak mengubahnya. Nilai-nilai tersebut dikutip sebagai konteks, bukan sebagai keputusan baru dari lane ini.
-
-Tiga pertanyaan di bawah meminta **klarifikasi** kontrak auth M2, bukan perubahannya.
+Tidak ada. Dokumen **mengonsumsi** kontrak beku `src/contracts/auth.ts` dan keputusan §A1–A5; tidak mengubah keduanya dan tidak meminta perubahan baru.
 
 ## Verification
 
 | Command | Result |
 |---|---|
-| `git diff --check` | bersih (satu-satunya `acceptance_commands` pada manifest) |
-| `git diff --name-only 18a26dd...HEAD` | hanya file review + handoff ini |
+| `git diff --check` | pass — tidak ada whitespace error |
+| `TASK_MANIFEST=coordination/tasks/M2-CLAUDE-AUTH-UX-SPEC-REVISION.md TASK_BASE=coordination/m2-revision-assignment npm run check:scope` | pass — `scope-check: 2 changed file(s) are within lease` |
 
-`npm run lint` / `typecheck` / `test` tidak dijalankan: tidak ada kode yang berubah, sehingga hasilnya identik dengan baseline dan tidak memberi sinyal apa pun tentang perubahan ini.
+`npm run lint` / `typecheck` / `test` tidak dijalankan dan tidak ada dalam `acceptance_commands` manifest: tidak ada kode yang berubah, sehingga hasilnya identik dengan baseline dan tidak memberi sinyal apa pun tentang perubahan ini.
 
 ## Untested areas
 
-Ini spesifikasi, bukan implementasi — belum ada perilaku yang dapat dieksekusi untuk diuji. Acceptance criteria di §3–§13 ditulis agar DeepSeek dapat menurunkannya menjadi test M3; kriteria itu belum divalidasi terhadap kode apa pun.
+Ini spesifikasi, bukan implementasi — belum ada perilaku yang dapat dieksekusi untuk diuji. Acceptance criteria §3–§13 ditulis agar DeepSeek dapat menurunkannya menjadi test M2 yang dapat dieksekusi; kriteria itu belum divalidasi terhadap kode apa pun.
 
-## Risks and follow-ups
+Secara khusus, klaim §9/§13 tentang penahanan state di memori di balik kunci re-autentikasi **belum boleh dijanjikan ke pengguna** sampai ada test yang mengeksekusinya (§A3). Dokumen sudah ditulis agar tidak menjanjikannya.
 
-1. **DeepSeek:** turunkan test M3 dari acceptance criteria §3–§13. Prioritas: perbandingan byte-for-byte kelas enumerasi (§5 acceptance (a)) dan corpus open redirect (§12 acceptance (a)).
-2. **Peninjau berbahasa Arab:** copy AR dalam dokumen adalah *intent*, bukan terjemahan final — validasi sebelum masuk `messages/ar.json`.
-3. **Kebijakan reset password:** larangan tautan "Lupa kata sandi" (§3) berasal dari `docs/06` ("tidak ada reset password publik pada v1"). Bila kebijakan itu berubah, §3 dan §5 wajib ditinjau ulang bersamaan — alur reset password adalah permukaan enumerasi klasik.
+## Risks and follow-ups (semuanya M2)
+
+1. **Ketersediaan kontrak.** `src/contracts/auth.ts` belum ada di `coordination/m2-revision-assignment`; ia hidup di `ai/gpt/m2-auth-contract` dan saya baca read-only dari sana. §8 dan §12 mengasumsikan schema itu masuk `integration/m2-security` **tanpa perubahan nama field**. Bila `PasswordChangeInputSchema` atau `SafeInternalPathSchema` berubah sebelum merge, kedua bagian itu harus diperiksa ulang. — *GPT*
+2. **Tinjauan penutur asli bahasa Arab.** Seluruh copy AR berlabel *intent*, belum divalidasi. Wajib selesai **sebelum** string masuk `messages/ar.json`; bukan blocker bagi implementasi struktur UI. — *M2*
+3. **Test turunan.** Prioritas: perbandingan byte-for-byte kelas enumerasi (§5 acceptance (a), mencakup akun nonaktif dengan password benar), kesetaraan blokir rate limit untuk akun ada/tidak ada/nonaktif (§6 acceptance (b)), ketiadaan escape hatch pada jalur revoked (§13 acceptance (b)/(c)), dan corpus open redirect (§12 acceptance (a)). — *DeepSeek*
+4. **Kebijakan reset password.** Larangan tautan "Lupa kata sandi" (§3) bergantung pada `docs/06` ("tidak ada reset password publik pada v1"). Bila kebijakan berubah, §3 dan §5 wajib ditinjau ulang bersamaan — alur reset password adalah permukaan enumerasi klasik. — *GPT*
 
 ## Requested shared changes
 
-**Untuk GPT — tiga pertanyaan kontrak. Sumber lengkap: `coordination/reviews/M2-AUTH-UX-SPEC-claude.md` §14.**
+Tidak ada. Ketiga pertanyaan kontrak yang diajukan handoff sebelumnya sudah dijawab mengikat oleh GPT dan kini tercatat sebagai kontrak terselesaikan di §14 dokumen review.
 
-Ketiganya **tidak dapat diselesaikan lane UI** dan menentukan apakah spesifikasi ini dapat dipenuhi. Mohon dijawab di kontrak auth M2 sebelum implementasi M3 dimulai.
-
-### 1. Apakah rate limit menaikkan penghitung dan memblokir untuk email yang TIDAK terdaftar? (risiko tertinggi)
-
-Spesifikasi menyatukan email-tidak-dikenal, password-salah, dan akun-nonaktif menjadi satu respons `AUTH_REJECTED` yang identik hingga ke teks, atribut ARIA, destinasi fokus, field yang dikosongkan, dan bentuk respons. Namun pesan rate limit sengaja dibuat **berbeda** dari `AUTH_REJECTED`, karena pengguna sah perlu tahu bahwa ia harus menunggu — bukan mengira passwordnya salah lalu mencoba terus.
-
-Kedua keputusan itu hanya kompatibel bila blokir terpicu **identik** untuk email terdaftar maupun tidak. Bila blokir hanya berlaku pada email yang ada di database, pesan blokir itu sendiri menjadi oracle: penyerang mengirim 6 percobaan, lalu melihat "terlalu banyak percobaan" (= email ada) versus "email atau kata sandi salah" (= email tidak ada). Enumerasi lolos lewat pintu belakang.
-
-`docs/06` menyebut kunci HMAC IP + HMAC email, yang secara prinsip memenuhi syarat ini — HMAC atas email tidak perlu tahu apakah email itu ada. **Butuh konfirmasi eksplisit** bahwa itu memang perilakunya. Bila tidak, §6 harus dibatalkan dan pesan blokir diseragamkan dengan `AUTH_REJECTED` (merugikan pengguna sah, tetapi lebih aman).
-
-### 2. Request admin dengan sesi yang sudah dicabut: redirect keras atau respons yang dapat dirender UI?
-
-Spesifikasi mensyaratkan bahwa sesi yang mati saat form masih kotor **tidak boleh membuang draf secara diam-diam** — mis. editor yang telah mengetik artikel panjang lalu sesinya kedaluwarsa (8 jam) atau dicabut karena role berubah.
-
-Agar UI dapat menampilkan dialog "sesi berakhir" **di atas** halaman kerja (isi form tetap di layar, pengguna dapat menyelamatkan teksnya), penolakan sesi harus datang sebagai hasil yang **dapat ditangani UI** — misalnya penolakan yang dapat dikenali pada Server Action. Bila `proxy.ts` selalu melakukan redirect navigasi keras yang mengganti dokumen, isi form hilang sebelum UI sempat bereaksi, dan §13 tidak dapat dipenuhi sama sekali.
-
-**Pertanyaan:** bentuk respons mana yang dipakai untuk request admin yang sesinya sudah tidak valid?
-
-### 3. Apakah jalur autentikasi melakukan kerja hashing setara saat user tidak ditemukan?
-
-UI tidak menambahkan delay kondisional apa pun; semua kegagalan melewati state `AUTH_SUBMITTING` yang identik, tanpa tahap "memeriksa email…" lalu "memeriksa kata sandi…".
-
-Namun bila server mengembalikan `AUTH_REJECTED` jauh lebih cepat untuk email-tidak-ada — karena `bcrypt.compare` hanya dijalankan bila `findUnique` menemukan user, persis seperti contoh kode di `docs/06` — maka kelas enumerasi bocor lewat **waktu respons**, dan tidak ada yang dapat dilakukan sisi UI untuk menutupnya.
-
-**Butuh kepastian** bahwa jalur user-tidak-ada tetap melakukan pekerjaan hashing yang setara (dummy compare terhadap hash konstan, atau ekuivalennya).
+**Tidak ada permintaan untuk memulai M3.** M3 (slice vertikal Post + Media + i18n) tetap belum aktif; seluruh pekerjaan auth di atas adalah M2 (§A5).
