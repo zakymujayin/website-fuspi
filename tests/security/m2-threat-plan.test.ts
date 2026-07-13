@@ -8,26 +8,17 @@ import {
   getM2ByDependsOn,
   countM2BySeverity,
   getM2Dependencies,
+  VALID_DEPENDENCIES,
+  validateM2Readiness,
 } from "./m2-threat-plan";
 import type {M2SecurityTestCase} from "./m2-threat-plan";
 
-const ALL_KNOWN_DEPENDENCIES = new Set([
-  "auth.session-revocation",
-  "auth.rate-limit",
-  "auth.csrf",
-  "lib.authorization",
-  "lib.upload",
-  "lib.ppks-encryption",
-  "lib.ppks-isolation",
-  "lib.outbox",
-  "lib.sanitizer",
-  "db.annual-sequence",
-]);
-
 const REAL_PII_PATTERN =
-  /(?:[a-zA-Z0-9._%+-]+@(?!.*(invalid|example|test|synthetic|placeholder|fuspi\.uinbanten\.ac\.id)).*|[0-9]{10,})/;
-const REAL_DOMAIN_PATTERN =
+  /(?:[a-zA-Z0-9._%+-]+@(?!.*(invalid|example|test|synthetic|placeholder)).*|[0-9]{10,})/;
+const FUDA_DOMAIN_PATTERN =
   /fuda\.uinbanten\.ac\.id/;
+const FUSPI_DOMAIN_PATTERN =
+  /fuspi\.uinbanten\.ac\.id/;
 
 describe("M2 security test plan meta-validation", () => {
   const plan = getM2Plan();
@@ -54,11 +45,19 @@ describe("M2 security test plan meta-validation", () => {
       "requiredFixture",
       "dependsOn",
       "testLevel",
+      "executable",
     ];
     for (const c of plan) {
       for (const key of requiredKeys) {
         expect(c[key], `${c.id} is missing field "${key}"`).toBeDefined();
-        expect(c[key], `${c.id} has empty field "${key}"`).not.toBe("");
+        if (key === "executable") {
+          expect(
+            typeof c[key],
+            `${c.id} executable must be boolean`,
+          ).toBe("boolean");
+        } else {
+          expect(c[key], `${c.id} has empty field "${key}"`).not.toBe("");
+        }
       }
     }
   });
@@ -117,8 +116,18 @@ describe("M2 security test plan meta-validation", () => {
     for (const c of plan) {
       const full = JSON.stringify(c);
       expect(
-        REAL_DOMAIN_PATTERN.test(full),
+        FUDA_DOMAIN_PATTERN.test(full),
         `${c.id} references forbidden FUDA domain`,
+      ).toBe(false);
+    }
+  });
+
+  it("no case references FUSPI production domain", () => {
+    for (const c of plan) {
+      const full = JSON.stringify(c);
+      expect(
+        FUSPI_DOMAIN_PATTERN.test(full),
+        `${c.id} references forbidden FUSPI production domain`,
       ).toBe(false);
     }
   });
@@ -126,7 +135,7 @@ describe("M2 security test plan meta-validation", () => {
   it("every dependsOn references a known contract/component ID", () => {
     for (const c of plan) {
       expect(
-        ALL_KNOWN_DEPENDENCIES.has(c.dependsOn),
+        VALID_DEPENDENCIES.has(c.dependsOn),
         `${c.id} references unknown dependency "${c.dependsOn}"`,
       ).toBe(true);
     }
@@ -176,10 +185,10 @@ describe("M2 security test plan meta-validation", () => {
     expect(covered.has("e2e")).toBe(true);
   });
 
-  it("every dependency ID referenced in the plan is declared in ALL_KNOWN_DEPENDENCIES", () => {
+  it("every dependency ID referenced in the plan is declared in VALID_DEPENDENCIES", () => {
     const deps = getM2Dependencies();
     for (const dep of deps) {
-      expect(ALL_KNOWN_DEPENDENCIES.has(dep), `Unknown dependency: ${dep}`).toBe(true);
+      expect(VALID_DEPENDENCIES.has(dep), `Unknown dependency: ${dep}`).toBe(true);
     }
   });
 
@@ -217,8 +226,91 @@ describe("M2 security test plan meta-validation", () => {
 
   it("getM2Dependencies returns all unique dependency keys sorted", () => {
     const deps = getM2Dependencies();
-    expect(deps.length).toBe(ALL_KNOWN_DEPENDENCIES.size);
+    expect(deps.length).toBe(VALID_DEPENDENCIES.size);
     const sorted = [...deps].sort();
     expect(deps).toEqual(sorted);
+  });
+
+  it("all test cases are currently blocked (executable: false)", () => {
+    const ready = plan.filter((c) => c.executable);
+    expect(ready, `Cases marked executable before dependencies merged: ${ready.map((c) => c.id).join(", ")}`).toHaveLength(0);
+  });
+
+  it("validateM2Readiness rejects case marked ready when dependency is missing", () => {
+    const synthetic: M2SecurityTestCase = {
+      id: "M2-SYNTHETIC-001",
+      area: "Login Enumeration",
+      severity: "high",
+      actor: "Attacker",
+      precondition: "x",
+      attack: "x",
+      invariant: "x",
+      expectedOutcome: "x",
+      requiredFixture: "x",
+      dependsOn: "auth.rate-limit",
+      testLevel: "integration",
+      executable: true,
+    };
+    const result = validateM2Readiness(synthetic, new Set());
+    expect(result.valid).toBe(false);
+    expect(result.reason).toContain("auth.rate-limit");
+  });
+
+  it("validateM2Readiness accepts blocked case regardless of dependencies", () => {
+    const blocked: M2SecurityTestCase = {
+      id: "M2-SYNTHETIC-002",
+      area: "Login Enumeration",
+      severity: "high",
+      actor: "Attacker",
+      precondition: "x",
+      attack: "x",
+      invariant: "x",
+      expectedOutcome: "x",
+      requiredFixture: "x",
+      dependsOn: "auth.rate-limit",
+      testLevel: "integration",
+      executable: false,
+    };
+    const result = validateM2Readiness(blocked, new Set());
+    expect(result.valid).toBe(true);
+  });
+
+  it("validateM2Readiness rejects unknown dependency regardless of readiness", () => {
+    const unknown: M2SecurityTestCase = {
+      id: "M2-SYNTHETIC-003",
+      area: "Login Enumeration",
+      severity: "high",
+      actor: "Attacker",
+      precondition: "x",
+      attack: "x",
+      invariant: "x",
+      expectedOutcome: "x",
+      requiredFixture: "x",
+      dependsOn: "nonexistent.fake",
+      testLevel: "integration",
+      executable: false,
+    };
+    const result = validateM2Readiness(unknown, new Set());
+    expect(result.valid).toBe(false);
+    expect(result.reason).toContain("nonexistent.fake");
+  });
+
+  it("validateM2Readiness approves ready case when dependency is available", () => {
+    const ready: M2SecurityTestCase = {
+      id: "M2-SYNTHETIC-004",
+      area: "Login Enumeration",
+      severity: "high",
+      actor: "Attacker",
+      precondition: "x",
+      attack: "x",
+      invariant: "x",
+      expectedOutcome: "x",
+      requiredFixture: "x",
+      dependsOn: "auth.rate-limit",
+      testLevel: "integration",
+      executable: true,
+    };
+    const result = validateM2Readiness(ready, new Set(["auth.rate-limit"]));
+    expect(result.valid).toBe(true);
   });
 });

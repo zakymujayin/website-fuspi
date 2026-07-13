@@ -12,6 +12,39 @@ export interface M2SecurityTestCase {
   requiredFixture: string;
   dependsOn: string;
   testLevel: TestLevel;
+  executable: boolean;
+}
+
+export const VALID_DEPENDENCIES = new Set([
+  "auth.session-revocation",
+  "auth.rate-limit",
+  "auth.csrf",
+  "lib.authorization",
+  "lib.upload",
+  "lib.ppks-encryption",
+  "lib.ppks-isolation",
+  "lib.outbox",
+  "lib.sanitizer",
+  "db.annual-sequence",
+]);
+
+export function validateM2Readiness(
+  testCase: M2SecurityTestCase,
+  availableDependencies: Set<string>,
+): { valid: boolean; reason?: string } {
+  if (testCase.executable && !availableDependencies.has(testCase.dependsOn)) {
+    return {
+      valid: false,
+      reason: `${testCase.id} marked executable but dependency "${testCase.dependsOn}" is not available`,
+    };
+  }
+  if (!VALID_DEPENDENCIES.has(testCase.dependsOn)) {
+    return {
+      valid: false,
+      reason: `${testCase.id} references unknown dependency "${testCase.dependsOn}"`,
+    };
+  }
+  return { valid: true };
 }
 
 const plan: M2SecurityTestCase[] = [
@@ -35,6 +68,7 @@ const plan: M2SecurityTestCase[] = [
       "synthetic-user with 3 Session rows in DB, distinct sessionToken values",
     dependsOn: "auth.session-revocation",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-AUTH-002",
@@ -53,6 +87,7 @@ const plan: M2SecurityTestCase[] = [
       "synthetic-editor with active Session, ADMIN session for deactivation action",
     dependsOn: "auth.session-revocation",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-AUTH-003",
@@ -71,6 +106,7 @@ const plan: M2SecurityTestCase[] = [
       "synthetic-editor with Session, ADMIN session for role-change action",
     dependsOn: "auth.session-revocation",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-AUTH-004",
@@ -88,6 +124,7 @@ const plan: M2SecurityTestCase[] = [
     requiredFixture: "synthetic-user Session row, attacker replay harness",
     dependsOn: "auth.session-revocation",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-AUTH-005",
@@ -104,6 +141,7 @@ const plan: M2SecurityTestCase[] = [
     requiredFixture: "synthetic-inactive-user with persisted Session row",
     dependsOn: "auth.session-revocation",
     testLevel: "integration",
+    executable: false,
   },
 
   // =========================================================
@@ -114,32 +152,36 @@ const plan: M2SecurityTestCase[] = [
     area: "Login Enumeration",
     severity: "high",
     actor: "Attacker (unauthenticated)",
-    precondition: "No prior failed attempts from this IP-hash.",
+    precondition:
+      "No prior failed attempts from this IP-hash. A rate-limit counter is derived from HMAC(email) and HMAC(IP) without querying user existence.",
     attack:
-      "Send 6 login attempts with different passwords to the same email within 15 minutes.",
+      "Send 6 login attempts with wrong passwords to an existing account email. Repeat the same pattern against a non-existing email and an inactive (isActive=false) account. Compare failure codes, response shape, and headers across all three cases.",
     invariant:
-      "Rate limit enforced per HMAC(IP) AND per HMAC(email). Error message identical for invalid email and wrong password.",
+      "Rate-limit counter is incremented for unknown email, inactive user, and wrong password alike. The compound key HMAC(email)+HMAC(IP) must not depend on whether the user exists. The 5th/6th-attempt behaviour, status, response body, and headers must be identical across existing, non-existing, and inactive accounts. No remaining-attempt count is exposed.",
     expectedOutcome:
-      "First 5 attempts return generic error. 6th returns generic 429. No response reveals whether email exists.",
-    requiredFixture: "synthetic-admin user, precompute HMAC keys",
+      "All three account types produce identical generic failure codes: INVALID_CREDENTIALS for first 5 attempts, TRY_AGAIN_LATER on 6th. No response distinguishes existing from non-existing or inactive accounts.",
+    requiredFixture: "synthetic-admin user, synthetic-inactive user, precompute HMAC keys for three email categories",
     dependsOn: "auth.rate-limit",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-AUTH-007",
     area: "Login Enumeration",
     severity: "medium",
     actor: "Attacker (unauthenticated)",
-    precondition: "Valid email exists. Attacker tries non-existent email.",
+    precondition:
+      "Valid admin email exists. Attacker knows the email but not the password. A constant dummy bcrypt hash (cost 12) is used when the user is not found.",
     attack:
-      "Submit login with `nonexistent@example.invalid` and with `admin@fuspi.uinbanten.ac.id` using wrong password. Compare responses.",
+      "Submit login with `nonexistent@example.invalid` (unknown email) and with `admin-test@example.invalid` (known email, wrong password). Measure response timing distributions. Unknown-email path must perform one bcrypt.compare-equivalent operation against the dummy hash at cost 12, not skip hashing.",
     invariant:
-      "Response status, body, timing, and headers must be indistinguishable between valid-email-wrong-password and invalid-email cases.",
+      "Credential rejection must always perform one cost-12 bcrypt operation: real hash for known user, constant dummy hash for unknown user. Inactive user path also performs real hash then returns the same public failure. Response status, body, error codes, and headers must be identical. Timing distributions may show expected variance but must not allow distinguishable separation within a documented statistical tolerance.",
     expectedOutcome:
-      "Both return identical error body with HTTP 200 or 401 and no timing side-channel.",
-    requiredFixture: "synthetic-admin user",
+      "Both responses return identical error code INVALID_CREDENTIALS with matching status, body shape, and headers. Timing comparison shows overlapping distributions; tests assert statistical tolerance, not nanosecond equality.",
+    requiredFixture: "synthetic-admin user, pre-generated dummy bcrypt hash constant",
     dependsOn: "auth.rate-limit",
     testLevel: "integration",
+    executable: false,
   },
 
   // =========================================================
@@ -162,6 +204,7 @@ const plan: M2SecurityTestCase[] = [
       "two synthetic-editors each owning one Post with distinct IDs",
     dependsOn: "lib.authorization",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-IDOR-002",
@@ -177,6 +220,7 @@ const plan: M2SecurityTestCase[] = [
     requiredFixture: "synthetic-editor user, user-update action endpoint",
     dependsOn: "lib.authorization",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-IDOR-003",
@@ -184,16 +228,17 @@ const plan: M2SecurityTestCase[] = [
     severity: "critical",
     actor: "ADMIN",
     precondition:
-      "A PPKS ticket exists. ADMIN has an active session.",
+      "A PPKS ticket exists. ADMIN has an active session but is not SATGAS_PPKS.",
     attack:
-      "ADMIN directly requests GET /api/admin/tickets/{ppks-ticket-id} or the PPKS detail Server Action.",
+      "ADMIN directly requests GET /api/admin/tickets/{ppks-ticket-id} or the PPKS detail Server Action by guessing a valid PPKS ticket ID.",
     invariant:
-      "Tickets with category PELECEHAN_SEKSUAL must be filtered at query level for non-SATGAS_PPKS roles. ADMIN sees only aggregate counts.",
+      "Tickets with category PELECEHAN_SEKSUAL must be filtered at query level for non-SATGAS_PPKS roles. The response must return exactly 404 with zero detail bytes and no distinguishing metadata. Aggregate PPKS statistics use a separate, explicitly authorized query.",
     expectedOutcome:
-      "Request returns 403 or empty/redacted payload. PPKS subject, description, identity, and attachment URLs are never exposed.",
+      "Request returns 404 with empty body. No PPKS subject, description, identity, or attachment URLs are exposed. A denied-access audit entry is recorded in TicketAccessLog.",
     requiredFixture: "synthetic-ppks-ticket with attachments, ADMIN session",
     dependsOn: "lib.authorization",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-IDOR-004",
@@ -212,6 +257,7 @@ const plan: M2SecurityTestCase[] = [
       "synthetic-ppks-ticket, ppks-attachment, PETUGAS session",
     dependsOn: "lib.authorization",
     testLevel: "integration",
+    executable: false,
   },
 
   // =========================================================
@@ -234,6 +280,7 @@ const plan: M2SecurityTestCase[] = [
       "ADMIN session, attacker origin page fixture, Server Action endpoint URLs",
     dependsOn: "auth.csrf",
     testLevel: "e2e",
+    executable: false,
   },
 
   // =========================================================
@@ -254,6 +301,7 @@ const plan: M2SecurityTestCase[] = [
     requiredFixture: "EDITOR session, crafted multipart payload",
     dependsOn: "lib.upload",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-UPLOAD-002",
@@ -270,6 +318,7 @@ const plan: M2SecurityTestCase[] = [
     requiredFixture: "EDITOR session, crafted PHP/jpg binary payload",
     dependsOn: "lib.upload",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-UPLOAD-003",
@@ -285,6 +334,7 @@ const plan: M2SecurityTestCase[] = [
     requiredFixture: "EDITOR session, crafted pixel-bomb image",
     dependsOn: "lib.upload",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-UPLOAD-004",
@@ -300,6 +350,7 @@ const plan: M2SecurityTestCase[] = [
     requiredFixture: "EDITOR session, null-byte payload",
     dependsOn: "lib.upload",
     testLevel: "integration",
+    executable: false,
   },
 
   // =========================================================
@@ -322,6 +373,7 @@ const plan: M2SecurityTestCase[] = [
       "synthetic-ppks-ticket with encrypted attachment, SATGAS_PPKS session, DB manipulation harness",
     dependsOn: "lib.ppks-encryption",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-ENC-002",
@@ -340,6 +392,7 @@ const plan: M2SecurityTestCase[] = [
       "synthetic-ppks-ticket, SATGAS_PPKS session, DB tampering harness",
     dependsOn: "lib.ppks-encryption",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-ENC-003",
@@ -358,6 +411,7 @@ const plan: M2SecurityTestCase[] = [
       "two PPKS attachments with keyVersion=1 and keyVersion=2, both keys in fixture config",
     dependsOn: "lib.ppks-encryption",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-ENC-004",
@@ -365,16 +419,17 @@ const plan: M2SecurityTestCase[] = [
     severity: "high",
     actor: "Attacker (replay)",
     precondition:
-      "Two PPKS attachments exist with known nonce values. Attacker replays a known nonce.",
+      "Two PPKS attachments exist. Encryption uses randomly generated nonces for each operation.",
     attack:
-      "Re-encrypt different plaintext using the same nonce as a prior attachment. Attempt decryption.",
+      "Attempt to re-encrypt different plaintext using a known nonce from a prior attachment. Verify the encryption layer rejects the operation before ciphertext is stored.",
     invariant:
-      "Nonce must be randomly generated for each encryption operation. Nonce reuse detection is implementation responsibility.",
+      "Nonce must be randomly generated for each encryption operation. The encryption helper must assert nonce uniqueness at encryption time, rejecting duplicate nonces before persisting any ciphertext.",
     expectedOutcome:
-      "Either nonce collision is vanishingly improbable, or explicit nonce-uniqueness check rejects the operation at encryption time.",
-    requiredFixture: "two plaintext payloads, encryption helper",
+      "Nonce-reuse attempt is rejected at encryption time with a clear error. No duplicate-nonce ciphertext reaches the database.",
+    requiredFixture: "two plaintext payloads, encryption helper with nonce-uniqueness assertion",
     dependsOn: "lib.ppks-encryption",
     testLevel: "unit",
+    executable: false,
   },
 
   // =========================================================
@@ -396,6 +451,7 @@ const plan: M2SecurityTestCase[] = [
     requiredFixture: "3 synthetic-ppks-tickets, ADMIN session, export endpoint",
     dependsOn: "lib.authorization",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-PPKS-002",
@@ -413,6 +469,7 @@ const plan: M2SecurityTestCase[] = [
       "synthetic-ppks-ticket with attachment, SATGAS_PPKS session",
     dependsOn: "lib.ppks-isolation",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-PPKS-003",
@@ -429,6 +486,7 @@ const plan: M2SecurityTestCase[] = [
     requiredFixture: "synthetic-ppks-ticket, PETUGAS session",
     dependsOn: "lib.authorization",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-PPKS-004",
@@ -447,6 +505,7 @@ const plan: M2SecurityTestCase[] = [
       "synthetic-ppks-tickets with access log rows, SATGAS_PPKS session",
     dependsOn: "lib.authorization",
     testLevel: "integration",
+    executable: false,
   },
 
   // =========================================================
@@ -469,6 +528,7 @@ const plan: M2SecurityTestCase[] = [
       "concurrency harness spawning 20 parallel requests, isolated AnnualSequence row",
     dependsOn: "db.annual-sequence",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-SEQ-002",
@@ -487,6 +547,7 @@ const plan: M2SecurityTestCase[] = [
       "isolated AnnualSequence rows for two distinct years, boundary clock fixture",
     dependsOn: "db.annual-sequence",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-SEQ-003",
@@ -505,6 +566,7 @@ const plan: M2SecurityTestCase[] = [
       "both kind rows in AnnualSequence, 20-parallel-request harness",
     dependsOn: "db.annual-sequence",
     testLevel: "integration",
+    executable: false,
   },
 
   // =========================================================
@@ -526,23 +588,25 @@ const plan: M2SecurityTestCase[] = [
     requiredFixture: "existing NotificationOutbox row, retry harness",
     dependsOn: "lib.outbox",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-OBX-002",
     area: "Outbox",
     severity: "critical",
-    actor: "System (outbox worker)",
+    actor: "Attacker (with DB access)",
     precondition:
-      "A sensitive PPKS notification outbox row exists with an encrypted payload (payloadEncrypted=true).",
+      "A sensitive PPKS notification outbox row exists with an encrypted payload (payloadEncrypted=true) and a known idempotencyKey.",
     attack:
-      "An attacker with DB access modifies the idempotencyKey and re-inserts, hoping the worker processes it again with plaintext exposure.",
+      "Attacker modifies the payloadEncrypted column directly in the database — replacing the ciphertext with a tampered value — then the worker picks up the row for processing.",
     invariant:
-      "Sensitive outbox rows must carry encrypted payload only. The idempotencyKey uniqueness + encrypted flag prevents plaintext leakage on retry.",
+      "Encrypted outbox payloads must include an authentication tag. Payload tampering must cause decryption to fail with an integrity error. The worker must not deliver garbled plaintext or expose decrypted fragments to SMTP. Idempotency with the same key is a separate property (see M2-OBX-001); this case validates payload integrity, not key collision.",
     expectedOutcome:
-      "Duplicate rejected by unique constraint. If forced, encrypted payload cannot be read without decryption key.",
-    requiredFixture: "sensitive outbox row with encryptedPayload",
+      "Worker detects decryption failure, marks the row as FAILED with an integrity error reason. No email is sent. No plaintext data is written to logs or SMTP.",
+    requiredFixture: "sensitive outbox row with encryptedPayload, DB tampering harness",
     dependsOn: "lib.outbox",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-OBX-003",
@@ -559,6 +623,7 @@ const plan: M2SecurityTestCase[] = [
     requiredFixture: "ticket creation action, SMTP mock/failure harness",
     dependsOn: "lib.outbox",
     testLevel: "integration",
+    executable: false,
   },
 
   // =========================================================
@@ -581,6 +646,7 @@ const plan: M2SecurityTestCase[] = [
       "synthetic-post with formula injection in title, CSV export endpoint, ADMIN session",
     dependsOn: "lib.sanitizer",
     testLevel: "unit",
+    executable: false,
   },
   {
     id: "M2-CSV-002",
@@ -598,6 +664,7 @@ const plan: M2SecurityTestCase[] = [
     requiredFixture: "synthetic-ticket with injected reply, CSV export endpoint",
     dependsOn: "lib.sanitizer",
     testLevel: "unit",
+    executable: false,
   },
 
   // =========================================================
@@ -619,6 +686,7 @@ const plan: M2SecurityTestCase[] = [
     requiredFixture: "synthetic-ppks-ticket, outbox worker with SMTP mock",
     dependsOn: "lib.outbox",
     testLevel: "integration",
+    executable: false,
   },
 
   // =========================================================
@@ -640,6 +708,7 @@ const plan: M2SecurityTestCase[] = [
     requiredFixture: "EDITOR session, DB error injection harness",
     dependsOn: "lib.upload",
     testLevel: "integration",
+    executable: false,
   },
 
   // =========================================================
@@ -660,6 +729,7 @@ const plan: M2SecurityTestCase[] = [
     requiredFixture: "EDITOR session, Unicode-named image payload",
     dependsOn: "lib.upload",
     testLevel: "integration",
+    executable: false,
   },
   {
     id: "M2-CSV-003",
@@ -677,6 +747,7 @@ const plan: M2SecurityTestCase[] = [
     requiredFixture: "multiple synthetic tickets with varied text content",
     dependsOn: "lib.sanitizer",
     testLevel: "unit",
+    executable: false,
   },
 ];
 
