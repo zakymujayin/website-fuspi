@@ -37,4 +37,18 @@ describe("audit metadata sanitizer", () => {
     );
     expect(() => sanitizeAuditMetadata(metadata)).toThrow("exceeds 16 KiB");
   });
+
+  it("truncates nested values and arrays at the documented boundaries", () => {
+    const result = sanitizeAuditMetadata({
+      nested: {one: {two: {three: {four: {five: {six: "hidden"}}}}}},
+      items: Array.from({length: 51}, (_, index) => index),
+    }) as {
+      nested: {one: {two: {three: {four: {five: {six: string}}}}}};
+      items: number[];
+    };
+
+    expect(result.nested.one.two.three.four.five.six).toBe("[TRUNCATED_DEPTH]");
+    expect(result.items).toHaveLength(50);
+    expect(result.items.at(-1)).toBe(49);
+  });
 });
