@@ -3,7 +3,7 @@
 - Branch: `ai/claude/m2-auth-ux-spec-revision`
 - Base: `coordination/m2-revision-assignment` (`c8550d8`)
 - Manifest base_sha: `18a26dd`
-- Head SHA: commit revisi pada branch ini (`docs(review): align M2 auth UX spec with GPT security decision`)
+- Revision implementation SHA: `f8f3990` (`docs(review): align M2 auth UX spec with GPT security decision`)
 - Menggantikan handoff task pendahulu `M2-CLAUDE-AUTH-UX-SPEC` (branch `ai/claude/m2-auth-ux-spec` @ `9817ebc`)
 
 ## Result
