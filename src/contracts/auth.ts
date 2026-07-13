@@ -29,7 +29,7 @@ export const SafeInternalPathSchema = z
       value.startsWith("/") &&
       !value.startsWith("//") &&
       !value.includes("\\") &&
-      !/[\u0000-\u001f\u007f]/u.test(value),
+      !/[\u0000-\u001f\u007f-\u009f]/u.test(value),
     "Redirect path must be an internal application path.",
   );
 
@@ -44,6 +44,13 @@ export const LoginResultSchema = z.discriminatedUnion("ok", [
     code: PublicLoginFailureCodeSchema,
   }),
 ]);
+
+export const SessionInvalidResultSchema = z
+  .object({
+    ok: z.literal(false),
+    code: z.literal("SESSION_INVALID"),
+  })
+  .strict();
 
 export const PasswordChangeInputSchema = z
   .object({
@@ -96,6 +103,7 @@ export const AuthorizationContextSchema = z
 export type AuthRole = z.infer<typeof AuthRoleSchema>;
 export type LoginCredentials = z.infer<typeof LoginCredentialsSchema>;
 export type LoginResult = z.infer<typeof LoginResultSchema>;
+export type SessionInvalidResult = z.infer<typeof SessionInvalidResultSchema>;
 export type PasswordChangeInput = z.infer<typeof PasswordChangeInputSchema>;
 export type ActiveDatabaseSession = z.infer<typeof ActiveDatabaseSessionSchema>;
 export type AuthorizationContext = z.infer<typeof AuthorizationContextSchema>;
