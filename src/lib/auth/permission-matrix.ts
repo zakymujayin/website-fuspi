@@ -23,10 +23,15 @@ export type PermissionRule = Readonly<{
   dataScope: PermissionDataScope;
 }>;
 
-type PermissionMatrix = Record<
+type MutablePermissionMatrix = Record<
   AuthRole,
   Record<AuthResource, Record<AuthAction, PermissionRule>>
 >;
+
+type PermissionMatrix = Readonly<Record<
+  AuthRole,
+  Readonly<Record<AuthResource, Readonly<Record<AuthAction, PermissionRule>>>>
+>>;
 
 const ROLES: readonly AuthRole[] = ["ADMIN", "EDITOR", "PETUGAS", "SATGAS_PPKS"];
 const DENY: PermissionRule = Object.freeze({
@@ -35,18 +40,18 @@ const DENY: PermissionRule = Object.freeze({
   dataScope: "NONE",
 });
 
-function createDeniedMatrix(): PermissionMatrix {
+function createDeniedMatrix(): MutablePermissionMatrix {
   return Object.fromEntries(
     ROLES.map((role) => [role, Object.fromEntries(
       AUTH_RESOURCES.map((resource) => [resource, Object.fromEntries(
         AUTH_ACTIONS.map((action) => [action, DENY]),
       )]),
     )]),
-  ) as PermissionMatrix;
+  ) as MutablePermissionMatrix;
 }
 
 function grant(
-  matrix: PermissionMatrix,
+  matrix: MutablePermissionMatrix,
   role: AuthRole,
   resource: AuthResource,
   actions: readonly AuthAction[],
@@ -57,7 +62,7 @@ function grant(
   }
 }
 
-function buildPermissionMatrix(): PermissionMatrix {
+function buildPermissionMatrix(): MutablePermissionMatrix {
   const matrix = createDeniedMatrix();
   const any = {ownership: "ANY", dataScope: "ALL"} as const;
   const own = {ownership: "OWN", dataScope: "ALL"} as const;
@@ -96,7 +101,17 @@ function buildPermissionMatrix(): PermissionMatrix {
   return matrix;
 }
 
-export const PERMISSION_MATRIX = buildPermissionMatrix();
+function freezePermissionMatrix(matrix: MutablePermissionMatrix): PermissionMatrix {
+  for (const role of ROLES) {
+    for (const resource of AUTH_RESOURCES) {
+      Object.freeze(matrix[role][resource]);
+    }
+    Object.freeze(matrix[role]);
+  }
+  return Object.freeze(matrix);
+}
+
+export const PERMISSION_MATRIX = freezePermissionMatrix(buildPermissionMatrix());
 
 export function getPermissionRule(
   role: AuthRole,
