@@ -50,3 +50,6 @@ active_leases:
   - task: M1-REVIEW-GPT-PLATFORM-HARDENING
     owner: deepseek
     paths: ["coordination/reviews/M1-GPT-PLATFORM-HARDENING-deepseek.md"]
+  - task: M1-CLAUDE-HOMEPAGE-SHELL
+    owner: claude
+    paths: ["src/app/[locale]/page.tsx", "src/app/[locale]/(public)/page.tsx", "e2e/experience/homepage-shell.spec.ts"]
