@@ -1,13 +1,15 @@
 # M2 DeepSeek Security Test Design — Handoff
 
 ## Task ID
-M2-DEEPSEEK-SECURITY-TEST-DESIGN
+M2-DEEPSEEK-SECURITY-TEST-DESIGN-REVISION
 
-## Branch
+Parent task: `M2-DEEPSEEK-SECURITY-TEST-DESIGN`
+
+## Original Branch
 `ai/deepseek/m2-security-test-design`
 
 ## Base SHA
-`18a26dd` (integration/m2-security)
+`c8550d8` (`coordination/m2-revision-assignment`)
 
 ## Head SHA (original implementation)
 `d995fc4`
@@ -15,8 +17,10 @@ M2-DEEPSEEK-SECURITY-TEST-DESIGN
 ## Revision Branch
 `ai/deepseek/m2-security-test-design-revision`
 
-## Revision Head SHA
-`00476f0`
+## Revision implementation SHAs
+
+- `b4d536b` — applies the original GPT cross-lane corrections
+- `8bbfb77` — hardens PII validation and aligns nonce/outbox cases with frozen contracts
 
 ## Revision Summary
 
@@ -28,12 +32,12 @@ GPT cross-lane review (`coordination/reviews/M2-AUTH-SECURITY-CROSS-LANE-gpt.md`
 4. **Equal rate-limit** — M2-AUTH-006 now requires identical behaviour for existing, non-existing, and inactive accounts; M2-AUTH-007 references dummy bcrypt and statistical timing tolerance.
 5. **Outbox tampering corrected** — M2-OBX-002 tests encrypted payload tampering (decryption integrity failure), not key-change/unique-constraint collision.
 6. **PPKS detail access frozen** — M2-IDOR-003 outcome is deterministic 404 with zero bytes, denied-access audit entry; aggregate statistics via separate authorized query.
-7. **Ambiguous alternatives removed** — M2-ENC-004 expects explicit nonce-uniqueness rejection; all "X or Y" expected outcomes replaced with single deterministic result.
+7. **Ambiguous alternatives removed** — M2-ENC-004 now verifies server-owned `crypto.randomBytes(12)` nonce generation without inventing a global uniqueness index; all "X or Y" expected outcomes use one deterministic result.
 8. **Follow-ups remain M2** — no M3 references in test plan or handoff.
 
 ## Summary
 
-Created a typed, executable M2 security test plan with 32 test cases spanning all required areas. Two files added. Revision from GPT cross-lane review applied: added execution readiness state + validator, fixed rate-limit coverage, removed production FUSPI domain, corrected outbox and PPKS cases, eliminated ambiguous outcomes.
+Created a typed M2 security test-plan registry with 32 currently blocked cases spanning all required areas. Revision from GPT cross-lane review added execution readiness validation, fixed rate-limit coverage, replaced production-like fixture identity, corrected outbox and PPKS cases, and eliminated ambiguous outcomes.
 
 ### `tests/security/m2-threat-plan.ts`
 - `M2SecurityTestCase` interface with 12 fields including `executable: boolean`
@@ -43,16 +47,16 @@ Created a typed, executable M2 security test plan with 32 test cases spanning al
 - Export functions: getM2Plan, getM2ByArea, getM2BySeverity, getM2ByTestLevel, getM2ByDependsOn, countM2BySeverity, getM2Dependencies, validateM2Readiness
 
 ### `tests/security/m2-threat-plan.test.ts`
-- 25 meta-tests (was 20) including:
+- 26 meta-tests (was 20) including:
   - 4 new execution readiness validator tests
   - FUSPI production domain rejection test
-- Updated PII guard to reject `@fuspi.uinbanten.ac.id`
+- Updated PII guard to extract every email and allow only the exact reserved domain `example.invalid`; it separately rejects production FUSPI/FUDA domains, real-looking Indonesian phone numbers, and secret-like material
 
 ## Files Changed
 | File | Status | Notes |
 |---|---|---|
 | `tests/security/m2-threat-plan.ts` | Added (revised) | 32 cases, 8 exports, execution readiness |
-| `tests/security/m2-threat-plan.test.ts` | Added (revised) | 25 meta-tests, FUSPI domain guard |
+| `tests/security/m2-threat-plan.test.ts` | Added (revised) | 26 meta-tests, exact reserved-domain/PII guard |
 | `coordination/handoffs/M2-DEEPSEEK-SECURITY-TEST-DESIGN-deepseek.md` | Added (revised) | Revision details documented |
 
 ## Acceptance Commands Results
