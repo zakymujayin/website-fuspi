@@ -53,6 +53,6 @@ active_leases:
   - task: M2-CLAUDE-AUTH-UX-SPEC-REVISION
     owner: claude
     paths: ["coordination/reviews/M2-AUTH-UX-SPEC-claude.md", "coordination/handoffs/M2-CLAUDE-AUTH-UX-SPEC-claude.md"]
-  - task: M2-DEEPSEEK-SECURITY-TEST-DESIGN-REVISION
+  - task: M2-REVIEW-GPT-AUTH-CONTRACT
     owner: deepseek
-    paths: ["tests/security/m2-threat-plan.ts", "tests/security/m2-threat-plan.test.ts", "coordination/handoffs/M2-DEEPSEEK-SECURITY-TEST-DESIGN-deepseek.md"]
+    paths: ["coordination/reviews/M2-GPT-AUTH-CONTRACT-deepseek.md", "coordination/handoffs/M2-REVIEW-GPT-AUTH-CONTRACT-deepseek.md"]
