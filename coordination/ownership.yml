@@ -47,6 +47,6 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
-  - task: M1-GPT-PLATFORM-HARDENING
-    owner: gpt
-    paths: [".github/CODEOWNERS", "package.json", "prisma/seed.ts", "src/lib/db/config.ts", "tests/platform/**", "vitest.integration.config.ts"]
+  - task: M1-REVIEW-GPT-PLATFORM-HARDENING
+    owner: deepseek
+    paths: ["coordination/reviews/M1-GPT-PLATFORM-HARDENING-deepseek.md"]
