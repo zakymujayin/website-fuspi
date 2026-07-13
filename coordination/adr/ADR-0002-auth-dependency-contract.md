@@ -16,6 +16,8 @@ Pin, without ranges:
 
 - `next-auth@5.0.0-beta.31`
 - `@auth/prisma-adapter@2.11.2`
+- `bcryptjs@3.0.3` (pre-existing password primitive, now pinned because it directly
+  participates in credential verification and timing equalization)
 
 Registry metadata resolves both packages to `@auth/core@0.41.2`. `next-auth` declares compatibility with Next `^16.0.0` and React `^19.0.0`. Nodemailer and WebAuthn packages are optional peers; none are installed because this contract uses Credentials only and SMTP belongs to the transactional outbox workstream.
 
@@ -26,6 +28,8 @@ The selected Auth.js release remains beta. It is a candidate contract, not permi
 3. Revocation, user deactivation, password change, and role change invalidate sessions transactionally.
 4. Every secure loader/action/handler revalidates the database session and active user; Proxy is redirect UX only.
 5. Failed, inactive, unknown-email, and rate-limited authentication does not disclose account existence.
+6. Protected Server Actions/APIs return the generic typed `SESSION_INVALID` result without
+   exposing expiry/revocation reasons or technical errors.
 
 If Auth.js Credentials does not create the database session automatically, GPT must implement the documented custom create/revoke path and test it. Changing to JWT is prohibited.
 
