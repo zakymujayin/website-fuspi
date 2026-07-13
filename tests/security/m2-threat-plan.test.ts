@@ -13,8 +13,11 @@ import {
 } from "./m2-threat-plan";
 import type {M2SecurityTestCase} from "./m2-threat-plan";
 
-const REAL_PII_PATTERN =
-  /(?:[a-zA-Z0-9._%+-]+@(?!.*(invalid|example|test|synthetic|placeholder)).*|[0-9]{10,})/;
+const EMAIL_PATTERN = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/gu;
+const ALLOWED_TEST_EMAIL_DOMAINS = new Set(["example.invalid"]);
+const REAL_PHONE_PATTERN = /(?<!\d)(?:\+?62|0)(?:[\s.-]?\d){9,13}(?!\d)/u;
+const SECRET_MATERIAL_PATTERN =
+  /(?:-----BEGIN [A-Z ]*PRIVATE KEY-----|(?:api[_-]?key|secret|token)\s*[:=]\s*["']?[a-zA-Z0-9_./+=-]{16,})/iu;
 const FUDA_DOMAIN_PATTERN =
   /fuda\.uinbanten\.ac\.id/;
 const FUSPI_DOMAIN_PATTERN =
@@ -102,12 +105,23 @@ describe("M2 security test plan meta-validation", () => {
     }
   });
 
-  it("no case contains real PII (email outside test domains)", () => {
+  it("no case contains production PII or secret material", () => {
     for (const c of plan) {
       const full = JSON.stringify(c);
+      const emails = full.match(EMAIL_PATTERN) ?? [];
+      for (const email of emails) {
+        const domain = email.slice(email.lastIndexOf("@") + 1).toLowerCase();
+        expect(
+          ALLOWED_TEST_EMAIL_DOMAINS.has(domain),
+          `${c.id} contains non-reserved email domain in "${email}"`,
+        ).toBe(true);
+      }
+      expect(REAL_PHONE_PATTERN.test(full), `${c.id} contains real-looking phone data`).toBe(
+        false,
+      );
       expect(
-        REAL_PII_PATTERN.test(full),
-        `${c.id} contains real PII (email or phone-like data)`,
+        SECRET_MATERIAL_PATTERN.test(full),
+        `${c.id} contains secret-like material`,
       ).toBe(false);
     }
   });

@@ -419,14 +419,15 @@ const plan: M2SecurityTestCase[] = [
     severity: "high",
     actor: "Attacker (replay)",
     precondition:
-      "Two PPKS attachments exist. Encryption uses randomly generated nonces for each operation.",
+      "The encryption helper owns nonce generation and uses crypto.randomBytes(12) for every AES-256-GCM envelope.",
     attack:
-      "Attempt to re-encrypt different plaintext using a known nonce from a prior attachment. Verify the encryption layer rejects the operation before ciphertext is stored.",
+      "Attempt to provide a caller-controlled nonce through the encryption boundary, then encrypt two payloads with a deterministic RNG fixture that returns two distinct 12-byte nonce values.",
     invariant:
-      "Nonce must be randomly generated for each encryption operation. The encryption helper must assert nonce uniqueness at encryption time, rejecting duplicate nonces before persisting any ciphertext.",
+      "Callers cannot choose or reuse a nonce. The helper generates a fresh 12-byte nonce internally for each operation and stores it with the authenticated envelope. This test does not invent a global nonce-uniqueness index absent from the schema.",
     expectedOutcome:
-      "Nonce-reuse attempt is rejected at encryption time with a clear error. No duplicate-nonce ciphertext reaches the database.",
-    requiredFixture: "two plaintext payloads, encryption helper with nonce-uniqueness assertion",
+      "The public encryption boundary rejects a caller-supplied nonce. Two normal encryptions receive the two distinct fixture nonces, produce valid authenticated envelopes, and decrypt successfully.",
+    requiredFixture:
+      "two plaintext payloads, encryption helper, deterministic crypto.randomBytes fixture returning two distinct 12-byte values",
     dependsOn: "lib.ppks-encryption",
     testLevel: "unit",
     executable: false,
@@ -598,11 +599,11 @@ const plan: M2SecurityTestCase[] = [
     precondition:
       "A sensitive PPKS notification outbox row exists with an encrypted payload (payloadEncrypted=true) and a known idempotencyKey.",
     attack:
-      "Attacker modifies the payloadEncrypted column directly in the database — replacing the ciphertext with a tampered value — then the worker picks up the row for processing.",
+      "Attacker modifies payloadCiphertext or encryptionTag directly in the database, then the worker picks up the row for processing.",
     invariant:
       "Encrypted outbox payloads must include an authentication tag. Payload tampering must cause decryption to fail with an integrity error. The worker must not deliver garbled plaintext or expose decrypted fragments to SMTP. Idempotency with the same key is a separate property (see M2-OBX-001); this case validates payload integrity, not key collision.",
     expectedOutcome:
-      "Worker detects decryption failure, marks the row as FAILED with an integrity error reason. No email is sent. No plaintext data is written to logs or SMTP.",
+      "Worker detects authentication failure, marks the row FAILED with a sanitized generic integrity code, and sends no email. No ciphertext, tag, plaintext fragment, or technical crypto error is written to logs or SMTP.",
     requiredFixture: "sensitive outbox row with encryptedPayload, DB tampering harness",
     dependsOn: "lib.outbox",
     testLevel: "integration",
