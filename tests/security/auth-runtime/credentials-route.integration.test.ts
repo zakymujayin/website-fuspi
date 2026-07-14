@@ -2,8 +2,8 @@ import {hash} from "bcryptjs";
 import {afterAll, beforeAll, describe, expect, it} from "vitest";
 
 import {POST} from "@/app/api/auth/credentials/route";
+import {getAuthSecrets, SESSION_MAX_AGE_SECONDS} from "@/lib/auth/runtime/config";
 import {createLoginRateLimitKey} from "@/lib/auth/runtime/rate-limit";
-import {SESSION_MAX_AGE_SECONDS} from "@/lib/auth/runtime/config";
 import {createPrismaClient} from "@/lib/db/client";
 
 const runDatabaseTests = process.env.RUN_PLATFORM_DB_TESTS === "true";
@@ -11,10 +11,10 @@ const suite = runDatabaseTests ? describe : describe.skip;
 
 suite("M2 credentials route adversarial (MariaDB)", () => {
   const marker = `m2-route-${Date.now()}`;
-  const emailSecret = "e".repeat(32);
-  const ipSecret = "i".repeat(32);
   const oldPassword = "Synthetic-Route-Pass-12";
-  const configuredOrigin = process.env.AUTH_URL ?? "http://localhost:3000";
+  const configuredOrigin = new URL(
+    process.env.AUTH_URL ?? "http://localhost:3000",
+  ).origin;
   let prisma: ReturnType<typeof createPrismaClient>;
   let activeUserId: string;
   let activeEmail: string;
@@ -36,9 +36,15 @@ suite("M2 credentials route adversarial (MariaDB)", () => {
   });
 
   afterAll(async () => {
+    const {emailHmacSecret, ipHmacSecret} = getAuthSecrets();
     const rateLimitKeys = ["192.0.2.70", "192.0.2.71", "192.0.2.72"].map(
       (ip) =>
-        createLoginRateLimitKey(activeEmail, ip, emailSecret, ipSecret)
+        createLoginRateLimitKey(
+          activeEmail,
+          ip,
+          emailHmacSecret,
+          ipHmacSecret,
+        )
           .keyHash,
     );
     await prisma.rateLimitBucket.deleteMany({
@@ -50,7 +56,17 @@ suite("M2 credentials route adversarial (MariaDB)", () => {
   });
 
   it("hostile-origin request returns 403 and creates no session or rate-limit mutation", async () => {
+    const {emailHmacSecret, ipHmacSecret} = getAuthSecrets();
+    const hostileKey = createLoginRateLimitKey(
+      activeEmail,
+      "192.0.2.70",
+      emailHmacSecret,
+      ipHmacSecret,
+    );
     const beforeSessions = await prisma.session.count({where: {userId: activeUserId}});
+    const beforeBuckets = await prisma.rateLimitBucket.count({
+      where: {keyHash: hostileKey.keyHash, scope: hostileKey.scope},
+    });
     const req = new Request(
       `${configuredOrigin}/api/auth/credentials`,
       {
@@ -74,6 +90,10 @@ suite("M2 credentials route adversarial (MariaDB)", () => {
 
     const afterSessions = await prisma.session.count({where: {userId: activeUserId}});
     expect(afterSessions).toBe(beforeSessions);
+    const afterBuckets = await prisma.rateLimitBucket.count({
+      where: {keyHash: hostileKey.keyHash, scope: hostileKey.scope},
+    });
+    expect(afterBuckets).toBe(beforeBuckets);
   });
 
   it("successful login returns 200, cookie, and expected JSON shape", async () => {
@@ -116,6 +136,7 @@ suite("M2 credentials route adversarial (MariaDB)", () => {
     const cookie = cookieHeader[0];
     expect(cookie).toContain("authjs.session-token=");
     expect(cookie.toLowerCase()).toContain("httponly");
+    expect(cookie.toLowerCase()).toContain("samesite=lax");
     expect(cookie.toLowerCase()).toContain("path=/");
     expect(cookie).toContain(`Max-Age=${SESSION_MAX_AGE_SECONDS}`);
     expect(cookie).not.toContain("password");
@@ -128,7 +149,7 @@ suite("M2 credentials route adversarial (MariaDB)", () => {
     expect(stored).toBeDefined();
     if (stored) {
       const ttl = stored.expires.getTime() - Date.now();
-      expect(ttl).toBeGreaterThan(0);
+      expect(ttl).toBeGreaterThan(SESSION_MAX_AGE_SECONDS * 1_000 - 5_000);
       expect(ttl).toBeLessThan(SESSION_MAX_AGE_SECONDS * 1_000 + 5_000);
     }
   });
