@@ -5,6 +5,23 @@
     "languageLabel": "Pilih bahasa",
     "status": "Locale Indonesia aktif (LTR)."
   },
+  "Auth": {
+    "metaTitle": "Masuk",
+    "title": "Masuk ke panel pengelola {faculty}",
+    "subtitle": "Halaman ini hanya untuk pengelola internal. Tidak ada pendaftaran publik.",
+    "emailLabel": "Email",
+    "passwordLabel": "Kata sandi",
+    "showPassword": "Tampilkan kata sandi",
+    "hidePassword": "Sembunyikan kata sandi",
+    "submit": "Masuk",
+    "submitting": "Memverifikasi…",
+    "submittingStatus": "Memverifikasi kredensial",
+    "error": {
+      "INVALID_CREDENTIALS": "Email atau kata sandi salah. Periksa kembali dan coba lagi.",
+      "TRY_AGAIN_LATER": "Terlalu banyak percobaan masuk. Coba lagi dalam beberapa menit.",
+      "AUTH_UNAVAILABLE": "Layanan masuk sedang tidak tersedia. Coba lagi beberapa saat lagi."
+    }
+  },
   "Nav": {
     "skipToContent": "Lompat ke konten utama",
     "menu": "Menu",
