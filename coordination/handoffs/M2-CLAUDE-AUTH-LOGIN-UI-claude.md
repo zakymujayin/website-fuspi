@@ -1,10 +1,12 @@
 # Handoff — M2-CLAUDE-AUTH-LOGIN-UI — claude
 
-- Branch: `ai/claude/m2-auth-login-ui`
-- Base: `origin/coordination/m2-claude-auth-login-ui-assignment` (`18cd0cd`)
+- Branch: `ai/claude/m2-auth-login-ui-correction`
+- Base: `origin/coordination/m2-claude-auth-login-ui-correction-assignment` (`bd7c8b4`)
 - Manifest base_sha: `dc68138`
 - Implementation SHA: `ac44363` (`feat(auth): implement localized login UI`)
-- Merge status: **not merged**. Password change, session guard, admin shell, proxy authorization, and M3 were not touched.
+- Correction SHA: `9aeed3f` (`fix(auth): preserve login state across locale switch`)
+- Review answered: `coordination/reviews/M2-CLAUDE-AUTH-LOGIN-UI-gpt.md` (REQUEST_CHANGES, one correction pass)
+- Merge status: **not merged**. Password change, session guard, admin shell, proxy authorization, runtime, and M3 were not touched.
 
 ## Result
 
@@ -35,15 +37,54 @@ Behaviour, mapped to the reviewed UX specification (`coordination/reviews/M2-AUT
 6. **i18n / RTL.** ID, EN, AR copy added. Arabic is RTL end-to-end; email and password values
    stay `dir="ltr"` so `@` and dots do not mirror. Logical direction utilities only.
 
-## Files changed (12, all inside the lease)
+## Correction pass (answers `M2-CLAUDE-AUTH-LOGIN-UI-gpt.md`)
 
-- `src/app/[locale]/(auth)/layout.tsx` — auth shell: fonts, skip link, single `<main>`, language switcher (no public nav/search)
+**Blocking finding — locale switching destroyed credentials and the destination.** Confirmed
+and fixed. The auth shell had reused the public `LanguageSwitcher`, which preserves only
+`usePathname()`: it dropped the query string, so `?next=` vanished, and the navigation
+remounted the form, so both fields emptied.
+
+- `src/components/auth/auth-language-switcher.tsx` (new) — auth-owned switcher. Keeps the query
+  string on the link (`next` rides along in the URL untouched, exactly as before — it is not a
+  credential), intercepts the click, snapshots the form, then navigates.
+- `src/components/auth/auth-draft.tsx` (new) — single-use, module-scoped in-memory draft plus
+  the provider that lets the switcher read the live form. Credentials go **nowhere else**: not
+  the URL, history state, cookies, `localStorage`/`sessionStorage`, RSC payload, log, or
+  analytics.
+- Lifecycle: the destination form initialises from the draft, then erases it in a mount effect
+  (single-use). It is also erased on submit and on leaving the auth flow. A `handoffPending`
+  flag keeps the shell's own teardown from erasing the draft *while the locale navigation is
+  in flight* — without it the draft died between the two shells, which the first test run
+  caught.
+- Regression coverage in `e2e/auth/login.spec.ts`: values and `next` survive the switch;
+  credentials appear in no script/RSC payload, history state, storage, cookie, URL, or body
+  text; a fresh `/login` visit starts empty; a submit discards the draft.
+
+**Required small corrections** — all applied: `spellCheck={false}` on email; `data-icon` on the
+toggle icons inside `Button`; a visible focus ring on the error region (bound to `:focus`, not
+`:focus-visible`, because the region is focused programmatically and `:focus-visible` is not
+reliably applied then); and the file count below, which said 12 where the scope checker
+reported 13.
+
+One consequence worth naming: `useSearchParams()` in the shared shell forced
+`/[locale]/login` to bail out of prerendering. It is wrapped in `<Suspense>` with a
+height-holding fallback, which is the sanctioned fix; the route was already dynamic because
+the page reads `searchParams`.
+
+## Files changed (13 in the original pass, all inside the lease)
+
+- `src/app/[locale]/(auth)/layout.tsx` — auth shell: fonts, skip link, single `<main>`, auth language switcher (no public nav/search)
 - `src/app/[locale]/(auth)/login/page.tsx` — Server Component page, FUSPI identity from `src/config/institution.ts`, `robots: noindex`
 - `src/components/auth/login-form.tsx` — Client Component: submission, failure states, focus management
 - `src/components/auth/password-field.tsx` — password input + show/hide toggle (`aria-pressed`, changing label)
 - `src/components/ui/{card,field,input,spinner}.tsx` — leased shadcn primitives
 - `messages/{id,en,ar}.json` — `Auth` namespace
-- `e2e/auth/login.spec.ts` — 19 tests × 2 projects
+- `e2e/auth/login.spec.ts` — Playwright coverage
+- `coordination/handoffs/M2-CLAUDE-AUTH-LOGIN-UI-claude.md` — this handoff (the 13th file the scope checker counts)
+
+The correction pass adds `src/components/auth/auth-draft.tsx` and
+`src/components/auth/auth-language-switcher.tsx` and touches the shell, the form, the password
+field, and the e2e spec.
 
 No change to `package.json`, `package-lock.json`, `prisma/**`, `src/auth.ts`, `src/lib/**`,
 `src/contracts/**`, `src/proxy.ts`, `src/config/**`, `src/app/api/**`, `globals.css`, or
@@ -62,9 +103,9 @@ neither.
 | `npm run typecheck` | pass — no errors |
 | `npm test` | pass — 133 passed, 8 skipped (13 files) |
 | `npm run build` | pass — no errors, no warnings; `/[locale]/login` is dynamic (reads `searchParams`) |
-| `npx playwright test e2e/auth/login.spec.ts` | pass — 38/38 (19 tests × chromium + mobile) |
+| `npx playwright test e2e/auth/login.spec.ts` | pass — 46/46 (23 tests × chromium + mobile) |
 | `git diff --check` | pass |
-| `TASK_MANIFEST=… TASK_BASE=origin/coordination/m2-claude-auth-login-ui-assignment npm run check:scope` | pass — `12 changed file(s) are within lease` |
+| `TASK_MANIFEST=… TASK_BASE=origin/coordination/m2-claude-auth-login-ui-correction-assignment npm run check:scope` | pass — all changed files within lease |
 
 `npm ci` was required first: `next-auth` and `@auth/prisma-adapter` were in the lockfile but
 absent from this worktree's `node_modules`, so typecheck failed on GPT's runtime files before
@@ -106,12 +147,14 @@ forbidden to this lane, so the accessibility assertions in `e2e/auth/login.spec.
 structural (labels, roles, focus order, `aria-pressed`, `aria-disabled`, no horizontal
 overflow) rather than axe-driven. Adding the package is a GPT-owned contract change.
 
-## Arabic copy — merge blocker
+## Arabic copy — draft, blocks production not integration
 
 **The Arabic copy in `messages/ar.json` (`Auth` namespace) is an unreviewed draft.** It exists
-so RTL can be exercised in this task. It has **not** been validated by a native speaker and
-**must not be treated as approved**. Native-speaker review is a **merge blocker** for this
-branch (per the manifest's Arabic copy gate and §14 of the UX specification).
+so RTL can be exercised, and it has **not** been validated by a native speaker.
+
+Per the reviewer's ruling, it **may remain explicitly marked draft on the development
+integration branch**, so this task does not loop. Native-speaker review is required **before a
+production release**, and until then the copy must not be described as approved.
 
 ## Untested areas and risks
 
@@ -126,11 +169,16 @@ branch (per the manifest's Arabic copy gate and §14 of the UX specification).
   banner driven by an unvalidated query parameter is a phishing surface, so I did not add a
   `?reason=` flag. This stays for the session-guard task (M2).
 - **Caps Lock hint (§1) not implemented** — optional in the spec, deferred.
+- **The locale hand-off needs JavaScript.** Without it the switcher is still a working link, but
+  nothing can carry browser-only state across a document load. This is inherent, not a defect.
 
 ## Follow-ups (all M2)
 
-1. Native-speaker review of the Arabic `Auth` copy — **blocks merge**. — *Claude / reviewer*
-2. Decide deviation 5 (locale-aware redirect fallback: client-supplied vs runtime). — *GPT*
+1. Native-speaker review of the Arabic `Auth` copy — **blocks production, not development
+   integration**. — *Claude / reviewer*
+2. Decide deviation 5 (locale-aware redirect fallback: client-supplied vs runtime). The reviewer
+   assigned locale-normalizing a validated stored redirect to the next GPT-owned auth bridge
+   contract; until then this UI keeps navigating only to the server-returned destination. — *GPT*
 3. Lease `ui/label.tsx` + `ui/separator.tsx` and restore the registry's `field.tsx` imports. — *GPT*
 4. `@axe-core/playwright` dependency so the axe acceptance criteria become executable. — *GPT*
 5. Session-expired / revoked banner on the login screen, once the session guard exists. — *GPT / Claude*
