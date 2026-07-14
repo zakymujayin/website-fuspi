@@ -71,7 +71,7 @@ acceptance_commands:
   - npm run build
   - npm run test:e2e
   - git diff --check
-  - TASK_MANIFEST=coordination/tasks/M2-GPT-POSTGRESQL-PLATFORM-MIGRATION.md TASK_BASE=d2fb5c5 npm run check:scope
+  - TASK_MANIFEST=coordination/tasks/M2-GPT-POSTGRESQL-PLATFORM-MIGRATION.md TASK_BASE=coordination/m2-postgresql-platform-migration npm run check:scope
 token_class: L
 status: active
 ---
@@ -95,4 +95,3 @@ documented PostgreSQL-on-VPS contract without changing auth behavior or feature 
 
 Create `coordination/handoffs/M2-GPT-POSTGRESQL-PLATFORM-MIGRATION-gpt.md` with the exact
 database version, migration/seed evidence, commands, files, risks, and head SHA.
-
