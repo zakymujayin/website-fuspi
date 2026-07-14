@@ -47,12 +47,6 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
-  - task: M2-GPT-AUTH-CONTRACT
+  - task: M2-GPT-AUTH-RUNTIME
     owner: gpt
-    paths: ["package.json", "package-lock.json", ".env.example", "src/contracts/auth.ts", "src/lib/auth/permission-matrix.ts", "tests/platform/auth-contracts/**", "coordination/adr/ADR-0002-auth-dependency-contract.md"]
-  - task: M2-CLAUDE-AUTH-UX-SPEC-REVISION
-    owner: claude
-    paths: ["coordination/reviews/M2-AUTH-UX-SPEC-claude.md", "coordination/handoffs/M2-CLAUDE-AUTH-UX-SPEC-claude.md"]
-  - task: M2-REVIEW-GPT-AUTH-CONTRACT
-    owner: deepseek
-    paths: ["coordination/reviews/M2-GPT-AUTH-CONTRACT-deepseek.md", "coordination/handoffs/M2-REVIEW-GPT-AUTH-CONTRACT-deepseek.md"]
+    paths: ["src/auth.ts", "src/app/api/auth/**", "src/lib/auth/runtime/**", "src/lib/security/hmac.ts", "src/types/next-auth.d.ts", "tests/platform/auth-runtime/**", "coordination/handoffs/M2-GPT-AUTH-RUNTIME-gpt.md"]
