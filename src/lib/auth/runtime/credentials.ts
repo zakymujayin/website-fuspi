@@ -1,10 +1,7 @@
 import {compare} from "bcryptjs";
 
-import {
-  LoginCredentialsSchema,
-  SafeInternalPathSchema,
-  type LoginResult,
-} from "@/contracts/auth";
+import {LoginCredentialsSchema, type LoginResult} from "@/contracts/auth";
+import type {AppLocale} from "@/i18n/routing";
 import {DUMMY_BCRYPT_HASH, getAuthSecrets} from "@/lib/auth/runtime/config";
 import {
   clearLoginRateLimit,
@@ -14,6 +11,7 @@ import {
   registerFailedLoginAttempt,
 } from "@/lib/auth/runtime/rate-limit";
 import type {createPrismaClient} from "@/lib/db/client";
+import {normalizeAuthRedirect} from "@/lib/auth/runtime/redirect";
 
 type PrismaClient = ReturnType<typeof createPrismaClient>;
 type CredentialUser = Readonly<{
@@ -42,6 +40,7 @@ export type AuthenticateCredentialsOptions = Readonly<{
   rawCredentials: unknown;
   clientIp: string;
   redirectTo?: string;
+  locale?: AppLocale;
   now?: Date;
   emailHmacSecret?: string;
   ipHmacSecret?: string;
@@ -55,8 +54,10 @@ export async function authenticateCredentials(
   const parsed = LoginCredentialsSchema.safeParse(options.rawCredentials);
   if (!parsed.success) return {ok: false, code: "INVALID_CREDENTIALS"};
 
-  const redirect = SafeInternalPathSchema.safeParse(options.redirectTo ?? "/id/admin");
-  const redirectTo = redirect.success ? redirect.data : "/id/admin";
+  const redirectTo = normalizeAuthRedirect(
+    options.redirectTo,
+    options.locale ?? "id",
+  );
   const now = options.now ?? new Date();
 
   try {

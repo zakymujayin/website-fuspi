@@ -52,6 +52,38 @@ export const SessionInvalidResultSchema = z
   })
   .strict();
 
+export const PasswordChangeFailureCodeSchema = z.enum([
+  "SESSION_INVALID",
+  "INVALID_CREDENTIALS",
+  "PASSWORD_POLICY",
+  "AUTH_UNAVAILABLE",
+]);
+
+export const PasswordChangeResultSchema = z.discriminatedUnion("ok", [
+  z
+    .object({
+      ok: z.literal(true),
+      redirectTo: SafeInternalPathSchema,
+    })
+    .strict(),
+  z
+    .object({
+      ok: z.literal(false),
+      code: PasswordChangeFailureCodeSchema,
+    })
+    .strict(),
+]);
+
+export const ProtectedRouteDecisionSchema = z.discriminatedUnion("allow", [
+  z.object({allow: z.literal(true)}).strict(),
+  z
+    .object({
+      allow: z.literal(false),
+      redirectTo: SafeInternalPathSchema,
+    })
+    .strict(),
+]);
+
 export const PasswordChangeInputSchema = z
   .object({
     currentPassword: z.string().min(1).max(128),
@@ -104,6 +136,8 @@ export type AuthRole = z.infer<typeof AuthRoleSchema>;
 export type LoginCredentials = z.infer<typeof LoginCredentialsSchema>;
 export type LoginResult = z.infer<typeof LoginResultSchema>;
 export type SessionInvalidResult = z.infer<typeof SessionInvalidResultSchema>;
+export type PasswordChangeResult = z.infer<typeof PasswordChangeResultSchema>;
+export type ProtectedRouteDecision = z.infer<typeof ProtectedRouteDecisionSchema>;
 export type PasswordChangeInput = z.infer<typeof PasswordChangeInputSchema>;
 export type ActiveDatabaseSession = z.infer<typeof ActiveDatabaseSessionSchema>;
 export type AuthorizationContext = z.infer<typeof AuthorizationContextSchema>;
