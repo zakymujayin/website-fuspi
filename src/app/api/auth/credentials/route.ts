@@ -7,6 +7,7 @@ import {
 } from "@/lib/auth/runtime/session";
 import type {SessionCookieDefinition} from "@/lib/auth/runtime/cookie";
 import {getPrismaClient} from "@/lib/db/client";
+import {resolveAuthLocale} from "@/lib/auth/runtime/redirect";
 
 function getClientIp(headers: Headers) {
   const forwarded = headers.get("x-forwarded-for")?.split(",")[0]?.trim();
@@ -34,11 +35,14 @@ export async function POST(request: Request) {
 
   const prisma = getPrismaClient();
   let issuedCookie: SessionCookieDefinition | undefined;
+  const requestUrl = new URL(request.url);
+  const redirectTo = requestUrl.searchParams.get("redirectTo") ?? undefined;
   const result = await authenticateCredentials({
     prisma,
     rawCredentials,
     clientIp: getClientIp(request.headers),
-    redirectTo: new URL(request.url).searchParams.get("redirectTo") ?? undefined,
+    redirectTo,
+    locale: resolveAuthLocale(requestUrl.searchParams.get("locale"), redirectTo),
     async issueSession(userId) {
       const issued = await createDatabaseSession(prisma, userId);
       issuedCookie = issued.cookie;
