@@ -5,6 +5,23 @@
     "languageLabel": "Choose a language",
     "status": "English locale is active (LTR)."
   },
+  "Auth": {
+    "metaTitle": "Sign in",
+    "title": "Sign in to the {faculty} admin panel",
+    "subtitle": "This page is for internal staff only. There is no public registration.",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "submit": "Sign in",
+    "submitting": "Verifying…",
+    "submittingStatus": "Verifying credentials",
+    "error": {
+      "INVALID_CREDENTIALS": "Incorrect email or password. Check your details and try again.",
+      "TRY_AGAIN_LATER": "Too many sign-in attempts. Try again in a few minutes.",
+      "AUTH_UNAVAILABLE": "The sign-in service is unavailable right now. Please try again shortly."
+    }
+  },
   "Nav": {
     "skipToContent": "Skip to main content",
     "menu": "Menu",
