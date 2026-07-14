@@ -47,6 +47,9 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
+  - task: M2-GPT-POSTGRESQL-PLATFORM-MIGRATION
+    owner: gpt
+    paths: ["package.json", "package-lock.json", "prisma/**", "src/lib/db/**", ".env.example", ".github/workflows/ci.yml", "README.md", "docs/{README,01-arsitektur,02-database-schema,07-upload-media-hostinger,08-deploy-hostinger,09-fitur-cms-editor,13-celah-fitur-keamanan-operasional,20-test-acceptance-go-live,24-implementation-plan-multi-model,25-m0-foundation-capability}.md", "coordination/adr/ADR-0003-postgresql-vps-platform.md", "coordination/milestones/{M1-CODE-COMPLETE,M2-EXIT-GATE-AND-M3-ENTRY}.md", "tests/**db*.test.ts", "tests/**/**.integration.test.ts", "coordination/handoffs/M2-GPT-POSTGRESQL-PLATFORM-MIGRATION-gpt.md"]
   - task: M2-CLAUDE-PASSWORD-SESSION-UI
     owner: claude
     paths: ["src/app/[locale]/(auth)/**", "src/app/[locale]/admin/**", "src/components/auth/**", "src/components/ui/field.tsx", "src/components/ui/label.tsx", "src/components/ui/separator.tsx", "messages/id.json", "messages/en.json", "messages/ar.json", "e2e/auth/password-session.spec.ts", "coordination/handoffs/M2-CLAUDE-PASSWORD-SESSION-UI-claude.md"]
