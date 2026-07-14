@@ -4,7 +4,7 @@ milestone: M2
 owner: deepseek
 reviewer: gpt
 tester: deepseek
-base_sha: d61ea00
+base_sha: a50fc78
 allowed_paths:
   - "tests/security/auth-runtime/**"
   - "coordination/reviews/M2-GPT-AUTH-RUNTIME-deepseek.md"
@@ -46,10 +46,10 @@ acceptance_commands:
   - npm run build
   - npm audit --audit-level=high
   - git diff --check
-  - TASK_MANIFEST=coordination/tasks/M2-DEEPSEEK-AUTH-RUNTIME-REVIEW.md TASK_BASE=origin/coordination/m2-auth-runtime-review-assignment npm run check:scope
+  - TASK_MANIFEST=coordination/tasks/M2-DEEPSEEK-AUTH-RUNTIME-REVIEW.md TASK_BASE=origin/coordination/m2-auth-runtime-review-correction-assignment npm run check:scope
 risk: critical
 token_class: L
-status: assigned
+status: revision_required
 ---
 
 # M2 DeepSeek Independent Auth Runtime Review
@@ -97,3 +97,30 @@ UI, start other shared-security work, or begin M3.
   untested browser behavior, and a complete handoff.
 
 Commit, push the DeepSeek review branch, and stop. Do not merge or begin Claude/M3 work.
+
+## Integrator correction gate
+
+The first review at `a50fc78` is not mergeable. Read
+`coordination/reviews/M2-DEEPSEEK-AUTH-RUNTIME-REVIEW-gpt.md` and correct only the leased
+review, handoff, and adversarial-test paths. Do not change GPT-owned runtime source.
+
+Required corrections:
+
+1. Make every MariaDB test independent of execution order. Use a unique rate-limit key per
+   scenario and future-relative session expiries; fixed historical timestamps may be used
+   for rate-limit windows only when the matching state is isolated.
+2. Run the database gate with the project MariaDB environment. The correction is not
+   acceptable when all integration tests are skipped.
+3. Exercise `POST /api/auth/credentials` itself against MariaDB for same-origin success and
+   representative failure responses. Assert status, bounded JSON keys, safe redirect,
+   opaque database row, eight-hour expiry, cookie name/flags, `Cache-Control`, and absence
+   of PII, hashes, tokens, and raw errors. Prove a hostile-origin request creates neither a
+   session nor a rate-limit mutation.
+4. Keep the writer tests as referenced evidence, but accurately identify what the
+   independent tests do and do not cover. Do not claim browser or timing-distribution
+   verification that was not executed.
+5. Add and pass the normalized default-port case (`https://host:443` versus
+   `https://host`). Remove L1 because the WHATWG URL parser normalizes the default port.
+6. Correct HMAC terminology and replace all stale command counts/results with exact output
+   from the correction SHA. The review verdict can remain `APPROVE` only after every
+   acceptance command passes, including non-skipped MariaDB tests.
