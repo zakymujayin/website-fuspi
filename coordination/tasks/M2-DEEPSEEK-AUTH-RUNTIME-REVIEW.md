@@ -49,7 +49,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-DEEPSEEK-AUTH-RUNTIME-REVIEW.md TASK_BASE=origin/coordination/m2-auth-runtime-review-correction-assignment npm run check:scope
 risk: critical
 token_class: L
-status: revision_required
+status: merged
 ---
 
 # M2 DeepSeek Independent Auth Runtime Review

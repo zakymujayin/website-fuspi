@@ -59,7 +59,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-CLAUDE-AUTH-LOGIN-UI.md TASK_BASE=origin/coordination/m2-claude-auth-login-ui-correction-assignment npm run check:scope
 risk: high
 token_class: M
-status: revision_required
+status: merged
 ---
 
 # M2 Claude Auth Login UI

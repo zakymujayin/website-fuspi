@@ -55,7 +55,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-GPT-AUTH-RUNTIME.md TASK_BASE=origin/integration/m2-security npm run check:scope
 risk: critical
 token_class: L
-status: assigned
+status: merged
 ---
 
 # M2 GPT Auth Runtime
