@@ -11,6 +11,28 @@ permissions:
 jobs:
   quick:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: fuspi
+          POSTGRES_PASSWORD: fuspi
+          POSTGRES_DB: fuspi_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U fuspi -d fuspi_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://fuspi:fuspi@127.0.0.1:5432/fuspi_test?connection_limit=10
+      SEED_ADMIN_EMAIL: ci-admin@example.invalid
+      SEED_ADMIN_PASSWORD: ci-only-password-change-me
+      AUTH_URL: http://localhost:3004
+      AUTH_SECRET: ci-only-auth-secret-at-least-32-bytes
+      TOKEN_HMAC_SECRET: ci-only-token-secret-at-least-32-bytes
+      IP_HASH_SECRET: ci-only-ip-secret-at-least-32-bytes
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,9 +45,9 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run prisma:validate
-        env:
-          DATABASE_URL: mysql://fuspi:fuspi@127.0.0.1:3306/fuspi_test
+      - run: npx prisma migrate deploy
+      - run: npm run prisma:seed
+      - run: npm run prisma:seed
       - run: npm run test
+      - run: npm run test:integration
       - run: npm run build
-        env:
-          DATABASE_URL: mysql://fuspi:fuspi@127.0.0.1:3306/fuspi_test

@@ -22,10 +22,10 @@ Tidak ada transformasi skema yang diserahkan kepada implementer: skema di `02` a
 
 - Auth: Auth.js Credentials dengan **database session** 8 jam; tidak ada fallback JWT.
 - Publikasi: EDITOR boleh menerbitkan dan menjadwalkan Post miliknya sendiri.
-- Email: SMTP Hostinger melalui transactional outbox; kegagalan email tidak membatalkan transaksi bisnis.
+- Email: SMTP transaksional melalui outbox; kegagalan email tidak membatalkan transaksi bisnis.
 - Migrasi: seluruh konten WordPress lama, media, dan redirect 301 adalah workstream wajib sebelum go-live.
 - Pengaduan anonim: token pelacakan hanya disimpan sebagai hash; token asli ditampilkan/dikirim sekali.
-- PPKS: isi dan lampiran terenkripsi, storage di luar `public_html`, serta hanya dapat dibuka SATGAS_PPKS.
+- PPKS: isi dan lampiran terenkripsi, storage di luar document root, serta hanya dapat dibuka SATGAS_PPKS.
 - Retensi PPKS: tidak ada penghapusan otomatis sampai kebijakan tertulis Satgas ditetapkan.
 
 ---
@@ -37,7 +37,7 @@ Membangun website resmi FUSPI sebagai aplikasi Next.js dengan panel admin (CMS) 
 **Tujuan utama:**
 
 1. Konten dikelola sendiri oleh admin/editor fakultas tanpa menyentuh kode.
-2. Berjalan penuh di **Hostinger Business** (Node.js + MariaDB native + storage lokal), tanpa layanan eksternal.
+2. Berjalan pada **VPS** dengan Node.js, PostgreSQL, reverse proxy, dan storage persisten yang dikelola sendiri.
 3. Tampilan publik dan panel admin yang rapi, konsisten, dan intentional — bukan template generik.
 
 ## Tech stack (final, tidak dinegosiasikan ulang)
@@ -46,15 +46,15 @@ Membangun website resmi FUSPI sebagai aplikasi Next.js dengan panel admin (CMS) 
 |---|---|
 | Framework | **Next.js 16** (App Router) + TypeScript + React 19.2 |
 | Runtime | **Node.js 20.9+ (disarankan Node 22 LTS)** — wajib untuk Next 16 |
-| ORM & Database | Prisma + **MariaDB** (native Hostinger) |
+| ORM & Database | Prisma + **PostgreSQL 17+** |
 | Autentikasi | Auth.js v5 (NextAuth) — Credentials + session database |
 | Styling | Tailwind CSS + shadcn/ui |
 | Rich text editor | Tiptap |
 | Validasi | Zod |
 | Ikon | lucide-react |
 | Tabel data admin | TanStack Table |
-| Upload | Native ke direktori persisten Hostinger (lihat `07`) |
-| Deploy | GitHub → Hostinger Business (Node.js Web Apps) |
+| Upload | Native ke direktori persisten VPS di luar build (lihat `07`) |
+| Deploy | GitHub Actions → VPS, systemd/container + reverse proxy |
 
 ## Bahasa & arah teks
 
@@ -74,13 +74,13 @@ Website **wajib 3 bahasa**: **Indonesia** (default), **English**, dan **Arabic**
 | File | Isi |
 |---|---|
 | `01-arsitektur.md` | Struktur folder, konvensi kode, environment variables |
-| `02-database-schema.md` | Skema Prisma lengkap (MariaDB) + penjelasan tiap model |
+| `02-database-schema.md` | Skema Prisma lengkap (PostgreSQL) + penjelasan tiap model |
 | `03-design-system.md` | Design tokens (#4169E1), tipografi, komponen — panduan anti-slop |
 | `04-panel-admin.md` | Spesifikasi tiap halaman admin & alur CRUD |
 | `05-halaman-publik.md` | Peta situs, template halaman, section beranda |
 | `06-autentikasi-role.md` | Setup Auth.js v5, RBAC, middleware proteksi |
-| `07-upload-media-hostinger.md` | Mekanisme upload di storage native Hostinger |
-| `08-deploy-hostinger.md` | Panduan deploy langkah demi langkah di Business plan |
+| `07-upload-media-hostinger.md` | Mekanisme upload di storage persisten VPS; nama file dipertahankan agar tautan lama tidak putus |
+| `08-deploy-hostinger.md` | Panduan deploy VPS + PostgreSQL; nama file dipertahankan agar tautan lama tidak putus |
 | `09-fitur-cms-editor.md` | Editor (gambar+posisi, tabel, embed), import massal, section beranda tambahan |
 | `10-menu-branding-referensi.md` | Menu builder drag & drop, branding/logo, peran kepemilikan, referensi desain |
 | `11-dosen-arsip-pdf-album.md` | Direktori dosen (gaya Zaytuna), arsip berita, render PDF inline, album foto |
@@ -97,12 +97,12 @@ Website **wajib 3 bahasa**: **Indonesia** (default), **English**, dan **Arabic**
 | `22-calon-mahasiswa-akademik-discoverability.md` | **Pengalaman akademik** — hub calon mahasiswa, direktori, katalog kurikulum, profil riset, structured data, CWV |
 | `23-integrasi-sila-e-layanan.md` | **Batas & roadmap SILA** — deep link v1, API read-only fase 2, SSO fase 3 tanpa duplikasi data |
 | `24-implementation-plan-multi-model.md` | **Rencana implementasi tiga model** — worktree, ownership, merge queue, model/cost per tahap, CI dan recovery |
-| `25-m0-foundation-capability.md` | **Rekaman M0** — baseline platform, gate lokal, advisory, dan capability Hostinger yang masih perlu bukti |
+| `25-m0-foundation-capability.md` | **Rekaman M0** — baseline lama dan capability VPS/PostgreSQL yang perlu dibuktikan |
 
 ## Urutan pengerjaan yang disarankan
 
 1. Setup proyek + **next-intl + routing `[locale]`** (`01`, `12`) — **sejak awal**
-2. Prisma + MariaDB + **tabel terjemahan** (`02`, `12`)
+2. Prisma + PostgreSQL + **tabel terjemahan** (`02`, `12`)
 3. Design system + **logical properties & font Arab** (`03`, `12`) — **sejak awal**
 4. Autentikasi + proteksi rute admin (`06`)
 5. Panel admin per modul + **tab bahasa** (`04`, `12`)

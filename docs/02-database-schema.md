@@ -1,21 +1,21 @@
-# 02 — Skema Database (Prisma + MariaDB)
+# 02 — Skema Database (Prisma + PostgreSQL)
 
 > **⚠️ KONTRAK FINAL:** dokumen ini wajib dibaca sampai bagian **“Kontrak skema final v1”**. Blok inventaris awal mempertahankan nama model agar mudah ditelusuri; kontrak final di bawah bersifat normatif dan menimpa field lama yang dipindah ke translation, token mentah, serta model yang diperluas dokumen 12–18. Tidak boleh ada keputusan skema yang diserahkan kepada implementer.
 
 Dokumen ini adalah sumber kebenaran struktur data. Sebelum migrasi pertama, hasil `prisma/schema.prisma` harus direview terhadap checklist kontrak final dan lulus `npx prisma validate`; jangan menjalankan skema inventaris awal tanpa extension final.
 
-> **Catatan MariaDB:** provider Prisma adalah `mysql` (kompatibel penuh dengan MariaDB). Konten HTML panjang dari editor memakai `@db.LongText`. ID memakai `cuid()`.
+> **Catatan PostgreSQL:** provider Prisma adalah `postgresql`. Teks panjang memakai `@db.Text`, tanggal tanpa waktu memakai `@db.Date`, dan ID memakai `cuid()`. Kontrak runtime menggunakan `@prisma/adapter-pg`; database remote wajib TLS.
 
 ## Skema lengkap
 
 ```prisma
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"
 }
 
 // ========================= ENUM =========================
@@ -137,7 +137,7 @@ model Post {
   title       String      @db.VarChar(255)
   slug        String      @unique
   excerpt     String?     @db.VarChar(500)
-  content     String      @db.LongText
+  content     String      @db.Text
   coverImage  String?
   status      PostStatus  @default(DRAFT)
   isFeatured  Boolean     @default(false)   // untuk highlight/pinned di beranda
@@ -180,7 +180,7 @@ model Page {
   id         String     @id @default(cuid())
   title      String     @db.VarChar(255)
   slug       String     @unique
-  content    String     @db.LongText
+  content    String     @db.Text
   heroImage  String?
   status     PageStatus @default(DRAFT)
   order      Int        @default(0)
@@ -202,7 +202,7 @@ model StudyProgram {
   degree             String      @default("S1")
   accreditation      String?                   // mis. "Unggul", "Baik Sekali"
   accreditationYear  Int?
-  description        String?     @db.LongText
+  description        String?     @db.Text
   logo               String?
   externalUrl        String?                   // untuk prodi dengan subdomain sendiri
   order              Int         @default(0)
@@ -219,7 +219,7 @@ model Lecturer {
   photo       String?
   position    String?                          // Dekan, Wakil Dekan, Kaprodi, Dosen
   expertise   String?                          // bidang keahlian
-  bio         String?       @db.LongText        // biografi lengkap (halaman detail, gaya Zaytuna)
+  bio         String?       @db.Text        // biografi lengkap (halaman detail, gaya Zaytuna)
   officeHours String?                           // jam konsultasi / office hours
   email       String?
   scholarUrl  String?
@@ -299,7 +299,7 @@ model Achievement {
 model StudentActivity {
   id          String   @id @default(cuid())   // Kegiatan Kemahasiswaan
   title       String
-  description String?  @db.LongText
+  description String?  @db.Text
   date        DateTime?
   image       String?                          // gambar utama
   gallery     ActivityImage[]                  // galeri foto tambahan
@@ -359,7 +359,7 @@ model Unit {
   slug        String   @unique
   type        UnitType @default(PUSAT_STUDI)
   logo        String?
-  description String?  @db.LongText
+  description String?  @db.Text
   externalUrl String?              // bila unit punya situs/blog sendiri
   order       Int      @default(0)
   isActive    Boolean  @default(true)
@@ -435,7 +435,7 @@ model Ticket {
   reporterProdi String?
 
   subject       String            @db.VarChar(255)
-  description   String            @db.LongText
+  description   String            @db.Text
   incidentDate  DateTime?                          // kapan kejadian (opsional)
 
   assignedToId  String?
@@ -734,7 +734,7 @@ model Event {
   id          String    @id @default(cuid())
   title       String
   slug        String    @unique
-  description String?   @db.LongText
+  description String?   @db.Text
   location    String?
   startDate   DateTime
   endDate     DateTime?

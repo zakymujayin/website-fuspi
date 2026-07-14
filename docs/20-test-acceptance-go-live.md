@@ -5,7 +5,7 @@ Dokumen ini adalah definisi selesai. Fitur tidak dianggap selesai hanya karena U
 ## A. Strategi dan lingkungan
 
 - **Unit:** Vitest untuk helper murni, validasi, authorization, locale, SLA, sequence, dan sanitasi.
-- **Integration:** Vitest terhadap MariaDB test yang skemanya dibuat dari migration produksi; jangan mengganti dengan SQLite karena perilaku transaction/FULLTEXT berbeda.
+- **Integration:** Vitest terhadap PostgreSQL dengan major yang sama seperti produksi dan skema dari migration produksi; jangan mengganti dengan SQLite karena perilaku transaction, locking, enum, JSON, dan full-text berbeda.
 - **E2E:** Playwright pada build production dengan seed fixture deterministik.
 - **Accessibility:** axe melalui Playwright + audit manual keyboard dan NVDA/VoiceOver.
 - **Security:** test otomatis untuk IDOR/XSS/upload/token serta review manual konfigurasi header, cookie, storage, dan secret.

@@ -10,7 +10,7 @@ import {createPrismaClient} from "@/lib/db/client";
 const runDatabaseTests = process.env.RUN_PLATFORM_DB_TESTS === "true";
 const suite = runDatabaseTests ? describe : describe.skip;
 
-suite("M2 auth bridge on MariaDB", () => {
+suite("M2 auth bridge on PostgreSQL", () => {
   const marker = `m2-auth-bridge-${Date.now()}`;
   const oldPassword = "Synthetic-Bridge-Old-12";
   const newPassword = "Synthetic-Bridge-New-34";

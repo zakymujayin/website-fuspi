@@ -41,7 +41,7 @@ All items are mandatory:
 
 - Auth.js uses opaque database sessions for eight hours; no JWT fallback.
 - Unknown, wrong-password, and inactive login paths are enumeration- and timing-resistant.
-- Session revocation, password change, role change, and inactive-user checks pass MariaDB
+- Session revocation, password change, role change, and inactive-user checks pass PostgreSQL
   integration tests.
 - Permission matrix, ownership, ticket scope, PPKS isolation, and IDOR negative tests pass.
 - CSRF, safe redirect, upload spoof/traversal/bomb, crypto tamper, HMAC, rate-limit, CSV,
@@ -49,9 +49,9 @@ All items are mandatory:
 - PPKS/private content never persists in public storage, logs, email, analytics, RSC payloads,
   or client draft storage.
 - ID/EN/AR login UX, Arabic RTL, keyboard, focus, and screen-reader acceptance pass.
-- Fresh MariaDB migration + double seed remains idempotent and the full integration suite is
+- Fresh PostgreSQL migration + double seed remains idempotent and the full integration suite is
   green.
-- Hostinger-dependent SMTP, cron, and persistent public/private filesystem capabilities have
+- VPS-dependent SMTP, worker scheduling, and persistent public/private filesystem capabilities have
   staging evidence before M2 is declared fully accepted; local assumptions are not enough.
 - All worker handoffs are committed, reviewed by another model, merged one at a time, and the
   final integration head passes full CI.

@@ -3,39 +3,41 @@ import {describe, expect, it} from "vitest";
 import {parseDatabaseUrl} from "@/lib/db/config";
 
 describe("database URL contract", () => {
-  it("maps a MariaDB-compatible mysql URL to adapter config", () => {
+  it("maps a PostgreSQL URL to a bounded pool config", () => {
     expect(
       parseDatabaseUrl(
-        "mysql://fuspi:p%40ss@db.internal:3307/fuspi?connection_limit=7&ssl=true",
+        "postgresql://fuspi:p%40ss@db.internal:5433/fuspi?connection_limit=7&sslmode=verify-full&application_name=fuspi-test",
       ),
     ).toEqual({
       host: "db.internal",
-      port: 3307,
+      port: 5433,
       user: "fuspi",
       password: "p@ss",
       database: "fuspi",
-      connectionLimit: 7,
-      allowPublicKeyRetrieval: false,
-      ssl: true,
+      max: 7,
+      application_name: "fuspi-test",
+      ssl: {rejectUnauthorized: true},
     });
   });
 
-  it("allows RSA public-key retrieval only on loopback development hosts", () => {
-    expect(parseDatabaseUrl("mysql://u:p@127.0.0.1/db").allowPublicKeyRetrieval).toBe(
-      true,
-    );
-    expect(parseDatabaseUrl("mysql://u:p@[::1]/db").allowPublicKeyRetrieval).toBe(true);
-    expect(parseDatabaseUrl("mysql://u:p@db.example.edu/db").allowPublicKeyRetrieval).toBe(
-      false,
-    );
+  it("allows non-TLS connections only on loopback development hosts", () => {
+    expect(parseDatabaseUrl("postgresql://u:p@127.0.0.1/db").ssl).toBe(false);
+    expect(parseDatabaseUrl("postgresql://u:p@[::1]/db").ssl).toBe(false);
+    expect(
+      parseDatabaseUrl("postgresql://u:p@db.example.edu/db?sslmode=require").ssl,
+    ).toEqual({rejectUnauthorized: false});
   });
 
   it.each([
-    "postgresql://u:p@localhost/db",
-    "mysql://localhost/db",
-    "mysql://u:p@localhost/",
-    "mysql://u:p@localhost/db?connection_limit=0",
-    "mysql://u:p@localhost/db?connection_limit=100",
+    "mysql://u:p@localhost/db",
+    "postgresql://localhost/db",
+    "postgresql://u@localhost/db",
+    "postgresql://u:p@localhost/",
+    "postgresql://u:p@localhost/db?connection_limit=0",
+    "postgresql://u:p@localhost/db?connection_limit=100",
+    "postgresql://u:p@db.example.edu/db",
+    "postgresql://u:p@db.example.edu/db?sslmode=disable",
+    "postgresql://u:p@localhost/db?sslmode=prefer",
   ])("rejects incomplete or incompatible URLs: %s", (url) => {
     expect(() => parseDatabaseUrl(url)).toThrow();
   });
