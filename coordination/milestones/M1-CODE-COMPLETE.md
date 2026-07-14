@@ -29,10 +29,10 @@ The first merged CI attempt encountered only stale generated `.next` route metad
 
 ## Open gates and risks
 
-1. Database execution evidence uses isolated MySQL 8.0.46. Fresh migration, double seed, JSON/ENUM/index behavior, and transaction tests must still run on isolated Hostinger MariaDB staging.
-2. Hostinger SMTP, cron, persistent public/private storage, and production filesystem behavior remain environment-dependent gates.
+1. Historical database evidence used isolated MySQL 8.0.46. ADR-0003 supersedes that provider; fresh migration, double seed, JSON/ENUM/index behavior, and transaction tests must now pass PostgreSQL before M1 is accepted.
+2. VPS SMTP, worker scheduling, persistent public/private storage, and production filesystem behavior remain environment-dependent gates.
 3. Provider token/cost telemetry was not available to the integrator. The owner must collect Claude, GPT, and DeepSeek usage from their provider dashboards before the milestone cost report can be finalized.
-4. `m1-accepted` must not be created until the MariaDB gate passes. M2 may begin only on work that does not rely on unverified MariaDB-specific behavior.
+4. `m1-accepted` must not be created until the PostgreSQL cutover gate passes. M2 may continue only on work that does not rely on unverified provider-specific behavior.
 
 ## M2 entry decision
 

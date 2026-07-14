@@ -9,7 +9,7 @@ import {createPrismaClient} from "@/lib/db/client";
 const runDatabaseTests = process.env.RUN_PLATFORM_DB_TESTS === "true";
 const suite = runDatabaseTests ? describe : describe.skip;
 
-suite("M2 credentials route adversarial (MariaDB)", () => {
+suite("M2 credentials route adversarial (PostgreSQL)", () => {
   const marker = `m2-route-${Date.now()}`;
   const oldPassword = "Synthetic-Route-Pass-12";
   const configuredOrigin = new URL(

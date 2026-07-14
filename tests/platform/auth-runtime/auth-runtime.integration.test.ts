@@ -16,7 +16,7 @@ import {createPrismaClient} from "@/lib/db/client";
 const runDatabaseTests = process.env.RUN_PLATFORM_DB_TESTS === "true";
 const suite = runDatabaseTests ? describe : describe.skip;
 
-suite("M2 auth runtime on MariaDB", () => {
+suite("M2 auth runtime on PostgreSQL", () => {
   const marker = `m2-auth-${Date.now()}`;
   const emailSecret = "e".repeat(32);
   const ipSecret = "i".repeat(32);

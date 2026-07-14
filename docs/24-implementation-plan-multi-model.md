@@ -174,11 +174,11 @@ Task dianggap selesai bila:
 Pekerjaan:
 
 - Initial commit/tag/remote/protection, governance files, worktrees, task manifests, PR template, CODEOWNERS, scope-check.
-- Scaffold Next.js di root repo, pin Node/dependency/lockfile, next-intl `[locale]`, Vitest, Playwright, lint/typecheck/build, MariaDB test.
-- Feasibility spike Hostinger: Node runtime, MariaDB, public/private filesystem, Sharp, pdf.js, SMTP, cron, Serializable transaction dan FULLTEXT.
+- Scaffold Next.js di root repo, pin Node/dependency/lockfile, next-intl `[locale]`, Vitest, Playwright, lint/typecheck/build, PostgreSQL test.
+- Feasibility spike VPS: Node runtime, PostgreSQL, public/private filesystem, Sharp, pdf.js, SMTP, worker scheduler, Serializable transaction dan full-text search.
 - Materialisasikan `docs/02` menjadi satu `prisma/schema.prisma` kanonik sebelum lane lain memakai model data.
 
-Gate: clean install/build; `/id`, `/en`, `/ar`; Prisma validate; CI hijau; capability Hostinger tercatat. Tidak ada worktree feature sebelum gate ini.
+Gate: clean install/build; `/id`, `/en`, `/ar`; Prisma validate; CI hijau; capability VPS/PostgreSQL tercatat. Tidak ada worktree feature sebelum gate ini.
 
 ### M1 — Fondasi paralel
 
@@ -186,7 +186,7 @@ Gate: clean install/build; `/id`, `/en`, `/ar`; Prisma validate; CI hijau; capab
 
 **Claude Sonnet 5:** design tokens, fonts, logical CSS, public/admin shell visual, messages dasar, RTL.
 
-**DeepSeek V4 Pro medium:** test harness MariaDB, fixtures sintetis, threat-test matrix, inventaris WordPress/URL/media.
+**DeepSeek V4 Pro medium:** test harness PostgreSQL, fixtures sintetis, threat-test matrix, inventaris WordPress/URL/media.
 
 Gate: database kosong migrate+seed dan rerun tanpa duplikasi; shell 360–1440 px + RTL; unit/integration foundation hijau.
 
@@ -287,7 +287,7 @@ Reviewer tidak melakukan silent fix pada branch writer. Bila review menemukan co
 ## G. CI bertingkat dan merge policy
 
 - **Fast CI per PR:** scope-check, secret scan, format/lint, typecheck, affected unit tests, Prisma validate bila relevan.
-- **Domain CI:** MariaDB integration, E2E domain, locale/RTL, axe untuk UI, security tests untuk action/upload.
+- **Domain CI:** PostgreSQL integration, E2E domain, locale/RTL, axe untuk UI, security tests untuk action/upload.
 - **Full CI setelah merge queue:** build production, semua unit/integration/E2E, migration fresh DB, seed idempotency.
 - **Nightly:** browser matrix, crawl/broken link, visual regression, import dry-run fixture, dependency/security scan.
 - **Milestone:** restore drill (M6), performance field/lab gate, PPKS isolation, booking parallel approval, WordPress reconciliation.

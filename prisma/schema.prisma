@@ -4,7 +4,7 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
 }
 
 enum Locale {
@@ -397,7 +397,7 @@ model PostTranslation {
   locale        Locale
   title         String            @db.VarChar(255)
   excerpt       String?           @db.VarChar(500)
-  content       String            @db.LongText
+  content       String            @db.Text
   metaTitle     String?
   metaDesc      String?           @db.VarChar(500)
   coverCaption  String?
@@ -498,7 +498,7 @@ model PageTranslation {
   pageId        String
   locale        Locale
   title         String            @db.VarChar(255)
-  content       String            @db.LongText
+  content       String            @db.Text
   metaTitle     String?
   metaDesc      String?           @db.VarChar(500)
   status        TranslationStatus @default(DRAFT)
@@ -585,13 +585,13 @@ model StudyProgramTranslation {
   studyProgramId   String
   locale           Locale
   name             String
-  description      String?           @db.LongText
-  vision           String?           @db.LongText
-  mission          String?           @db.LongText
-  objectives       String?           @db.LongText
-  graduateProfile  String?           @db.LongText
-  careerProspects  String?           @db.LongText
-  learningOutcomes String?           @db.LongText
+  description      String?           @db.Text
+  vision           String?           @db.Text
+  mission          String?           @db.Text
+  objectives       String?           @db.Text
+  graduateProfile  String?           @db.Text
+  careerProspects  String?           @db.Text
+  learningOutcomes String?           @db.Text
   status           TranslationStatus @default(DRAFT)
   sourceVersion    Int               @default(1)
   translatorId     String?
@@ -632,7 +632,7 @@ model LecturerTranslation {
   locale        Locale
   position      String?
   expertise     String?
-  bio           String?           @db.LongText
+  bio           String?           @db.Text
   officeHours   String?
   status        TranslationStatus @default(DRAFT)
   sourceVersion Int               @default(1)
@@ -808,7 +808,7 @@ model UnitTranslation {
   unitId        String
   locale        Locale
   name          String
-  description   String?           @db.LongText
+  description   String?           @db.Text
   status        TranslationStatus @default(DRAFT)
   sourceVersion Int               @default(1)
   translatorId  String?
@@ -957,7 +957,7 @@ model StudentActivityTranslation {
   studentActivityId String
   locale            Locale
   title             String
-  description       String?           @db.LongText
+  description       String?           @db.Text
   status            TranslationStatus @default(DRAFT)
   sourceVersion     Int               @default(1)
   translatorId      String?
@@ -1313,7 +1313,7 @@ model EventTranslation {
   eventId       String
   locale        Locale
   title         String
-  description   String?           @db.LongText
+  description   String?           @db.Text
   location      String?
   status        TranslationStatus @default(DRAFT)
   sourceVersion Int               @default(1)
@@ -1350,7 +1350,7 @@ model FaqTranslation {
   locale        Locale
   category      String?
   question      String
-  answer        String            @db.LongText
+  answer        String            @db.Text
   status        TranslationStatus @default(DRAFT)
   sourceVersion Int               @default(1)
   translatorId  String?
@@ -1406,10 +1406,10 @@ model Ticket {
   category                   ComplaintCategory
   priority                   TicketPriority     @default(NORMAL)
   status                     TicketStatus       @default(BARU)
-  subjectCiphertext          String?            @db.LongText
-  descriptionCiphertext      String             @db.LongText
-  reporterIdentityCiphertext String?            @db.LongText
-  resolutionCiphertext       String?            @db.LongText
+  subjectCiphertext          String?            @db.Text
+  descriptionCiphertext      String             @db.Text
+  reporterIdentityCiphertext String?            @db.Text
+  resolutionCiphertext       String?            @db.Text
   encryptionNonce            String?
   encryptionTag              String?
   keyVersion                 Int?
@@ -1436,7 +1436,7 @@ model TicketReply {
   id              String   @id @default(cuid())
   ticketId        String
   authorId        String?
-  bodyCiphertext  String   @db.LongText
+  bodyCiphertext  String   @db.Text
   encryptionNonce String?
   encryptionTag   String?
   keyVersion      Int?
@@ -1714,7 +1714,7 @@ model NotificationOutbox {
   template          String
   payload           Json?
   payloadEncrypted  Boolean      @default(false)
-  payloadCiphertext String?      @db.LongText
+  payloadCiphertext String?      @db.Text
   encryptionNonce   String?
   encryptionTag     String?
   keyVersion        Int?
@@ -1867,7 +1867,7 @@ model PrivacyNoticeTranslation {
   privacyNoticeId String
   locale          Locale
   title           String
-  content         String            @db.LongText
+  content         String            @db.Text
   status          TranslationStatus @default(DRAFT)
   sourceVersion   Int               @default(1)
   translatorId    String?
@@ -1900,10 +1900,10 @@ model DataSubjectRequest {
   type                 PrivacyRequestType
   status               PrivacyRequestStatus @default(RECEIVED)
   verificationState    VerificationState    @default(PENDING)
-  requesterCiphertext  String               @db.LongText
-  requestCiphertext    String               @db.LongText
+  requesterCiphertext  String               @db.Text
+  requestCiphertext    String               @db.Text
   assigneeId           String?
-  resolutionCiphertext String?              @db.LongText
+  resolutionCiphertext String?              @db.Text
   dueAt                DateTime?
   createdAt            DateTime             @default(now())
   updatedAt            DateTime             @updatedAt
@@ -1917,8 +1917,8 @@ model DataIncident {
   discoveredAt          DateTime
   systemsAffected       Json
   dataCategories        Json
-  containmentCiphertext String?            @db.LongText
-  summaryCiphertext     String             @db.LongText
+  containmentCiphertext String?            @db.Text
+  summaryCiphertext     String             @db.Text
   status                DataIncidentStatus @default(OPEN)
   ownerId               String?
   resolvedAt            DateTime?
@@ -1979,7 +1979,7 @@ model AccessibilityRequest {
   requestNumber       String                     @unique
   trackingTokenHash   String                     @unique
   status              AccessibilityRequestStatus @default(RECEIVED)
-  requesterCiphertext String                     @db.LongText
+  requesterCiphertext String                     @db.Text
   requestedFormat     String
   resourcePath        String
   createdAt           DateTime                   @default(now())
@@ -2002,7 +2002,7 @@ model AdmissionInfoTranslation {
   admissionInfoId String
   locale          Locale
   title           String
-  content         String            @db.LongText
+  content         String            @db.Text
   status          TranslationStatus @default(DRAFT)
   sourceVersion   Int               @default(1)
   translatorId    String?

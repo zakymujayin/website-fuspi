@@ -1,10 +1,10 @@
 import bcrypt from "bcryptjs";
 import {PrismaClient} from "../src/generated/prisma/client";
-import {PrismaMariaDb} from "@prisma/adapter-mariadb";
+import {PrismaPg} from "@prisma/adapter-pg";
 import {institution} from "../src/config/institution";
 import {parseDatabaseUrl} from "../src/lib/db/config";
 
-const adapter = new PrismaMariaDb(
+const adapter = new PrismaPg(
   parseDatabaseUrl(process.env.DATABASE_URL ?? ""),
 );
 const prisma = new PrismaClient({adapter});

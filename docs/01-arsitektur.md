@@ -97,16 +97,17 @@ fuspi-web/
 - **Tanggal** disimpan sebagai `DateTime` UTC, ditampilkan dalam zona `Asia/Jakarta` lewat helper `formatTanggal()` (format: `8 Juli 2026`).
 - **Semua mutasi data** lewat Server Action yang: (1) cek sesi & role, (2) validasi Zod, (3) tulis Prisma, (4) `revalidatePath()` halaman terkait.
 
-## Prisma client singleton (`lib/prisma.ts`)
+## Prisma client singleton (`src/lib/db/client.ts`)
 
 ```ts
-import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaClient } from "@/generated/prisma/client";
+import { parseDatabaseUrl } from "@/lib/db/config";
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({ log: ["error", "warn"] });
+const adapter = new PrismaPg(parseDatabaseUrl(process.env.DATABASE_URL!));
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({ adapter });
 
 if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 ```
@@ -114,31 +115,31 @@ if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
 ## Environment variables (`.env.example`)
 
 ```bash
-# Database MariaDB (Hostinger — lihat 08 untuk detail)
-DATABASE_URL="mysql://USER:PASSWORD@HOST:3306/NAMA_DB"
+# PostgreSQL. Remote/staging/production wajib TLS; lihat 08.
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/NAMA_DB?connection_limit=10&sslmode=verify-full"
 
 # Auth.js v5
 AUTH_SECRET="ganti-dengan-string-acak-panjang"   # generate: openssl rand -base64 32
 AUTH_URL="https://fuspi.uinbanten.ac.id"
 
 # Upload — direktori penyimpanan persisten & URL publiknya (lihat 07)
-UPLOAD_DIR="/home/USERNAME/domains/fuspi.uinbanten.ac.id/public_html/uploads"
+UPLOAD_DIR="/srv/fuspi/shared/public/uploads"
 UPLOAD_PUBLIC_URL="https://fuspi.uinbanten.ac.id/uploads"
 
 # Batas ukuran upload (byte) — default 5MB
 UPLOAD_MAX_SIZE="5242880"
 
-# Storage privat — WAJIB berada di luar public_html
-UPLOAD_PRIVATE_DIR="/home/USERNAME/domains/fuspi.uinbanten.ac.id/private_uploads"
-PPKS_PRIVATE_DIR="/home/USERNAME/domains/fuspi.uinbanten.ac.id/ppks_private"
+# Storage privat — WAJIB berada di luar document root reverse proxy
+UPLOAD_PRIVATE_DIR="/srv/fuspi/shared/private/uploads"
+PPKS_PRIVATE_DIR="/srv/fuspi/shared/ppks"
 PPKS_ENCRYPTION_KEY="base64-encoded-32-byte-key"
 
-# SMTP Hostinger + transactional outbox
-SMTP_HOST="smtp.hostinger.com"
+# SMTP + transactional outbox; provider ditentukan saat provisioning VPS
+SMTP_HOST="smtp.example.edu"
 SMTP_PORT="465"
 SMTP_SECURE="true"
 SMTP_USER="noreply@fuspi.uinbanten.ac.id"
-SMTP_PASSWORD="ganti-di-hPanel"
+SMTP_PASSWORD="ganti-di-secret-manager"
 MAIL_FROM="FUSPI UIN Banten <noreply@fuspi.uinbanten.ac.id>"
 
 # HMAC untuk token/IP hash; berbeda dari AUTH_SECRET
@@ -156,7 +157,7 @@ SEED_ADMIN_PASSWORD="ganti-sebelum-seed"
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",          // penting untuk deploy Node.js Hostinger
+  output: "standalone",          // artifact ringkas untuk deploy VPS/container
   images: {
     // gambar upload disajikan sebagai file statis dari domain sendiri
     remotePatterns: [
@@ -180,7 +181,7 @@ cd fuspi-web
 # Verifikasi versi: harus 16.x
 npm show next version
 
-npm i prisma @prisma/client next-auth@beta @auth/prisma-adapter bcryptjs zod
+npm i prisma @prisma/client @prisma/adapter-pg pg next-auth@beta @auth/prisma-adapter bcryptjs zod
 npm i next-intl                                   # multibahasa (12)
 npm i @tiptap/react @tiptap/starter-kit @tiptap/extension-image @tiptap/extension-link
 npm i @tiptap/extension-underline @tiptap/extension-text-align @tiptap/extension-youtube @tiptap/extension-table
@@ -189,7 +190,7 @@ npm i @dnd-kit/core @dnd-kit/sortable            # menu builder & reorder (10)
 npm i @fullcalendar/react @fullcalendar/daygrid @fullcalendar/timegrid @fullcalendar/list  # jadwal ruangan (15)
 npm i sharp file-type isomorphic-dompurify       # upload (07) & sanitasi HTML (13)
 npm i react-pdf                                  # viewer PDF final (11)
-npm i nodemailer                                 # SMTP Hostinger + outbox
+npm i nodemailer                                 # SMTP + outbox
 npm i papaparse xlsx                             # import massal dosen (09)
 npm i -D @types/bcryptjs @types/nodemailer tsx vitest @playwright/test
 npx shadcn@latest init
