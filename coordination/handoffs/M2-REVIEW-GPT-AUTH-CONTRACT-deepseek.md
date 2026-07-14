@@ -3,7 +3,7 @@
 - Task: `M2-REVIEW-GPT-AUTH-CONTRACT`
 - Branch: `ai/deepseek/m2-review-gpt-auth-contract`
 - Base SHA: `1f2c4d9` (review assignment head from `coordination/m2-auth-contract-review-assignment`)
-- Head SHA: TBD after commit
+- Head SHA: `c390d6c`
 - Owner: DeepSeek Delivery & QA
 - Reviewer: GPT
 - Status: ready for review; not merged
