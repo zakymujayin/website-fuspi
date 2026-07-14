@@ -51,7 +51,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-GPT-AUTH-BRIDGE.md TASK_BASE=origin/coordination/m2-gpt-auth-bridge-assignment npm run check:scope
 risk: critical
 token_class: M
-status: assigned
+status: merged
 ---
 
 # M2 GPT Auth Bridge
