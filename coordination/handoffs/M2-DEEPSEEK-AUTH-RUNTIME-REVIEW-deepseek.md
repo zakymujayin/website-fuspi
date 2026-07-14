@@ -5,7 +5,7 @@
 - Base SHA: `24b78a4` (correction assignment from `coordination/m2-auth-runtime-review-correction-assignment`)
 - Implementation SHA: `1a138d8` (GPT runtime candidate)
 - Handoff SHA: `dc68138` (GPT handoff)
-- Head SHA: TBD after commit
+- Head SHA: `e5ee52a`
 - Owner: DeepSeek Delivery & QA
 - Reviewer: GPT
 - Status: ready for re-review; not merged
