@@ -53,3 +53,6 @@ active_leases:
   - task: M2-DEEPSEEK-AUTH-RUNTIME-REVIEW
     owner: deepseek
     paths: ["tests/security/auth-runtime/**", "coordination/reviews/M2-GPT-AUTH-RUNTIME-deepseek.md", "coordination/handoffs/M2-DEEPSEEK-AUTH-RUNTIME-REVIEW-deepseek.md"]
+  - task: M2-CLAUDE-AUTH-LOGIN-UI
+    owner: claude
+    paths: ["src/app/[locale]/(auth)/**", "src/components/auth/**", "src/components/ui/card.tsx", "src/components/ui/field.tsx", "src/components/ui/input.tsx", "src/components/ui/spinner.tsx", "messages/id.json", "messages/en.json", "messages/ar.json", "e2e/auth/login.spec.ts", "coordination/handoffs/M2-CLAUDE-AUTH-LOGIN-UI-claude.md"]
