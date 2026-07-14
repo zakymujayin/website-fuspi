@@ -1,5 +1,5 @@
 import {compare, hash} from "bcryptjs";
-import {afterAll, beforeAll, describe, expect, it} from "vitest";
+import {afterAll, afterEach, beforeAll, describe, expect, it} from "vitest";
 
 import {
   authenticateCredentials,
@@ -21,11 +21,10 @@ const runDatabaseTests = process.env.RUN_PLATFORM_DB_TESTS === "true";
 const suite = runDatabaseTests ? describe : describe.skip;
 
 suite("M2 auth runtime adversarial (MariaDB)", () => {
-  const marker = `m2-adv-${Date.now()}`;
+  const marker = `m2-advc-${Date.now()}`;
   const emailSecret = "e".repeat(32);
   const ipSecret = "i".repeat(32);
   const oldPassword = "Synthetic-Old-Pass-12";
-  const now = new Date("2026-07-14T03:00:00.000Z");
   let prisma: ReturnType<typeof createPrismaClient>;
   let activeUserId: string;
   let inactiveUserId: string;
@@ -37,7 +36,7 @@ suite("M2 auth runtime adversarial (MariaDB)", () => {
     const users = await Promise.all([
       prisma.user.create({
         data: {
-          name: "Synthetic Adv Active",
+          name: "Synthetic AdvC Active",
           email: `${marker}-active@example.test`,
           passwordHash,
           role: "ADMIN",
@@ -45,7 +44,7 @@ suite("M2 auth runtime adversarial (MariaDB)", () => {
       }),
       prisma.user.create({
         data: {
-          name: "Synthetic Adv Inactive",
+          name: "Synthetic AdvC Inactive",
           email: `${marker}-inactive@example.test`,
           passwordHash,
           role: "EDITOR",
@@ -57,16 +56,21 @@ suite("M2 auth runtime adversarial (MariaDB)", () => {
   });
 
   afterAll(async () => {
-    const rateLimitKeys = [
+    const allEmails = [
       `${marker}-active@example.test`,
       `${marker}-inactive@example.test`,
-    ].map(
-      (email) =>
-        createLoginRateLimitKey(email, "192.0.2.50", emailSecret, ipSecret)
-          .keyHash,
-    );
+    ];
+    const allIps = ["192.0.2.60", "192.0.2.61", "192.0.2.62", "192.0.2.63"];
+    const rateLimitHashes: string[] = [];
+    for (const email of allEmails) {
+      for (const ip of allIps) {
+        rateLimitHashes.push(
+          createLoginRateLimitKey(email, ip, emailSecret, ipSecret).keyHash,
+        );
+      }
+    }
     await prisma.rateLimitBucket.deleteMany({
-      where: {keyHash: {in: rateLimitKeys}},
+      where: {keyHash: {in: rateLimitHashes}},
     });
     await prisma.session.deleteMany({
       where: {userId: {in: [activeUserId, inactiveUserId]}},
@@ -75,10 +79,32 @@ suite("M2 auth runtime adversarial (MariaDB)", () => {
     await prisma.$disconnect();
   });
 
+  afterEach(async () => {
+    const allEmails = [
+      `${marker}-active@example.test`,
+      `${marker}-inactive@example.test`,
+    ];
+    const allIps = ["192.0.2.60", "192.0.2.61", "192.0.2.62", "192.0.2.63"];
+    const rateLimitHashes: string[] = [];
+    for (const email of allEmails) {
+      for (const ip of allIps) {
+        rateLimitHashes.push(
+          createLoginRateLimitKey(email, ip, emailSecret, ipSecret).keyHash,
+        );
+      }
+    }
+    await prisma.rateLimitBucket.deleteMany({
+      where: {keyHash: {in: rateLimitHashes}},
+    });
+    await prisma.session.deleteMany({
+      where: {userId: {in: [activeUserId, inactiveUserId]}},
+    });
+  });
+
   it("rate-limit keyHash does not store raw email or IP", () => {
     const key = createLoginRateLimitKey(
       `${marker}-active@example.test`,
-      "192.0.2.50",
+      "192.0.2.60",
       emailSecret,
       ipSecret,
     );
@@ -91,12 +117,13 @@ suite("M2 auth runtime adversarial (MariaDB)", () => {
   it("rate-limit counter is not lost under concurrent same-window increments", async () => {
     const key = createLoginRateLimitKey(
       `${marker}-active@example.test`,
-      "192.0.2.50",
+      "192.0.2.61",
       emailSecret,
       ipSecret,
     );
+    const now = new Date();
     const errors: unknown[] = [];
-    const results = await Promise.allSettled(
+    await Promise.allSettled(
       Array.from({length: 20}, () =>
         registerFailedLoginAttempt(prisma, key, now).catch((error) => {
           errors.push(error);
@@ -111,13 +138,14 @@ suite("M2 auth runtime adversarial (MariaDB)", () => {
         keyHash_scope_windowStart: {
           keyHash: key.keyHash,
           scope: key.scope,
-          windowStart: new Date("2026-07-14T03:00:00.000Z"),
+          windowStart: new Date(
+            Math.floor(now.getTime() / 900_000) * 900_000,
+          ),
         },
       },
       select: {count: true},
     });
     expect(bucket.count).toBe(20);
-    expect(results.every((r) => r.status === "fulfilled")).toBe(true);
   });
 
   it("login failure never issues a cookie when the session issuer throws", async () => {
@@ -128,8 +156,8 @@ suite("M2 auth runtime adversarial (MariaDB)", () => {
         email: `${marker}-active@example.test`,
         password: oldPassword,
       },
-      clientIp: "192.0.2.50",
-      now,
+      clientIp: "192.0.2.62",
+      now: new Date(),
       emailHmacSecret: emailSecret,
       ipHmacSecret: ipSecret,
       async comparePassword() {
@@ -145,11 +173,12 @@ suite("M2 auth runtime adversarial (MariaDB)", () => {
   });
 
   it("deactivating a user revokes all their sessions in the same transaction", async () => {
+    const future = new Date(Date.now() + 120_000);
     await prisma.session.createMany({
       data: [1, 2, 3].map((index) => ({
         sessionToken: `${marker}-deact-${index}`,
         userId: activeUserId,
-        expires: new Date(now.getTime() + 60_000),
+        expires: future,
       })),
     });
     const actor = `${marker}-deact-1`;
@@ -179,6 +208,7 @@ suite("M2 auth runtime adversarial (MariaDB)", () => {
   });
 
   it("password change revokes every prior session inside the same transaction", async () => {
+    const future = new Date(Date.now() + 120_000);
     const activeSessions = [
       `${marker}-pwd-s1`,
       `${marker}-pwd-s2`,
@@ -188,7 +218,7 @@ suite("M2 auth runtime adversarial (MariaDB)", () => {
       data: activeSessions.map((token) => ({
         sessionToken: token,
         userId: activeUserId,
-        expires: new Date(now.getTime() + 60_000),
+        expires: future,
       })),
     });
 
@@ -228,11 +258,12 @@ suite("M2 auth runtime adversarial (MariaDB)", () => {
   });
 
   it("revokeAllUserSessions removes every row for a given user", async () => {
+    const future = new Date(Date.now() + 120_000);
     await prisma.session.createMany({
       data: [1, 2].map((index) => ({
         sessionToken: `${marker}-revoke-${index}`,
         userId: activeUserId,
-        expires: new Date(now.getTime() + 60_000),
+        expires: future,
       })),
     });
     await revokeAllUserSessions(prisma, activeUserId);

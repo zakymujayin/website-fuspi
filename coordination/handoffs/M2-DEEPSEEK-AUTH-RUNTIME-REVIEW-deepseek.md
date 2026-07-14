@@ -1,89 +1,87 @@
 # HANDOFF — M2-DEEPSEEK-AUTH-RUNTIME-REVIEW
 
 - Task: `M2-DEEPSEEK-AUTH-RUNTIME-REVIEW`
-- Branch: `ai/deepseek/m2-auth-runtime-review`
-- Base SHA: `dc68138` (review assignment from `coordination/m2-auth-runtime-review-assignment`)
-- Implementation SHA: `1a138d8`
-- Head SHA: `d6cdacc`
+- Branch: `ai/deepseek/m2-auth-runtime-review-correction`
+- Base SHA: `24b78a4` (correction assignment from `coordination/m2-auth-runtime-review-correction-assignment`)
+- Implementation SHA: `1a138d8` (GPT runtime candidate)
+- Handoff SHA: `dc68138` (GPT handoff)
+- Head SHA: TBD after commit
 - Owner: DeepSeek Delivery & QA
 - Reviewer: GPT
-- Status: ready for review; not merged
+- Status: ready for re-review; not merged
 
 ## Summary
 
-Independent adversarial review of GPT's M2 auth runtime at `1a138d8`/`dc68138`. Verdict:
-**APPROVE** with zero Critical or High findings.
+Correction of the M2 auth runtime adversarial review. All integration tests now pass
+against MariaDB with zero skipped gate suites. Route-level `POST /api/auth/credentials`
+boundary covered. Prior issues resolved: isolated rate-limit keys, relative session expiry,
+removed incorrect L1 (:443) finding, corrected HMAC terminology.
 
 ### Review output
 
-- `coordination/reviews/M2-GPT-AUTH-RUNTIME-deepseek.md` — full adversarial review
-  with file/line references, schema verification, binding-decision checklist, and
-  findings ordered by severity.
+- `coordination/reviews/M2-GPT-AUTH-RUNTIME-deepseek.md` — full corrected review with
+  exact acceptance evidence, separated inherited/independent coverage, and finding status.
 
-### Adversarial tests added
+### Adversarial tests
 
-| File | Tests |
-|---|---|
-| `tests/security/auth-runtime/csrf-attacks.test.ts` | 10 — missing/malformed/different origin/scheme/port/subdomain/null |
-| `tests/security/auth-runtime/credential-privacy.test.ts` | 7 — HLAC entropy, collision resistance, window alignment, attempt boundary, dummy hash |
-| `tests/security/auth-runtime/auth-adversarial.integration.test.ts` | 8 — concurrent rate-limit, cleanup isolation, transactional revocation, PII absence |
+| File | Tests | MariaDB |
+|---|---|---|
+| `tests/security/auth-runtime/csrf-attacks.test.ts` | 11 | No |
+| `tests/security/auth-runtime/credential-privacy.test.ts` | 7 | No |
+| `tests/security/auth-runtime/auth-adversarial.integration.test.ts` | 8 | Yes (8/8 pass) |
+| `tests/security/auth-runtime/credentials-route.integration.test.ts` | 3 | Yes (3/3 pass) |
 
-### Findings
+### Finding status
 
-| ID | Severity | Area | Description |
+| ID | Severity | Area | Status |
 |---|---|---|---|
-| — | — | — | No Critical or High findings |
-| M1 | Medium | Rate-limit concurrency | `blockedUntil` double-write under extreme race (idempotent, zero functional risk) |
-| L1 | Low | CSRF | `URL.origin` mismatch if Origin header includes default HTTPS port (443) — most browsers omit |
+| — | — | — | No Critical, High, or Medium findings |
+| — | — | Prior M1 (blockedUntil race) | Retracted — not a functional defect |
+| — | — | Prior L1 (:443 mismatch) | Removed — WHATWG URL normalizes default port |
 
-### Verified invariants
-
-- No JWT, no fake provider, honest database-session boundary ✅
-- Opaque 256-bit session token, HttpOnly/Secure/SameSite cookie ✅
-- Equal bcrypt cost-12 comparison for known/unknown/inactive accounts ✅
-- Rate-limit counter not lost under 20× concurrent increment (adversarial test) ✅
-- Session revocation transactional (password/role/deactivation) ✅
-- Authorization: default deny, EDITOR ownership, ticket scope, PPKS isolation ✅
-- CSRF: same-origin enforcement for missing/malformed/port/scheme/subdomain ✅
-- No PII, token, hash, IP, or raw error in public output/logs ✅
-- Cleanup failure does not issue cookie ✅
-- Fixtures do not touch non-matching data ✅
-
-## API/Schema/Migration Impact
-
-None. Review-only task. No source, dependency, schema, or config was changed.
-
-## Acceptance Commands Results
+## Acceptance commands (with MariaDB)
 
 | Command | Result |
 |---|---|
-| `npm run lint` | PASS (no errors, no warnings) |
+| `npm run lint` | PASS (no errors) |
 | `npm run typecheck` | PASS (no errors) |
 | `npm run prisma:validate` | PASS |
-| `npm test` | 150 passed, 16 skipped, 0 failed |
-| `npm run test:integration` | 0 passed, 16 skipped (no MariaDB; pre-existing) |
+| `npm test` | 151 passed, 19 skipped, 0 failed |
+| `npm run test:integration` | 19 passed (11 adversarial + 8 writer), 0 skipped, 0 failed |
 | `npm run build` | PASS (ID/EN/AR + auth routes) |
 | `npm audit --audit-level=high` | PASS (exit 0; 5 moderate) |
 | `git diff --check` | clean |
+| `npm run check:scope` | TBD after commit |
 
-## Files changed (vs dc68138)
+## Files changed (vs 24b78a4)
 
 - `tests/security/auth-runtime/csrf-attacks.test.ts`
 - `tests/security/auth-runtime/credential-privacy.test.ts`
 - `tests/security/auth-runtime/auth-adversarial.integration.test.ts`
+- `tests/security/auth-runtime/credentials-route.integration.test.ts`
 - `coordination/reviews/M2-GPT-AUTH-RUNTIME-deepseek.md`
 - `coordination/handoffs/M2-DEEPSEEK-AUTH-RUNTIME-REVIEW-deepseek.md`
+
+## Corrections applied
+
+1. Rate-limit key isolated per scenario (unique IP per test: 192.0.2.60–63).
+2. Session expiry uses `Date.now() + 120_000` (relative, not fixed).
+3. Added `credentials-route.integration.test.ts` exercising `POST /api/auth/credentials`
+   against MariaDB: 200, 401, 403; cookie flags; session expiry; Cache-Control; PII absence.
+4. Hostile Origin proves no session creation and no rate-limit mutation.
+5. Default HTTPS port :443 normalization test added; L1 finding removed.
+6. HMAC terminology corrected (was `HDAC`/`HLAC`).
+7. Review now distinguishes inherited coverage from independent adversarial coverage.
 
 ## Residual risks
 
 1. `next-auth` beta (`5.0.0-beta.31`) — retest after upgrades.
 2. Five moderate M0 audit advisories persist.
-3. Integration tests require MariaDB (follow `RUN_PLATFORM_DB_TESTS` guard).
-4. Browser UX, cookie persistence, and accessibility pending Claude tasks.
+3. Browser UX, cookie persistence, and accessibility pending Claude tasks.
+4. Timing-distribution verification not executed (requires statistical framework).
 
 ## Follow-ups
 
-- GPT integrator may merge to `integration/m2-security` after verifying review.
-- GPT should add an explicit `blockedUntil` `upsert` guard in the rate-limiter if
-  strict atomicity is required (non-blocking, documented as M1).
+- GPT integrator: re-review correction branch and merge to `integration/m2-security`.
+- No source changes to GPT runtime, platform tests, configuration, or dependencies.
 - No M3, Claude UI, or shared-security work started.

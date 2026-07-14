@@ -75,6 +75,21 @@ describe("M2 auth CSRF adversarial", () => {
     ).toBe(false);
   });
 
+  it("accepts default-port normalization (https://host:443 equals https://host)", () => {
+    expect(
+      isSameOriginRequest(
+        new Headers({origin: "https://fuspi.uinbanten.ac.id:443"}),
+        CONFIGURED,
+      ),
+    ).toBe(true);
+    expect(
+      isSameOriginRequest(
+        new Headers({origin: "https://fuspi.uinbanten.ac.id"}),
+        "https://fuspi.uinbanten.ac.id:443",
+      ),
+    ).toBe(true);
+  });
+
   it("rejects when AUTH_URL is not configured", () => {
     expect(
       isSameOriginRequest(
