@@ -38,7 +38,7 @@ depends_on:
   - M2-CLAUDE-AUTH-LOGIN-UI
 contracts:
   - docs/06-autentikasi-role.md
-  - docs/12-i18n-rtl-aksesibilitas-seo.md
+  - docs/12-multibahasa-rtl.md
   - docs/20-test-acceptance-go-live.md
 acceptance_commands:
   - npm run lint
