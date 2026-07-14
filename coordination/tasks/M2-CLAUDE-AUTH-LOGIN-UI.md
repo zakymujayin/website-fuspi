@@ -4,7 +4,7 @@ milestone: M2
 owner: claude
 reviewer: gpt
 tester: claude
-base_sha: dc68138
+base_sha: 8952b53
 allowed_paths:
   - "src/app/[locale]/(auth)/**"
   - "src/components/auth/**"
@@ -56,10 +56,10 @@ acceptance_commands:
   - npm run build
   - npx playwright test e2e/auth/login.spec.ts
   - git diff --check
-  - TASK_MANIFEST=coordination/tasks/M2-CLAUDE-AUTH-LOGIN-UI.md TASK_BASE=origin/coordination/m2-claude-auth-login-ui-assignment npm run check:scope
+  - TASK_MANIFEST=coordination/tasks/M2-CLAUDE-AUTH-LOGIN-UI.md TASK_BASE=origin/coordination/m2-claude-auth-login-ui-correction-assignment npm run check:scope
 risk: high
 token_class: M
-status: assigned
+status: revision_required
 ---
 
 # M2 Claude Auth Login UI
@@ -115,3 +115,28 @@ handoff must mark native review as a merge blocker. Do not claim the Arabic copy
 
 Commit implementation and handoff, push the Claude branch, and stop. Do not merge, edit the
 runtime, start password/session UI, or begin M3.
+
+## Integrator correction gate
+
+This is the only correction pass for this task. Read
+`coordination/reviews/M2-CLAUDE-AUTH-LOGIN-UI-gpt.md` and fix the proven locale-switch state
+loss without touching GPT runtime or shared public components.
+
+Required corrections:
+
+1. Replace the public-shell language switcher on the auth surface with an auth-owned
+   implementation under `src/components/auth/**`.
+2. Preserve the typed email, typed password, and raw `next` value across an ID/EN/AR locale
+   switch using transient in-memory state only. Never put credentials in URL parameters,
+   history state, cookies, web storage, logs, analytics, or RSC payloads.
+3. Consume and clear the transient draft immediately after the destination login form
+   initializes. Clear it on submit and when leaving the auth flow so credentials cannot be
+   recovered later.
+4. Add Playwright coverage proving both fields and `next` survive one locale switch, while
+   no credential appears in the URL or page text. Also prove a fresh login navigation does
+   not restore a prior draft.
+5. Add `spellCheck={false}` to the email input, add `data-icon` to icons inside shadcn
+   buttons, and give the programmatically focused alert a visible focus treatment.
+6. Correct the handoff file count and record the correction SHA/results. Arabic copy remains
+   a pre-release native-review requirement, but it does not block merging this development
+   branch into `integration/m2-security`.
