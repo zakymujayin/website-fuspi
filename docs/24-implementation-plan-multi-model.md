@@ -59,7 +59,7 @@ Setelah milestone berganti, tiap worktree membuat branch task baru dari `origin/
 
 Isolasi runtime agar tiga agent tidak bertabrakan di luar Git:
 
-- Port dev: GPT `3001`, Claude `3002`, DeepSeek `3003`.
+- Port dev: GPT `3001`, Claude `3004`, DeepSeek `3003`.
 - Database: `fuspi_dev_gpt`, `fuspi_dev_claude`, `fuspi_dev_deepseek`; test database unik per CI job.
 - Upload/tmp: `/tmp/fuspi-gpt`, `/tmp/fuspi-claude`, `/tmp/fuspi-deepseek`.
 - Setiap worktree memiliki `.env.local` dan `node_modules` sendiri; package-download cache boleh dibagi.
