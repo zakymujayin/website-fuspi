@@ -7,12 +7,12 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI ? "github" : "list",
   use: {
-    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3000",
+    baseURL: process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3004",
     trace: "on-first-retry",
   },
   webServer: {
     command: "npm run dev",
-    url: "http://127.0.0.1:3000/id",
+    url: "http://127.0.0.1:3004/id",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
   },
