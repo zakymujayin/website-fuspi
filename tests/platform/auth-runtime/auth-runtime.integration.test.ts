@@ -95,6 +95,7 @@ suite("M2 auth runtime on MariaDB", () => {
   it("creates an opaque eight-hour database session consumable by the Auth.js adapter", async () => {
     let comparisons = 0;
     let cookie: SessionCookieDefinition | undefined;
+    const sessionNow = new Date();
     const result = await authenticateCredentials({
       prisma,
       rawCredentials: {
@@ -102,7 +103,7 @@ suite("M2 auth runtime on MariaDB", () => {
         password: oldPassword,
       },
       clientIp: "192.0.2.10",
-      now,
+      now: sessionNow,
       emailHmacSecret: emailSecret,
       ipHmacSecret: ipSecret,
       async comparePassword(password, passwordHash) {
@@ -111,7 +112,7 @@ suite("M2 auth runtime on MariaDB", () => {
       },
       async issueSession(userId) {
         const issued = await createDatabaseSession(prisma, userId, {
-          now,
+          now: sessionNow,
           production: false,
           tokenFactory: () => `${marker}-opaque-session`,
         });
@@ -137,9 +138,9 @@ suite("M2 auth runtime on MariaDB", () => {
     const stored = await prisma.session.findUniqueOrThrow({
       where: {sessionToken: `${marker}-opaque-session`},
     });
-    expect(stored.expires.getTime() - now.getTime()).toBe(28_800_000);
+    expect(stored.expires.getTime() - sessionNow.getTime()).toBe(28_800_000);
     expect(
-      await validateDatabaseSession(prisma, `${marker}-opaque-session`, now),
+      await validateDatabaseSession(prisma, `${marker}-opaque-session`, sessionNow),
     ).toMatchObject({ok: true, session: {userId: activeUserId, role: "ADMIN"}});
 
     const adapterSession = await createActiveSessionAdapter(prisma).getSessionAndUser?.(
