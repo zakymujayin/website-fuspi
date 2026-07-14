@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 
+import { clearAuthDraft, peekAuthDraft, useAuthDraft } from "@/components/auth/auth-draft";
 import { PasswordField } from "@/components/auth/password-field";
 import { Button } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -37,11 +38,16 @@ export function LoginForm({ locale, next }: LoginFormProps) {
   const errorRef = useRef<HTMLDivElement>(null);
   const inFlight = useRef(false);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  // Initialise from the locale hand-off, then erase it in the effect below: the
+  // draft exists only for the width of that navigation, and reading it is a
+  // one-shot. A later visit to /login therefore starts from an empty form.
+  const [email, setEmail] = useState(() => peekAuthDraft()?.email ?? "");
+  const [password, setPassword] = useState(() => peekAuthDraft()?.password ?? "");
   const [submitting, setSubmitting] = useState(false);
   const [rateLimited, setRateLimited] = useState(false);
   const [failure, setFailure] = useState<Failure | null>(null);
+
+  const { register } = useAuthDraft();
 
   // Focus lands on the error region, never on a field: focusing the password
   // input would tell the visitor the email was accepted, which is the account
@@ -49,6 +55,23 @@ export function LoginForm({ locale, next }: LoginFormProps) {
   useEffect(() => {
     if (failure) errorRef.current?.focus();
   }, [failure]);
+
+  useEffect(() => {
+    clearAuthDraft();
+  }, []);
+
+  // Lets the locale switcher read the current values at the moment it is
+  // clicked, without this form having to push every keystroke into the shell.
+  const latest = useRef({ email, password });
+
+  useEffect(() => {
+    latest.current = { email, password };
+  }, [email, password]);
+
+  useEffect(() => {
+    register(() => latest.current);
+    return () => register(null);
+  }, [register]);
 
   function releaseRateLimit() {
     // The block duration is deliberately not exposed by the server, so there is
@@ -64,6 +87,8 @@ export function LoginForm({ locale, next }: LoginFormProps) {
     inFlight.current = true;
     setSubmitting(true);
     setFailure(null);
+    // Submitting ends the locale-switch hand-off: nothing typed may survive it.
+    clearAuthDraft();
 
     const destination = next ?? `/${locale}/admin`;
     let result;
@@ -120,7 +145,10 @@ export function LoginForm({ locale, next }: LoginFormProps) {
         tabIndex={-1}
         className={
           failure
-            ? "mb-5 flex items-start gap-2 rounded-lg bg-danger-surface p-3 text-sm text-slate-900 outline-none"
+            ? // The region is focused programmatically, so :focus-visible cannot
+              // be relied on; the ring is bound to :focus and is the only thing
+              // telling a sighted keyboard user where focus just landed.
+              "mb-5 flex items-start gap-2 rounded-lg bg-danger-surface p-3 text-sm text-slate-900 focus:ring-2 focus:ring-danger focus:ring-offset-2 focus:outline-none"
             : "sr-only"
         }
       >
@@ -145,6 +173,7 @@ export function LoginForm({ locale, next }: LoginFormProps) {
             type="email"
             inputMode="email"
             autoComplete="username"
+            spellCheck={false}
             aria-required
             required
             // Email and password are LTR strings in every locale; mirroring them

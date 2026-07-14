@@ -66,6 +66,85 @@ test.describe("login — localisation and direction", () => {
     await expect(page).toHaveURL(/\/ar\/login$/);
   });
 
+  test("switching language keeps typed credentials and the next destination", async ({
+    page,
+  }) => {
+    await page.goto("/id/login?next=%2Fid%2Fadmin%2Fberita");
+    await page.locator("input[name='email']").fill(KNOWN_EMAIL);
+    await page.locator("input[name='password']").fill(PASSWORD);
+
+    await page.getByRole("link", { name: "العربية" }).click();
+    await expect(page).toHaveURL("/ar/login?next=%2Fid%2Fadmin%2Fberita");
+
+    await expect(page.locator("input[name='email']")).toHaveValue(KNOWN_EMAIL);
+    await expect(page.locator("input[name='password']")).toHaveValue(PASSWORD);
+  });
+
+  test("carried credentials never leave browser memory", async ({ page }) => {
+    await page.goto("/id/login?next=%2Fid%2Fadmin%2Fberita");
+    await page.locator("input[name='email']").fill(KNOWN_EMAIL);
+    await page.locator("input[name='password']").fill(PASSWORD);
+    await page.getByRole("link", { name: "English" }).click();
+    await expect(page).toHaveURL(/\/en\/login/);
+
+    // Not in the address bar, not in the history entry, not in the rendered
+    // markup the server sent, not in storage, not in cookies.
+    expect(page.url()).not.toContain(KNOWN_EMAIL);
+    expect(page.url()).not.toContain(PASSWORD);
+
+    const leaks = await page.evaluate(() => ({
+      history: JSON.stringify(window.history.state ?? {}),
+      storage: JSON.stringify({ ...localStorage, ...sessionStorage }),
+      cookies: document.cookie,
+      // The RSC payload and every other inline script: the server must never
+      // have been told what was typed. (The input's own value is excluded on
+      // purpose — the field is exactly where the credential belongs.)
+      scripts: Array.from(document.querySelectorAll("script"))
+        .map((script) => script.textContent ?? "")
+        .join(""),
+    }));
+
+    for (const surface of Object.values(leaks)) {
+      expect(surface).not.toContain(KNOWN_EMAIL);
+      expect(surface).not.toContain(PASSWORD);
+    }
+
+    const bodyText = await page.locator("body").innerText();
+    expect(bodyText).not.toContain(KNOWN_EMAIL);
+    expect(bodyText).not.toContain(PASSWORD);
+  });
+
+  test("a fresh login visit never restores an earlier draft", async ({ page }) => {
+    await page.goto("/id/login");
+    await page.locator("input[name='email']").fill(KNOWN_EMAIL);
+    await page.locator("input[name='password']").fill(PASSWORD);
+    await page.getByRole("link", { name: "English" }).click();
+    await expect(page.locator("input[name='email']")).toHaveValue(KNOWN_EMAIL);
+
+    // The draft is consumed by the form that reads it, so arriving at /login
+    // again starts from an empty form.
+    await page.goto("/id/login");
+    await expect(page.locator("input[name='email']")).toHaveValue("");
+    await expect(page.locator("input[name='password']")).toHaveValue("");
+  });
+
+  test("submitting discards the locale hand-off draft", async ({ page }) => {
+    await stubCredentials(page, {
+      status: 401,
+      body: { ok: false, code: "INVALID_CREDENTIALS" },
+    });
+
+    await page.goto("/id/login");
+    await signIn(page, KNOWN_EMAIL);
+    await expect(alertRegion(page)).toBeVisible();
+
+    // The password was cleared by the failure; switching locale must not bring
+    // back a pre-submit copy of it.
+    await page.getByRole("link", { name: "English" }).click();
+    await expect(page).toHaveURL(/\/en\/login/);
+    await expect(page.locator("input[name='password']")).toHaveValue("");
+  });
+
   test("no horizontal overflow at 360px", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 740 });
     for (const locale of ["id", "ar"] as const) {

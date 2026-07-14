@@ -60,7 +60,11 @@ export function PasswordField({
           onClick={() => setVisible((current) => !current)}
           className="absolute end-1 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-900"
         >
-          {visible ? <EyeOffIcon aria-hidden /> : <EyeIcon aria-hidden />}
+          {visible ? (
+            <EyeOffIcon aria-hidden data-icon="inline-start" />
+          ) : (
+            <EyeIcon aria-hidden data-icon="inline-start" />
+          )}
         </Button>
       </div>
     </Field>
