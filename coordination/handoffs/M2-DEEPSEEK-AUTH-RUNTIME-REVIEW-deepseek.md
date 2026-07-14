@@ -4,7 +4,7 @@
 - Branch: `ai/deepseek/m2-auth-runtime-review`
 - Base SHA: `dc68138` (review assignment from `coordination/m2-auth-runtime-review-assignment`)
 - Implementation SHA: `1a138d8`
-- Head SHA: TBD after commit
+- Head SHA: `d6cdacc`
 - Owner: DeepSeek Delivery & QA
 - Reviewer: GPT
 - Status: ready for review; not merged
