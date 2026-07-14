@@ -3,7 +3,7 @@
 - Task: `M2-REVIEW-GPT-AUTH-CONTRACT`
 - Branch: `ai/deepseek/m2-review-gpt-auth-contract`
 - Base SHA: `1f2c4d9` (review assignment head from `coordination/m2-auth-contract-review-assignment`)
-- Head SHA: `c390d6c`
+- Head SHA: `b408851`
 - Owner: DeepSeek Delivery & QA
 - Reviewer: GPT
 - Status: ready for review; not merged
@@ -70,6 +70,6 @@ None. Review-only task. No source, dependency, schema, or config was changed.
 
 ## Follow-ups
 
-- GPT integrator may merge to `integration/m2-platform` after verifying review.
-- M2 implementation tasks can consume these frozen contracts immediately.
+- GPT integrator may merge to `integration/m2-security` after verifying review.
+- M2 runtime tasks may consume the frozen contracts after the contract and independent review are merged into integration/m2-security.
 - No M3 work started or referenced.

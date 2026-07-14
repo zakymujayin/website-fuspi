@@ -14,7 +14,7 @@
 
 This is a follow-up adversarial review of GPT's corrected M2 Auth/RBAC contract after
 findings M1–M5 and L1–L3 from the initial review (`fc4ad81` / `53c9e7f`) were addressed
-in commit `bdc3a67`. The correction added 203 lines across 7 files. Each finding was
+in commit `bdc3a67`. The correction changed 6 source files with 147 insertions and 10 deletions. Each finding was
 verified independently against the corrected snapshot.
 
 ## Finding status
@@ -43,7 +43,7 @@ verified independently against the corrected snapshot.
 |---|---|---|
 | SafeInternalPath rejects C1 control characters U+0080–U+009F | ✅ | `auth.ts:32` expands regex from `[\u0000-\u001f\u007f]` to `[\u0000-\u001f\u007f-\u009f]`; test at line 70 adds `"/id/admin\u0085hidden"` rejection |
 | SessionInvalidResultSchema provides safe public shape | ✅ | `auth.ts:48–53` exports new schema with `ok: literal(false)` + `code: literal("SESSION_INVALID")` + `.strict()`; test at lines 49–56 validates parse and rejects extra keys |
-| No PII, tokens, hashes, or technical errors in public output | ✅ | All public schemas (`LoginCredentialsSchema`, `LoginResultSchema`, `SessionInvalidResultSchema`, `SafeInternalPathSchema`, `ActiveDatabaseSessionSchema`) expose zero PII/hash/token fields |
+| No PII, tokens, hashes, or technical errors in public output | ✅ | `LoginResultSchema` and `SessionInvalidResultSchema` do not expose PII, password, hash, token, or technical error. `LoginCredentialsSchema` encodes the trust-boundary input contract and must never be logged or returned as output. `ActiveDatabaseSessionSchema` is server-only, contains no `sessionToken`/`passwordHash` field, and must never be serialized to the client. `SafeInternalPathSchema` has no PII surface. |
 | PPKS isolation, EDITOR ownership, ticket scope, default-deny intact | ✅ | Matrix cell-by-cell audit confirms zero change to grants; only `freezePermissionMatrix` was added |
 | Matrix cannot be mutated through nested role/resource/action assignment | ✅ | `permission-matrix.ts` type is now `Readonly<Record<AuthRole, Readonly<Record<AuthResource, Readonly<Record<AuthAction, PermissionRule>>>>>`; runtime freeze at every level |
 | No M3 changes | ✅ | Diff shows only M2 files: `src/contracts/auth.ts`, `src/lib/auth/permission-matrix.ts`, `tests/platform/auth-contracts/auth-contracts.test.ts`, `package.json`, `package-lock.json`, ADR, handoff |
