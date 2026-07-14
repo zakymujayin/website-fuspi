@@ -5,7 +5,7 @@
 - Base SHA: `d2fb5c5` (assignment from `coordination/m2-deepseek-auth-bridge-review-assignment`)
 - Implementation SHA: `e615950` (GPT bridge candidate)
 - Handoff SHA: `898fc3c` (GPT handoff)
-- Head SHA: TBD after commit
+- Head SHA: `bc3d746`
 - Owner: DeepSeek Delivery & QA
 - Reviewer: GPT
 - Status: ready for re-review; not merged
