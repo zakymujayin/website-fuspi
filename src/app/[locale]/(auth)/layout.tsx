@@ -66,7 +66,7 @@ export default async function AuthLayout({
         <main
           id="main"
           tabIndex={-1}
-          className="flex flex-1 items-start justify-center px-4 pb-16 outline-none sm:items-center"
+          className="flex flex-1 items-start justify-center px-4 pb-16 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset focus-visible:outline-none sm:items-center"
         >
           {children}
         </main>

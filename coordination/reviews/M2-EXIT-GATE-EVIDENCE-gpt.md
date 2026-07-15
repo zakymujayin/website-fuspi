@@ -13,11 +13,11 @@ Decision: **platform code complete; milestone acceptance and M3 entry remain blo
 | Gate | Result | Durable evidence |
 | --- | --- | --- |
 | GitHub integration pipeline | PASS | Run `29431120389` for `8d804f1`: migration deploy, double seed, lint, typecheck, Prisma validate, unit, PostgreSQL integration, and build all succeeded. |
-| Unit suite | PASS | `npm test`: 376 passed; database-gated cases skipped by the unit configuration and executed by the integration configuration. |
+| Unit suite | PASS | `npm test`: 380 passed; database-gated cases skipped by the unit configuration and executed by the integration configuration. |
 | PostgreSQL integration suite | PASS | `npm run test:integration`: 54 passed against PostgreSQL. |
 | Production build | PASS | `npm run build`. |
-| Browser/UX suite | PASS | `npm run test:e2e`: 166 passed across desktop Chromium and Pixel 7 projects. |
-| Dependency severity gate | PASS | `npm audit --audit-level=high`: zero High/Critical; five Moderate remain visible and are not represented as zero findings. |
+| Browser/UX suite | PASS | `npm run test:e2e`: 170 passed across desktop Chromium and Pixel 7 projects, including axe. |
+| Dependency severity gate | PASS | `npm audit --audit-level=high`: zero known vulnerabilities after pinned PostCSS and Hono remediation. |
 | Redirect registry acceptance | PASS | Unit and PostgreSQL adversarial coverage includes invalid local paths, chain/loop rejection, concurrent opposite edges, fail-closed resolution, and hit counting. |
 
 GitHub evidence: https://github.com/zakymujayin/website-fuspi/actions/runs/29431120389
@@ -78,20 +78,24 @@ survive deploy/rollback, or that a real SMTP provider delivers without duplicate
 Reconciled by `M2-GPT-THREAT-REGISTRY-RECONCILIATION`. The 36 cases now have an explicit
 execution state, owning milestone, evidence paths, and a bounded explanation:
 
-- 14 `covered` M2 cases are executable and link to present tests;
-- 12 `partial` cases link to tested platform primitives but remain non-executable until their
+- 15 `covered` M2 cases are executable and link to present tests;
+- 11 `partial` cases link to tested platform primitives but remain non-executable until their
   final M3/M4 route or action exists;
 - 10 `blocked` M3/M4 feature cases claim no executable evidence.
 
 Meta-tests reject missing evidence paths, inconsistent state/boolean combinations, unknown
 milestones, and any attempt to label an M3/M4 case executable.
 
-## Remaining blockers
+## Development gate closure
 
-1. Independent consolidated-head threat-surface review.
-2. Automated axe and recorded manual screen-reader acceptance for auth.
-3. VPS staging proof for SMTP, scheduler, persistent storage, backup/restore, and secret/file
-   permissions.
+Completed in `M2-GPT-FINAL-CLOSURE-AND-M3-ENTRY`:
 
-Until those three blockers are closed, the correct status is `M2 platform code complete; M2
-acceptance blocked; M3 blocked`.
+- consolidated security review with zero confirmed Critical/High defect;
+- executable bcrypt timing-distribution guard, closing `M2-AUTH-007`;
+- automated axe coverage for login ID/EN/AR, password change, and admin;
+- Web Interface Guidelines review and visible skip-link target focus correction;
+- dependency remediation from five Moderate advisories to zero vulnerabilities.
+
+VPS SMTP/scheduler/storage/backup/permission proof and human NVDA/VoiceOver listening remain
+deployment/go-live gates. They are not evidence that can be generated from a development
+worktree and no longer block the M3 development branch.

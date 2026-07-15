@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 
+import AxeBuilder from "@axe-core/playwright";
 import { hash } from "bcryptjs";
 import { expect, test, type Page } from "@playwright/test";
 import { Pool } from "pg";
@@ -100,6 +101,21 @@ test.describe("password and session UI", () => {
     expect(body).not.toContain(email);
     expect(body).not.toContain(userId);
     expect(body).not.toContain("ADMIN");
+  });
+
+  test("admin and password-change surfaces have no WCAG A/AA axe violations", async ({ page }) => {
+    await setSession(page);
+    await page.goto("/id/admin");
+    const adminResult = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+      .analyze();
+    expect(adminResult.violations, "admin axe violations").toEqual([]);
+
+    await page.goto("/id/change-password");
+    const passwordResult = await new AxeBuilder({ page })
+      .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+      .analyze();
+    expect(passwordResult.violations, "password-change axe violations").toEqual([]);
   });
 
   test("forced-password session is redirected before admin renders", async ({ page }) => {

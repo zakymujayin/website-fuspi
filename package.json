@@ -55,7 +55,7 @@
     "fuspi-nodemailer": "npm:nodemailer@9.0.3",
     "isomorphic-dompurify": "^2.34.0",
     "lucide-react": "^0.577.0",
-    "next": "16.2.6",
+    "next": "16.2.10",
     "next-auth": "5.0.0-beta.31",
     "next-intl": "^4.8.3",
     "papaparse": "^5.5.3",
@@ -70,6 +70,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.12.1",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4.2.1",
     "@types/bcryptjs": "^2.4.6",
@@ -80,12 +81,18 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.4",
     "eslint": "^9.39.4",
-    "eslint-config-next": "16.2.6",
+    "eslint-config-next": "16.2.10",
     "jsdom": "^29.0.1",
     "prisma": "^7.8.0",
     "tailwindcss": "^4.2.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0"
+  },
+  "overrides": {
+    "@hono/node-server": "1.19.13",
+    "next": {
+      "postcss": "8.5.19"
+    }
   }
 }

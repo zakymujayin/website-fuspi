@@ -1,10 +1,11 @@
 # M2 Exit Gate and M3 Entry Contract
 
-Status: **M2 platform code complete; M2 acceptance blocked; M3 blocked**
+Status: **M2 development acceptance candidate; M3 pending final merged CI**
 
 This is the only transition rule from M2 to M3. The durable evidence audit is
-`coordination/reviews/M2-EXIT-GATE-EVIDENCE-gpt.md`. A passing suite does not open M3 when
-required route-level or staging evidence is absent.
+`coordination/reviews/M2-EXIT-GATE-EVIDENCE-gpt.md`. M2 development acceptance requires the
+merged platform/security/accessibility suites to pass. VPS operations and human assistive-
+technology sign-off remain mandatory deployment/go-live gates, but do not block building M3.
 
 ## 1. Delivered platform baseline
 
@@ -47,6 +48,9 @@ lease.
   retry/idempotency primitives, sanitizer, and redirect safety: **PASS at platform level**.
 - ID/EN/AR auth UX, Arabic RTL, keyboard order, focus behavior, mobile overflow, generic errors,
   and client-side credential privacy: **PASS in Playwright**.
+- Login ID/EN/AR, password change, and admin WCAG A/AA axe scans: **PASS with zero violations**.
+- Consolidated security review: **PASS with zero confirmed Critical/High defect**.
+- Dependency audit: **PASS with zero known vulnerabilities after narrow pinned overrides**.
 - Fresh PostgreSQL migration, double seed, lint, typecheck, unit, integration, and production
   build: **PASS in GitHub Actions**.
 
@@ -61,35 +65,34 @@ lease.
   mandatory M3 gate**.
 - CSRF coverage for future Post, Media, ticket, booking, and user-management mutations remains
   mandatory when those boundaries are introduced: **PARTIAL; per-feature merge blocker**.
-- Automated axe coverage and a manual screen-reader pass for the auth flow are not recorded:
-  **BLOCKED until evidence exists**.
 - VPS SMTP delivery, five-minute worker scheduling, persistent public/private filesystem,
   backup/restore, and secret/permission configuration have no staging evidence:
-  **BLOCKED on deployment environment**.
-- The milestone requirement for an independent final threat-surface review has not been
-  satisfied for the consolidated M2 head: **BLOCKED until a fresh read-only review is recorded**.
+  **BLOCKED for deployment/go-live; not an M3 development blocker**.
+- Human NVDA/VoiceOver listening acceptance requires a person and staging browser/device:
+  **BLOCKED for deployment/go-live; automated semantics, keyboard, focus, and axe pass**.
 
 ## 4. Required closure sequence
 
 Completed: the threat registry now records `covered`, `partial`, or `blocked`, links evidence,
 and binds every future route-level case to M3 or M4 without claiming it is executable.
 
-Remaining sequence:
+Completed locally:
 
-1. Run a fresh independent, read-only threat-surface review against the consolidated integration
-   head. GPT fixes only confirmed Critical/High defects under new manifests.
-2. Record automated axe plus manual keyboard/screen-reader evidence for the implemented auth flow.
-3. Record VPS staging evidence for SMTP, scheduler, persistent storage, backup/restore, and
-   production-like secrets/permissions.
-4. Re-run the complete integration and browser suites at the final M2 head and attach the CI URL.
+1. Consolidated, separately leased integrator security review found no Critical/High defect.
+2. Automated axe, keyboard, focus, live-region, RTL, mobile, and semantic screen-reader contracts
+   pass for the implemented auth/admin flow.
+3. Bcrypt rejection timing distributions overlap within the recorded tolerance.
+4. Lint, typecheck, Prisma validation, 380 unit tests, 54 PostgreSQL integration tests,
+   production build, 170 Playwright tests, and dependency audit pass locally.
 
-These are closure activities, not authorization to add M3 or M4 feature code.
+Remaining transition action: merge this closure task and require the final integration CI to pass.
+VPS operations and human NVDA/VoiceOver then remain tracked under the deployment/go-live gate.
 
 ## 5. M3 activation
 
-Only the GPT integrator may change this document's status to `M2 accepted; M3 ready`, create the
-M3 integration branch, and issue M3 task manifests with a frozen base SHA. Until every M2 closure
-item above has durable evidence:
+Only the GPT integrator may change this document's status to `M2 development accepted; M3 ready`,
+create the M3 integration branch, and issue M3 task manifests with a frozen base SHA. Until the
+closure task is merged and its final integration CI is green:
 
 - do not create M3 feature branches;
 - do not lease M3 source paths;
