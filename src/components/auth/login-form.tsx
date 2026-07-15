@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircleIcon } from "lucide-react";
+import { AlertCircleIcon, InfoIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
@@ -19,6 +19,8 @@ type LoginFormProps = {
   locale: string;
   /** Raw, untrusted `?next=` value. Forwarded to the server verbatim. */
   next?: string;
+  /** Set only after the server found a cookie and rejected its database session. */
+  sessionInvalid?: boolean;
 };
 
 type Failure = {
@@ -27,7 +29,7 @@ type Failure = {
   attempt: number;
 };
 
-export function LoginForm({ locale, next }: LoginFormProps) {
+export function LoginForm({ locale, next, sessionInvalid = false }: LoginFormProps) {
   const t = useTranslations("Auth");
   const router = useRouter();
 
@@ -95,7 +97,7 @@ export function LoginForm({ locale, next }: LoginFormProps) {
 
     try {
       const response = await fetch(
-        `/api/auth/credentials?redirectTo=${encodeURIComponent(destination)}`,
+        `/api/auth/credentials?redirectTo=${encodeURIComponent(destination)}&locale=${encodeURIComponent(locale)}`,
         {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -135,6 +137,16 @@ export function LoginForm({ locale, next }: LoginFormProps) {
 
   return (
     <form onSubmit={handleSubmit} aria-labelledby="login-title" aria-busy={busy} noValidate>
+      {sessionInvalid ? (
+        <div
+          role="status"
+          className="mb-5 flex items-start gap-2 rounded-lg bg-info-surface p-3 text-sm text-foreground"
+        >
+          <InfoIcon aria-hidden className="mt-0.5 size-4 shrink-0 text-info" />
+          <span>{t("sessionInvalid")}</span>
+        </div>
+      ) : null}
+
       {/* Both regions exist from first render: a live region inserted at the
           same moment its content arrives is frequently not announced at all. */}
       <div
