@@ -42,7 +42,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-GPT-CRYPTO-HMAC-PRIMITIVES.md TASK_BASE=origin/coordination/m2-gpt-crypto-hmac-assignment npm run check:scope
 risk: high
 token_class: M
-status: ready
+status: merged
 ---
 
 # M2 GPT Cryptography and HMAC Primitives

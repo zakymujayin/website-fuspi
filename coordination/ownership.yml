@@ -46,13 +46,4 @@ ui_hotspots:
     - src/app/globals.css
     - src/components/ui/**
     - messages/**
-active_leases:
-  - task: M2-GPT-CRYPTO-HMAC-PRIMITIVES
-    owner: gpt
-    branch: ai/gpt/m2-crypto-hmac-primitives
-    base_sha: b6d1284
-    paths:
-      - src/contracts/security.ts
-      - src/lib/security/**
-      - tests/platform/security/**
-      - coordination/handoffs/M2-GPT-CRYPTO-HMAC-PRIMITIVES-gpt.md
+active_leases: []
