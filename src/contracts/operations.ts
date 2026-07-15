@@ -67,6 +67,25 @@ export const HolidayRangeSchema = z
     path: ["through"],
   });
 
+export const OptimisticResourceSchema = z.enum(["Post", "Page", "Booking"]);
+
+export const OptimisticLockInputSchema = z.object({
+  resource: OptimisticResourceSchema,
+  id: z.string().trim().min(1).max(191),
+  expectedVersion: z.number().int().positive().max(2_147_483_646),
+});
+
+export const OptimisticConflictSchema = z.object({
+  ok: z.literal(false),
+  code: z.literal("VERSION_CONFLICT"),
+});
+
+export const OptimisticClaimSchema = z.object({
+  ok: z.literal(true),
+  previousVersion: z.number().int().positive().max(2_147_483_646),
+  nextVersion: z.number().int().min(2).max(2_147_483_647),
+});
+
 export type AnnualSequenceKind = z.infer<typeof AnnualSequenceKindSchema>;
 export type AnnualSequenceInput = z.input<typeof AnnualSequenceInputSchema>;
 export type AnnualSequenceAllocation = z.infer<typeof AnnualSequenceAllocationSchema>;
@@ -74,3 +93,6 @@ export type TicketPriority = z.infer<typeof TicketPrioritySchema>;
 export type TicketSlaCalculationInput = z.input<typeof TicketSlaCalculationInputSchema>;
 export type TicketSlaDeadlines = z.infer<typeof TicketSlaDeadlinesSchema>;
 export type TicketSlaResumeInput = z.input<typeof TicketSlaResumeInputSchema>;
+export type OptimisticLockInput = z.input<typeof OptimisticLockInputSchema>;
+export type OptimisticClaim = z.infer<typeof OptimisticClaimSchema>;
+export type OptimisticConflict = z.infer<typeof OptimisticConflictSchema>;
