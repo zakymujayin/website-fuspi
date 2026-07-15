@@ -798,7 +798,7 @@ const executionRecords: Record<string, ExecutionRecord> = {
   "M2-AUTH-004": {state: "covered", milestone: "M2", evidence: AUTH_RUNTIME_EVIDENCE, note: "Password changes invalidate every previously issued session."},
   "M2-AUTH-005": {state: "covered", milestone: "M2", evidence: AUTH_RUNTIME_EVIDENCE, note: "Persisted stale sessions for inactive users fail closed."},
   "M2-AUTH-006": {state: "covered", milestone: "M2", evidence: AUTH_PRIVACY_EVIDENCE, note: "Existing, unknown, and inactive accounts share the same bounded failure sequence and persistent limiter."},
-  "M2-AUTH-007": {state: "partial", milestone: "M2", evidence: AUTH_PRIVACY_EVIDENCE, note: "Dummy/real cost-12 bcrypt selection is covered; the required timing-distribution acceptance run is not recorded."},
+  "M2-AUTH-007": {state: "covered", milestone: "M2", evidence: AUTH_PRIVACY_EVIDENCE, note: "Dummy and real cost-12 rejection paths are structurally equal and their alternating median timing distributions overlap within a bounded tolerance."},
   "M2-IDOR-001": {state: "blocked", milestone: "M3", evidence: [], note: "The Post ownership mutation boundary is introduced by the M3 reference slice."},
   "M2-IDOR-002": {state: "blocked", milestone: "M4", evidence: [], note: "No user-management mutation route exists yet."},
   "M2-IDOR-003": {state: "blocked", milestone: "M4", evidence: [], note: "The PPKS ticket detail query and denied-access log are M4 boundaries."},

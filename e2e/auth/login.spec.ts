@@ -1,3 +1,4 @@
+import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 /* Fixtures use reserved, non-resolvable domains only. No real credential and no
@@ -44,6 +45,16 @@ async function signIn(page: Page, email: string, password = PASSWORD) {
 const alertRegion = (page: Page) => page.locator("form [role='alert']");
 
 test.describe("login — localisation and direction", () => {
+  test("has no WCAG A/AA axe violations in ID, EN, or AR", async ({ page }) => {
+    for (const locale of ["id", "en", "ar"] as const) {
+      await page.goto(`/${locale}/login`);
+      const result = await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+        .analyze();
+      expect(result.violations, `${locale} login axe violations`).toEqual([]);
+    }
+  });
+
   test("renders a localized login card in every locale", async ({ page }) => {
     for (const locale of ["id", "en", "ar"] as const) {
       await page.goto(`/${locale}/login`);
