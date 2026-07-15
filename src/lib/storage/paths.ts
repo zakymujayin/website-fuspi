@@ -1,5 +1,5 @@
 import path from "node:path";
-import {StorageKeySchema, type StorageClass} from "@/contracts/storage";
+import {AnyStorageKeySchema, type StorageClass} from "@/contracts/storage";
 import {storageBoundaryError} from "@/lib/storage/error";
 
 export type StorageRoots = Readonly<Record<StorageClass, string>>;
@@ -34,7 +34,7 @@ export function parseStorageRoots(input: Record<StorageClass, string>): StorageR
 export function resolveStoragePath(root: string, storageKey: string): string {
   try {
     if (!path.isAbsolute(root) || root.includes("\0")) throw storageBoundaryError();
-    const candidate = path.resolve(root, StorageKeySchema.parse(storageKey));
+    const candidate = path.resolve(root, AnyStorageKeySchema.parse(storageKey));
     if (!candidate.startsWith(`${path.resolve(root)}${path.sep}`)) throw storageBoundaryError();
     return candidate;
   } catch {
