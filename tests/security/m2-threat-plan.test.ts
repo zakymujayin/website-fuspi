@@ -1,3 +1,5 @@
+import {existsSync} from "node:fs";
+
 import {describe, expect, it} from "vitest";
 
 import {
@@ -49,6 +51,10 @@ describe("M2 security test plan meta-validation", () => {
       "dependsOn",
       "testLevel",
       "executable",
+      "executionState",
+      "owningMilestone",
+      "evidence",
+      "executionNote",
     ];
     for (const c of plan) {
       for (const key of requiredKeys) {
@@ -82,6 +88,30 @@ describe("M2 security test plan meta-validation", () => {
     const allowed = new Set(["unit", "integration", "e2e"]);
     for (const c of plan) {
       expect(allowed.has(c.testLevel), `${c.id} has invalid testLevel`).toBe(true);
+    }
+  });
+
+  it("uses consistent execution states and owning milestones", () => {
+    for (const c of plan) {
+      expect(["covered", "partial", "blocked"]).toContain(c.executionState);
+      expect(["M2", "M3", "M4"]).toContain(c.owningMilestone);
+      expect(c.executable).toBe(c.executionState === "covered");
+      expect(c.executionNote.length).toBeGreaterThan(10);
+    }
+  });
+
+  it("links every covered or partial case to existing executable evidence", () => {
+    for (const c of plan) {
+      if (c.executionState === "blocked") {
+        expect(c.evidence, `${c.id} blocked case must not claim evidence`).toHaveLength(0);
+        continue;
+      }
+
+      expect(c.evidence.length, `${c.id} has no evidence`).toBeGreaterThan(0);
+      for (const path of c.evidence) {
+        expect(existsSync(path), `${c.id} references missing evidence ${path}`).toBe(true);
+        expect(path).toMatch(/^tests\//);
+      }
     }
   });
 
@@ -245,9 +275,21 @@ describe("M2 security test plan meta-validation", () => {
     expect(deps).toEqual(sorted);
   });
 
-  it("all test cases are currently blocked (executable: false)", () => {
-    const ready = plan.filter((c) => c.executable);
-    expect(ready, `Cases marked executable before dependencies merged: ${ready.map((c) => c.id).join(", ")}`).toHaveLength(0);
+  it("distinguishes covered platform cases from partial and feature-blocked cases", () => {
+    const counts = plan.reduce<Record<string, number>>((result, c) => {
+      result[c.executionState] = (result[c.executionState] ?? 0) + 1;
+      return result;
+    }, {});
+
+    expect(counts.covered).toBeGreaterThanOrEqual(10);
+    expect(counts.partial).toBeGreaterThan(0);
+    expect(counts.blocked).toBeGreaterThan(0);
+  });
+
+  it("never claims a future feature-boundary case is executable", () => {
+    const future = plan.filter((c) => c.owningMilestone === "M3" || c.owningMilestone === "M4");
+    expect(future.length).toBeGreaterThan(0);
+    expect(future.filter((c) => c.executable)).toHaveLength(0);
   });
 
   it("validateM2Readiness rejects case marked ready when dependency is missing", () => {
@@ -264,6 +306,10 @@ describe("M2 security test plan meta-validation", () => {
       dependsOn: "auth.rate-limit",
       testLevel: "integration",
       executable: true,
+      executionState: "covered",
+      owningMilestone: "M2",
+      evidence: ["tests/security/m2-threat-plan.test.ts"],
+      executionNote: "Synthetic readiness validation fixture.",
     };
     const result = validateM2Readiness(synthetic, new Set());
     expect(result.valid).toBe(false);
@@ -284,6 +330,10 @@ describe("M2 security test plan meta-validation", () => {
       dependsOn: "auth.rate-limit",
       testLevel: "integration",
       executable: false,
+      executionState: "blocked",
+      owningMilestone: "M4",
+      evidence: [],
+      executionNote: "Synthetic blocked validation fixture.",
     };
     const result = validateM2Readiness(blocked, new Set());
     expect(result.valid).toBe(true);
@@ -303,6 +353,10 @@ describe("M2 security test plan meta-validation", () => {
       dependsOn: "nonexistent.fake",
       testLevel: "integration",
       executable: false,
+      executionState: "blocked",
+      owningMilestone: "M4",
+      evidence: [],
+      executionNote: "Synthetic unknown dependency fixture.",
     };
     const result = validateM2Readiness(unknown, new Set());
     expect(result.valid).toBe(false);
@@ -323,6 +377,10 @@ describe("M2 security test plan meta-validation", () => {
       dependsOn: "auth.rate-limit",
       testLevel: "integration",
       executable: true,
+      executionState: "covered",
+      owningMilestone: "M2",
+      evidence: ["tests/security/m2-threat-plan.test.ts"],
+      executionNote: "Synthetic available dependency fixture.",
     };
     const result = validateM2Readiness(ready, new Set(["auth.rate-limit"]));
     expect(result.valid).toBe(true);

@@ -71,15 +71,17 @@ lease.
 
 ## 4. Required closure sequence
 
-1. Reconcile the M2 threat registry with current executable evidence. Keep route-dependent cases
-   blocked and bind each one to its M3/M4 owning gate; do not mark a design row executable merely
-   because a lower-level helper test exists.
-2. Run a fresh independent, read-only threat-surface review against the consolidated integration
+Completed: the threat registry now records `covered`, `partial`, or `blocked`, links evidence,
+and binds every future route-level case to M3 or M4 without claiming it is executable.
+
+Remaining sequence:
+
+1. Run a fresh independent, read-only threat-surface review against the consolidated integration
    head. GPT fixes only confirmed Critical/High defects under new manifests.
-3. Record automated axe plus manual keyboard/screen-reader evidence for the implemented auth flow.
-4. Record VPS staging evidence for SMTP, scheduler, persistent storage, backup/restore, and
+2. Record automated axe plus manual keyboard/screen-reader evidence for the implemented auth flow.
+3. Record VPS staging evidence for SMTP, scheduler, persistent storage, backup/restore, and
    production-like secrets/permissions.
-5. Re-run the complete integration and browser suites at the final M2 head and attach the CI URL.
+4. Re-run the complete integration and browser suites at the final M2 head and attach the CI URL.
 
 These are closure activities, not authorization to add M3 or M4 feature code.
 
