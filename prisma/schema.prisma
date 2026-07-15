@@ -116,26 +116,26 @@ enum HomeSectionKey {
 
 enum ComplaintCategory {
   AKADEMIK
-  FASILITAS
-  LAYANAN
-  KEUANGAN
+  KEMAHASISWAAN
+  SARANA
   PELECEHAN_SEKSUAL
   LAINNYA
 }
 
 enum TicketPriority {
   RENDAH
-  NORMAL
+  SEDANG
   TINGGI
-  DARURAT
+  URGENT
 }
 
 enum TicketStatus {
   BARU
+  DIVERIFIKASI
   DIPROSES
   MENUNGGU_PELAPOR
   SELESAI
-  DITUTUP
+  DITOLAK
 }
 
 enum TicketAccessAction {
@@ -1404,7 +1404,7 @@ model Ticket {
   ticketNumber               String             @unique
   trackingTokenHash          String             @unique
   category                   ComplaintCategory
-  priority                   TicketPriority     @default(NORMAL)
+  priority                   TicketPriority     @default(SEDANG)
   status                     TicketStatus       @default(BARU)
   subjectCiphertext          String?            @db.Text
   descriptionCiphertext      String             @db.Text
