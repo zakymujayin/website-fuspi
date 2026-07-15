@@ -86,6 +86,36 @@ export const OptimisticClaimSchema = z.object({
   nextVersion: z.number().int().min(2).max(2_147_483_647),
 });
 
+export const SharedRateLimitPolicySchema = z.enum([
+  "CONTACT_SUBMIT",
+  "SURVEY_SUBMIT",
+  "PPKS_SUBMIT",
+  "AUTOCOMPLETE",
+  "TICKET_TRACK_IP",
+  "TICKET_TRACK_NUMBER",
+]);
+
+export const SharedRateLimitKeyHashSchema = z.string().regex(/^[a-f0-9]{64}$/);
+
+export const SharedRateLimitInputSchema = z.object({
+  policy: SharedRateLimitPolicySchema,
+  keyHash: SharedRateLimitKeyHashSchema,
+  now: z.date(),
+});
+
+export const SharedRateLimitAllowedSchema = z.object({
+  allowed: z.literal(true),
+  remaining: z.number().int().min(0).max(60),
+  windowResetAt: z.date(),
+});
+
+export const SharedRateLimitBlockedSchema = z.object({
+  allowed: z.literal(false),
+  code: z.literal("RATE_LIMITED"),
+  retryAfterSeconds: z.number().int().min(1).max(86_400),
+  windowResetAt: z.date(),
+});
+
 export type AnnualSequenceKind = z.infer<typeof AnnualSequenceKindSchema>;
 export type AnnualSequenceInput = z.input<typeof AnnualSequenceInputSchema>;
 export type AnnualSequenceAllocation = z.infer<typeof AnnualSequenceAllocationSchema>;
@@ -96,3 +126,8 @@ export type TicketSlaResumeInput = z.input<typeof TicketSlaResumeInputSchema>;
 export type OptimisticLockInput = z.input<typeof OptimisticLockInputSchema>;
 export type OptimisticClaim = z.infer<typeof OptimisticClaimSchema>;
 export type OptimisticConflict = z.infer<typeof OptimisticConflictSchema>;
+export type SharedRateLimitPolicy = z.infer<typeof SharedRateLimitPolicySchema>;
+export type SharedRateLimitInput = z.input<typeof SharedRateLimitInputSchema>;
+export type SharedRateLimitResult =
+  | z.infer<typeof SharedRateLimitAllowedSchema>
+  | z.infer<typeof SharedRateLimitBlockedSchema>;
