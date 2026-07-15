@@ -43,7 +43,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-GPT-PPKS-ATTACHMENT-CRYPTO.md TASK_BASE=origin/coordination/m2-gpt-ppks-attachment-assignment npm run check:scope
 risk: critical
 token_class: M
-status: ready
+status: merged
 ---
 
 # M2 GPT Encrypted PPKS Attachment Boundary
