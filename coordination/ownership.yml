@@ -46,12 +46,4 @@ ui_hotspots:
     - src/app/globals.css
     - src/components/ui/**
     - messages/**
-active_leases:
-  - task: M2-GPT-REDIRECT-REGISTRY-SAFETY
-    owner: gpt
-    paths:
-      - src/contracts/operations.ts
-      - src/lib/redirect/**
-      - tests/platform/redirect-registry.test.ts
-      - tests/platform/redirect-registry.integration.test.ts
-      - coordination/handoffs/M2-GPT-REDIRECT-REGISTRY-SAFETY-gpt.md
+active_leases: []
