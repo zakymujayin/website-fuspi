@@ -57,7 +57,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-CLAUDE-PASSWORD-SESSION-UI.md TASK_BASE=origin/coordination/m2-claude-password-session-ui-assignment npm run check:scope
 risk: high
 token_class: M
-status: assigned
+status: superseded
 ---
 
 # M2 Claude Password and Session UI
