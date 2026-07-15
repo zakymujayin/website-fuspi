@@ -60,6 +60,21 @@ export const NotificationOutboxInputSchema = z.discriminatedUnion("sensitive", [
   }),
 ]);
 
+export const OutboxWorkerConfigSchema = z
+  .object({
+    workerId: z.string().trim().min(3).max(80).regex(/^[A-Za-z0-9_-]+$/),
+    batchSize: z.number().int().min(1).max(100).default(25),
+    lockTimeoutMs: z.number().int().min(1_000).max(15 * 60_000).default(5 * 60_000),
+    maxAttempts: z.literal(5).default(5),
+    baseBackoffMs: z.number().int().min(1_000).max(60 * 60_000).default(60_000),
+    maxBackoffMs: z.number().int().min(1_000).max(24 * 60 * 60_000).default(60 * 60_000),
+  })
+  .refine((value) => value.maxBackoffMs >= value.baseBackoffMs, {
+    message: "Maximum backoff must not be shorter than base backoff.",
+    path: ["maxBackoffMs"],
+  });
+
 export type ActivityLogInput = z.infer<typeof ActivityLogInputSchema>;
 export type ContentRevisionInput = z.infer<typeof ContentRevisionInputSchema>;
 export type NotificationOutboxInput = z.input<typeof NotificationOutboxInputSchema>;
+export type OutboxWorkerConfig = z.input<typeof OutboxWorkerConfigSchema>;
