@@ -74,7 +74,34 @@ export const OutboxWorkerConfigSchema = z
     path: ["maxBackoffMs"],
   });
 
+const EnvIntegerSchema = (minimum: number, maximum: number, defaultValue: number) =>
+  z.coerce.number().int().min(minimum).max(maximum).default(defaultValue);
+
+export const SmtpOutboxEnvironmentSchema = z.object({
+  SMTP_HOST: z
+    .string()
+    .trim()
+    .min(1)
+    .max(253)
+    .regex(/^(?!.*\.\.)(?:[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?\.)*[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/),
+  SMTP_PORT: EnvIntegerSchema(1, 65_535, 465),
+  SMTP_SECURE: z.enum(["true", "false"]).transform((value) => value === "true"),
+  SMTP_USER: z.string().trim().email().max(320),
+  SMTP_PASSWORD: z.string().min(1).max(1_024),
+  MAIL_FROM: z.string().trim().min(3).max(320).regex(/^[^\r\n]+$/),
+  SMTP_TIMEOUT_MS: EnvIntegerSchema(1_000, 60_000, 10_000),
+  OUTBOX_WORKER_ID: z.string().trim().min(3).max(80).regex(/^[A-Za-z0-9_-]+$/),
+  OUTBOX_BATCH_SIZE: EnvIntegerSchema(1, 100, 25),
+  OUTBOX_LOCK_TIMEOUT_MS: EnvIntegerSchema(1_000, 15 * 60_000, 5 * 60_000),
+  OUTBOX_BASE_BACKOFF_MS: EnvIntegerSchema(1_000, 60 * 60_000, 60_000),
+  OUTBOX_MAX_BACKOFF_MS: EnvIntegerSchema(1_000, 24 * 60 * 60_000, 60 * 60_000),
+}).refine(
+  (value) => value.OUTBOX_MAX_BACKOFF_MS >= value.OUTBOX_BASE_BACKOFF_MS,
+  {message: "Maximum outbox backoff must not be shorter than base backoff."},
+);
+
 export type ActivityLogInput = z.infer<typeof ActivityLogInputSchema>;
 export type ContentRevisionInput = z.infer<typeof ContentRevisionInputSchema>;
 export type NotificationOutboxInput = z.input<typeof NotificationOutboxInputSchema>;
 export type OutboxWorkerConfig = z.input<typeof OutboxWorkerConfigSchema>;
+export type SmtpOutboxEnvironment = z.infer<typeof SmtpOutboxEnvironmentSchema>;
