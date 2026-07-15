@@ -46,10 +46,4 @@ ui_hotspots:
     - src/app/globals.css
     - src/components/ui/**
     - messages/**
-active_leases:
-  - task: M2-GPT-EXIT-GATE-EVIDENCE
-    owner: gpt
-    paths:
-      - coordination/milestones/M2-EXIT-GATE-AND-M3-ENTRY.md
-      - coordination/reviews/M2-EXIT-GATE-EVIDENCE-gpt.md
-      - coordination/handoffs/M2-GPT-EXIT-GATE-EVIDENCE-gpt.md
+active_leases: []

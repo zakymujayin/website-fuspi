@@ -41,7 +41,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-GPT-EXIT-GATE-EVIDENCE.md TASK_BASE=origin/coordination/m2-gpt-exit-gate-evidence-assignment npm run check:scope
 risk: medium
 token_class: S
-status: assigned
+status: merged
 ---
 
 # M2 GPT Exit Gate Evidence
