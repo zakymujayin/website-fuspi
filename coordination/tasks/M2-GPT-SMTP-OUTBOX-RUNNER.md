@@ -58,7 +58,8 @@ single-batch command. Do not change the worker claim/state machine.
 
 ## Required implementation
 
-1. Add pinned Nodemailer 7 and compatible type definitions. Parse SMTP and runner environment
+1. Add a pinned Nodemailer release above the current High-severity advisory range and
+   compatible type definitions. Parse SMTP and runner environment
    through strict Zod contracts: host, port, secure boolean, credentials, sender, bounded
    connection/socket timeout, and safe worker ID/batch/lock/backoff settings.
 2. Create an injected Nodemailer transport adapter with TLS certificate verification,
