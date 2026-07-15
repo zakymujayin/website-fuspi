@@ -57,7 +57,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-GPT-FINAL-CLOSURE-AND-M3-ENTRY.md TASK_BASE=origin/coordination/m2-gpt-final-closure-assignment npm run check:scope
 risk: high
 token_class: L
-status: assigned
+status: merged
 ---
 
 # M2 GPT Final Closure and M3 Entry
