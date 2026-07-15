@@ -1,4 +1,5 @@
-import nodemailer from "nodemailer";
+import {createRequire} from "node:module";
+
 import type SMTPTransport from "nodemailer/lib/smtp-transport";
 import {z} from "zod";
 
@@ -8,6 +9,9 @@ import {
 } from "@/contracts/platform";
 import {renderOutboxMail, type RenderedOutboxMail} from "@/lib/outbox/templates";
 import type {ClaimedOutboxMessage, OutboxSender} from "@/lib/outbox/worker";
+
+const require = createRequire(import.meta.url);
+const nodemailer = require("fuspi-nodemailer") as typeof import("nodemailer");
 
 const RecipientSchema = z.string().trim().email().max(320);
 
