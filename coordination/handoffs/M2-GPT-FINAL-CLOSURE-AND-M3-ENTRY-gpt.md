@@ -60,6 +60,7 @@ evidence and do not block M3 development.
 | targeted auth/axe Chromium | PASS — 40 passed |
 | `npm run test:e2e` | PASS — 170 passed across desktop Chromium and Pixel 7 |
 | `npm audit --audit-level=high` | PASS — 0 vulnerabilities |
+| npm 10.9.4 `npm ci --dry-run` | PASS after regenerating the lockfile with npm 10 |
 | `git diff --check` | PASS |
 | task scope check | Run after this handoff commit |
 
@@ -71,3 +72,9 @@ evidence and do not block M3 development.
 - M3 Post/Media and M4 ticket/PPKS threat cases remain non-executable hard gates for their owning
   feature slices.
 - M3 feature code was not implemented in this task.
+
+## CI lockfile correction
+
+The first merged-head CI attempt stopped at `npm ci`: the npm 11-generated lockfile omitted the
+optional `@swc/helpers@0.5.23` entry required by npm 10.9.4. The lockfile was regenerated with npm
+10.9.4 and its `npm ci --dry-run` now succeeds. No dependency contract changed in this correction.
