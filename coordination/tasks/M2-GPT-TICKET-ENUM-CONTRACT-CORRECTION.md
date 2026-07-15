@@ -44,7 +44,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-GPT-TICKET-ENUM-CONTRACT-CORRECTION.md TASK_BASE=origin/coordination/m2-gpt-ticket-enum-assignment npm run check:scope
 risk: high
 token_class: M
-status: assigned
+status: merged
 ---
 
 # M2 GPT Ticket Enum Contract Correction

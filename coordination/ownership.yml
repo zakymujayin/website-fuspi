@@ -46,14 +46,4 @@ ui_hotspots:
     - src/app/globals.css
     - src/components/ui/**
     - messages/**
-active_leases:
-  - task: M2-GPT-TICKET-ENUM-CONTRACT-CORRECTION
-    owner: gpt
-    paths:
-      - prisma/schema.prisma
-      - prisma/migrations/20260715193000_correct_ticket_enums/**
-      - src/generated/prisma/**
-      - src/contracts/operations.ts
-      - tests/platform/ticket-enum-contract.test.ts
-      - tests/platform/ticket-enum-contract.integration.test.ts
-      - coordination/handoffs/M2-GPT-TICKET-ENUM-CONTRACT-CORRECTION-gpt.md
+active_leases: []
