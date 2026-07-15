@@ -5,6 +5,7 @@
 - Base SHA: `d7944d0`
 - Implementation SHA: `46f3066`
 - Handoff SHA: `695fbf4`
+- Head SHA at handoff finalization: `43285f7`
 - Owner/tester: GPT Platform
 - Reviewer: human owner
 - Status: ready for integration review; not merged
