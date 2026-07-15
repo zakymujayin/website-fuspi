@@ -46,11 +46,4 @@ ui_hotspots:
     - src/app/globals.css
     - src/components/ui/**
     - messages/**
-active_leases:
-  - task: M2-GPT-SMTP-NPM10-LOCK-CORRECTION
-    owner: gpt
-    branch: ai/gpt/m2-smtp-npm10-lock-correction
-    base_sha: 96f02b9
-    paths:
-      - package-lock.json
-      - coordination/handoffs/M2-GPT-SMTP-NPM10-LOCK-CORRECTION-gpt.md
+active_leases: []

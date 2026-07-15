@@ -34,7 +34,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-GPT-SMTP-NPM10-LOCK-CORRECTION.md TASK_BASE=origin/coordination/m2-gpt-smtp-npm10-lock-assignment npm run check:scope
 risk: medium
 token_class: S
-status: ready
+status: merged
 ---
 
 # M2 SMTP npm 10 Lockfile Correction
