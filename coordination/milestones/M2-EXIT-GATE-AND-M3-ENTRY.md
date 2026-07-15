@@ -1,70 +1,98 @@
 # M2 Exit Gate and M3 Entry Contract
 
-Status: **M2 active; M3 blocked**
+Status: **M2 platform code complete; M2 acceptance blocked; M3 blocked**
 
-This is the only transition rule from M2 to M3. A completed design document or passing unit
-suite alone does not open M3. The coordinator opens M3 only after every gate below has durable
-evidence on `integration/m2-security`.
+This is the only transition rule from M2 to M3. The durable evidence audit is
+`coordination/reviews/M2-EXIT-GATE-EVIDENCE-gpt.md`. A passing suite does not open M3 when
+required route-level or staging evidence is absent.
 
-## 1. Immediate parallel work
+## 1. Delivered platform baseline
 
-Claude and DeepSeek may work simultaneously because their revision leases do not overlap:
+The following M2 platform capabilities are merged on `integration/m2-security`:
 
-- Claude: `coordination/tasks/M2-CLAUDE-AUTH-UX-SPEC-REVISION.md`
-- DeepSeek: `coordination/tasks/M2-DEEPSEEK-SECURITY-TEST-DESIGN-REVISION.md`
+- PostgreSQL migration and Prisma platform contract;
+- opaque Auth.js database sessions, credential rejection, revocation, password/session UX,
+  layered authorization contracts, CSRF protection, safe login destinations, and shared rate
+  limiting;
+- AES-GCM/HMAC primitives, content/CSV sanitization, public/private upload boundaries, and
+  ciphertext-only PPKS attachment storage;
+- optimistic locking, annual sequence and SLA/Holiday primitives;
+- transactional outbox worker, SMTP adapter/runner, and lockfile correction;
+- safe one-hop redirect registry with serialized PostgreSQL writes.
 
-Each worker rebases its task branch onto `coordination/m2-revision-assignment`,
-changes only `allowed_paths`, commits, updates its own handoff, pushes, and stops. Neither
-worker reviews, merges, or begins a second task without a new manifest.
+The obsolete revision sequence previously recorded here is complete. Historical manifests with
+`ready` status are design/revision records; later merged runtime or takeover manifests are the
+delivery authority. They must not be treated as active work unless the integrator issues a new
+lease.
 
-## 2. Remaining M2 delivery sequence
+## 2. Evidence states
 
-After the two revisions merge, the integrator creates fresh, non-overlapping manifests in
-this order:
-
-1. GPT implements Auth.js Credentials database sessions, login rate limiting, timing-equalized
-   rejection, revocation, password change, safe redirect, layered authorization, and CSRF.
-2. DeepSeek converts the now-unblocked auth cases into executable integration/adversarial
-   tests against the frozen runtime API.
-3. Claude implements the login/password-change/session UX only after the runtime contract and
-   message keys are leased; Claude does not implement security decisions.
-4. GPT implements the remaining shared M2 capabilities: optimistic locking, public/private
-   upload boundaries, PPKS AES-GCM primitives, HMAC tokens/IP, annual sequence, outbox worker,
-   sanitizer, and redirect safety.
-5. DeepSeek enables and executes each security case only after its dependency is merged.
-6. Claude performs the read-only accessibility/session-flow review; critical findings return
-   to the owning writer.
+- **PASS** means the exact platform invariant has executable evidence on the integration head.
+- **PARTIAL** means the platform primitive is tested but the final feature route/action does not
+  exist yet; the route-level adversarial case remains mandatory in its owning milestone.
+- **BLOCKED** means evidence requires external staging, manual specialist review, or an
+  unimplemented feature boundary. A blocked item must never be relabeled as passed from local
+  assumptions.
 
 ## 3. M2 exit checklist
 
-All items are mandatory:
+### Passing platform gates
 
-- Auth.js uses opaque database sessions for eight hours; no JWT fallback.
-- Unknown, wrong-password, and inactive login paths are enumeration- and timing-resistant.
-- Session revocation, password change, role change, and inactive-user checks pass PostgreSQL
-  integration tests.
-- Permission matrix, ownership, ticket scope, PPKS isolation, and IDOR negative tests pass.
-- CSRF, safe redirect, upload spoof/traversal/bomb, crypto tamper, HMAC, rate-limit, CSV,
-  annual-sequence concurrency, and outbox idempotency tests pass.
-- PPKS/private content never persists in public storage, logs, email, analytics, RSC payloads,
-  or client draft storage.
-- ID/EN/AR login UX, Arabic RTL, keyboard, focus, and screen-reader acceptance pass.
-- Fresh PostgreSQL migration + double seed remains idempotent and the full integration suite is
-  green.
-- VPS-dependent SMTP, worker scheduling, and persistent public/private filesystem capabilities have
-  staging evidence before M2 is declared fully accepted; local assumptions are not enough.
-- All worker handoffs are committed, reviewed by another model, merged one at a time, and the
-  final integration head passes full CI.
+- Opaque eight-hour database sessions, credential timing/equality, login throttling, inactive
+  rejection, password/role/deactivation revocation, and safe auth redirect: **PASS**.
+- Shared authorization matrix and server-side auth boundary: **PASS at contract/platform level**.
+- CSRF enforcement on the implemented auth mutation boundaries: **PASS**.
+- Upload type/size/pixel/path/storage boundaries, AES-GCM tamper detection, key rotation, HMAC,
+  persistent rate limiting, CSV formula escaping, annual-sequence concurrency, outbox locking,
+  retry/idempotency primitives, sanitizer, and redirect safety: **PASS at platform level**.
+- ID/EN/AR auth UX, Arabic RTL, keyboard order, focus behavior, mobile overflow, generic errors,
+  and client-side credential privacy: **PASS in Playwright**.
+- Fresh PostgreSQL migration, double seed, lint, typecheck, unit, integration, and production
+  build: **PASS in GitHub Actions**.
 
-## 4. M3 activation
+### Mandatory evidence not yet complete
 
-Only the GPT integrator may change this document's status to `M2 accepted; M3 ready`, create
-the M3 integration branch, and issue M3 task manifests with a frozen base SHA. Until then:
+- Post ownership mutation IDOR belongs to the M3 Post vertical slice and has no route/action to
+  attack yet: **PARTIAL; mandatory M3 gate**.
+- Ticket query scoping, PPKS detail/download isolation, TicketAccessLog, PPKS CSV/email privacy,
+  and ticket+outbox atomic creation belong to the M4 sensitive ticket slice: **PARTIAL; mandatory
+  M4 blocker before that slice merges**.
+- Final upload endpoint rollback/orphan cleanup belongs to the M3 Media slice: **PARTIAL;
+  mandatory M3 gate**.
+- CSRF coverage for future Post, Media, ticket, booking, and user-management mutations remains
+  mandatory when those boundaries are introduced: **PARTIAL; per-feature merge blocker**.
+- Automated axe coverage and a manual screen-reader pass for the auth flow are not recorded:
+  **BLOCKED until evidence exists**.
+- VPS SMTP delivery, five-minute worker scheduling, persistent public/private filesystem,
+  backup/restore, and secret/permission configuration have no staging evidence:
+  **BLOCKED on deployment environment**.
+- The milestone requirement for an independent final threat-surface review has not been
+  satisfied for the consolidated M2 head: **BLOCKED until a fresh read-only review is recorded**.
+
+## 4. Required closure sequence
+
+1. Reconcile the M2 threat registry with current executable evidence. Keep route-dependent cases
+   blocked and bind each one to its M3/M4 owning gate; do not mark a design row executable merely
+   because a lower-level helper test exists.
+2. Run a fresh independent, read-only threat-surface review against the consolidated integration
+   head. GPT fixes only confirmed Critical/High defects under new manifests.
+3. Record automated axe plus manual keyboard/screen-reader evidence for the implemented auth flow.
+4. Record VPS staging evidence for SMTP, scheduler, persistent storage, backup/restore, and
+   production-like secrets/permissions.
+5. Re-run the complete integration and browser suites at the final M2 head and attach the CI URL.
+
+These are closure activities, not authorization to add M3 or M4 feature code.
+
+## 5. M3 activation
+
+Only the GPT integrator may change this document's status to `M2 accepted; M3 ready`, create the
+M3 integration branch, and issue M3 task manifests with a frozen base SHA. Until every M2 closure
+item above has durable evidence:
 
 - do not create M3 feature branches;
 - do not lease M3 source paths;
 - do not implement Post/Media/Tiptap/public archive work;
-- do not reinterpret an M2 follow-up as M3 work.
+- do not reinterpret an M2 closure item as permission to build a later feature.
 
 When opened, M3 remains the Post + Media + i18n reference vertical slice defined in
-`docs/24-implementation-plan-multi-model.md`; it is not a place to finish missing M2 security.
+`docs/24-implementation-plan-multi-model.md`.
