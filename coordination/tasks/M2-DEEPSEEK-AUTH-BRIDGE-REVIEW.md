@@ -41,7 +41,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-DEEPSEEK-AUTH-BRIDGE-REVIEW.md TASK_BASE=origin/coordination/m2-deepseek-auth-bridge-review-assignment npm run check:scope
 risk: high
 token_class: S
-status: assigned
+status: merged
 ---
 
 # M2 DeepSeek Independent Auth Bridge Review
