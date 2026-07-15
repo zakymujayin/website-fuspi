@@ -48,7 +48,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-GPT-SMTP-OUTBOX-RUNNER.md TASK_BASE=origin/coordination/m2-gpt-smtp-runner-assignment npm run check:scope
 risk: high
 token_class: M
-status: ready
+status: merged
 ---
 
 # M2 GPT SMTP Adapter and Outbox Runner

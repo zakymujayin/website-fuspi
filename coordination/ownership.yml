@@ -46,18 +46,4 @@ ui_hotspots:
     - src/app/globals.css
     - src/components/ui/**
     - messages/**
-active_leases:
-  - task: M2-GPT-SMTP-OUTBOX-RUNNER
-    owner: gpt
-    branch: ai/gpt/m2-smtp-outbox-runner
-    base_sha: 4432fb0
-    paths:
-      - package.json
-      - package-lock.json
-      - .env.example
-      - src/contracts/platform.ts
-      - src/lib/outbox/smtp.ts
-      - src/lib/outbox/templates.ts
-      - scripts/process-outbox.ts
-      - tests/platform/outbox-smtp.test.ts
-      - coordination/handoffs/M2-GPT-SMTP-OUTBOX-RUNNER-gpt.md
+active_leases: []
