@@ -49,7 +49,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-GPT-ANNUAL-SEQUENCE-SLA.md TASK_BASE=origin/coordination/m2-gpt-sequence-sla-assignment npm run check:scope
 risk: high
 token_class: M
-status: assigned
+status: merged
 ---
 
 # M2 GPT Annual Sequence and Ticket SLA/Holiday Primitives

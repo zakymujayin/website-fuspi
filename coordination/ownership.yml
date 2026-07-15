@@ -46,15 +46,4 @@ ui_hotspots:
     - src/app/globals.css
     - src/components/ui/**
     - messages/**
-active_leases:
-  - task: M2-GPT-ANNUAL-SEQUENCE-SLA
-    owner: gpt
-    paths:
-      - src/contracts/operations.ts
-      - src/lib/sequence/**
-      - src/lib/sla/**
-      - tests/platform/annual-sequence.test.ts
-      - tests/platform/annual-sequence.integration.test.ts
-      - tests/platform/ticket-sla.test.ts
-      - tests/platform/ticket-sla.integration.test.ts
-      - coordination/handoffs/M2-GPT-ANNUAL-SEQUENCE-SLA-gpt.md
+active_leases: []
