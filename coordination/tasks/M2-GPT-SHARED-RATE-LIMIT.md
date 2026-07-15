@@ -46,7 +46,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-GPT-SHARED-RATE-LIMIT.md TASK_BASE=origin/coordination/m2-gpt-shared-rate-limit-assignment npm run check:scope
 risk: high
 token_class: M
-status: assigned
+status: merged
 ---
 
 # M2 GPT Shared Persistent Rate Limit
