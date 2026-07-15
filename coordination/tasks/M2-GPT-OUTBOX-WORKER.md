@@ -45,7 +45,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-GPT-OUTBOX-WORKER.md TASK_BASE=origin/coordination/m2-gpt-outbox-worker-assignment npm run check:scope
 risk: high
 token_class: M
-status: ready
+status: merged
 ---
 
 # M2 GPT Transactional Outbox Worker
