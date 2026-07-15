@@ -1,5 +1,7 @@
 import {z} from "zod";
 
+import {TicketPriority as PrismaTicketPriority} from "@/generated/prisma/enums";
+
 export const AnnualSequenceKindSchema = z.enum(["TICKET", "BOOKING"]);
 
 export const AnnualSequenceInputSchema = z.object({
@@ -27,7 +29,7 @@ export const HolidayDateKeySchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/).refi
 
 export const HolidayDateKeysSchema = z.array(HolidayDateKeySchema).max(3_660);
 
-export const TicketPrioritySchema = z.enum(["URGENT", "TINGGI", "SEDANG", "RENDAH"]);
+export const TicketPrioritySchema = z.enum(PrismaTicketPriority);
 
 export const TicketSlaCalculationInputSchema = z.object({
   priority: TicketPrioritySchema,
