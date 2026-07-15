@@ -45,7 +45,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-GPT-OPTIMISTIC-LOCKING.md TASK_BASE=origin/coordination/m2-gpt-optimistic-lock-assignment npm run check:scope
 risk: high
 token_class: M
-status: assigned
+status: merged
 ---
 
 # M2 GPT Optimistic Locking Primitive
