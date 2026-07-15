@@ -73,7 +73,7 @@ acceptance_commands:
   - git diff --check
   - TASK_MANIFEST=coordination/tasks/M2-GPT-POSTGRESQL-PLATFORM-MIGRATION.md TASK_BASE=coordination/m2-postgresql-platform-migration npm run check:scope
 token_class: L
-status: active
+status: merged
 ---
 
 ## Intent
