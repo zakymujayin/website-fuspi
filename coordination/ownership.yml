@@ -46,9 +46,4 @@ ui_hotspots:
     - src/app/globals.css
     - src/components/ui/**
     - messages/**
-active_leases:
-  - task: M2-GPT-NPM10-FINAL-LOCK-CORRECTION
-    owner: gpt
-    paths:
-      - package-lock.json
-      - coordination/handoffs/M2-GPT-NPM10-FINAL-LOCK-CORRECTION-gpt.md
+active_leases: []

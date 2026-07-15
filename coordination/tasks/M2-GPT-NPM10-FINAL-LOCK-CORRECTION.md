@@ -30,7 +30,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-GPT-NPM10-FINAL-LOCK-CORRECTION.md TASK_BASE=origin/coordination/m2-gpt-npm10-final-lock-assignment npm run check:scope
 risk: medium
 token_class: S
-status: assigned
+status: merged
 ---
 
 # M2 GPT npm 10 Final Lock Correction
