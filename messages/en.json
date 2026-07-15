@@ -16,11 +16,42 @@
     "submit": "Sign in",
     "submitting": "Verifying…",
     "submittingStatus": "Verifying credentials",
+    "sessionInvalid": "Your session is no longer valid. Sign in again to continue.",
     "error": {
       "INVALID_CREDENTIALS": "Incorrect email or password. Check your details and try again.",
       "TRY_AGAIN_LATER": "Too many sign-in attempts. Try again in a few minutes.",
       "AUTH_UNAVAILABLE": "The sign-in service is unavailable right now. Please try again shortly."
     }
+  },
+  "PasswordChange": {
+    "metaTitle": "Change password",
+    "title": "Update your password",
+    "description": "Use at least 12 characters. For your security, all active sessions will end after a successful password change.",
+    "currentPasswordLabel": "Current password",
+    "newPasswordLabel": "New password",
+    "confirmPasswordLabel": "Confirm new password",
+    "showCurrentPassword": "Show current password",
+    "hideCurrentPassword": "Hide current password",
+    "showNewPassword": "Show new password",
+    "hideNewPassword": "Hide new password",
+    "showConfirmation": "Show password confirmation",
+    "hideConfirmation": "Hide password confirmation",
+    "submit": "Update password",
+    "submitting": "Updating…",
+    "submittingStatus": "Updating password",
+    "error": {
+      "SESSION_INVALID": "Your session is no longer valid. Sign in again to continue.",
+      "INVALID_CREDENTIALS": "The current password is incorrect. Check it and try again.",
+      "PASSWORD_POLICY": "The new password could not be accepted. Review the requirements above and try again.",
+      "AUTH_UNAVAILABLE": "The password service is unavailable right now. Please try again shortly."
+    }
+  },
+  "AdminLanding": {
+    "metaTitle": "Admin panel",
+    "title": "FUSPI admin panel",
+    "description": "Your session has been verified. Content-management modules will appear here in the next implementation stage.",
+    "securityNote": "Every page and action still checks the session and permissions on the server. This landing page grants no access to other modules.",
+    "changePassword": "Change password"
   },
   "Nav": {
     "skipToContent": "Skip to main content",

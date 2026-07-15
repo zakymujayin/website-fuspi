@@ -1,9 +1,20 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/components/auth/login-form";
 import { institution } from "@/config/institution";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { getPrismaClient } from "@/lib/db/client";
+import {
+  readSessionToken,
+  validateRequestSession,
+} from "@/lib/auth/runtime/request-session";
+import {
+  normalizeAuthRedirect,
+  parseAppLocale,
+} from "@/lib/auth/runtime/redirect";
 
 type LoginPageProps = {
   params: Promise<{ locale: string }>;
@@ -26,6 +37,32 @@ export default async function LoginPage({ params, searchParams }: LoginPageProps
 
   const t = await getTranslations("Auth");
   const next = (await searchParams).next;
+  const destinationCandidate = typeof next === "string" ? next : undefined;
+  const appLocale = parseAppLocale(locale);
+  const cookieStore = await cookies();
+  const hasSessionCookie = Boolean(readSessionToken(cookieStore));
+  let sessionInvalid = false;
+  let activeSessionDestination: string | undefined;
+
+  if (hasSessionCookie) {
+    try {
+      const session = await validateRequestSession(getPrismaClient(), cookieStore);
+      if (session.ok) {
+        const destination = normalizeAuthRedirect(destinationCandidate, appLocale);
+        activeSessionDestination = session.session.mustChangePassword
+          ? `/${appLocale}/change-password?next=${encodeURIComponent(destination)}`
+          : destination;
+      } else {
+        sessionInvalid = true;
+      }
+    } catch {
+      // A database outage must not be presented as an expired session. The
+      // credentials endpoint will return its bounded unavailable result.
+    }
+  }
+
+  // redirect() throws; keep it outside the database error boundary.
+  if (activeSessionDestination) redirect(activeSessionDestination);
 
   return (
     <Card className="w-full max-w-md gap-6 px-2 py-8 shadow-md sm:px-4">
@@ -46,7 +83,11 @@ export default async function LoginPage({ params, searchParams }: LoginPageProps
           is never validated, resolved, or navigated to on the client; only the
           server-returned `redirectTo` is ever used as a destination.
         */}
-        <LoginForm locale={locale} next={typeof next === "string" ? next : undefined} />
+        <LoginForm
+          locale={locale}
+          next={destinationCandidate}
+          sessionInvalid={sessionInvalid}
+        />
       </CardContent>
     </Card>
   );
