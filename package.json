@@ -15,6 +15,7 @@
     "test:watch": "vitest",
     "test:integration": "RUN_PLATFORM_DB_TESTS=true vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test",
+    "outbox:process": "tsx scripts/process-outbox.ts",
     "prisma:format": "prisma format",
     "prisma:validate": "prisma validate",
     "prisma:generate": "prisma generate",
