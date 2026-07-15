@@ -1,8 +1,17 @@
 import {createHash, randomBytes} from "node:crypto";
 import {chmod, link, lstat, mkdir, open, readFile, realpath, unlink} from "node:fs/promises";
 import path from "node:path";
+import {z} from "zod";
 
-import {ValidatedUploadSchema, type ValidatedUpload} from "@/contracts/storage";
+import {
+  AnyStorageKeySchema,
+  EncryptedPpksStorageKeySchema,
+  Sha256ChecksumSchema,
+  StorageClassSchema,
+  StorageKeySchema,
+  ValidatedUploadSchema,
+  type ValidatedUpload,
+} from "@/contracts/storage";
 import {storageBoundaryError} from "@/lib/storage/error";
 import {resolveStoragePath, type StorageRoots} from "@/lib/storage/paths";
 
@@ -13,6 +22,23 @@ export type StagedUpload = {
   commit(): Promise<void>;
   discard(): Promise<void>;
 };
+
+const StagedBytesSchema = z.object({
+  storageClass: StorageClassSchema,
+  storageKey: AnyStorageKeySchema,
+  size: z.number().int().positive().max(20_971_520),
+  checksumSha256: Sha256ChecksumSchema,
+  bytes: z.instanceof(Uint8Array),
+}).strict().superRefine((value, context) => {
+  const keyMatchesClass = value.storageClass === "PPKS_PRIVATE"
+    ? EncryptedPpksStorageKeySchema.safeParse(value.storageKey).success
+    : StorageKeySchema.safeParse(value.storageKey).success;
+  if (!keyMatchesClass || value.bytes.byteLength !== value.size) {
+    context.addIssue({code: "custom", message: "Invalid staged file."});
+  }
+});
+
+export type StagedBytesInput = z.infer<typeof StagedBytesSchema>;
 
 async function ensureRealDirectory(directory: string, mode: number): Promise<void> {
   try {
@@ -47,10 +73,10 @@ async function removeIfPresent(filename: string): Promise<void> {
   }
 }
 
-export async function stageUpload(rawUpload: ValidatedUpload, roots: StorageRoots): Promise<StagedUpload> {
+export async function stageVerifiedBytes(rawUpload: StagedBytesInput, roots: StorageRoots): Promise<StagedUpload> {
   let temporaryPath: string | undefined;
   try {
-    const upload = ValidatedUploadSchema.parse(rawUpload);
+    const upload = StagedBytesSchema.parse(rawUpload);
     const root = roots[upload.storageClass];
     await verifyRoot(root);
     const stagingDirectory = path.join(root, ".staging");
@@ -111,6 +137,21 @@ export async function stageUpload(rawUpload: ValidatedUpload, roots: StorageRoot
     };
   } catch {
     if (temporaryPath) await removeIfPresent(temporaryPath).catch(() => undefined);
+    throw storageBoundaryError();
+  }
+}
+
+export async function stageUpload(rawUpload: ValidatedUpload, roots: StorageRoots): Promise<StagedUpload> {
+  try {
+    const upload = ValidatedUploadSchema.parse(rawUpload);
+    return await stageVerifiedBytes({
+      storageClass: upload.storageClass,
+      storageKey: upload.storageKey,
+      size: upload.size,
+      checksumSha256: upload.checksumSha256,
+      bytes: upload.bytes,
+    }, roots);
+  } catch {
     throw storageBoundaryError();
   }
 }

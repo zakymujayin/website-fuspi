@@ -4,9 +4,12 @@ import sharp from "sharp";
 
 import {
   DetectedUploadMimeSchema,
+  EncryptedPpksStorageKeySchema,
   UploadPolicySchema,
+  ValidatedPpksAttachmentSchema,
   ValidatedUploadSchema,
   type UploadPolicy,
+  type ValidatedPpksAttachment,
   type ValidatedUpload,
   type WritableStorageClass,
 } from "@/contracts/storage";
@@ -137,6 +140,26 @@ export async function validateAndTransformUpload(
       width,
       height,
       bytes: new Uint8Array(outputBytes),
+    });
+  } catch {
+    throw storageBoundaryError();
+  }
+}
+
+export async function validatePpksAttachmentUpload(candidate: Omit<UploadCandidate, "policy">): Promise<ValidatedPpksAttachment> {
+  try {
+    const validated = await validateAndTransformUpload({...candidate, policy: "TICKET_ATTACHMENT"});
+    const storageKey = EncryptedPpksStorageKeySchema.parse(
+      validated.storageKey.replace(/\.(?:webp|pdf)$/u, ".enc"),
+    );
+    return ValidatedPpksAttachmentSchema.parse({
+      storageClass: "PPKS_PRIVATE",
+      storageKey,
+      originalName: validated.mimeType === "image/webp" ? "lampiran.webp" : "lampiran.pdf",
+      mimeType: validated.mimeType,
+      size: validated.size,
+      checksumSha256: validated.checksumSha256,
+      bytes: validated.bytes,
     });
   } catch {
     throw storageBoundaryError();
