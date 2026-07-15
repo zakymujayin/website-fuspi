@@ -73,24 +73,25 @@ insert or privacy behavior of future PPKS routes, RSC payloads, exports, and ema
 No local test can prove that a VPS scheduler actually runs every five minutes, that uploads
 survive deploy/rollback, or that a real SMTP provider delivers without duplicate scheduling.
 
-## Threat-registry reconciliation finding
+## Threat-registry reconciliation
 
-`tests/security/m2-threat-plan.ts` still marks every design case `executable: false`. That registry
-predates the merged implementations and is stale, but blindly flipping every flag would be a
-false claim: several cases explicitly require Post, Media, ticket, PPKS export/download, and user
-management routes scheduled for M3/M4.
+Reconciled by `M2-GPT-THREAT-REGISTRY-RECONCILIATION`. The 36 cases now have an explicit
+execution state, owning milestone, evidence paths, and a bounded explanation:
 
-The next closure task must map cases to exact executable evidence and leave future-route cases
-blocked with their owning milestone. This is documentation/test-governance debt, not evidence of
-a runtime failure in the passing platform suites.
+- 14 `covered` M2 cases are executable and link to present tests;
+- 12 `partial` cases link to tested platform primitives but remain non-executable until their
+  final M3/M4 route or action exists;
+- 10 `blocked` M3/M4 feature cases claim no executable evidence.
+
+Meta-tests reject missing evidence paths, inconsistent state/boolean combinations, unknown
+milestones, and any attempt to label an M3/M4 case executable.
 
 ## Remaining blockers
 
-1. Reconciled threat registry with exact evidence links and explicit M3/M4 ownership.
-2. Independent consolidated-head threat-surface review.
-3. Automated axe and recorded manual screen-reader acceptance for auth.
-4. VPS staging proof for SMTP, scheduler, persistent storage, backup/restore, and secret/file
+1. Independent consolidated-head threat-surface review.
+2. Automated axe and recorded manual screen-reader acceptance for auth.
+3. VPS staging proof for SMTP, scheduler, persistent storage, backup/restore, and secret/file
    permissions.
 
-Until those four blockers are closed, the correct status is `M2 platform code complete; M2
+Until those three blockers are closed, the correct status is `M2 platform code complete; M2
 acceptance blocked; M3 blocked`.

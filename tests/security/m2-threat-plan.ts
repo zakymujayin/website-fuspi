@@ -1,4 +1,6 @@
 export type TestLevel = "unit" | "integration" | "e2e";
+export type ExecutionState = "covered" | "partial" | "blocked";
+export type OwningMilestone = "M2" | "M3" | "M4";
 
 export interface M2SecurityTestCase {
   id: string;
@@ -13,6 +15,22 @@ export interface M2SecurityTestCase {
   dependsOn: string;
   testLevel: TestLevel;
   executable: boolean;
+  executionState: ExecutionState;
+  owningMilestone: OwningMilestone;
+  evidence: readonly string[];
+  executionNote: string;
+}
+
+type M2SecurityTestDraft = Omit<
+  M2SecurityTestCase,
+  "executionState" | "owningMilestone" | "evidence" | "executionNote"
+>;
+
+interface ExecutionRecord {
+  state: ExecutionState;
+  milestone: OwningMilestone;
+  evidence: readonly string[];
+  note: string;
 }
 
 export const VALID_DEPENDENCIES = new Set([
@@ -47,7 +65,7 @@ export function validateM2Readiness(
   return { valid: true };
 }
 
-const plan: M2SecurityTestCase[] = [
+const draftPlan: M2SecurityTestDraft[] = [
   // =========================================================
   // AUTH — Session Revocation & Inactive Users
   // =========================================================
@@ -751,6 +769,82 @@ const plan: M2SecurityTestCase[] = [
     executable: false,
   },
 ];
+
+const AUTH_RUNTIME_EVIDENCE = [
+  "tests/platform/auth-runtime/auth-runtime.integration.test.ts",
+  "tests/security/auth-runtime/auth-adversarial.integration.test.ts",
+] as const;
+const AUTH_PRIVACY_EVIDENCE = [
+  ...AUTH_RUNTIME_EVIDENCE,
+  "tests/security/auth-runtime/credential-privacy.test.ts",
+] as const;
+const AUTH_CSRF_EVIDENCE = ["tests/security/auth-runtime/csrf-attacks.test.ts"] as const;
+const UPLOAD_EVIDENCE = ["tests/platform/storage/upload-storage-boundaries.test.ts"] as const;
+const ENCRYPTION_EVIDENCE = [
+  "tests/platform/security/crypto-hmac-primitives.test.ts",
+  "tests/platform/storage/ppks-attachment-crypto.test.ts",
+] as const;
+const SEQUENCE_EVIDENCE = ["tests/platform/annual-sequence.integration.test.ts"] as const;
+const OUTBOX_EVIDENCE = [
+  "tests/platform/platform-db.integration.test.ts",
+  "tests/platform/outbox-worker.integration.test.ts",
+] as const;
+const CSV_EVIDENCE = ["tests/platform/security/content-sanitizer.test.ts"] as const;
+
+const executionRecords: Record<string, ExecutionRecord> = {
+  "M2-AUTH-001": {state: "covered", milestone: "M2", evidence: AUTH_RUNTIME_EVIDENCE, note: "Password mutation and all-session revocation are exercised transactionally."},
+  "M2-AUTH-002": {state: "covered", milestone: "M2", evidence: AUTH_RUNTIME_EVIDENCE, note: "Deactivation revokes sessions and inactive sessions are rejected."},
+  "M2-AUTH-003": {state: "covered", milestone: "M2", evidence: AUTH_RUNTIME_EVIDENCE, note: "Role changes revoke existing sessions transactionally."},
+  "M2-AUTH-004": {state: "covered", milestone: "M2", evidence: AUTH_RUNTIME_EVIDENCE, note: "Password changes invalidate every previously issued session."},
+  "M2-AUTH-005": {state: "covered", milestone: "M2", evidence: AUTH_RUNTIME_EVIDENCE, note: "Persisted stale sessions for inactive users fail closed."},
+  "M2-AUTH-006": {state: "covered", milestone: "M2", evidence: AUTH_PRIVACY_EVIDENCE, note: "Existing, unknown, and inactive accounts share the same bounded failure sequence and persistent limiter."},
+  "M2-AUTH-007": {state: "partial", milestone: "M2", evidence: AUTH_PRIVACY_EVIDENCE, note: "Dummy/real cost-12 bcrypt selection is covered; the required timing-distribution acceptance run is not recorded."},
+  "M2-IDOR-001": {state: "blocked", milestone: "M3", evidence: [], note: "The Post ownership mutation boundary is introduced by the M3 reference slice."},
+  "M2-IDOR-002": {state: "blocked", milestone: "M4", evidence: [], note: "No user-management mutation route exists yet."},
+  "M2-IDOR-003": {state: "blocked", milestone: "M4", evidence: [], note: "The PPKS ticket detail query and denied-access log are M4 boundaries."},
+  "M2-IDOR-004": {state: "blocked", milestone: "M4", evidence: [], note: "The PPKS attachment download route and access log are M4 boundaries."},
+  "M2-CSRF-001": {state: "partial", milestone: "M3", evidence: AUTH_CSRF_EVIDENCE, note: "Auth origin enforcement is covered; every future mutation must add route-level CSRF evidence when introduced."},
+  "M2-UPLOAD-001": {state: "partial", milestone: "M3", evidence: UPLOAD_EVIDENCE, note: "Server-owned storage keys and escape resistance are covered; the Media upload route does not exist."},
+  "M2-UPLOAD-002": {state: "partial", milestone: "M3", evidence: UPLOAD_EVIDENCE, note: "Magic-byte and declared MIME disagreement are covered below the future Media route."},
+  "M2-UPLOAD-003": {state: "partial", milestone: "M3", evidence: UPLOAD_EVIDENCE, note: "Pixel and size ceilings are covered below the future Media route."},
+  "M2-UPLOAD-004": {state: "partial", milestone: "M3", evidence: UPLOAD_EVIDENCE, note: "Storage paths ignore client filenames; multipart null-byte rejection awaits the Media route."},
+  "M2-ENC-001": {state: "partial", milestone: "M4", evidence: ENCRYPTION_EVIDENCE, note: "Ciphertext tamper rejection is covered; the SATGAS download route and DB tamper harness do not exist."},
+  "M2-ENC-002": {state: "partial", milestone: "M4", evidence: ENCRYPTION_EVIDENCE, note: "Tag tamper rejection is covered; route-level zero-plaintext behavior awaits M4."},
+  "M2-ENC-003": {state: "partial", milestone: "M4", evidence: ENCRYPTION_EVIDENCE, note: "Strict key-version selection is covered; attachment route integration awaits M4."},
+  "M2-ENC-004": {state: "covered", milestone: "M2", evidence: ENCRYPTION_EVIDENCE, note: "The encryption boundary owns fresh 96-bit nonce generation and exposes no nonce input."},
+  "M2-PPKS-001": {state: "blocked", milestone: "M4", evidence: [], note: "PPKS aggregate CSV export is an M4 ticket feature."},
+  "M2-PPKS-002": {state: "blocked", milestone: "M4", evidence: [], note: "PPKS view/download access logging is an M4 ticket feature."},
+  "M2-PPKS-003": {state: "blocked", milestone: "M4", evidence: [], note: "Ticket search query isolation is an M4 ticket feature."},
+  "M2-PPKS-004": {state: "blocked", milestone: "M4", evidence: [], note: "TicketAccessLog mutation authorization is introduced with the M4 ticket feature."},
+  "M2-SEQ-001": {state: "covered", milestone: "M2", evidence: SEQUENCE_EVIDENCE, note: "Twenty parallel allocations are unique and gap-free."},
+  "M2-SEQ-002": {state: "covered", milestone: "M2", evidence: SEQUENCE_EVIDENCE, note: "Jakarta year rollover starts a distinct counter at one."},
+  "M2-SEQ-003": {state: "covered", milestone: "M2", evidence: SEQUENCE_EVIDENCE, note: "Ticket and booking kinds remain independent under parallel load."},
+  "M2-OBX-001": {state: "covered", milestone: "M2", evidence: OUTBOX_EVIDENCE, note: "Database uniqueness rejects duplicate idempotency keys and workers claim rows once."},
+  "M2-OBX-002": {state: "partial", milestone: "M4", evidence: ENCRYPTION_EVIDENCE, note: "Authenticated encryption tamper rejection exists; encrypted PPKS worker delivery is not a current route."},
+  "M2-OBX-003": {state: "blocked", milestone: "M4", evidence: [], note: "Atomic ticket creation plus outbox enqueue is an M4 ticket action."},
+  "M2-CSV-001": {state: "covered", milestone: "M2", evidence: CSV_EVIDENCE, note: "The unit-level CSV boundary escapes leading formula characters."},
+  "M2-CSV-002": {state: "covered", milestone: "M2", evidence: CSV_EVIDENCE, note: "The shared CSV boundary protects every supplied cell value."},
+  "M2-EMAIL-001": {state: "blocked", milestone: "M4", evidence: [], note: "PPKS notification composition is introduced with the M4 ticket feature."},
+  "M2-UPLOAD-005": {state: "partial", milestone: "M3", evidence: UPLOAD_EVIDENCE, note: "Idempotent staged-file discard exists; database-insert rollback awaits the M3 Media action."},
+  "M2-UPLOAD-006": {state: "partial", milestone: "M3", evidence: UPLOAD_EVIDENCE, note: "ASCII server keys are covered; Unicode multipart metadata persistence awaits the M3 Media action."},
+  "M2-CSV-003": {state: "covered", milestone: "M2", evidence: CSV_EVIDENCE, note: "Benign cells remain unchanged in the shared CSV unit boundary."},
+};
+
+const plan: M2SecurityTestCase[] = draftPlan.map((testCase) => {
+  const execution = executionRecords[testCase.id];
+  if (!execution) {
+    throw new Error(`Missing execution record for ${testCase.id}`);
+  }
+
+  return {
+    ...testCase,
+    executable: execution.state === "covered",
+    executionState: execution.state,
+    owningMilestone: execution.milestone,
+    evidence: execution.evidence,
+    executionNote: execution.note,
+  };
+});
 
 export function getM2Plan(): M2SecurityTestCase[] {
   return plan;
