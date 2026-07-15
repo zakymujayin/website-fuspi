@@ -58,7 +58,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-GPT-PASSWORD-SESSION-UI.md TASK_BASE=origin/coordination/m2-gpt-password-session-ui-assignment npm run check:scope
 risk: high
 token_class: M
-status: assigned
+status: merged
 ---
 
 # M2 GPT Password and Session UI Takeover

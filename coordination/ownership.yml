@@ -46,7 +46,4 @@ ui_hotspots:
     - src/app/globals.css
     - src/components/ui/**
     - messages/**
-active_leases:
-  - task: M2-GPT-PASSWORD-SESSION-UI
-    owner: gpt
-    paths: ["src/app/[locale]/(auth)/**", "src/app/[locale]/admin/**", "src/components/auth/**", "src/components/ui/field.tsx", "src/components/ui/label.tsx", "src/components/ui/separator.tsx", "messages/id.json", "messages/en.json", "messages/ar.json", "e2e/auth/password-session.spec.ts", "coordination/handoffs/M2-GPT-PASSWORD-SESSION-UI-gpt.md"]
+active_leases: []
