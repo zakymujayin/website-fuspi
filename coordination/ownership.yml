@@ -46,4 +46,12 @@ ui_hotspots:
     - src/app/globals.css
     - src/components/ui/**
     - messages/**
-active_leases: []
+active_leases:
+  - task: M2-GPT-OPTIMISTIC-LOCKING
+    owner: gpt
+    paths:
+      - src/contracts/operations.ts
+      - src/lib/db/optimistic-lock.ts
+      - tests/platform/optimistic-lock.test.ts
+      - tests/platform/optimistic-lock.integration.test.ts
+      - coordination/handoffs/M2-GPT-OPTIMISTIC-LOCKING-gpt.md
