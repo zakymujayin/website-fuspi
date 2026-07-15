@@ -1,8 +1,11 @@
 # M2 Exit Gate Evidence Audit
 
-Audit date: 2026-07-15 (Asia/Jakarta)  
-Audited integration head: `8d804f1f09bdb81d0469f3f8ecbb226f2f84e3a6`  
-Assignment head: `f5a7a13`  
+Audit date: 2026-07-15 (Asia/Jakarta)
+
+Audited integration head: `8d804f1f09bdb81d0469f3f8ecbb226f2f84e3a6`
+
+Assignment head: `f5a7a13`
+
 Decision: **platform code complete; milestone acceptance and M3 entry remain blocked**
 
 ## Automated evidence
