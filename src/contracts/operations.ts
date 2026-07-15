@@ -116,6 +116,63 @@ export const SharedRateLimitBlockedSchema = z.object({
   windowResetAt: z.date(),
 });
 
+const EncodedRedirectSeparatorPattern = /%(?:2e|2f|5c)/iu;
+
+function isCanonicalLocalRedirectPath(value: string) {
+  if (
+    !value.startsWith("/")
+    || value.startsWith("//")
+    || value.includes("\\")
+    || value.includes("//")
+    || value.includes("?")
+    || value.includes("#")
+    || /[\u0000-\u001f\u007f-\u009f]/u.test(value)
+    || EncodedRedirectSeparatorPattern.test(value)
+  ) return false;
+  try {
+    const decoded = decodeURIComponent(value);
+    return decoded.startsWith("/")
+      && !decoded.startsWith("//")
+      && !decoded.includes("\\")
+      && !decoded.split("/").some((segment) => segment === "." || segment === "..");
+  } catch {
+    return false;
+  }
+}
+
+export const RedirectSourcePathSchema = z
+  .string()
+  .min(1)
+  .max(2_048)
+  .refine(isCanonicalLocalRedirectPath, "Redirect source must be a canonical local path.")
+  .refine(
+    (value) => !/^\/(?:api|_next)(?:\/|$)/u.test(value),
+    "Redirect source uses a reserved application path.",
+  );
+
+export const RedirectDestinationPathSchema = z
+  .string()
+  .min(1)
+  .max(2_048)
+  .refine(isCanonicalLocalRedirectPath, "Redirect destination must be a canonical local path.")
+  .refine(
+    (value) => /^\/(?:id|en|ar)(?:\/|$)/u.test(value),
+    "Redirect destination must be a locale-final path.",
+  );
+
+export const RedirectRegistryInputSchema = z.object({
+  sourcePath: RedirectSourcePathSchema,
+  destinationPath: RedirectDestinationPathSchema,
+  statusCode: z.literal(301).default(301),
+  isActive: z.boolean().default(true),
+});
+
+export const RedirectRegistryConflictCodeSchema = z.enum([
+  "SOURCE_EQUALS_DESTINATION",
+  "REDIRECT_CHAIN",
+  "REDIRECT_LOOP",
+]);
+
 export type AnnualSequenceKind = z.infer<typeof AnnualSequenceKindSchema>;
 export type AnnualSequenceInput = z.input<typeof AnnualSequenceInputSchema>;
 export type AnnualSequenceAllocation = z.infer<typeof AnnualSequenceAllocationSchema>;
@@ -131,3 +188,5 @@ export type SharedRateLimitInput = z.input<typeof SharedRateLimitInputSchema>;
 export type SharedRateLimitResult =
   | z.infer<typeof SharedRateLimitAllowedSchema>
   | z.infer<typeof SharedRateLimitBlockedSchema>;
+export type RedirectRegistryInput = z.input<typeof RedirectRegistryInputSchema>;
+export type RedirectRegistryConflictCode = z.infer<typeof RedirectRegistryConflictCodeSchema>;
