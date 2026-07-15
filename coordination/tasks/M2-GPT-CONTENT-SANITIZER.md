@@ -40,7 +40,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M2-GPT-CONTENT-SANITIZER.md TASK_BASE=origin/coordination/m2-gpt-content-sanitizer-assignment npm run check:scope
 risk: high
 token_class: S
-status: ready
+status: merged
 ---
 
 # M2 GPT Content and CSV Sanitizer
