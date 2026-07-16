@@ -1,6 +1,6 @@
 # M3 Reference Slice Entry
 
-Status: **M3 active — Post mutation/public query merged; Media persistence next**
+Status: **M3 active — Post/Media runtime merged; Claude public Post experience active**
 
 M3 starts from the accepted M2 development head
 `f83a00e6816a91f72b9ade654b012be8a1a0b2d0`. That head passed GitHub Actions run
@@ -12,16 +12,21 @@ tracked by the M2 exit contract.
 
 ## Activation order
 
-1. **GPT contract freeze (active):** define the Zod and TypeScript boundary for Post, Media,
+1. **GPT contract freeze (merged):** define the Zod and TypeScript boundary for Post, Media,
    locale fallback, ownership, optimistic versioning, autosave, publish/schedule/archive, and
    safe public reads. No route, action, UI, dependency, or schema change is included.
-2. **GPT runtime slice:** after the contract merges, implement the server-only service,
+2. **GPT runtime slice (merged):** after the contract merges, implement the server-only service,
    authorization, transaction, revision, upload commit/rollback, and public query boundaries.
-3. **Claude experience + DeepSeek QA:** only after the contract is frozen, issue separate,
-   non-overlapping manifests. Claude owns admin/public presentation, Tiptap, RTL, accessibility,
-   and metadata. DeepSeek owns fixtures and negative/integration/E2E tests against the frozen
-   contract.
-4. **Integrator gate:** merge serially, run the full PostgreSQL and browser suites, reconcile the
+3. **Claude public experience (active):** implement the bounded `/berita` list/detail reference
+   experience against the frozen public query contract, including ID/EN/AR fallback presentation,
+   RTL, accessibility, metadata, JSON-LD, responsive states, and safe rich-text rendering.
+4. **DeepSeek public experience QA (next):** after the Claude candidate is committed, issue a
+   separate non-overlapping fixture/E2E/adversarial manifest. Do not reuse the completed Media
+   review branch for implementation.
+5. **Admin transport/editor slice (later M3 tasks):** issue new GPT/Claude/DeepSeek manifests for
+   CSRF-protected Post/Media transport, admin editor presentation, and executable ownership/IDOR
+   browser flows. These remain closed during the public experience task.
+6. **Integrator gate:** merge serially, run the full PostgreSQL and browser suites, reconcile the
    carried security cases, then freeze the reference pattern for M4.
 
 Claude and DeepSeek may work only from a newly committed task manifest and non-overlapping frozen

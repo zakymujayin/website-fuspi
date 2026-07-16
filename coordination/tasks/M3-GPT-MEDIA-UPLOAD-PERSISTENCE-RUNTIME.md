@@ -61,7 +61,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M3-GPT-MEDIA-UPLOAD-PERSISTENCE-RUNTIME.md TASK_BASE=origin/coordination/m3-gpt-media-upload-persistence-runtime-assignment npm run check:scope
 risk: high
 token_class: M
-status: assigned
+status: merged
 ---
 
 # M3 GPT Media Upload Persistence Runtime
