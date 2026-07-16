@@ -54,3 +54,8 @@ active_leases:
       - tests/m3/runtime/post-mutations.test.ts
       - tests/m3/runtime/post-mutations.integration.test.ts
       - coordination/handoffs/M3-GPT-POST-MUTATION-RUNTIME-gpt.md
+  - task: M3-DEEPSEEK-POST-MUTATION-RUNTIME-REVIEW
+    owner: deepseek-v4-pro
+    paths:
+      - coordination/reviews/M3-GPT-POST-MUTATION-RUNTIME-deepseek.md
+      - coordination/handoffs/M3-DEEPSEEK-POST-MUTATION-RUNTIME-REVIEW-deepseek.md
