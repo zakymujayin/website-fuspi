@@ -69,7 +69,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M3-GPT-POST-MUTATION-RUNTIME.md TASK_BASE=origin/coordination/m3-gpt-post-mutation-runtime-assignment npm run check:scope
 risk: high
 token_class: L
-status: assigned
+status: merged
 ---
 
 # M3 GPT Post Mutation Runtime

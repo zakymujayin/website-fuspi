@@ -51,7 +51,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M3-DEEPSEEK-POST-MUTATION-RUNTIME-REVIEW.md TASK_BASE=origin/coordination/m3-deepseek-post-mutation-runtime-review-assignment npm run check:scope
 risk: high
 token_class: M
-status: assigned
+status: merged
 ---
 
 # M3 DeepSeek Independent Post Mutation Runtime Review
