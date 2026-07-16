@@ -1,7 +1,7 @@
 ---
 id: M3-CLAUDE-PUBLIC-POST-EXPERIENCE
 milestone: M3
-owner: claude-sonnet
+owner: claude
 reviewer: gpt
 tester: deepseek-v4-pro
 base_sha: d152db7
