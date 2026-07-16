@@ -46,7 +46,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M3-DEEPSEEK-POST-MEDIA-CONTRACT-REVIEW.md TASK_BASE=origin/coordination/m3-deepseek-post-media-contract-review-assignment npm run check:scope
 risk: high
 token_class: S
-status: assigned
+status: merged
 ---
 
 # M3 DeepSeek Independent Post + Media Contract Review

@@ -58,7 +58,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M3-GPT-POST-MEDIA-CONTRACT.md TASK_BASE=origin/coordination/m3-gpt-post-media-contract-assignment npm run check:scope
 risk: high
 token_class: M
-status: assigned
+status: merged
 ---
 
 # M3 GPT Post + Media Contract Freeze
