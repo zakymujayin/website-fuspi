@@ -1,6 +1,6 @@
 # M3 Reference Slice Entry
 
-Status: **M3 active — GPT contract task assigned**
+Status: **M3 active — Post mutation/public query merged; Media persistence next**
 
 M3 starts from the accepted M2 development head
 `f83a00e6816a91f72b9ade654b012be8a1a0b2d0`. That head passed GitHub Actions run
@@ -24,8 +24,8 @@ tracked by the M2 exit contract.
 4. **Integrator gate:** merge serially, run the full PostgreSQL and browser suites, reconcile the
    carried security cases, then freeze the reference pattern for M4.
 
-Claude and DeepSeek have no active M3 source lease yet. They must not infer permission from this
-entry document or begin work from a chat prompt alone.
+Claude and DeepSeek may work only from a newly committed task manifest and non-overlapping frozen
+assignment branch. They must not infer permission from this entry document or a chat prompt alone.
 
 ## Carried mandatory security evidence
 
