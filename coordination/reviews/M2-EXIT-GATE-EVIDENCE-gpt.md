@@ -2,17 +2,17 @@
 
 Audit date: 2026-07-15 (Asia/Jakarta)
 
-Audited integration head: `8d804f1f09bdb81d0469f3f8ecbb226f2f84e3a6`
+Audited integration head: `2ea2f3098a63e829b146fd8e450f18b3855f47bb`
 
 Assignment head: `f5a7a13`
 
-Decision: **platform code complete; milestone acceptance and M3 entry remain blocked**
+Decision: **M2 development accepted; M3 entry authorized**
 
 ## Automated evidence
 
 | Gate | Result | Durable evidence |
 | --- | --- | --- |
-| GitHub integration pipeline | PASS | Run `29431120389` for `8d804f1`: migration deploy, double seed, lint, typecheck, Prisma validate, unit, PostgreSQL integration, and build all succeeded. |
+| GitHub integration pipeline | PASS | Run `29435220778` for `2ea2f30`: npm 10 clean install, migration deploy, double seed, lint, typecheck, Prisma validate, unit, PostgreSQL integration, and build all succeeded. |
 | Unit suite | PASS | `npm test`: 380 passed; database-gated cases skipped by the unit configuration and executed by the integration configuration. |
 | PostgreSQL integration suite | PASS | `npm run test:integration`: 54 passed against PostgreSQL. |
 | Production build | PASS | `npm run build`. |
@@ -20,7 +20,7 @@ Decision: **platform code complete; milestone acceptance and M3 entry remain blo
 | Dependency severity gate | PASS | `npm audit --audit-level=high`: zero known vulnerabilities after pinned PostCSS and Hono remediation. |
 | Redirect registry acceptance | PASS | Unit and PostgreSQL adversarial coverage includes invalid local paths, chain/loop rejection, concurrent opposite edges, fail-closed resolution, and hit counting. |
 
-GitHub evidence: https://github.com/zakymujayin/website-fuspi/actions/runs/29431120389
+GitHub evidence: https://github.com/zakymujayin/website-fuspi/actions/runs/29435220778
 
 ## Platform invariant mapping
 
@@ -98,4 +98,9 @@ Completed in `M2-GPT-FINAL-CLOSURE-AND-M3-ENTRY`:
 
 VPS SMTP/scheduler/storage/backup/permission proof and human NVDA/VoiceOver listening remain
 deployment/go-live gates. They are not evidence that can be generated from a development
-worktree and no longer block the M3 development branch.
+worktree and do not block the M3 development branch.
+
+The first final-closure integration runs exposed an npm 11-generated lockfile that npm 10 could
+not install. `M2-GPT-NPM10-FINAL-LOCK-CORRECTION` regenerated only `package-lock.json` with npm
+10.9.4. The corrected clean-install contract and the complete integration pipeline then passed
+on run `29435220778`; no failed M2 gate was waived.

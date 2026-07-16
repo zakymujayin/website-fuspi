@@ -1,6 +1,6 @@
 # M2 Exit Gate and M3 Entry Contract
 
-Status: **M2 development acceptance candidate; M3 pending final merged CI**
+Status: **M2 development accepted; M3 ready**
 
 This is the only transition rule from M2 to M3. The durable evidence audit is
 `coordination/reviews/M2-EXIT-GATE-EVIDENCE-gpt.md`. M2 development acceptance requires the
@@ -85,19 +85,22 @@ Completed locally:
 4. Lint, typecheck, Prisma validation, 380 unit tests, 54 PostgreSQL integration tests,
    production build, 170 Playwright tests, and dependency audit pass locally.
 
-Remaining transition action: merge this closure task and require the final integration CI to pass.
-VPS operations and human NVDA/VoiceOver then remain tracked under the deployment/go-live gate.
+Completed: the final merged integration head `2ea2f3098a63e829b146fd8e450f18b3855f47bb`
+passed GitHub Actions run `29435220778`, including npm 10 clean install, fresh migration,
+double seed, lint, typecheck, Prisma validation, unit tests, PostgreSQL integration tests, and
+production build. VPS operations and human NVDA/VoiceOver remain tracked exclusively under the
+deployment/go-live gate.
 
 ## 5. M3 activation
 
-Only the GPT integrator may change this document's status to `M2 development accepted; M3 ready`,
-create the M3 integration branch, and issue M3 task manifests with a frozen base SHA. Until the
-closure task is merged and its final integration CI is green:
+The GPT integrator changed this document's status only after the closure task, npm 10 lockfile
+correction, and final merged CI were green. The M3 integration branch and its task manifests may
+now be created from the accepted M2 SHA. M3 still follows these controls:
 
-- do not create M3 feature branches;
-- do not lease M3 source paths;
-- do not implement Post/Media/Tiptap/public archive work;
-- do not reinterpret an M2 closure item as permission to build a later feature.
+- create task branches only from the frozen M3 assignment base;
+- lease each source path to exactly one active task;
+- merge the GPT Post/Media contract before Claude or DeepSeek implementation starts;
+- do not reinterpret M2 platform evidence as route-level Post/Media acceptance.
 
 When opened, M3 remains the Post + Media + i18n reference vertical slice defined in
 `docs/24-implementation-plan-multi-model.md`.
