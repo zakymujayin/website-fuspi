@@ -388,6 +388,7 @@ describe("unavailable and empty state copy without technical disclosure", () => 
     const markup = renderToStaticMarkup(
       <PostStateNotice
         variant="unavailable"
+        headingAs="h2"
         title="Berita sedang tidak dapat dimuat"
         description="Silakan muat ulang halaman ini beberapa saat lagi."
       />,
@@ -401,9 +402,64 @@ describe("unavailable and empty state copy without technical disclosure", () => 
 
   it("renders only the translated empty-archive copy", () => {
     const markup = renderToStaticMarkup(
-      <PostStateNotice variant="empty" title="Belum ada berita" description="Berita akan tampil di sini setelah diterbitkan." />,
+      <PostStateNotice
+        variant="empty"
+        headingAs="h2"
+        title="Belum ada berita"
+        description="Berita akan tampil di sini setelah diterbitkan."
+      />,
     );
     expect(markupToContainer(markup).textContent).toContain("Belum ada berita");
+  });
+
+  it("renders the notice title as an h1 only when it stands in for the page's own H1", () => {
+    const h1Markup = renderToStaticMarkup(
+      <PostStateNotice
+        variant="unavailable"
+        headingAs="h1"
+        title="Berita sedang tidak dapat dimuat"
+        description="Silakan muat ulang halaman ini beberapa saat lagi."
+      />,
+    );
+    const h1Container = markupToContainer(h1Markup);
+    expect(h1Container.querySelector("h1")?.textContent).toBe("Berita sedang tidak dapat dimuat");
+    expect(h1Container.querySelector("h2")).toBeNull();
+
+    const h2Markup = renderToStaticMarkup(
+      <PostStateNotice
+        variant="unavailable"
+        headingAs="h2"
+        title="Berita sedang tidak dapat dimuat"
+        description="Silakan muat ulang halaman ini beberapa saat lagi."
+      />,
+    );
+    const h2Container = markupToContainer(h2Markup);
+    expect(h2Container.querySelector("h2")?.textContent).toBe("Berita sedang tidak dapat dimuat");
+    expect(h2Container.querySelector("h1")).toBeNull();
+  });
+
+  it("keeps exactly one H1 when the detail unavailable state (h1) sits beside an article H2 fallback", () => {
+    const markup = renderToStaticMarkup(
+      <div>
+        <PostStateNotice
+          variant="unavailable"
+          headingAs="h1"
+          title="Berita sedang tidak dapat dimuat"
+          description="Silakan muat ulang halaman ini beberapa saat lagi."
+        />
+        <article>
+          <PostStateNotice
+            variant="unavailable"
+            headingAs="h2"
+            title="Berita sedang tidak dapat dimuat"
+            description="Silakan muat ulang halaman ini beberapa saat lagi."
+          />
+        </article>
+      </div>,
+    );
+    const container = markupToContainer(markup);
+    expect(container.querySelectorAll("h1")).toHaveLength(1);
+    expect(container.querySelectorAll("h2")).toHaveLength(1);
   });
 });
 
@@ -420,6 +476,34 @@ describe("Arabic direction-safe markup and mirrored directional icons", () => {
     expect(container.querySelector('[aria-current="page"]')?.textContent).toBe("Judul Contoh");
     const separator = container.querySelector("svg");
     expect(separator?.getAttribute("class")).toContain("rtl:rotate-180");
+  });
+
+  it("renders the breadcrumb's Indonesian fallback title with lang=id dir=ltr inside an Arabic ancestor", () => {
+    const markup = renderToStaticMarkup(
+      <div dir="rtl" lang="ar">
+        <PostBreadcrumb
+          ariaLabel="الأخبار"
+          items={[
+            { label: "الرئيسية", href: "/" },
+            { label: "الأخبار", href: "/berita" },
+            { label: "Judul Bahasa Indonesia", resolvedLocale: "id" },
+          ]}
+        />
+      </div>,
+    );
+    const container = markupToContainer(markup);
+    const titleCrumb = container.querySelector('[aria-current="page"]');
+
+    expect(titleCrumb?.textContent).toBe("Judul Bahasa Indonesia");
+    expect(titleCrumb?.getAttribute("lang")).toBe("id");
+    expect(titleCrumb?.getAttribute("dir")).toBe("ltr");
+
+    // Shell labels (Beranda/Berita) stay in the page locale — no lang/dir override.
+    const shellCrumb = Array.from(container.querySelectorAll("a")).find(
+      (anchor) => anchor.textContent === "الرئيسية",
+    );
+    expect(shellCrumb?.getAttribute("lang")).toBeNull();
+    expect(shellCrumb?.getAttribute("dir")).toBeNull();
   });
 
   it("never emits a physical-direction Tailwind utility in any Post component or route", () => {

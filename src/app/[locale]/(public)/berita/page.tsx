@@ -104,11 +104,17 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
         {!result.ok ? (
           <PostStateNotice
             variant="unavailable"
+            headingAs="h2"
             title={t("unavailable.title")}
             description={t("unavailable.description")}
           />
         ) : result.data.total === 0 ? (
-          <PostStateNotice variant="empty" title={t("empty.title")} description={t("empty.description")} />
+          <PostStateNotice
+            variant="empty"
+            headingAs="h2"
+            title={t("empty.title")}
+            description={t("empty.description")}
+          />
         ) : (
           <>
             <div className="flex flex-col">

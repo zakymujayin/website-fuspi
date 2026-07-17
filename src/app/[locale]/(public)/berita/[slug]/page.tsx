@@ -131,6 +131,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
       <Container className="py-12 md:py-20">
         <PostStateNotice
           variant="unavailable"
+          headingAs="h1"
           title={t("unavailable.title")}
           description={t("unavailable.description")}
         />
@@ -156,7 +157,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
   const breadcrumbItems = [
     { label: t("breadcrumbHome"), href: "/" },
     { label: t("news.breadcrumbLabel"), href: NEWS_PATH },
-    { label: post.translation.value.title },
+    { label: post.translation.value.title, resolvedLocale: post.translation.resolvedLocale },
   ];
 
   const sidebarItems = await fetchSidebarItems(locale, post.id, siteOrigin);
@@ -234,6 +235,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
           ) : (
             <PostStateNotice
               variant="unavailable"
+              headingAs="h2"
               title={t("unavailable.title")}
               description={t("unavailable.description")}
             />
