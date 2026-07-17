@@ -1,6 +1,6 @@
 # M3 Reference Slice Entry
 
-Status: **M3 active — Post/Media runtime merged; Claude public Post experience active**
+Status: **M3 active — public Post experience merged; DeepSeek browser QA active**
 
 M3 starts from the accepted M2 development head
 `f83a00e6816a91f72b9ade654b012be8a1a0b2d0`. That head passed GitHub Actions run
@@ -17,10 +17,10 @@ tracked by the M2 exit contract.
    safe public reads. No route, action, UI, dependency, or schema change is included.
 2. **GPT runtime slice (merged):** after the contract merges, implement the server-only service,
    authorization, transaction, revision, upload commit/rollback, and public query boundaries.
-3. **Claude public experience (active):** implement the bounded `/berita` list/detail reference
+3. **Claude public experience (merged):** implement the bounded `/berita` list/detail reference
    experience against the frozen public query contract, including ID/EN/AR fallback presentation,
    RTL, accessibility, metadata, JSON-LD, responsive states, and safe rich-text rendering.
-4. **DeepSeek public experience QA (next):** after the Claude candidate is committed, issue a
+4. **DeepSeek public experience QA (active):** after the Claude candidate is committed, issue a
    separate non-overlapping fixture/E2E/adversarial manifest. Do not reuse the completed Media
    review branch for implementation.
 5. **Admin transport/editor slice (later M3 tasks):** issue new GPT/Claude/DeepSeek manifests for

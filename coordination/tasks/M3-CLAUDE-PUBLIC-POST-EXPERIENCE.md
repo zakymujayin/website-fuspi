@@ -86,7 +86,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M3-CLAUDE-PUBLIC-POST-EXPERIENCE.md TASK_BASE=origin/coordination/m3-claude-public-post-experience-assignment npm run check:scope
 risk: medium
 token_class: L
-status: review
+status: merged
 ---
 
 # M3 Claude Public Post Experience

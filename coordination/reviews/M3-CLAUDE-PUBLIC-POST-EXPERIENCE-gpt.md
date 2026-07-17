@@ -4,7 +4,7 @@
 - Candidate handoff: `e79f0a5`
 - Assignment base: `27bbed9`
 - Reviewer: GPT integrator
-- Verdict: **REQUEST_CHANGES**
+- Verdict: **APPROVE after correction**
 
 ## Decision
 
@@ -119,3 +119,28 @@ Two exact residuals remain before approval; do not reopen any other design decis
 
 After this micro-correction, rerun the same manifest commands, update the handoff SHA/evidence,
 push the same branch, and stop. No new broad review cycle, new branch, or DeepSeek task is needed.
+
+## Final correction approval — `653c6a7` / `3b8b475`
+
+The bounded micro-correction closes both residuals without widening the task. Fallback breadcrumb
+titles now carry their resolved content locale and direction, while state notices use the required
+semantic heading level (`h1` for the standalone detail-unavailable state and `h2` inside list or
+article hierarchy). The added tests exercise Indonesian fallback content under an Arabic ancestor
+and the relevant H1/H2 cases.
+
+Independent final evidence on the Claude branch:
+
+| Command | Result |
+| --- | --- |
+| `npx vitest run tests/m3/ui/public-post-experience.test.tsx` | PASS — 55 passed |
+| `npm run lint` | PASS |
+| `npm run typecheck` | PASS |
+| `npm test` | PASS — 487 passed, 69 database-gated skipped |
+| `npm run build` | PASS |
+| `git diff --check 42f433f...HEAD` | PASS |
+| Manifest scope check | PASS — 30 changed files within lease |
+
+The first sandboxed scope invocation returned `spawnSync git EPERM`; rerunning the exact command
+with worktree access succeeded. This was an execution-boundary limitation, not a candidate defect.
+No remaining merge blocker was found. The candidate was merged into
+`integration/m3-reference-slice` as `154840d`.
