@@ -95,3 +95,27 @@ Required correction:
 Automated green status does not override the two missing acceptance cases above. After the writer
 corrects them, rerun every manifest command, update the existing handoff with the new
 implementation SHA and evidence, commit, push the same branch, and stop for re-review.
+
+## Correction re-review — `3f0cda7` / `09cfb83`
+
+The correction closes the two original blocking findings: list/detail/sidebar content now carries
+its resolved locale, article HTML has in-component descendant styling for every sanitizer tag
+family, site-origin handling is fail-closed, and the requested hierarchy/overflow/time semantics
+are covered by tests. Focused 52/52, full unit 484 passed with 69 database-gated skips, lint,
+typecheck, build, diff, and manual scope comparison pass.
+
+Two exact residuals remain before approval; do not reopen any other design decision:
+
+1. `src/app/[locale]/(public)/berita/[slug]/page.tsx:156-160` passes the fallback Post title into
+   `PostBreadcrumb` without its `resolvedLocale`. On an Arabic page the same Indonesian title
+   that is correctly LTR in the H1 is still announced/rendered as Arabic RTL in the breadcrumb.
+   Extend the breadcrumb item shape with an optional content locale and apply its `lang`/`dir` to
+   that item. Add an Arabic-ancestor fallback assertion.
+2. `src/app/[locale]/(public)/berita/[slug]/page.tsx:129-138` returns the unavailable detail state
+   before rendering the article H1, while `PostStateNotice` still renders its title as a paragraph.
+   This violates the manifest's one-H1 requirement. Give `PostStateNotice` a semantic heading
+   option: detail-unavailable uses H1; list empty/unavailable and in-article unavailable use H2.
+   Add focused heading assertions.
+
+After this micro-correction, rerun the same manifest commands, update the handoff SHA/evidence,
+push the same branch, and stop. No new broad review cycle, new branch, or DeepSeek task is needed.
