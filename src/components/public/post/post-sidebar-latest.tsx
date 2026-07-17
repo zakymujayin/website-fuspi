@@ -1,15 +1,20 @@
 import { ArrowRight } from "lucide-react";
 
 import { Link } from "@/i18n/navigation";
+import type { AppLocale } from "@/i18n/routing";
 
 import type { ResolvedCoverImage } from "./cover-image";
+import { LOCALE_DIRECTION } from "./locale";
 import { PostCoverImage } from "./post-cover-image";
 
 export type PostSidebarItem = {
   id: string;
   href: string;
   title: string;
+  /** Actual language `title` is rendered in — may be Indonesian fallback on an Arabic page. */
+  resolvedLocale: AppLocale;
   dateLabel: string;
+  dateTimeIso: string;
   cover: ResolvedCoverImage;
 };
 
@@ -44,11 +49,17 @@ export function PostSidebarLatest({ heading, items, seeAllLabel, seeAllHref }: P
                   sizes="72px"
                   className="h-14 w-[72px] shrink-0 rounded-md"
                 />
-                <span className="flex flex-col gap-1">
-                  <span className="line-clamp-2 text-sm font-medium text-slate-900 group-hover:text-royal-600">
+                <span className="flex min-w-0 flex-col gap-1">
+                  <span
+                    lang={item.resolvedLocale}
+                    dir={LOCALE_DIRECTION[item.resolvedLocale]}
+                    className="line-clamp-2 break-words text-sm font-medium text-slate-900 group-hover:text-royal-600"
+                  >
                     {item.title}
                   </span>
-                  <span className="text-xs text-slate-400">{item.dateLabel}</span>
+                  <time dateTime={item.dateTimeIso} className="text-xs text-slate-400">
+                    {item.dateLabel}
+                  </time>
                 </span>
               </Link>
             </li>

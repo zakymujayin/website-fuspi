@@ -19,7 +19,9 @@ export default async function NewsDetailNotFound() {
         className="flex flex-col items-center gap-3 rounded-xl border border-slate-200 bg-white px-6 py-12 text-center"
       >
         <FileQuestion aria-hidden className="size-10 text-slate-300" strokeWidth={1.5} />
-        <p className="font-display text-base font-medium text-slate-900">{t("notFound.title")}</p>
+        <h1 className="text-balance font-display text-base font-medium text-slate-900">
+          {t("notFound.title")}
+        </h1>
         <p className="max-w-prose text-sm text-slate-500">{t("notFound.description")}</p>
         <Link
           href="/berita"

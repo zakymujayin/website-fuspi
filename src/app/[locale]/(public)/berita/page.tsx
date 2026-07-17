@@ -10,6 +10,7 @@ import { buildLocaleAlternates } from "@/components/public/post/hreflang";
 import { resolveAppLocale } from "@/components/public/post/locale";
 import { clampPageToTotalPages, parsePageCandidate, totalPagesFor } from "@/components/public/post/pagination";
 import { resolveCoverImageSrc } from "@/components/public/post/cover-image";
+import { validateSiteOrigin } from "@/components/public/post/site-origin";
 import { formatJakartaPublishedDate, humanizeCategorySlug } from "@/components/public/post/format";
 import { PostBreadcrumb } from "@/components/public/post/post-breadcrumb";
 import { PostCardHorizontal } from "@/components/public/post/post-card-horizontal";
@@ -30,7 +31,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { locale: rawLocale } = await params;
   const locale = resolveAppLocale(rawLocale);
   const t = await getTranslations({ locale, namespace: "Post" });
-  const alternates = buildLocaleAlternates(NEWS_PATH, locale, process.env.NEXT_PUBLIC_SITE_URL);
+  const siteOrigin = validateSiteOrigin(process.env.NEXT_PUBLIC_SITE_URL);
+  const alternates = buildLocaleAlternates(NEWS_PATH, locale, siteOrigin);
 
   return {
     title: t("news.title"),
@@ -61,6 +63,7 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
   setRequestLocale(locale);
 
   const t = await getTranslations("Post");
+  const siteOrigin = validateSiteOrigin(process.env.NEXT_PUBLIC_SITE_URL);
   const { page: rawPage } = await searchParams;
 
   const candidatePage = parsePageCandidate(rawPage);
@@ -83,12 +86,14 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
 
   return (
     <Container className="py-12 md:py-20">
-      <PostJsonLd
-        data={buildBreadcrumbJsonLd([
-          { name: t("breadcrumbHome"), url: buildLocaleAlternates("/", locale, process.env.NEXT_PUBLIC_SITE_URL).canonical },
-          { name: t("news.breadcrumbLabel"), url: buildLocaleAlternates(NEWS_PATH, locale, process.env.NEXT_PUBLIC_SITE_URL).canonical },
-        ])}
-      />
+      {siteOrigin ? (
+        <PostJsonLd
+          data={buildBreadcrumbJsonLd([
+            { name: t("breadcrumbHome"), url: buildLocaleAlternates("/", locale, siteOrigin).canonical },
+            { name: t("news.breadcrumbLabel"), url: buildLocaleAlternates(NEWS_PATH, locale, siteOrigin).canonical },
+          ])}
+        />
+      ) : null}
       <PostBreadcrumb items={breadcrumbItems} ariaLabel={t("news.breadcrumbLabel")} />
 
       <div className="mt-6">
@@ -113,9 +118,11 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
                   href={`${NEWS_PATH}/${item.slug}`}
                   title={item.translation.value.title}
                   excerpt={item.translation.value.excerpt}
-                  cover={resolveCoverImageSrc(item.cover, process.env.NEXT_PUBLIC_SITE_URL)}
+                  resolvedLocale={item.translation.resolvedLocale}
+                  cover={resolveCoverImageSrc(item.cover, siteOrigin)}
                   authorName={item.authorName}
                   dateLabel={formatJakartaPublishedDate(item.publishedAt, locale)}
+                  dateTimeIso={item.publishedAt.toISOString()}
                   categoryLabel={item.categorySlug ? humanizeCategorySlug(item.categorySlug) : null}
                   readMoreLabel={t("readMore")}
                   fallbackNoticeMessage={item.translation.isFallback ? t("fallbackNotice") : null}

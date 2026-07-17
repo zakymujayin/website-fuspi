@@ -29,11 +29,14 @@ export function PostBreadcrumb({ items, ariaLabel }: PostBreadcrumbProps) {
               <ChevronRight aria-hidden className="size-3.5 rtl:rotate-180" strokeWidth={1.5} />
             ) : null}
             {isLast || !item.href ? (
-              <span aria-current={isLast ? "page" : undefined} className="text-slate-700">
+              <span
+                aria-current={isLast ? "page" : undefined}
+                className="min-w-0 break-words text-slate-700"
+              >
                 {item.label}
               </span>
             ) : (
-              <Link href={item.href} className="transition-colors hover:text-royal-600">
+              <Link href={item.href} className="min-w-0 break-words transition-colors hover:text-royal-600">
                 {item.label}
               </Link>
             )}

@@ -32,6 +32,7 @@ const {
   totalPagesFor,
 } = await import("@/components/public/post/pagination");
 const { resolveCoverImageSrc } = await import("@/components/public/post/cover-image");
+const { validateSiteOrigin } = await import("@/components/public/post/site-origin");
 const { estimateReadingMinutes, formatJakartaPublishedDate, humanizeCategorySlug } = await import(
   "@/components/public/post/format"
 );
@@ -40,6 +41,8 @@ const { PostStateNotice } = await import("@/components/public/post/post-state-no
 const { PostBreadcrumb } = await import("@/components/public/post/post-breadcrumb");
 const { PostPagination } = await import("@/components/public/post/post-pagination");
 const { PostCardHorizontal } = await import("@/components/public/post/post-card-horizontal");
+const { PostArticleBody } = await import("@/components/public/post/post-article-body");
+const { PostSidebarLatest } = await import("@/components/public/post/post-sidebar-latest");
 
 function markupToContainer(markup: string): HTMLDivElement {
   const container = document.createElement("div");
@@ -182,7 +185,7 @@ describe("same-origin cover conversion versus safe placeholder", () => {
   it("falls back to a placeholder when the site origin is not configured", () => {
     const resolved = resolveCoverImageSrc(
       { ...SAMPLE_COVER, url: "https://fuspi.example/uploads/cover.webp" },
-      undefined,
+      null,
     );
     expect(resolved).toEqual({ kind: "placeholder" });
   });
@@ -195,6 +198,45 @@ describe("same-origin cover conversion versus safe placeholder", () => {
         "https://fuspi.example",
       ),
     ).toEqual({ kind: "placeholder" });
+  });
+
+  it("constrains a relative local path to the /uploads contract, even when same-origin", () => {
+    const resolved = resolveCoverImageSrc(
+      { ...SAMPLE_COVER, url: "/other/cover.webp" },
+      "https://fuspi.example",
+    );
+    expect(resolved).toEqual({ kind: "placeholder" });
+  });
+});
+
+describe("URL robustness — validated site origin", () => {
+  it("accepts a valid http(s) origin", () => {
+    expect(validateSiteOrigin("https://fuspi.example")).toBe("https://fuspi.example");
+    expect(validateSiteOrigin("http://localhost:3004")).toBe("http://localhost:3004");
+  });
+
+  it("rejects a malformed truthy value instead of letting new URL throw", () => {
+    expect(validateSiteOrigin("not-a-url")).toBeNull();
+    expect(validateSiteOrigin("://broken")).toBeNull();
+  });
+
+  it("rejects a non-HTTP(S) protocol", () => {
+    expect(validateSiteOrigin("ftp://fuspi.example")).toBeNull();
+    expect(validateSiteOrigin("javascript:alert(1)")).toBeNull();
+  });
+
+  it("rejects an empty or missing value", () => {
+    expect(validateSiteOrigin(undefined)).toBeNull();
+    expect(validateSiteOrigin("")).toBeNull();
+  });
+
+  it("never throws when building cover src or alternates from a malformed configured origin", () => {
+    const malformed = "not-a-url";
+    expect(() => resolveCoverImageSrc(
+      { ...SAMPLE_COVER, url: "/uploads/cover.webp" },
+      validateSiteOrigin(malformed),
+    )).not.toThrow();
+    expect(() => buildLocaleAlternates("/berita", "id", validateSiteOrigin(malformed))).not.toThrow();
   });
 });
 
@@ -242,9 +284,11 @@ describe("exact translation versus one calm fallback banner", () => {
         href="/berita/contoh"
         title="Judul Contoh"
         excerpt="Ringkasan contoh."
+        resolvedLocale="id"
         cover={{ kind: "placeholder" }}
         authorName="Editor FUSPI"
         dateLabel="16 Januari 2026"
+        dateTimeIso="2026-01-16T00:30:00.000Z"
         categoryLabel="akademik"
         readMoreLabel="Selengkapnya"
         fallbackNoticeMessage="Menampilkan versi Bahasa Indonesia."
@@ -260,12 +304,80 @@ describe("exact translation versus one calm fallback banner", () => {
       <PostCardHorizontal
         href="/berita/contoh"
         title="Judul Contoh"
+        resolvedLocale="id"
         cover={{ kind: "placeholder" }}
         dateLabel="16 Januari 2026"
+        dateTimeIso="2026-01-16T00:30:00.000Z"
         readMoreLabel="Selengkapnya"
       />,
     );
     expect(markupToContainer(markup).textContent).not.toContain("Bahasa Indonesia");
+  });
+
+  it("renders Indonesian fallback with lang=id dir=ltr even inside an Arabic RTL ancestor", () => {
+    const markup = renderToStaticMarkup(
+      <div dir="rtl" lang="ar">
+        <PostCardHorizontal
+          href="/berita/contoh"
+          title="Judul Bahasa Indonesia"
+          excerpt="Ringkasan Bahasa Indonesia."
+          resolvedLocale="id"
+          cover={{ kind: "placeholder" }}
+          dateLabel="16 يناير 2026"
+          dateTimeIso="2026-01-16T00:30:00.000Z"
+          readMoreLabel="اقرأ المزيد"
+        />
+      </div>,
+    );
+    const container = markupToContainer(markup);
+    const heading = container.querySelector("h2");
+    const excerpt = container.querySelector("p");
+
+    expect(heading?.getAttribute("lang")).toBe("id");
+    expect(heading?.getAttribute("dir")).toBe("ltr");
+    expect(excerpt?.getAttribute("lang")).toBe("id");
+    expect(excerpt?.getAttribute("dir")).toBe("ltr");
+  });
+
+  it("carries resolvedLocale into the sidebar's fallback item too", () => {
+    const markup = renderToStaticMarkup(
+      <div dir="rtl" lang="ar">
+        <PostSidebarLatest
+          heading="أحدث الأخبار"
+          seeAllLabel="عرض جميع الأخبار"
+          seeAllHref="/berita"
+          items={[
+            {
+              id: "post-1",
+              href: "/berita/contoh",
+              title: "Judul Bahasa Indonesia",
+              resolvedLocale: "id",
+              dateLabel: "16 Januari 2026",
+              dateTimeIso: "2026-01-16T00:30:00.000Z",
+              cover: { kind: "placeholder" },
+            },
+          ]}
+        />
+      </div>,
+    );
+    const container = markupToContainer(markup);
+    const titleSpan = Array.from(container.querySelectorAll("span")).find(
+      (span) => span.textContent === "Judul Bahasa Indonesia",
+    );
+    expect(titleSpan?.getAttribute("lang")).toBe("id");
+    expect(titleSpan?.getAttribute("dir")).toBe("ltr");
+  });
+
+  it("wraps the article body with the resolved content locale, not the page locale", () => {
+    const markup = renderToStaticMarkup(
+      <div dir="rtl" lang="ar">
+        <PostArticleBody html="<p>Konten Bahasa Indonesia.</p>" resolvedLocale="id" />
+      </div>,
+    );
+    const container = markupToContainer(markup);
+    const body = container.querySelector('[lang="id"]');
+    expect(body?.getAttribute("dir")).toBe("ltr");
+    expect(body?.textContent).toContain("Konten Bahasa Indonesia.");
   });
 });
 
@@ -340,6 +452,134 @@ describe("Arabic direction-safe markup and mirrored directional icons", () => {
   });
 });
 
+describe("Web Interface Guidelines corrections", () => {
+  it("uses an h2 for the card title under the page H1, not h3", () => {
+    const markup = renderToStaticMarkup(
+      <PostCardHorizontal
+        href="/berita/contoh"
+        title="Judul Contoh"
+        resolvedLocale="id"
+        cover={{ kind: "placeholder" }}
+        dateLabel="16 Januari 2026"
+        dateTimeIso="2026-01-16T00:30:00.000Z"
+        readMoreLabel="Selengkapnya"
+      />,
+    );
+    const container = markupToContainer(markup);
+    expect(container.querySelector("h2")).not.toBeNull();
+    expect(container.querySelector("h3")).toBeNull();
+  });
+
+  it("renders a machine-readable dateTime on <time> alongside the locale-formatted label", () => {
+    const markup = renderToStaticMarkup(
+      <PostCardHorizontal
+        href="/berita/contoh"
+        title="Judul Contoh"
+        resolvedLocale="id"
+        cover={{ kind: "placeholder" }}
+        dateLabel="16 Januari 2026"
+        dateTimeIso="2026-01-16T00:30:00.000Z"
+        readMoreLabel="Selengkapnya"
+      />,
+    );
+    const time = markupToContainer(markup).querySelector("time");
+    expect(time?.getAttribute("dateTime")).toBe("2026-01-16T00:30:00.000Z");
+    expect(time?.textContent).toBe("16 Januari 2026");
+  });
+
+  it("gives the card content column and sidebar text column min-w-0 so long titles cannot overflow", () => {
+    const cardMarkup = renderToStaticMarkup(
+      <PostCardHorizontal
+        href="/berita/contoh"
+        title="Judul"
+        resolvedLocale="id"
+        cover={{ kind: "placeholder" }}
+        dateLabel="16 Januari 2026"
+        dateTimeIso="2026-01-16T00:30:00.000Z"
+        readMoreLabel="Selengkapnya"
+      />,
+    );
+    expect(cardMarkup).toMatch(/min-w-0/);
+
+    const sidebarMarkup = renderToStaticMarkup(
+      <PostSidebarLatest
+        heading="Berita Terbaru"
+        seeAllLabel="Lihat semua berita"
+        seeAllHref="/berita"
+        items={[
+          {
+            id: "post-1",
+            href: "/berita/contoh",
+            title: "Judul",
+            resolvedLocale: "id",
+            dateLabel: "16 Januari 2026",
+            dateTimeIso: "2026-01-16T00:30:00.000Z",
+            cover: { kind: "placeholder" },
+          },
+        ]}
+      />,
+    );
+    expect(sidebarMarkup).toMatch(/min-w-0/);
+  });
+
+  it("renders one standalone H1 on the not-found page instead of a paragraph", () => {
+    const contents = readFileSync(
+      path.join(process.cwd(), "src/app/[locale]/(public)/berita/[slug]/not-found.tsx"),
+      "utf8",
+    );
+    expect(contents).toMatch(/<h1[^>]*>\s*\{t\("notFound\.title"\)\}/);
+  });
+});
+
+describe("rich-text article body styling", () => {
+  it("styles every sanitizer-allowed tag family via Tailwind descendant selectors", () => {
+    const markup = renderToStaticMarkup(
+      <PostArticleBody
+        resolvedLocale="id"
+        html={[
+          "<h2>Judul Bagian</h2>",
+          "<p>Paragraf pertama dengan <a href=\"https://fuspi.example\">tautan</a>.</p>",
+          "<ul><li>Butir satu</li><li>Butir dua</li></ul>",
+          "<blockquote>Kutipan penting.</blockquote>",
+          "<figure><img src=\"/uploads/2026/01/a.webp\" alt=\"\"><figcaption>Keterangan gambar.</figcaption></figure>",
+          "<table><thead><tr><th>Kolom</th></tr></thead><tbody><tr><td>Sel</td></tr></tbody></table>",
+          "<pre><code>const x = 1;</code></pre>",
+          "<hr>",
+        ].join("")}
+      />,
+    );
+    const container = markupToContainer(markup);
+
+    expect(container.querySelector("h2")?.textContent).toBe("Judul Bagian");
+    expect(container.querySelector("a")?.getAttribute("href")).toBe("https://fuspi.example");
+    expect(container.querySelectorAll("li")).toHaveLength(2);
+    expect(container.querySelector("blockquote")?.textContent).toBe("Kutipan penting.");
+    expect(container.querySelector("figcaption")?.textContent).toBe("Keterangan gambar.");
+    expect(container.querySelector("table")).not.toBeNull();
+    expect(container.querySelector("pre code")?.textContent).toBe("const x = 1;");
+    expect(container.querySelector("hr")).not.toBeNull();
+
+    const wrapperClassName = container.firstElementChild?.getAttribute("class") ?? "";
+    expect(wrapperClassName).toMatch(/\[&_h2\]/);
+    expect(wrapperClassName).toMatch(/\[&_blockquote\]:border-s-4/);
+    expect(wrapperClassName).toMatch(/\[&_a\]/);
+    expect(wrapperClassName).toMatch(/\[&_table\]:block/);
+    expect(wrapperClassName).toMatch(/\[&_table\]:overflow-x-auto/);
+    expect(wrapperClassName).toMatch(/\[&_pre\]:overflow-x-auto/);
+    expect(wrapperClassName).toMatch(/\[&_code\]:break-words/);
+    expect(wrapperClassName).toMatch(/\[&_td\]:break-words/);
+  });
+
+  it("never uses a physical-direction utility for blockquote or table cell alignment", () => {
+    const markup = renderToStaticMarkup(
+      <PostArticleBody resolvedLocale="id" html="<blockquote>x</blockquote>" />,
+    );
+    expect(markup).not.toMatch(/border-l\b/);
+    expect(markup).not.toMatch(/\btext-left\b/);
+    expect(markup).toMatch(/border-s-4/);
+  });
+});
+
 describe("metadata and JSON-LD helpers exclude raw HTML and storage keys", () => {
   it("builds canonical + hreflang alternates including x-default", () => {
     const alternates = buildLocaleAlternates("/berita/contoh", "en", "https://fuspi.example");
@@ -353,7 +593,7 @@ describe("metadata and JSON-LD helpers exclude raw HTML and storage keys", () =>
   });
 
   it("degrades to root-relative alternates without a configured site origin", () => {
-    const alternates = buildLocaleAlternates("/berita/contoh", "en", undefined);
+    const alternates = buildLocaleAlternates("/berita/contoh", "en", null);
     expect(alternates.canonical).toBe("/en/berita/contoh");
     expect(alternates.languages["x-default"]).toBe("/id/berita/contoh");
   });

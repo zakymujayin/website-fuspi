@@ -12,8 +12,9 @@ import {
 } from "@/lib/content/post-public-queries";
 
 import { buildLocaleAlternates } from "@/components/public/post/hreflang";
-import { resolveAppLocale } from "@/components/public/post/locale";
+import { LOCALE_DIRECTION, resolveAppLocale } from "@/components/public/post/locale";
 import { resolveCoverImageSrc } from "@/components/public/post/cover-image";
+import { validateSiteOrigin } from "@/components/public/post/site-origin";
 import { formatJakartaPublishedDate, estimateReadingMinutes, humanizeCategorySlug } from "@/components/public/post/format";
 import { sanitizeStoredContentOrNull } from "@/components/public/post/sanitize";
 import { buildBreadcrumbJsonLd, buildNewsArticleJsonLd } from "@/components/public/post/json-ld";
@@ -66,9 +67,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const post = load.result.data;
   const { value } = post.translation;
-  const alternates = buildLocaleAlternates(`${NEWS_PATH}/${slug}`, locale, process.env.NEXT_PUBLIC_SITE_URL);
-  const cover = resolveCoverImageSrc(post.cover, process.env.NEXT_PUBLIC_SITE_URL);
-  const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL;
+  const siteOrigin = validateSiteOrigin(process.env.NEXT_PUBLIC_SITE_URL);
+  const alternates = buildLocaleAlternates(`${NEWS_PATH}/${slug}`, locale, siteOrigin);
+  const cover = resolveCoverImageSrc(post.cover, siteOrigin);
   const absoluteCoverUrl =
     cover.kind === "image" && siteOrigin ? new URL(cover.src, siteOrigin).toString() : undefined;
 
@@ -90,6 +91,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 async function fetchSidebarItems(
   locale: ReturnType<typeof resolveAppLocale>,
   excludeId: string,
+  siteOrigin: string | null,
 ): Promise<PostSidebarItem[]> {
   try {
     const database = getPrismaClient();
@@ -106,8 +108,10 @@ async function fetchSidebarItems(
         id: item.id,
         href: `${NEWS_PATH}/${item.slug}`,
         title: item.translation.value.title,
+        resolvedLocale: item.translation.resolvedLocale,
         dateLabel: formatJakartaPublishedDate(item.publishedAt, locale),
-        cover: resolveCoverImageSrc(item.cover, process.env.NEXT_PUBLIC_SITE_URL),
+        dateTimeIso: item.publishedAt.toISOString(),
+        cover: resolveCoverImageSrc(item.cover, siteOrigin),
       }));
   } catch {
     return [];
@@ -140,8 +144,9 @@ export default async function NewsDetailPage({ params }: PageProps) {
 
   const post = load.result.data;
   const sanitizedContent = sanitizeStoredContentOrNull(post.translation.value.content);
+  const contentDir = LOCALE_DIRECTION[post.translation.resolvedLocale];
 
-  const siteOrigin = process.env.NEXT_PUBLIC_SITE_URL;
+  const siteOrigin = validateSiteOrigin(process.env.NEXT_PUBLIC_SITE_URL);
   const detailUrl = buildLocaleAlternates(`${NEWS_PATH}/${slug}`, locale, siteOrigin).canonical;
   const homeUrl = buildLocaleAlternates("/", locale, siteOrigin).canonical;
   const newsUrl = buildLocaleAlternates(NEWS_PATH, locale, siteOrigin).canonical;
@@ -154,7 +159,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
     { label: post.translation.value.title },
   ];
 
-  const sidebarItems = await fetchSidebarItems(locale, post.id);
+  const sidebarItems = await fetchSidebarItems(locale, post.id, siteOrigin);
 
   return (
     <Container className="py-12 md:py-20">
@@ -183,16 +188,21 @@ export default async function NewsDetailPage({ params }: PageProps) {
       <PostBreadcrumb items={breadcrumbItems} ariaLabel={t("news.breadcrumbLabel")} />
 
       <div className="mt-8 grid gap-8 lg:grid-cols-12">
-        <article className="flex flex-col gap-6 lg:col-span-8">
+        <article className="flex min-w-0 flex-col gap-6 lg:col-span-8">
           {post.translation.isFallback ? <PostFallbackBanner message={t("fallbackNotice")} /> : null}
 
-          <h1 className="font-display text-3xl leading-tight font-bold text-slate-900 md:text-4xl">
+          <h1
+            lang={post.translation.resolvedLocale}
+            dir={contentDir}
+            className="text-balance font-display text-3xl leading-tight font-bold break-words text-slate-900 md:text-4xl"
+          >
             {post.translation.value.title}
           </h1>
 
           <PostMetaRow
             authorName={post.authorName}
             dateLabel={formatJakartaPublishedDate(post.publishedAt, locale)}
+            dateTimeIso={post.publishedAt.toISOString()}
             categoryLabel={post.categorySlug ? humanizeCategorySlug(post.categorySlug) : null}
             readingLabel={
               sanitizedContent ? t("readingTime", { minutes: estimateReadingMinutes(sanitizedContent) }) : undefined
@@ -208,7 +218,11 @@ export default async function NewsDetailPage({ params }: PageProps) {
                 className="aspect-video w-full rounded-xl"
               />
               {post.translation.value.coverCaption ? (
-                <figcaption className="mt-2 text-[13px] text-slate-500 italic">
+                <figcaption
+                  lang={post.translation.resolvedLocale}
+                  dir={contentDir}
+                  className="mt-2 text-[13px] break-words text-slate-500 italic"
+                >
                   {post.translation.value.coverCaption}
                 </figcaption>
               ) : null}
@@ -216,7 +230,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
           ) : null}
 
           {sanitizedContent ? (
-            <PostArticleBody html={sanitizedContent} />
+            <PostArticleBody html={sanitizedContent} resolvedLocale={post.translation.resolvedLocale} />
           ) : (
             <PostStateNotice
               variant="unavailable"
@@ -226,7 +240,7 @@ export default async function NewsDetailPage({ params }: PageProps) {
           )}
         </article>
 
-        <div className="lg:col-span-4">
+        <div className="min-w-0 lg:col-span-4">
           <PostSidebarLatest
             heading={t("sidebar.latestTitle")}
             items={sidebarItems}

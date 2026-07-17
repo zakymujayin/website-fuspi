@@ -6,27 +6,19 @@ export type LocaleAlternates = {
   languages: Record<string, string>;
 };
 
-function safeOrigin(siteOrigin: string | undefined): string {
-  if (!siteOrigin) return "";
-  try {
-    return new URL(siteOrigin).origin;
-  } catch {
-    return "";
-  }
-}
-
 /**
  * Canonical + ID/EN/AR + `x-default` hreflang alternates for a neutral,
  * locale-independent path such as `/berita` or `/berita/{slug}` (manifest
- * detail requirement 4, docs/12-G). Degrades to root-relative URLs when no
- * absolute site origin is configured, which browsers still resolve correctly.
+ * detail requirement 4, docs/12-G). `siteOrigin` must already be validated
+ * by `validateSiteOrigin` — pass `null` to degrade to root-relative URLs,
+ * which browsers still resolve correctly.
  */
 export function buildLocaleAlternates(
   path: string,
   currentLocale: AppLocale,
-  siteOrigin: string | undefined,
+  siteOrigin: string | null,
 ): LocaleAlternates {
-  const origin = safeOrigin(siteOrigin);
+  const origin = siteOrigin ?? "";
   const languages: Record<string, string> = {};
   for (const locale of routing.locales) {
     languages[locale] = `${origin}/${locale}${path}`;

@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 type PostMetaRowProps = {
   authorName?: string | null;
   dateLabel: string;
+  dateTimeIso: string;
   categoryLabel?: string | null;
   readingLabel?: string;
   className?: string;
@@ -18,6 +19,7 @@ type PostMetaRowProps = {
 export function PostMetaRow({
   authorName,
   dateLabel,
+  dateTimeIso,
   categoryLabel,
   readingLabel,
   className,
@@ -37,7 +39,7 @@ export function PostMetaRow({
       ) : null}
       <span className="inline-flex items-center gap-1.5">
         <Calendar aria-hidden className="size-4" strokeWidth={1.5} />
-        <time>{dateLabel}</time>
+        <time dateTime={dateTimeIso}>{dateLabel}</time>
       </span>
       {categoryLabel ? (
         <span className="inline-flex items-center gap-1.5 rounded-full bg-royal-50 px-2.5 py-0.5 text-xs font-medium tracking-wide text-royal-700 uppercase">

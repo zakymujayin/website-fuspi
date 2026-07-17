@@ -12,6 +12,7 @@ export type ResolvedCoverImage =
   | {kind: "placeholder"};
 
 const PLACEHOLDER: ResolvedCoverImage = {kind: "placeholder"};
+const UPLOADS_PREFIX = "/uploads/";
 
 function parseOrigin(rawUrl: string): string | null {
   try {
@@ -27,10 +28,11 @@ function parseOrigin(rawUrl: string): string | null {
  * accessible placeholder. `next.config.ts` only allow-lists one remote image
  * host, so any URL that cannot be proven same-origin as the configured
  * public site must never reach `next/image` (docs manifest, list requirement 3).
+ * `siteOrigin` must already be validated by `validateSiteOrigin`.
  */
 export function resolveCoverImageSrc(
   cover: PublicPostView["cover"],
-  siteOrigin: string | undefined,
+  siteOrigin: string | null,
 ): ResolvedCoverImage {
   if (!cover || cover.mimeType !== "image/webp" || cover.width === null || cover.height === null) {
     return PLACEHOLDER;
@@ -38,7 +40,7 @@ export function resolveCoverImageSrc(
 
   const isRelative = cover.url.startsWith("/") && !cover.url.startsWith("//");
   const localPath = isRelative ? cover.url : resolveAbsoluteToLocalPath(cover.url, siteOrigin);
-  if (!localPath) return PLACEHOLDER;
+  if (!localPath || !localPath.startsWith(UPLOADS_PREFIX)) return PLACEHOLDER;
 
   return {
     kind: "image",
@@ -50,10 +52,9 @@ export function resolveCoverImageSrc(
   };
 }
 
-function resolveAbsoluteToLocalPath(rawUrl: string, siteOrigin: string | undefined): string | null {
+function resolveAbsoluteToLocalPath(rawUrl: string, siteOrigin: string | null): string | null {
   if (!siteOrigin) return null;
   const coverOrigin = parseOrigin(rawUrl);
-  const configuredOrigin = parseOrigin(siteOrigin);
-  if (!coverOrigin || !configuredOrigin || coverOrigin !== configuredOrigin) return null;
+  if (!coverOrigin || coverOrigin !== siteOrigin) return null;
   return new URL(rawUrl).pathname;
 }

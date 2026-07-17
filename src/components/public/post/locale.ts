@@ -14,3 +14,15 @@ export function resolveAppLocale(locale: string): AppLocale {
     ? (locale as AppLocale)
     : routing.defaultLocale;
 }
+
+/**
+ * Real writing direction per resolved *content* locale — used to mark up a
+ * translation region with its own `lang`/`dir`, independent of the page's
+ * requested locale. Indonesian-fallback content on an Arabic page must keep
+ * `lang="id" dir="ltr"`, never inherit the document's `dir="rtl"`.
+ */
+export const LOCALE_DIRECTION: Record<AppLocale, "ltr" | "rtl"> = {
+  id: "ltr",
+  en: "ltr",
+  ar: "rtl",
+};
