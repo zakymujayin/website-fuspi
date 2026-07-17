@@ -103,5 +103,41 @@
     "title": "Program Studi",
     "description": "Lima program studi sarjana di Fakultas Ushuluddin dan Pemikiran Islam, dari kajian Al-Qur’an dan hadis hingga tasawuf dan psikoterapi.",
     "readMore": "Selengkapnya"
+  },
+  "Post": {
+    "breadcrumbHome": "Beranda",
+    "readMore": "Selengkapnya",
+    "fallbackNotice": "Konten ini belum tersedia dalam bahasa yang dipilih. Menampilkan versi Bahasa Indonesia.",
+    "readingTime": "{minutes} menit baca",
+    "loading": "Memuat berita…",
+    "sidebar": {
+      "latestTitle": "Berita Terbaru",
+      "seeAll": "Lihat semua berita"
+    },
+    "pagination": {
+      "previous": "Halaman sebelumnya",
+      "next": "Halaman berikutnya",
+      "pageStatus": "Hal {page} dari {totalPages}",
+      "goToPage": "Ke halaman {page}"
+    },
+    "empty": {
+      "title": "Belum ada berita",
+      "description": "Berita akan tampil di sini setelah diterbitkan."
+    },
+    "unavailable": {
+      "title": "Berita sedang tidak dapat dimuat",
+      "description": "Silakan muat ulang halaman ini beberapa saat lagi."
+    },
+    "notFound": {
+      "title": "Berita tidak ditemukan",
+      "description": "Berita yang Anda cari mungkin sudah dipindahkan atau belum diterbitkan.",
+      "backToList": "Kembali ke daftar berita"
+    },
+    "news": {
+      "breadcrumbLabel": "Berita",
+      "title": "Berita",
+      "description": "Kabar dan kegiatan terbaru Fakultas Ushuluddin dan Pemikiran Islam.",
+      "metaDescription": "Kumpulan berita dan kegiatan terbaru Fakultas Ushuluddin dan Pemikiran Islam (FUSPI)."
+    }
   }
 }

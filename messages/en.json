@@ -103,5 +103,41 @@
     "title": "Study Programs",
     "description": "Five undergraduate programs at the Faculty of Ushuluddin and Islamic Thought, from Qur’an and hadith studies to Sufism and psychotherapy.",
     "readMore": "Read more"
+  },
+  "Post": {
+    "breadcrumbHome": "Home",
+    "readMore": "Read more",
+    "fallbackNotice": "This content is not yet available in the selected language. Showing the Indonesian version.",
+    "readingTime": "{minutes} min read",
+    "loading": "Loading news…",
+    "sidebar": {
+      "latestTitle": "Latest News",
+      "seeAll": "See all news"
+    },
+    "pagination": {
+      "previous": "Previous page",
+      "next": "Next page",
+      "pageStatus": "Page {page} of {totalPages}",
+      "goToPage": "Go to page {page}"
+    },
+    "empty": {
+      "title": "No news yet",
+      "description": "News will appear here once it is published."
+    },
+    "unavailable": {
+      "title": "News cannot be loaded right now",
+      "description": "Please reload this page again in a moment."
+    },
+    "notFound": {
+      "title": "News article not found",
+      "description": "The article you are looking for may have moved or is not yet published.",
+      "backToList": "Back to the news list"
+    },
+    "news": {
+      "breadcrumbLabel": "News",
+      "title": "News",
+      "description": "Latest news and activities from the Faculty of Ushuluddin and Islamic Thought.",
+      "metaDescription": "Latest news and activities from the Faculty of Ushuluddin and Islamic Thought (FUSPI)."
+    }
   }
 }
