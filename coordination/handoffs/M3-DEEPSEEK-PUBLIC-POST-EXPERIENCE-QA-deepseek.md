@@ -3,7 +3,7 @@
 - Task ID: `M3-DEEPSEEK-PUBLIC-POST-EXPERIENCE-QA`
 - Branch: `ai/deepseek/m3-public-post-experience-qa`
 - Base SHA: `dac98f8`
-- Head SHA: PENDING
+- Head SHA: f085715
 
 ## Summary
 
