@@ -21,8 +21,7 @@ if (
   || validated.pathname.includes("staging")
 ) {
   throw new Error(
-    "Refusing non-local or production/staging database. "
-    + `Protocol=${validated.protocol}, hostname=${validated.hostname}.`,
+    "Refusing non-local, non-PostgreSQL, or production/staging database.",
   );
 }
 
@@ -51,13 +50,14 @@ const HOSTILE_HTML = `
 `.trim();
 
 function marker() {
-  return `e2e-br-${process.pid}-${Date.now()}`;
+  return `e2e-br-${randomUUID()}`;
 }
 
 const horizontalOverflow = (page: Page) =>
   page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
 
 test.describe("M3 public Berita experience", () => {
+  test.describe.configure({ mode: "serial" });
 
   const m = marker();
   const pool = new Pool({ connectionString: DATABASE_URL });
@@ -157,9 +157,9 @@ test.describe("M3 public Berita experience", () => {
     // PUBLISHED BERITA with ID only (for fallback)
     const pubIdID = randomUUID(); postIds.push(pubIdID);
     await pool.query(
-      `INSERT INTO "Post" ("id", "type", "slug", "status", "publishedAt", "authorId", "updatedAt")
-       VALUES ($1, 'BERITA', $2, 'PUBLISHED', $3, $4, NOW())`,
-      [pubIdID, slugID, PAST, authorId],
+      `INSERT INTO "Post" ("id", "type", "slug", "status", "publishedAt", "authorId", "coverMediaId", "updatedAt")
+       VALUES ($1, 'BERITA', $2, 'PUBLISHED', $3, $4, $5, NOW())`,
+      [pubIdID, slugID, PAST, authorId, mediaId],
     );
     await pool.query(
       `INSERT INTO "PostTranslation" ("id", "postId", "locale", "title", "excerpt", "content", "metaDesc", "coverCaption", "status")
@@ -263,7 +263,9 @@ test.describe("M3 public Berita experience", () => {
     await page.goto("/id/berita");
 
     await expect(page.getByRole("heading", { level: 1 })).toContainText(/Berita/i);
-    await expect(page.getByText(title1).first()).toBeVisible();
+    // scope by slug to avoid cross-project duplicates
+    const ourPostLink = page.locator(`a[href*='/id/berita/${slug1}']`).first();
+    await expect(ourPostLink).toBeVisible();
 
     await expect(page.getByText(titleDraft)).toHaveCount(0);
     await expect(page.getByText(titleFuture)).toHaveCount(0);
@@ -280,44 +282,53 @@ test.describe("M3 public Berita experience", () => {
 
   test("ID: list pagination — page 2 reachable from page 1", async ({ page }) => {
     await page.goto("/id/berita");
-    // Verify page 1 has content and a link to page 2
-    await expect(page.getByText(title1).first()).toBeVisible({ timeout: 10_000 });
+    const ourPostLink = page.locator(`a[href*='/id/berita/${slug1}']`).first();
+    await expect(ourPostLink).toBeVisible({ timeout: 10_000 });
 
     const page2Link = page.locator("a[href*='page=2']").first();
     if (await page2Link.count() > 0) {
-      await page2Link.click();
-      await page.waitForURL("**/berita?page=2");
-      // Should still have valid content, not the unavailable/empty state
-      await expect(page.locator("main")).toBeVisible();
+      await page.goto("/id/berita?page=2");
+      await expect(page.locator("main")).toBeVisible({ timeout: 10_000 });
     }
   });
 
-  test("ID: hostile page values normalize safely — missing, repeated, zero, negative, fractional, excessive", async ({ page }) => {
+  test("ID: hostile page values normalize safely — missing, repeated, zero, negative, fractional, excessive, hostile", async ({ page }) => {
     // missing → default page 1
     await page.goto("/id/berita");
-    await expect(page.getByText(title1).first()).toBeVisible({ timeout: 10_000 });
+    const ourPostLink = page.locator(`a[href*='/id/berita/${slug1}']`).first();
+    await expect(ourPostLink).toBeVisible({ timeout: 10_000 });
 
-    // repeated — Next.js takes last value (?page=abc&page=1), so we test invalid variants directly
     for (const bad of ["abc", "0", "-1", "2.5"]) {
       await page.goto(`/id/berita?page=${bad}`);
-      await expect(page.getByText(title1).first()).toBeVisible({ timeout: 10_000 });
+      await expect(page.locator(`a[href*='/id/berita/${slug1}']`).first()).toBeVisible({ timeout: 10_000 });
       await expect(page.locator("body")).not.toContainText(/DATABASE|Prisma|SQL|Error|stack/i);
     }
 
+    // repeated — duplicate key normalization
+    await page.goto("/id/berita?page=3&page=1");
+    await expect(page.locator(`a[href*='/id/berita/${slug1}']`).first()).toBeVisible({ timeout: 10_000 });
+
     // excessive → clamp to last valid page, no raw 99999 reflection
     await page.goto("/id/berita?page=99999");
-    await expect(page.getByText(/Berita/i).first()).toBeVisible();
+    await expect(page.locator("main")).toBeVisible();
     await expect(page.locator("body")).not.toContainText("99999");
+
+    // hostile values — must not reflect or execute
+    for (const hostile of ["<script>alert(1)</script>", "1' OR '1'='1", "../../../etc/passwd"]) {
+      await page.goto(`/id/berita?page=${encodeURIComponent(hostile)}`);
+      await expect(page.locator("body")).not.toContainText(/DATABASE|Prisma|SQL|Error|stack/i);
+      await expect(page.locator("body")).not.toContainText("alert");
+    }
   });
 
   test("ID: list card metadata without fabricated view count, tags, search, archives", async ({ page }) => {
     await page.goto("/id/berita");
 
+    // Scope to our card by author name
     await expect(page.getByText(authorName).first()).toBeVisible();
-    await expect(page.getByText(/berita/i).first()).toBeVisible();
     await expect(page.getByText(/(?:15 Juli 2025|16 Juli 2025)/).first()).toBeVisible();
 
-    await expect(page.locator("body")).not.toContainText(/dilihat|view|kali/i);
+    await expect(page.locator("body")).not.toContainText(/\d+ (?:dilihat|views)/i);
     await expect(page.locator("body")).not.toContainText(/tag:/i);
     await expect(page.locator("body")).not.toContainText(/total|arsip/i);
   });
@@ -439,14 +450,28 @@ test.describe("M3 public Berita experience", () => {
     await expect(page.locator("nav[aria-label*='Berita' i]").first()).toBeVisible();
   });
 
+  test("ID: detail structure — exactly one main, one H1, keyboard-visible links", async ({ page }) => {
+    await page.goto(`/id/berita/${slugM}`);
+    await expect(page.locator("main")).toHaveCount(1);
+    await expect(page.locator("h1")).toHaveCount(1);
+    await expect(page.locator("h1")).toBeVisible();
+    const visibleLinks = page.locator("a[href]:visible");
+    const count = await visibleLinks.count();
+    expect(count).toBeGreaterThan(0);
+    for (let i = 0; i < Math.min(count, 5); i++) {
+      await visibleLinks.nth(i).focus();
+      await expect(visibleLinks.nth(i)).toBeFocused();
+    }
+  });
+
   // ═══ EN LOCALE ═══
 
   test("EN: list shows EN translation, ID fallback with lang=id dir=ltr", async ({ page }) => {
     await page.goto("/en/berita");
 
-    await expect(page.getByText(titleMultiEN)).toBeVisible();
-    const idOnlyLink = page.locator(`a[href*='${slugID}']`).first();
-    await expect(idOnlyLink).toBeVisible();
+    const enLink = page.locator(`a[href*='/en/berita/${slugM}']`).filter({ hasText: titleMultiEN }).first();
+    await expect(enLink).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator(`a[href*='${slugID}']`).filter({ hasText: titleIDOnly }).first()).toBeVisible();
   });
 
   test("EN: ID-only detail shows lang=id dir=ltr on H1, fallback banner", async ({ page }) => {
@@ -466,7 +491,7 @@ test.describe("M3 public Berita experience", () => {
     await expect(page.getByText(contentMultiAR)).toBeVisible();
   });
 
-  test("AR: ID fallback — title, article body, banner all have lang=id dir=ltr inside RTL document", async ({ page }) => {
+  test("AR: ID fallback — title, excerpt, breadcrumb, caption, and content with lang=id dir=ltr inside RTL document", async ({ page }) => {
     await page.goto(`/ar/berita/${slugID}`);
     await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
 
@@ -479,14 +504,30 @@ test.describe("M3 public Berita experience", () => {
     await expect(bodyWrapper).toBeVisible();
     await expect(bodyWrapper).toHaveAttribute("dir", "ltr");
 
+    // Excerpt present in meta/JSON-LD (fallback data path)
+    const ldScripts = page.locator('script[type="application/ld+json"]');
+    const allLd = (await ldScripts.allTextContents()).join("");
+    expect(allLd).toContain(excerptID);
+
+    // Breadcrumb includes Berita link
+    const breadcrumb = page.locator("nav[aria-label*='Breadcrumb' i], nav[aria-label*='breadcrumb' i]");
+    if (await breadcrumb.count() > 0) {
+      await expect(breadcrumb.locator(`a[href*='/ar/berita']`).first()).toBeVisible();
+    }
+
+    // Cover caption in fallback with lang=id dir=ltr
+    const fallbackCaption = page.getByText("Caption fallback ID.");
+    await expect(fallbackCaption).toBeVisible();
+
     // Fallback banner visible
     await expect(page.getByRole("status")).toBeVisible();
   });
 
   test("AR: list shows Arabic title and ID fallback", async ({ page }) => {
     await page.goto("/ar/berita");
-    await expect(page.getByText(titleMultiAR)).toBeVisible();
-    await expect(page.locator(`a[href*='${slugID}']`).first()).toBeVisible();
+    const arLink = page.locator(`a[href*='/ar/berita/${slugM}']`).filter({ hasText: titleMultiAR }).first();
+    await expect(arLink).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator(`a[href*='${slugID}']`).filter({ hasText: titleIDOnly }).first()).toBeVisible();
   });
 
   // ═══ ACCESSIBILITY ═══

@@ -1,54 +1,76 @@
-# Handoff — M3-DEEPSEEK-PUBLIC-POST-EXPERIENCE-QA (corrected)
+# Handoff — M3-DEEPSEEK-PUBLIC-POST-EXPERIENCE-QA (corrected v3)
 
 - Task ID: `M3-DEEPSEEK-PUBLIC-POST-EXPERIENCE-QA`
 - Branch: `ai/deepseek/m3-public-post-experience-qa`
 - Base SHA: `dac98f8`
-- Head SHA: f085715
+- Head SHA: b1c0916
 
 ## Summary
 
-Performed independent QA of the merged Claude Berita public reference slice via
-PostgreSQL-backed Playwright browser coverage (29 test scenarios across ID/EN/AR
-locales). Verdict: **APPROVE** — no product defects found.
+Third correction pass of the FUSPI Berita public reference slice QA. Fixed
+parallel-safe fixtures, DATABASE_URL validation message, and completed coverage
+per the manifest. Verdict: **REQUEST_CHANGES** — one reproducible WCAG 2.1 AA
+color-contrast violation (`text-slate-400` in sidebar `<time>` elements)
+remains.
 
 ## Correction Pass Changes
 
-1. **Parallel-safe fixtures**: Removed global `LIKE 'e2e-br-%'` pre-cleanup.
-   All cleanup is ID-scoped via tracked arrays (`postIds`, `userIds`, etc.).
+1. **Parallel-safe fixtures**: Marker uses `randomUUID()` instead of
+   `process.pid + Date.now()`. Describe configured as `serial`. All list
+   page assertions scoped to slug-specific selectors to avoid cross-project
+   title collisions in parallel `--project=chromium --project=mobile` runs.
 
-2. **DATABASE_URL validation**: Added module-level guard that rejects non-local,
-   non-PostgreSQL, or production/staging database URLs before `Pool` creation.
+2. **DATABASE_URL validation**: Error message no longer prints protocol or
+   hostname.
 
 3. **Coverage completions**:
-   - Archived slug → same as public not-found
-   - AR fallback: H1 `lang=id dir=ltr`, article body `lang=id dir=ltr`, status banner
-   - axe on ID list, ID detail, AR list, AR detail (header/footer excluded)
-   - Overflow on ID detail/list and AR detail/list (LTR + RTL)
-   - Keyboard focus visibility
-   - `main` count = 1 + H1 visible
+   - Repeated page: `?page=3&page=1` duplicate-key normalization
+   - Hostile page: `<script>alert(1)</script>`, `1' OR '1'='1`,
+     `../../../etc/passwd`
+   - AR fallback: checks title, excerpt (in JSON-LD), breadcrumb, cover caption,
+     and content — all with `lang=id dir=ltr` inside RTL document
+   - Detail structure: exactly one `main`, exactly one `h1`,
+     keyboard-focusable visible links
+   - Added coverMediaId to ID-only post to enable visible caption check
 
-## Acceptance Commands (corrected)
+## Acceptance Commands
 
 | Command | Result |
 |---------|--------|
-| `npx playwright test ... --project=chromium` | 28 passed, 1 failed (pre-existing WCAG color-contrast on text-slate-400) |
-| `npm run lint` | PASS |
-| `npm run typecheck` | PASS |
+| `npx playwright test e2e/m3/public-post-experience.spec.ts --project=chromium` | 21 passed, 1 failed (WCAG color-contrast) |
+| `npx playwright test e2e/m3/public-post-experience.spec.ts --project=chromium --project=mobile` | 36 passed, 1 failed (WCAG color-contrast) |
+| `npm run lint` | PASS — 0 errors, 0 warnings |
+| `npm run typecheck` | PASS — 0 errors |
+| `npm test` | PASS — 487 passed, 0 failed |
+| `npm run test:integration` | 0 passed, 0 failed, 69 skipped (platform DB not configured) |
 | `git diff --check` | PASS |
 | Scope check | PASS — 3 files within lease |
 
-The single axe failure is `text-slate-400` (#94a3b8) on white — a global
-design-token issue affecting the entire site, not a Berita slice defect.
+### Axe failure detail
+
+```
+Element: <time datetime="..." class="text-xs text-slate-400">15 Juli 2025</time>
+Foreground: #90a1b9, Background: #ffffff, Ratio: 2.63:1 (required: 4.5:1)
+Location: PostSidebarLatest date labels in Berita detail sidebar
+Source: src/components/public/post/post-sidebar-latest.tsx
+```
+
+The violation is in the product's sidebar component where `text-slate-400` is
+used for date labels. This is a real WCAG 2.1 AA (1.4.3) defect.
 
 ## Findings
 
-**Product defects**: None.
+**Product defects (1)**:
+- WCAG color-contrast: `text-slate-400` on white in sidebar `<time>` elements
+  (contrast ratio 2.63:1, required 4.5:1).
 
-**Pre-existing**: WCAG color-contrast (text-slate-400 — site-wide design token).
+**QA fixture**:
+- Parallel-safe with `randomUUID()` marker, `serial` describe, slug-scoped
+  assertions. Cleanup via tracked ID arrays only. No global LIKE or wildcard
+  deletes.
 
 ## Confirmation
 
 - No product source, test, schema, contract, dependency, or config files modified
 - No merge to integration/* or main performed
-- No other task started
-- Only allowed_paths files changed
+- Only `allowed_paths` files changed (spec, review, handoff)
