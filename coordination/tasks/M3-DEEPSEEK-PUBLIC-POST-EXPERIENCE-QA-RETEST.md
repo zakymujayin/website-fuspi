@@ -59,7 +59,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M3-DEEPSEEK-PUBLIC-POST-EXPERIENCE-QA-RETEST.md TASK_BASE=origin/coordination/m3-deepseek-public-post-experience-qa-retest-assignment npm run check:scope
 risk: medium
 token_class: S
-status: assigned
+status: merged
 ---
 
 # M3 DeepSeek Public Post Experience QA Retest

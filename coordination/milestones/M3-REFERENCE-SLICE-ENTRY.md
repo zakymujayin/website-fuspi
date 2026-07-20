@@ -1,6 +1,6 @@
 # M3 Reference Slice Entry
 
-Status: **M3 active — public Post contrast corrected; DeepSeek browser QA retest assigned**
+Status: **M3 active — public Post experience and browser QA accepted**
 
 M3 starts from the accepted M2 development head
 `f83a00e6816a91f72b9ade654b012be8a1a0b2d0`. That head passed GitHub Actions run
@@ -20,9 +20,9 @@ tracked by the M2 exit contract.
 3. **Claude public experience (merged):** implement the bounded `/berita` list/detail reference
    experience against the frozen public query contract, including ID/EN/AR fallback presentation,
    RTL, accessibility, metadata, JSON-LD, responsive states, and safe rich-text rendering.
-4. **DeepSeek public experience QA (retest assigned):** the initial independent browser pass found
-   one WCAG AA sidebar-date contrast defect. Claude corrected it in a bounded UI task; DeepSeek now
-   reruns the corrected PostgreSQL-backed Chromium/mobile gate from a new frozen assignment.
+4. **DeepSeek public experience QA (accepted):** the initial independent browser pass found one
+   WCAG AA sidebar-date contrast defect. Claude corrected it in a bounded UI task; the final
+   PostgreSQL-backed retest passed 60/60 across Chromium and mobile with all ID/AR axe scans green.
 5. **Admin transport/editor slice (later M3 tasks):** issue new GPT/Claude/DeepSeek manifests for
    CSRF-protected Post/Media transport, admin editor presentation, and executable ownership/IDOR
    browser flows. These remain closed during the public experience task.
