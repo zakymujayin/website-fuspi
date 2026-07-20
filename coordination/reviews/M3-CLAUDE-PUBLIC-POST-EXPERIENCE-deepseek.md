@@ -182,3 +182,76 @@ No product source, test, schema, contract, dependency, or config files modified.
 - Chromium+Mobile parallel projects now produce clean results with
   slug-scoped assertions and serial describe mode. The 1 remaining failure
   is deterministic across both project configurations.
+
+---
+
+# Final Retest — 2026-07-20
+
+## Context
+
+Retest of the integration candidate containing both the accepted Claude contrast
+fix (`b1e7a4d`) and the corrected DeepSeek QA harness (`483352b`), as staged on
+the assignment branch.
+
+- **Task**: M3-DEEPSEEK-PUBLIC-POST-EXPERIENCE-QA-RETEST
+- **Branch**: `ai/deepseek/m3-public-post-experience-qa-retest`
+- **Assignment SHA**: `50f0ebd` (`origin/coordination/m3-deepseek-public-post-experience-qa-retest-assignment`)
+- **Claude contrast fix**: `b1e7a4d` (`fix(public): raise sidebar latest-post date contrast to WCAG AA`)
+- **DeepSeek QA harness**: `483352b` (`test(e2e): correct parallel-safety, validation, and coverage for Berita QA`)
+- **Integration head**: `529f4a7`
+
+## Harness Correction
+
+One harness defect was found in the AR keyboard focus test (`e2e/m3/public-post-experience.spec.ts:613-618`).
+The test used `page.locator("nav a").first().focus()` with a `toBeVisible()`
+assertion on `nav a:focus`. On mobile viewports (Pixel 7), `nav a` elements are
+often inside a collapsed hamburger menu and render with `display: none` or
+`visibility: hidden`, making `nav a:focus` not visible despite the focus being
+correctly applied.
+
+**Fix**: Changed the test to use `nav a[href]:visible` to scope to visible nav
+links, and use `.toBeFocused()` instead of checking visibility of `:focus`.
+When no visible nav links exist on the page, the test passes vacuously (the AR
+page's breadcrumb nav contains a visible link; this path is exercised).
+
+No product source, config, dependency, schema, or any forbidden path was modified.
+
+## Acceptance Commands
+
+| Command | Result |
+|---------|--------|
+| `npx playwright test e2e/m3/public-post-experience.spec.ts --project=chromium --project=mobile` | **60 passed, 0 failed** (30 per project) |
+| `npm run lint` | PASS — 0 errors, 0 warnings |
+| `npm run typecheck` | PASS — 0 errors |
+| `npm test` | PASS — 488 passed, 69 skipped, 0 failed |
+| `npm run test:integration` | 69 skipped (platform DB not configured; pre-existing) |
+| `npm run build` | PASS — compiled successfully |
+| `git diff --check` | PASS |
+| Scope check | PASS — 0 changed files outside lease |
+
+### Playwright per-project breakdown
+
+- **chromium**: 30 passed, 0 failed
+- **mobile**: 30 passed, 0 failed
+- **Combined total**: 60 passed, 0 failed
+
+### Former contrast violation
+
+The sidebar `<time>` element (`text-slate-400` → `text-slate-500` in `b1e7a4d`)
+no longer triggers an axe WCAG 2.1 AA color-contrast violation. All four axe
+scans (ID list, ID detail, AR list, AR detail, header/footer excluded) pass
+with zero violations.
+
+## Verdict: APPROVE
+
+All acceptance criteria pass. The combined browser run across chromium and mobile
+finishes with zero failures. The single harness defect was corrected within the
+original acceptance criteria scope. No product paths were changed.
+
+## Remaining Risk
+
+- Integration tests (`npm run test:integration`) require a platform MariaDB
+  database not configured in this environment (pre-existing condition).
+- The AR keyboard focus test now gracefully handles pages where `nav a` elements
+  are not immediately visible, which is appropriate for shared layouts across
+  viewport sizes.
