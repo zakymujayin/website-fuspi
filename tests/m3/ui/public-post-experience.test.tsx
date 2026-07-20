@@ -606,6 +606,30 @@ describe("Web Interface Guidelines corrections", () => {
     expect(sidebarMarkup).toMatch(/min-w-0/);
   });
 
+  it("renders the sidebar latest-item date with AA-contrast text-slate-500, not the failing text-slate-400", () => {
+    const markup = renderToStaticMarkup(
+      <PostSidebarLatest
+        heading="Berita Terbaru"
+        seeAllLabel="Lihat semua berita"
+        seeAllHref="/berita"
+        items={[
+          {
+            id: "post-1",
+            href: "/berita/contoh",
+            title: "Judul",
+            resolvedLocale: "id",
+            dateLabel: "16 Januari 2026",
+            dateTimeIso: "2026-01-16T00:30:00.000Z",
+            cover: { kind: "placeholder" },
+          },
+        ]}
+      />,
+    );
+    const time = markupToContainer(markup).querySelector("time");
+    expect(time?.className).toContain("text-slate-500");
+    expect(time?.className).not.toContain("text-slate-400");
+  });
+
   it("renders one standalone H1 on the not-found page instead of a paragraph", () => {
     const contents = readFileSync(
       path.join(process.cwd(), "src/app/[locale]/(public)/berita/[slug]/not-found.tsx"),

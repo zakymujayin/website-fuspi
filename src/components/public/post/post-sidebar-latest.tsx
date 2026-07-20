@@ -57,7 +57,7 @@ export function PostSidebarLatest({ heading, items, seeAllLabel, seeAllHref }: P
                   >
                     {item.title}
                   </span>
-                  <time dateTime={item.dateTimeIso} className="text-xs text-slate-400">
+                  <time dateTime={item.dateTimeIso} className="text-xs text-slate-500">
                     {item.dateLabel}
                   </time>
                 </span>
