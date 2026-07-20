@@ -5,8 +5,8 @@
 - **Owner**: deepseek-v4-pro
 - **Assignment SHA**: `50f0ebd` (`origin/coordination/m3-deepseek-public-post-experience-qa-retest-assignment`)
 - **First retest commit**: `1da5f24` (initial retest — review, handoff, vacuum-prone AR focus test)
-- **Correction commit**: see final branch head below
-- **Final branch head**: will be set by this commit
+- **Correction commit**: `6571085` (fix vacuum pass, update review/handoff)
+- **Final branch head**: `6571085`
 
 ## Summary
 
