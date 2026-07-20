@@ -47,7 +47,7 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
-  - task: M3-DEEPSEEK-PUBLIC-POST-EXPERIENCE-QA
+  - task: M3-DEEPSEEK-PUBLIC-POST-EXPERIENCE-QA-RETEST
     owner: deepseek-v4-pro
     paths:
       - e2e/m3/public-post-experience.spec.ts
