@@ -209,10 +209,10 @@ often inside a collapsed hamburger menu and render with `display: none` or
 `visibility: hidden`, making `nav a:focus` not visible despite the focus being
 correctly applied.
 
-**Fix**: Changed the test to use `nav a[href]:visible` to scope to visible nav
-links, and use `.toBeFocused()` instead of checking visibility of `:focus`.
-When no visible nav links exist on the page, the test passes vacuously (the AR
-page's breadcrumb nav contains a visible link; this path is exercised).
+**Fix (corrected)**: Changed the test to target a breadcrumb link inside `main`
+(`main nav a[href]`), assert it is visible, focus it, and assert `toBeFocused()`.
+This is guaranteed to find a visible breadcrumb link on the AR detail page. The
+test cannot pass vacuously — if no breadcrumb link is found or visible, it fails.
 
 No product source, config, dependency, schema, or any forbidden path was modified.
 
@@ -252,6 +252,6 @@ original acceptance criteria scope. No product paths were changed.
 
 - Integration tests (`npm run test:integration`) require a platform MariaDB
   database not configured in this environment (pre-existing condition).
-- The AR keyboard focus test now gracefully handles pages where `nav a` elements
-  are not immediately visible, which is appropriate for shared layouts across
-  viewport sizes.
+- The AR keyboard focus test targets `main nav a[href]` which exercises the
+  breadcrumb link inside the content area. If the AR detail page breadcrumb
+  ever omits the nav element or its anchor, the test will correctly fail.

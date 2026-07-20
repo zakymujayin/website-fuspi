@@ -4,8 +4,9 @@
 - **Branch**: `ai/deepseek/m3-public-post-experience-qa-retest`
 - **Owner**: deepseek-v4-pro
 - **Assignment SHA**: `50f0ebd` (`origin/coordination/m3-deepseek-public-post-experience-qa-retest-assignment`)
-- **Implementation SHA**: `50f0ebd` (no product changes; only test spec fix + review + handoff)
-- **Final branch head**: will be set after commit
+- **First retest commit**: `1da5f24` (initial retest — review, handoff, vacuum-prone AR focus test)
+- **Correction commit**: see final branch head below
+- **Final branch head**: will be set by this commit
 
 ## Summary
 
@@ -15,32 +16,42 @@ and the corrected DeepSeek QA harness (`483352b`).
 
 The sidebar `<time>` color-contrast violation (`text-slate-400` → `text-slate-500`
 in `post-sidebar-latest.tsx`) is confirmed resolved. One harness defect was
-corrected in the AR keyboard focus test to handle mobile viewports where `nav a`
-elements may be collapsed in a hamburger menu.
+corrected in the AR keyboard focus test; the initial fix allowed a vacuum pass
+which was subsequently corrected to target `main nav a[href]` (breadcrumb) with
+mandatory visibility assertion — the test now fails if no visible breadcrumb
+link exists.
 
 ## Files Changed
 
-1. `e2e/m3/public-post-experience.spec.ts` — Fixed AR keyboard focus test:
-   - Changed `page.locator("nav a").first().focus()` + `toBeVisible()` to
-     `nav a[href]:visible` + `toBeFocused()` to support collapsed mobile nav.
+1. `e2e/m3/public-post-experience.spec.ts` — Two corrections to AR keyboard
+   focus test:
+   - First pass (`1da5f24`): changed to `nav a[href]:visible` + `toBeFocused()`
+     with `if (count > 0)` guard (allowed vacuum pass on pages without visible
+     nav links).
+   - Correction commit: removed `if` guard, targets `main nav a[href]`
+     (breadcrumb link inside content area), asserts visibility, then focus +
+     `toBeFocused()`. Fails correctly when no visible breadcrumb link exists.
 2. `coordination/reviews/M3-CLAUDE-PUBLIC-POST-EXPERIENCE-deepseek.md` —
    Appended final-retest section with dated verdict, per-project evidence,
-   and remaining risk.
+   corrected harness description, and remaining risk.
 3. `coordination/handoffs/M3-DEEPSEEK-PUBLIC-POST-EXPERIENCE-QA-RETEST-deepseek.md` —
-   This handoff file.
+   This handoff file (corrected).
 
-## Acceptance Commands (all passing)
+No generated/out-of-scope files (`next-env.d.ts`, `package-lock.json`)
+were committed. Worktree is clean except the three allowed_paths.
+
+## Acceptance Commands (all passing, corrected run)
 
 | Command | Result |
 |---------|--------|
-| `npx playwright test e2e/m3/public-post-experience.spec.ts --project=chromium --project=mobile` | **60 passed, 0 failed** |
+| `npx playwright test e2e/m3/public-post-experience.spec.ts --project=chromium --project=mobile` | **60 passed, 0 failed** (30 per project) |
 | `npm run lint` | 0 errors, 0 warnings |
 | `npm run typecheck` | 0 errors |
 | `npm test` | 488 passed, 69 skipped, 0 failed |
 | `npm run test:integration` | 69 skipped (platform DB not configured; pre-existing) |
 | `npm run build` | Compiled successfully |
 | `git diff --check` | PASS |
-| `TASK_MANIFEST=... TASK_BASE=... npm run check:scope` | PASS — 0 changed files outside lease |
+| `TASK_MANIFEST=... TASK_BASE=... npm run check:scope` | PASS — 3 changed files within lease |
 
 ### Playwright per-project totals
 
@@ -51,6 +62,7 @@ elements may be collapsed in a hamburger menu.
 | **Combined** | **60** | **0** |
 
 No Playwright tests were skipped, quarantined, weakened, or excluded.
+No axe rules were removed or excluded beyond the original header/footer exclusion.
 
 ## API/Schema/Migration Impact
 
@@ -64,10 +76,10 @@ None. No product source, schema, dependency, config, or migration was modified.
 
 ## Risks and Follow-ups
 
-- Low risk: the AR keyboard focus test adjustment uses `nav a[href]:visible` and
-  passes vacuously when no visible nav links exist. This is acceptable per the
-  original acceptance criteria and mirrors the approach used in the ID detail
-  structure test.
+- Low risk: the AR keyboard focus test targets `main nav a[href]` (breadcrumb
+  inside the content area). If the AR detail page breadcrumb is ever removed or
+  its `nav` element is restructured away from `main`, the test will correctly
+  fail, requiring a harness update.
 
 ## Dependencies
 
