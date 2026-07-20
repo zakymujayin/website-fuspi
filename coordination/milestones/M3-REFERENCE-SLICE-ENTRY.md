@@ -1,6 +1,6 @@
 # M3 Reference Slice Entry
 
-Status: **M3 active — public Post experience and browser QA accepted**
+Status: **M3 active — public Post accepted; admin transport contract assigned**
 
 M3 starts from the accepted M2 development head
 `f83a00e6816a91f72b9ade654b012be8a1a0b2d0`. That head passed GitHub Actions run
@@ -23,9 +23,9 @@ tracked by the M2 exit contract.
 4. **DeepSeek public experience QA (accepted):** the initial independent browser pass found one
    WCAG AA sidebar-date contrast defect. Claude corrected it in a bounded UI task; the final
    PostgreSQL-backed retest passed 60/60 across Chromium and mobile with all ID/AR axe scans green.
-5. **Admin transport/editor slice (later M3 tasks):** issue new GPT/Claude/DeepSeek manifests for
-   CSRF-protected Post/Media transport, admin editor presentation, and executable ownership/IDOR
-   browser flows. These remain closed during the public experience task.
+5. **Admin transport/editor slice (contract assigned):** freeze a GPT-owned Berita/Post/Media admin
+   transport contract first, then issue separate runtime, editor presentation, and executable
+   ownership/IDOR browser manifests. Runtime and UI remain closed until the contract is reviewed.
 6. **Integrator gate:** merge serially, run the full PostgreSQL and browser suites, reconcile the
    carried security cases, then freeze the reference pattern for M4.
 
