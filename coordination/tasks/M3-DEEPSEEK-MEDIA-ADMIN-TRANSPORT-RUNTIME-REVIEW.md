@@ -60,7 +60,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M3-DEEPSEEK-MEDIA-ADMIN-TRANSPORT-RUNTIME-REVIEW.md TASK_BASE=origin/coordination/m3-deepseek-media-admin-runtime-review-assignment npm run check:scope
 risk: critical
 token_class: L
-status: assigned
+status: merged
 ---
 
 # M3 DeepSeek Independent Media Admin Transport Runtime Review

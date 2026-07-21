@@ -73,7 +73,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M3-GPT-MEDIA-ADMIN-TRANSPORT-RUNTIME.md TASK_BASE=origin/coordination/m3-gpt-media-admin-transport-runtime-assignment npm run check:scope
 risk: critical
 token_class: L
-status: assigned
+status: merged
 ---
 
 # M3 GPT Media Admin Transport Runtime

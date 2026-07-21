@@ -1,6 +1,6 @@
 # M3 Reference Slice Entry
 
-Status: **M3 active — Media admin transport runtime assigned**
+Status: **M3 active — Post and Media admin transport runtimes reviewed and merged**
 
 M3 starts from the accepted M2 development head
 `f83a00e6816a91f72b9ade654b012be8a1a0b2d0`. That head passed GitHub Actions run
@@ -23,11 +23,12 @@ tracked by the M2 exit contract.
 4. **DeepSeek public experience QA (accepted):** the initial independent browser pass found one
    WCAG AA sidebar-date contrast defect. Claude corrected it in a bounded UI task; the final
    PostgreSQL-backed retest passed 60/60 across Chromium and mobile with all ID/AR axe scans green.
-5. **Admin transport/editor slice (Post runtime merged):** the GPT-owned Berita/Post/Media admin
+5. **Admin transport/editor slice (Post and Media runtimes merged):** the GPT-owned Berita/Post/Media admin
    transport contract and Post admin runtime passed independent DeepSeek adversarial review with
    no Critical/High defect. The batch-upload response gap is now closed and independently reviewed;
-   the GPT Media admin runtime is now assigned. Editor presentation and executable ownership/IDOR
-   browser manifests remain closed until both Post and Media runtimes merge.
+   the Media admin runtime is also independently reviewed and merged with no Critical/High defect.
+   The next bounded lane is Claude's admin editor/Media Library presentation, followed by executable
+   ownership/IDOR browser evidence.
 6. **Integrator gate:** merge serially, run the full PostgreSQL and browser suites, reconcile the
    carried security cases, then freeze the reference pattern for M4.
 
