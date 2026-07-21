@@ -1,6 +1,6 @@
 # M3 Reference Slice Entry
 
-Status: **M3 active — Post and Media admin transport runtimes reviewed and merged**
+Status: **M3 active — Claude Media Library browse presentation assigned**
 
 M3 starts from the accepted M2 development head
 `f83a00e6816a91f72b9ade654b012be8a1a0b2d0`. That head passed GitHub Actions run
@@ -27,8 +27,9 @@ tracked by the M2 exit contract.
    transport contract and Post admin runtime passed independent DeepSeek adversarial review with
    no Critical/High defect. The batch-upload response gap is now closed and independently reviewed;
    the Media admin runtime is also independently reviewed and merged with no Critical/High defect.
-   The next bounded lane is Claude's admin editor/Media Library presentation, followed by executable
-   ownership/IDOR browser evidence.
+   Claude's bounded read-only Media Library browse presentation is now assigned. Picker/upload/
+   metadata/delete UI and the Post editor remain closed until their own non-overlapping manifests,
+   followed by executable ownership/IDOR browser evidence.
 6. **Integrator gate:** merge serially, run the full PostgreSQL and browser suites, reconcile the
    carried security cases, then freeze the reference pattern for M4.
 
