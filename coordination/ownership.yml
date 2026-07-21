@@ -46,16 +46,4 @@ ui_hotspots:
     - src/app/globals.css
     - src/components/ui/**
     - messages/**
-active_leases:
-  - task: M3-GPT-POST-ADMIN-TRANSPORT-RUNTIME
-    owner: gpt
-    paths:
-      - src/lib/content/post-admin-transport.ts
-      - src/lib/content/post-mutations.ts
-      - src/app/api/admin/posts/**
-      - tests/m3/runtime/post-admin-transport.test.ts
-      - tests/m3/runtime/post-admin-transport.integration.test.ts
-      - tests/m3/runtime/post-mutations.test.ts
-      - tests/m3/runtime/post-mutations.integration.test.ts
-      - tests/security/admin-post-transport-adversarial.integration.test.ts
-      - coordination/handoffs/M3-GPT-POST-ADMIN-TRANSPORT-RUNTIME-gpt.md
+active_leases: []

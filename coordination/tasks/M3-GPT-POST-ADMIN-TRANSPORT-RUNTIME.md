@@ -76,7 +76,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M3-GPT-POST-ADMIN-TRANSPORT-RUNTIME.md TASK_BASE=origin/coordination/m3-gpt-post-admin-transport-runtime-assignment npm run check:scope
 risk: high
 token_class: L
-status: assigned
+status: merged
 ---
 
 # M3 GPT Post Admin Transport Runtime

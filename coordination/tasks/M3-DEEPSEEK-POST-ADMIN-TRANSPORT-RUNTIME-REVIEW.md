@@ -65,7 +65,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M3-DEEPSEEK-POST-ADMIN-TRANSPORT-RUNTIME-REVIEW.md TASK_BASE=origin/coordination/m3-deepseek-post-admin-transport-runtime-review-assignment npm run check:scope
 risk: high
 token_class: M
-status: assigned
+status: merged
 ---
 
 # M3 DeepSeek Independent Post Admin Transport Runtime Review
