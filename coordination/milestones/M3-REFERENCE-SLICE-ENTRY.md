@@ -1,6 +1,6 @@
 # M3 Reference Slice Entry
 
-Status: **M3 active — admin transport contract reviewed and merged**
+Status: **M3 active — Post admin transport runtime assigned**
 
 M3 starts from the accepted M2 development head
 `f83a00e6816a91f72b9ade654b012be8a1a0b2d0`. That head passed GitHub Actions run
@@ -25,8 +25,9 @@ tracked by the M2 exit contract.
    PostgreSQL-backed retest passed 60/60 across Chromium and mobile with all ID/AR axe scans green.
 5. **Admin transport/editor slice (contract merged):** the GPT-owned Berita/Post/Media admin
    transport contract passed independent DeepSeek adversarial review with no Critical/High defect.
-   The next serial task is the GPT admin transport runtime; editor presentation and executable
-   ownership/IDOR browser manifests remain closed until that runtime merges.
+   The GPT Post admin transport runtime is now assigned as the first bounded runtime slice. Media
+   runtime, editor presentation, and executable ownership/IDOR browser manifests remain closed
+   until their preceding dependency merges.
 6. **Integrator gate:** merge serially, run the full PostgreSQL and browser suites, reconcile the
    carried security cases, then freeze the reference pattern for M4.
 
