@@ -9,6 +9,7 @@ import {
   AdminMediaPersistenceInvariantDispositionSchema,
   AdminMediaTransportCommandSchema,
   AdminMediaUploadMetadataSchema,
+  AdminMediaUploadResponseSchema,
   adminMediaPersistenceInvariantDisposition,
   toAdminMediaMutationResponse,
 } from "@/contracts/media-admin";
@@ -189,6 +190,67 @@ describe("M3 multipart metadata and Media command contracts", () => {
 });
 
 describe("M3 Media mutation and invariant response contract", () => {
+  it("represents an ordered all-or-nothing multi-image upload", () => {
+    const items = Array.from({length: ADMIN_MEDIA_IMAGE_UPLOAD_LIMIT}, (_, index) => ({
+      index,
+      mediaId: `media-${index + 1}`,
+    }));
+    expect(AdminMediaUploadResponseSchema.safeParse({
+      ok: true,
+      policy: "CMS_IMAGE",
+      items,
+    }).success).toBe(true);
+    expect(AdminMediaUploadResponseSchema.safeParse({
+      ok: true,
+      policy: "PUBLIC_PDF",
+      items: [{index: 0, mediaId: "media-pdf"}],
+    }).success).toBe(true);
+  });
+
+  it("rejects invalid batch bounds, ordering, gaps, and duplicate Media IDs", () => {
+    const valid = {ok: true as const, policy: "CMS_IMAGE" as const};
+    for (const items of [
+      [],
+      Array.from({length: ADMIN_MEDIA_IMAGE_UPLOAD_LIMIT + 1}, (_, index) => ({
+        index,
+        mediaId: `media-${index + 1}`,
+      })),
+      [{index: 1, mediaId: "media-1"}],
+      [{index: 0, mediaId: "media-1"}, {index: 2, mediaId: "media-2"}],
+      [{index: 0, mediaId: "media-1"}, {index: 1, mediaId: "media-1"}],
+    ]) {
+      expect(AdminMediaUploadResponseSchema.safeParse({...valid, items}).success).toBe(false);
+    }
+    expect(AdminMediaUploadResponseSchema.safeParse({
+      ok: true,
+      policy: "PUBLIC_PDF",
+      items: [{index: 0, mediaId: "media-1"}, {index: 1, mediaId: "media-2"}],
+    }).success).toBe(false);
+  });
+
+  it("keeps failure and success responses free of partial or storage internals", () => {
+    for (const code of [
+      "SESSION_INVALID",
+      "CSRF_INVALID",
+      "REQUEST_INVALID",
+      "VALIDATION_FAILED",
+      "NOT_FOUND",
+      "MEDIA_IN_USE",
+      "UPLOAD_FAILED",
+      "UNAVAILABLE",
+    ]) {
+      expect(AdminMediaUploadResponseSchema.safeParse({ok: false, code}).success).toBe(true);
+    }
+    for (const payload of [
+      {ok: false, code: "UPLOAD_FAILED", partial: [{mediaId: "media-1"}]},
+      {ok: false, code: "UNAVAILABLE", path: "/srv/fuspi/private"},
+      {ok: true, policy: "CMS_IMAGE", items: [{index: 0, mediaId: "media-1", storageKey: STORAGE_KEY}]},
+      {ok: true, policy: "CMS_IMAGE", items: [{index: 0, mediaId: "media-1"}], checksumSha256: "c".repeat(64)},
+    ]) {
+      expect(AdminMediaUploadResponseSchema.safeParse(payload).success).toBe(false);
+    }
+  });
+
   it("removes storage state from successful persistence output", () => {
     expect(toAdminMediaMutationResponse({
       ok: true, mediaId: "media-1", storageState: "COMMITTED",

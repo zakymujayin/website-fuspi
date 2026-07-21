@@ -138,6 +138,48 @@ export const AdminMediaTransportFailureCodeSchema = z.enum([
   "UNAVAILABLE",
 ]);
 
+const AdminMediaUploadResultItemSchema = z.object({
+  index: z.number().int().min(0).max(ADMIN_MEDIA_IMAGE_UPLOAD_LIMIT - 1),
+  mediaId: MediaIdSchema,
+}).strict();
+
+export const AdminMediaUploadResponseSchema = z.discriminatedUnion("ok", [
+  z.object({
+    ok: z.literal(true),
+    policy: z.enum(["CMS_IMAGE", "PUBLIC_PDF"]),
+    items: z.array(AdminMediaUploadResultItemSchema)
+      .min(1)
+      .max(ADMIN_MEDIA_IMAGE_UPLOAD_LIMIT),
+  }).strict().superRefine((value, context) => {
+    if (value.policy === "PUBLIC_PDF" && value.items.length !== ADMIN_MEDIA_PDF_UPLOAD_LIMIT) {
+      context.addIssue({
+        code: "custom",
+        path: ["items"],
+        message: "Public PDF upload response must contain exactly one item.",
+      });
+    }
+    if (value.items.some((item, index) => item.index !== index)) {
+      context.addIssue({
+        code: "custom",
+        path: ["items"],
+        message: "Upload response indexes must be ordered and contiguous.",
+      });
+    }
+    const mediaIds = value.items.map((item) => item.mediaId);
+    if (new Set(mediaIds).size !== mediaIds.length) {
+      context.addIssue({
+        code: "custom",
+        path: ["items"],
+        message: "Upload response Media IDs must be unique.",
+      });
+    }
+  }),
+  z.object({
+    ok: z.literal(false),
+    code: AdminMediaTransportFailureCodeSchema,
+  }).strict(),
+]);
+
 export const AdminMediaMutationResponseSchema = z.discriminatedUnion("ok", [
   z.object({
     ok: z.literal(true),
@@ -198,5 +240,6 @@ export type AdminMediaListQuery = z.infer<typeof AdminMediaListQuerySchema>;
 export type AdminMediaItem = z.infer<typeof AdminMediaItemSchema>;
 export type AdminMediaListResult = z.infer<typeof AdminMediaListResultSchema>;
 export type AdminMediaUploadMetadata = z.infer<typeof AdminMediaUploadMetadataSchema>;
+export type AdminMediaUploadResponse = z.infer<typeof AdminMediaUploadResponseSchema>;
 export type AdminMediaTransportCommand = z.infer<typeof AdminMediaTransportCommandSchema>;
 export type AdminMediaMutationResponse = z.infer<typeof AdminMediaMutationResponseSchema>;
