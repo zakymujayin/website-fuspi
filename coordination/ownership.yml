@@ -46,4 +46,10 @@ ui_hotspots:
     - src/app/globals.css
     - src/components/ui/**
     - messages/**
-active_leases: []
+active_leases:
+  - task: M3-GPT-MEDIA-UPLOAD-RESPONSE-CONTRACT
+    owner: gpt
+    paths:
+      - src/contracts/media-admin.ts
+      - tests/m3/contracts/media-admin-transport-contract.test.ts
+      - coordination/handoffs/M3-GPT-MEDIA-UPLOAD-RESPONSE-CONTRACT-gpt.md
