@@ -4,6 +4,7 @@ import type {ActiveDatabaseSession} from "@/contracts/auth";
 import type {PostMutationDatabase} from "@/lib/content/post-mutations";
 import {
   createPost,
+  deletePost,
   mutatePostPublication,
   updatePost,
 } from "@/lib/content/post-mutations";
@@ -79,6 +80,7 @@ function createTransaction(overrides: Record<string, unknown> = {}) {
       }),
       findFirst: vi.fn(),
       updateMany: vi.fn(),
+      deleteMany: vi.fn(),
       findUniqueOrThrow: vi.fn(),
     },
     postTranslation: {
@@ -91,6 +93,7 @@ function createTransaction(overrides: Record<string, unknown> = {}) {
       createMany: vi.fn(),
     },
     contentRevision: {create: vi.fn().mockResolvedValue({id: "revision-1"})},
+    activityLog: {create: vi.fn().mockResolvedValue({id: "activity-1"})},
     ...overrides,
   };
 }
@@ -302,5 +305,59 @@ describe("M3 Post mutation trust boundary", () => {
       clock,
     )).resolves.toEqual({ok: false, code: "INVALID_STATE"});
     expect(updateMany).not.toHaveBeenCalled();
+  });
+
+  it("deletes an owned Post with optimistic locking and a sanitized audit event", async () => {
+    const updateMany = vi.fn().mockResolvedValue({count: 1});
+    const deleteMany = vi.fn().mockResolvedValue({count: 1});
+    const activityCreate = vi.fn().mockResolvedValue({id: "activity-1"});
+    const transaction = createTransaction({
+      post: {
+        findFirst: vi.fn().mockResolvedValue({
+          id: "post-1",
+          type: "BERITA",
+          columnType: null,
+          slug: "post-1",
+          status: "DRAFT",
+          isFeatured: false,
+          publishedAt: null,
+          version: 1,
+          categoryId: null,
+          coverMediaId: null,
+          contentOwnerId: "editor-1",
+          authorId: "editor-1",
+          translations: [{
+            locale: "id",
+            ...translation("Post"),
+            status: "DRAFT",
+            sourceVersion: 1,
+          }],
+          tags: [],
+        }),
+        updateMany,
+        deleteMany,
+      },
+      activityLog: {create: activityCreate},
+    });
+
+    await expect(deletePost(
+      databaseWithTransaction(transaction),
+      session(),
+      {postId: "post-1", expectedVersion: 1},
+      clock,
+    )).resolves.toMatchObject({ok: true, postId: "post-1", version: 2});
+    expect(deleteMany).toHaveBeenCalledWith({where: {
+      id: "post-1",
+      contentOwnerId: "editor-1",
+      authorId: "editor-1",
+      version: 2,
+    }});
+    expect(activityCreate).toHaveBeenCalledWith({data: expect.objectContaining({
+      actorId: "editor-1",
+      action: "UPDATE",
+      resourceType: "Post",
+      resourceId: "post-1",
+      metadata: {operation: "DELETE", version: 2},
+    })});
   });
 });

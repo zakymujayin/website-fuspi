@@ -1,5 +1,6 @@
 import type {Prisma} from "@/generated/prisma/client";
 import type {ContentStatus, TranslationStatus} from "@/generated/prisma/enums";
+import {z} from "zod";
 
 import {
   ActiveDatabaseSessionSchema,
@@ -9,6 +10,7 @@ import {
   PostAutosaveInputSchema,
   PostCreateInputSchema,
   PostInitialPublicationDecisionSchema,
+  PostIdSchema,
   PostMutationResultSchema,
   PostPublicationMutationInputSchema,
   PostPublicationTransitionSchema,
@@ -23,6 +25,7 @@ import {
   type PostUpdateInput,
 } from "@/contracts/post";
 import {authorize} from "@/lib/auth/runtime/authorization";
+import {recordActivity} from "@/lib/audit/activity-log";
 import {createPrismaClient} from "@/lib/db/client";
 import {claimOptimisticVersion} from "@/lib/db/optimistic-lock";
 import {createContentRevision} from "@/lib/db/revision";
@@ -92,7 +95,7 @@ function isFailure(value: Actor | PostMutationResult): value is PostMutationResu
 
 function isAuthorized(
   actor: Actor,
-  action: "CREATE" | "UPDATE" | "PUBLISH" | "SCHEDULE",
+  action: "CREATE" | "UPDATE" | "DELETE" | "PUBLISH" | "SCHEDULE",
   resourceOwnerId: string,
 ) {
   return authorize({
@@ -100,6 +103,11 @@ function isAuthorized(
     resourceOwnerId,
   }, action, "POST").allowed;
 }
+
+const PostDeleteInputSchema = z.object({
+  postId: PostIdSchema,
+  expectedVersion: z.number().int().positive().max(2_147_483_646),
+}).strict();
 
 function ownedPostWhere(actor: Actor, postId: string): Prisma.PostWhereInput {
   return actor.role === "ADMIN"
@@ -702,6 +710,59 @@ export async function mutatePostPublication(
         },
       });
       return successfulResult(post);
+    });
+  } catch {
+    return resultFailure("INTERNAL_ERROR");
+  }
+}
+
+export async function deletePost(
+  database: PostMutationDatabase,
+  rawSession: unknown,
+  rawInput: unknown,
+  clock: PostMutationClock = SYSTEM_CLOCK,
+): Promise<PostMutationResult> {
+  const now = clock();
+  const actor = actorFromSession(rawSession, now);
+  if (isFailure(actor)) return actor;
+  const parsed = PostDeleteInputSchema.safeParse(rawInput);
+  if (!parsed.success) return resultFailure("VALIDATION_FAILED");
+
+  try {
+    return await database.$transaction(async (transaction) => {
+      const existing = await readOwnedPost(transaction, actor, parsed.data.postId);
+      if (!existing) return resultFailure("NOT_FOUND");
+      const ownerId = existing.contentOwnerId ?? existing.authorId ?? "";
+      if (!isAuthorized(actor, "DELETE", ownerId)) return resultFailure("NOT_FOUND");
+
+      const claim = await claimOptimisticVersion(transaction, {
+        resource: "Post",
+        id: existing.id,
+        expectedVersion: parsed.data.expectedVersion,
+      });
+      if (!claim.ok) return resultFailure("VERSION_CONFLICT");
+
+      const removed = await transaction.post.deleteMany({
+        where: {
+          ...ownedPostWhere(actor, existing.id),
+          version: claim.nextVersion,
+        },
+      });
+      if (removed.count !== 1) throw new Error("Owned post changed during deletion.");
+      await recordActivity(transaction, {
+        actorId: actor.userId,
+        action: "UPDATE",
+        resourceType: "Post",
+        resourceId: existing.id,
+        metadata: {operation: "DELETE", version: claim.nextVersion},
+      });
+      return successfulResult({
+        id: existing.id,
+        version: claim.nextVersion,
+        status: existing.status,
+        publishedAt: existing.publishedAt,
+        updatedAt: now,
+      });
     });
   } catch {
     return resultFailure("INTERNAL_ERROR");
