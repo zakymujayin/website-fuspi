@@ -3,7 +3,7 @@
 > Nama file lama dipertahankan agar tautan dokumentasi tidak putus. Kontrak Hostinger sudah
 > digantikan oleh VPS melalui ADR-0003.
 
-Ini bagian paling rawan salah, jadi ikuti persis. Tujuannya: meniru cara WordPress (`wp-content/uploads`) — file diunggah ke **direktori persisten di luar folder build**, disajikan langsung oleh web server sebagai file statis, dan aplikasi hanya menyimpan URL-nya di database.
+Ini bagian paling rawan salah, jadi ikuti persis. Tujuannya: file publik diunggah ke **direktori persisten di luar folder build**, disajikan langsung oleh web server sebagai file statis, dan aplikasi hanya menyimpan URL-nya di database.
 
 ## Prinsip kunci
 

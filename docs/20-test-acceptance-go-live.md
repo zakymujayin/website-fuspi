@@ -130,15 +130,16 @@ Pipeline minimum: `prisma validate` → migration database kosong → seed → l
 - Screen reader manual mencakup beranda → daftar/detail berita serta login → tulis berita; calendar memiliki list view yang ekuivalen.
 - `prefers-reduced-motion` menghentikan marquee/count-up/carousel autoplay.
 
-## G. Migrasi WordPress
+## G. Kesiapan konten awal manual
 
-- Dry run dan final run menghasilkan laporan jumlah source/created/updated/skipped/failed per tipe dan tahun.
-- Rekonsiliasi wajib 100% untuk konten yang masuk scope; setiap exclusion tercatat dengan alasan dan persetujuan pemilik konten.
-- Semua media mempunyai checksum; missing/corrupt media nol sebelum cutover.
-- Sampling visual minimum: 20 berita, 10 halaman, seluruh prodi, seluruh menu, dan semua tipe dokumen.
-- Crawl staging tidak menemukan internal 404, redirect chain/loop, mixed content, missing canonical, atau broken hreflang.
-- Setiap URL publik WordPress yang ditemukan sitemap/database/log memiliki redirect 301 atau exclusion tertulis.
-- Menjalankan importer ulang tidak membuat duplikasi.
+- Pemilik konten menyetujui matriks menu, halaman wajib, owner, status materi, locale, dan tanggal review.
+- Profil, sejarah, visi, misi, tujuan, strategi, struktur organisasi, pimpinan, SDM, fasilitas, lima program studi, layanan, kontak, dokumen, dan akreditasi diisi melalui CMS dengan data resmi.
+- Sambutan dan foto Dekan, angka mahasiswa/dosen/tenaga kependidikan, media hero, quick links, serta CTA diverifikasi sebelum section terkait ditampilkan.
+- Berita dan modul dinamis boleh kosong saat go-live; section beranda terkait harus tersembunyi dan halaman arsip memberi empty state yang jujur.
+- Tidak ada seed/fixture yang tampil sebagai nama orang, angka, media, testimoni, mitra, atau klaim institusional nyata.
+- Semua media publik mempunyai sumber/hak penggunaan, alt text, dimensi, dan file yang dapat dibaca.
+- Sampling visual mencakup seluruh template profil, lima program studi, seluruh menu, layanan, dokumen, beranda desktop/mobile, dan locale ID/EN/AR.
+- Crawl staging tidak menemukan internal 404, redirect chain/loop, mixed content, missing canonical, broken hreflang, atau tautan integrasi yang belum dikonfigurasi.
 
 ## H. Operasional, backup, dan deployment
 
@@ -155,12 +156,12 @@ Pipeline minimum: `prisma validate` → migration database kosong → seed → l
 Go-live hanya boleh dilakukan bila semua kondisi terpenuhi:
 
 - Tidak ada defect severity Critical atau High; Medium memiliki owner dan tanggal penyelesaian.
-- Migration, seed, build, seluruh test otomatis, dan crawl staging lulus.
+- Database migration, seed struktural, build, seluruh test otomatis, dan crawl staging lulus.
 - Restore drill berhasil dan bukti hasil disimpan.
 - SMTP/outbox/cron diuji di lingkungan produksi.
 - Satgas PPKS menyetujui kontak bantuan, wording, role, alur, SLA, dan retention hold secara tertulis.
 - Seluruh secret produksi tersedia, berbeda satu sama lain, tidak berada di repo/log, dan mempunyai prosedur rotasi.
-- Migrasi WordPress serta redirect 301 direkonsiliasi.
+- Checklist kesiapan konten manual disetujui pemilik konten; registry redirect tidak memuat data terdahulu sebagai syarat v1.
 - Checklist RTL, mobile, accessibility, privacy, dan cookie consent ditandatangani penanggung jawab.
 - Tidak ada konten institusional tanpa owner/review date; alert/status dan privacy request telah diuji (`21`).
 - Hub calon mahasiswa, direktori, structured data, performance budget, dan analytics tanpa PII telah diuji (`22`).

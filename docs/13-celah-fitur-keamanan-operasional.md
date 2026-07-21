@@ -6,7 +6,7 @@ Dokumen ini menutup celah yang ditemukan saat membandingkan rencana kita dengan 
 
 ## A. Formulir publik (Kontak, Pengaduan, Survei) — celah besar
 
-Situs lama hanya menautkan ke Google Form eksternal. Sekarang formulir masuk ke sistem sendiri. `FormSubmission` hanya menampung KONTAK; SURVEI memakai model survei berversi dan PENGADUAN memakai `Ticket`.
+Kontrak awal hanya menautkan formulir eksternal. Pada produk baru, formulir masuk ke sistem sendiri. `FormSubmission` hanya menampung KONTAK; SURVEI memakai model survei berversi dan PENGADUAN memakai `Ticket`.
 
 ### 1. Hubungi Kami (`/kontak`)
 - Field: Nama, Email, Nomor telepon (opsional), Subjek, Pesan.
@@ -158,17 +158,17 @@ Konten fakultas (berita bertahun-tahun, dokumen akreditasi) tidak boleh hilang.
 - **Uji restore wajib** sebelum go-live dan setiap 6 bulan: restore database + ketiga storage ke lingkungan terisolasi, verifikasi checksum dan satu file terenkripsi, lalu catat hasilnya.
 - **Log aktivitas admin** (`ActivityLog`, disebut di `10-D`) — siapa mengubah apa; membantu melacak bila ada kesalahan.
 - **Monitoring uptime** sederhana (mis. UptimeRobot gratis) + cek broken link berkala.
-- **Redirect dari URL WordPress lama** memakai tabel `Redirect` dan status 301. Tidak boleh ada loop atau chain; destination selalu URL locale final.
+- **Registry redirect aman** tersedia untuk perubahan URL FUSPI di masa depan. Redirect permanen tidak boleh membentuk loop atau chain; destination selalu URL locale final.
 
-### Migrasi WordPress — workstream wajib
+### Kesiapan konten awal manual — workstream wajib
 
-1. Inventaris seluruh post type, page, kategori, tag, author, menu, attachment, dokumen, tanggal, status, slug, dan URL publik lama.
-2. Buat skrip import idempotent dengan tabel mapping ID WordPress → ID baru. Konten lama masuk sebagai translation `id`; EN/AR dibiarkan kosong.
-3. Sanitasi HTML, transformasikan block/shortcode yang didukung, salin media dengan checksum SHA-256, deduplikasi, dan perbaiki internal URL.
-4. Buat satu redirect 301 untuk setiap URL lama menuju URL `/id/...` final. Redirect chain dan loop adalah kegagalan migrasi.
-5. Dry run menghasilkan jumlah source, created, updated, skipped, failed, missing media, dan broken internal links.
-6. Sebelum cutover, rekonsiliasi jumlah per tipe/status/tahun, sampling visual konten, lalu crawl staging untuk 404, missing media, canonical, hreflang, dan redirect.
-7. Backup WordPress lama dipertahankan sampai restore situs baru dan rekonsiliasi produksi disetujui.
+1. Pemilik konten mengesahkan matriks menu, halaman wajib, penanggung jawab, status materi, dan tanggal review.
+2. Admin memasukkan materi melalui CMS; tidak ada proses impor atau pemetaan ID/URL dari sistem terdahulu dalam scope v1.
+3. Nama pimpinan, statistik, sejarah, kontak, akreditasi, program, dan klaim publik hanya diterbitkan setelah diverifikasi pemilik konten.
+4. Media awal memakai aset resmi FUSPI, memiliki alt text, dimensi, hak penggunaan, dan checksum penyimpanan yang valid.
+5. Section beranda tanpa konten valid disembunyikan. Halaman arsip kosong memakai empty state yang jujur dan tidak diisi fixture seolah-olah nyata.
+6. Sebelum cutover, lakukan sampling visual seluruh template utama dan crawl staging untuk 404 internal, media hilang, canonical, hreflang, dan tautan rusak.
+7. Checklist lengkap mengikuti `26-H` dan acceptance `20-G`. Registry redirect tidak perlu dipopulasi dari situs terdahulu.
 
 ### SMTP & transactional outbox
 

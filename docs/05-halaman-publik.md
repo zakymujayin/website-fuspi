@@ -2,15 +2,16 @@
 
 Rute publik berada di route group `(public)` dengan layout berisi Navbar dan Footer. Semua halaman publik adalah Server Components yang membaca data via `lib/queries/` (hanya konten `PUBLISHED`).
 
-## Struktur navigasi (FINAL — pola dua lapis)
+## Struktur navigasi (FINAL — tiga lapis)
 
 Navigasi diambil dari tabel `MenuItem` (bisa diedit di admin), dengan default berikut.
 
-**Prinsip (diadopsi dari UIN Suka Ushuluddin):** rahasia navigasi yang rapi bukan mengurangi isi, melainkan **memisahkan dua lapis**:
+**Prinsip:** navigasi yang rapi bukan mengurangi isi, melainkan memisahkan kebutuhan pengguna menjadi tiga lapis:
 - **Lapis konten** (yang sering diperbarui: berita, pengumuman, agenda…) → bar tipis di atas header.
-- **Lapis struktur** (identitas institusi: profil, program, akademik…) → menu utama.
+- **Lapis utilitas** (portal, integrasi, dan locale) → topbar ringkas.
+- **Lapis struktur** (identitas institusi: profil, akademik, riset, dan layanan) → menu utama.
 
-Dengan cara ini menu utama cukup **6 item** — lebih lega daripada struktur situs FUDA yang dipakai sebagai salah satu referensi audit dan memiliki sekitar 10 menu plus keranjang "Lainnya".
+Kategori informasi mengikuti kebutuhan yang ditemukan dalam audit referensi eksternal, tetapi penamaan, pengelompokan, identitas, dan pengalaman visual ditetapkan khusus untuk FUSPI. Kontrak lengkap ada di `26`.
 
 ### Lapis 1 — Bar konten (paling atas, tipis)
 Tautan langsung ke arsip tiap tipe konten:
@@ -25,7 +26,7 @@ Calon Mahasiswa · Portal PMB · SILA · SIAKAD · E-Learning · GKM        [ID 
 ```
 `Calon Mahasiswa` menuju hub internal `/calon-mahasiswa`; lainnya link eksternal, termasuk SILA dari konfigurasi `NEXT_PUBLIC_SILA_URL`, ditambah language switcher (`12-F`). URL SILA tidak di-hardcode sebelum fase integrasi.
 
-### Lapis 3 — Menu utama (6 item, semuanya dropdown)
+### Lapis 3 — Menu utama
 
 ```
 1. PROFIL
@@ -37,37 +38,44 @@ Calon Mahasiswa · Portal PMB · SILA · SIAKAD · E-Learning · GKM        [ID 
    ├─ Tenaga Kependidikan      /tenaga-kependidikan
    └─ Fasilitas                /halaman/fasilitas
 
-2. PROGRAM STUDI
-   ├─ Ilmu Al-Qur’an dan Tafsir (IAT)    /program-studi/iat
-   ├─ Ilmu Hadis (IH)                    /program-studi/ih
-   ├─ Aqidah dan Filsafat Islam (AFI)    /program-studi/afi
-   ├─ Studi Agama-Agama (SAA)            /program-studi/saa
-   └─ Tasawuf dan Psikoterapi (TASPI)    /program-studi/taspi
-
-3. AKADEMIK
+2. AKADEMIK
+   ├─ Program Studi
+   │  ├─ Ilmu Al-Qur’an dan Tafsir (IAT)    /program-studi/iat
+   │  ├─ Ilmu Hadis (IH)                    /program-studi/ih
+   │  ├─ Aqidah dan Filsafat Islam (AFI)    /program-studi/afi
+   │  ├─ Studi Agama-Agama (SAA)            /program-studi/saa
+   │  └─ Tasawuf dan Psikoterapi (TASPI)    /program-studi/taspi
    ├─ Kurikulum                /halaman/kurikulum
    ├─ Kalender Akademik        /halaman/kalender-akademik
-   ├─ Akreditasi               /halaman/akreditasi
+   ├─ Monitoring & Evaluasi    /halaman/monev
    ├─ Pedoman Akademik         /dokumen?kategori=pedoman
    ├─ Tugas Akhir & Skripsi    /halaman/tugas-akhir
-   ├─ Yudisium                 /halaman/yudisium
-   └─ Profil Lulusan           /halaman/profil-lulusan
+   └─ Yudisium                 /halaman/yudisium
 
-4. RISET & KERJASAMA
-   ├─ Penelitian               /penelitian
-   ├─ Pengabdian (PkM)         /pengabdian
-   ├─ Kerjasama                /kerjasama
+3. PENELITIAN & PKM
+   ├─ Penelitian Dosen         /penelitian?pelaku=dosen
+   ├─ Penelitian Mahasiswa     /penelitian?pelaku=mahasiswa
+   ├─ Pengabdian Dosen         /pengabdian?pelaku=dosen
+   ├─ Pengabdian Mahasiswa     /pengabdian?pelaku=mahasiswa
+   ├─ Panduan Teknis           /dokumen?kategori=penelitian-pkm
    ├─ Pusat Studi & Laboratorium  /unit
    └─ Jurnal                   (eksternal)
 
-5. KEMAHASISWAAN
+4. KEMAHASISWAAN
    ├─ Beasiswa                 /beasiswa
    ├─ Prestasi Mahasiswa       /prestasi
    ├─ Kegiatan Mahasiswa       /kegiatan
    ├─ Organisasi Mahasiswa     /unit?tipe=ormawa
    └─ Tracer Study & Alumni    (eksternal / halaman)
 
-6. LAYANAN
+5. KERJA SAMA
+   ├─ Internasional            /kerjasama?cakupan=internasional
+   ├─ Nasional                 /kerjasama?cakupan=nasional
+   └─ Lokal                    /kerjasama?cakupan=lokal
+
+6. AKREDITASI                  /halaman/akreditasi
+
+7. LAYANAN
    ├─ Informasi Layanan        /layanan
    ├─ e-Layanan Akademik SILA  (eksternal)
    ├─ Pengaduan                /pengaduan
@@ -81,11 +89,12 @@ Calon Mahasiswa · Portal PMB · SILA · SIAKAD · E-Learning · GKM        [ID 
    └─ PPID                     /halaman/ppid
 ```
 
-### Yang dibuang / diperbaiki dari situs lama
+### Penyederhanaan arsitektur informasi
 - ❌ **Menu "Lainnya"** — dihapus. Keranjang serba-ada selalu jadi tempat sampah navigasi.
-- ❌ **Program Studi ganda** (dulu muncul di Profil *dan* Akademik) — sekarang satu tempat.
+- ❌ **Program Studi ganda** — ditempatkan konsisten di bawah Akademik dan tetap diberi akses kontekstual dari beranda.
 - ❌ **Berita/Pengumuman di menu utama** — dipindah ke bar konten.
 - ✅ **Menu "Layanan" jadi menu utama** — ini pembeda FUSPI (pengaduan bertiket + peminjaman ruangan), pantas ditonjolkan.
+- ✅ **Akreditasi menjadi tautan utama** — mudah ditemukan tanpa terselip dalam dropdown panjang.
 - ✅ Link eksternal (SIAKAD, E-Learning, GKM, jurnal) dikumpulkan di topbar & footer, bukan berserak di menu.
 
 ### Mobile
@@ -124,20 +133,27 @@ Di bawah `md`: bar konten + topbar + menu utama semuanya masuk ke **hamburger �
 - **PostCard**: gambar sampul (aspek 16:9), kategori (caption), judul (H4, clamp 2 baris), tanggal, ringkasan (clamp 2 baris). Hover naik shadow.
 - **Pagination**, **EmptyState** ("Belum ada konten untuk kategori ini."), **SectionHeading** (judul + garis brass).
 
-## Beranda (`/`) — susunan section
+## Beranda (`/`) — susunan awal section
 
-Urutan section, dari atas:
+Seluruh urutan dan visibilitas dibaca dari `HomeSection`. Susunan awal mengikuti kontrak `26`:
 
-1. **Hero** — `HomeSlider` (carousel gambar). Bukan gradient generik: foto FUSPI + judul tegas (Plus Jakarta Sans) + subjudul + 1 CTA. Overlay navy transparan agar teks terbaca. Autoplay lambat, kontrol panah, hormati `prefers-reduced-motion`.
+1. **Hero** — media resmi FUSPI, satu pesan utama, dan maksimal dua CTA. Carousel bukan keharusan; bila digunakan, kontrol manual dan reduced motion wajib.
 2. **Akses cepat** — 6 kartu ikon: Layanan, Pengaduan, Survei, E-Journal, PMB, E-Learning. Grid responsif.
 3. **Sambutan Dekan** — foto dekan + nama/jabatan + kutipan sambutan (dari `SiteSetting`). Layout 2 kolom.
-4. **Statistik** — 3 angka besar (Mahasiswa, Tenaga Pendidik, Tenaga Kependidikan) dengan animasi count-up saat masuk viewport. Latar `royal-900`, teks putih.
-5. **Berita Terbaru** — 3–4 `PostCard` terbaru + tombol "Semua Berita".
-6. **Pengumuman & Informasi** — 2 kolom daftar ringkas (judul + tanggal), tautan "Selengkapnya".
-7. **Program Studi** — grid 5 prodi (nama + badge akreditasi; "Unggul" pakai badge brass).
-8. **Kerjasama** — carousel/grid logo mitra (`Partnership` aktif), judul "Penguatan Kerja Sama Strategis".
-9. **Sorotan Akademik / Kolom** — tab Dekan/Dosen/Mahasiswa, masing-masing 2–3 kartu kolom.
-10. **CTA akhir** — banner ajakan (mis. "Bergabung dengan FUSPI" → PMB) dengan latar royal.
+4. **Statistik** — mahasiswa, dosen, dan tenaga kependidikan; tampil hanya setelah angka diverifikasi.
+5. **Pengantar fakultas** — ringkasan profil dengan tautan ke profil, visi-misi, dan struktur organisasi.
+6. **Program Studi** — lima program resmi dalam urutan `src/config/institution.ts`.
+7. **Pengumuman & Informasi** — daftar ringkas yang mengutamakan tanggal dan status.
+8. **Layanan** — pintasan layanan akademik, umum, laboratorium, dan pengaduan.
+9. **Berita Terbaru** — satu berita utama dan beberapa berita pendamping.
+10. **Kerja Sama** — logo/grid mitra (`Partnership` aktif) dengan aset resmi.
+11. **Sorotan Akademik / Kolom** — karya atau kolom Dekan, dosen, dan mahasiswa.
+12. **Video** — profil/tur/liputan resmi dengan poster image.
+13. **Agenda** — agenda mendatang dengan tanggal, lokasi, dan CTA detail.
+14. **Testimoni Alumni** — opsional dan tersembunyi sampai materi serta izin tersedia.
+15. **CTA akhir** — ajakan menuju hub calon mahasiswa atau PMB terkonfigurasi.
+
+Tidak ada bagian yang memakai angka, nama, foto, atau klaim contoh sebagai konten produksi. Section dinamis tanpa konten disembunyikan; halaman arsip tetap memberi empty state yang jujur.
 
 ## SEO & metadata
 
