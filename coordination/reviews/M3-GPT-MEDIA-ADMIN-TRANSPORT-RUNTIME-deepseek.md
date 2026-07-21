@@ -237,7 +237,7 @@ The handoff records a Turbopack NFT tracing warning related to the upload route 
 | `npm run prisma:validate` | **PASS** — Schema valid |
 | `npm run build` | **PASS** — 25 routes (including `/api/admin/media`, `/api/admin/media/upload`) |
 | `git diff --check` | **PASS** — Clean |
-| `TASK_MANIFEST=... npm run check:scope` | **PASS** — 0 changed files within lease |
+| `TASK_MANIFEST=... npm run check:scope` | **PASS** — 2 changed files within lease |
 
 ---
 
@@ -258,7 +258,7 @@ The handoff records a Turbopack NFT tracing warning related to the upload route 
 | Assignment commit | `f9a546f3a98fc03c6d440585bc309693ccbee52e` |
 | Candidate under review | `8ab07a8` |
 | Implementation SHA | `4c83d8f` |
-| Initial review documentation commit | (to be set by commit) |
+| Initial review documentation commit | `179c467` |
 | Final branch head | corrective documentation commit containing this handoff; exact SHA reported after push |
 
 ---

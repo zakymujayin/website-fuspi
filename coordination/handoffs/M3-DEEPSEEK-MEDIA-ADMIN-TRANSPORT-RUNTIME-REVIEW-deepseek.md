@@ -3,7 +3,7 @@
 - **Task ID:** `M3-DEEPSEEK-MEDIA-ADMIN-TRANSPORT-RUNTIME-REVIEW`
 - **Branch:** `ai/deepseek/m3-media-admin-transport-runtime-review`
 - **Base SHA (assignment):** `f9a546f3a98fc03c6d440585bc309693ccbee52e`
-- **Initial review documentation commit:** (to be set by commit)
+- **Initial review documentation commit:** `179c467`
 - **Final branch head:** corrective documentation commit containing this handoff; exact SHA reported after push
 - **Candidate reviewed:** `8ab07a8`
 - **Implementation SHA:** `4c83d8f`
@@ -66,7 +66,7 @@ All twelve review requirements were satisfied:
 | `npm run prisma:validate` | **PASS** — Schema valid |
 | `npm run build` | **PASS** — 25 routes including Media APIs |
 | `git diff --check` | **PASS** — Clean |
-| `TASK_MANIFEST=... npm run check:scope` | **PASS** — 0 changed files within lease |
+| `TASK_MANIFEST=... npm run check:scope` | **PASS** — 2 changed files within lease |
 
 ## Untested areas, risks, and follow-ups
 
