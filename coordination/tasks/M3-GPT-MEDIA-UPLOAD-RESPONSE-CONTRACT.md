@@ -52,7 +52,7 @@ acceptance_commands:
   - TASK_MANIFEST=coordination/tasks/M3-GPT-MEDIA-UPLOAD-RESPONSE-CONTRACT.md TASK_BASE=origin/coordination/m3-gpt-media-upload-response-contract-assignment npm run check:scope
 risk: high
 token_class: S
-status: assigned
+status: merged
 ---
 
 # M3 GPT Media Upload Response Contract
