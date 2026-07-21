@@ -135,7 +135,7 @@ The contract design makes partial-success representation structurally impossible
 | `npm run prisma:validate` | **PASS** — Schema valid |
 | `npm run build` | **PASS** — 23 routes/pages, production build |
 | `git diff --check` | **PASS** — Clean |
-| `TASK_MANIFEST=... npm run check:scope` | **PASS** — 0 changed files within lease |
+| `TASK_MANIFEST=... npm run check:scope` | **PASS** — 2 changed files within lease |
 
 No integration tests are required by this manifest; the contract is tested purely through Zod boundary validation.
 
@@ -158,7 +158,7 @@ These are documented in the GPT handoff and are not contract defects:
 | Assignment commit | `4efe23c0f4e59f0e1af8b1dc6dcb2cbac459e668` |
 | Candidate under review | `ef33207` |
 | Implementation SHA | `2647529` |
-| Initial review documentation commit | (to be set by commit) |
+| Initial review documentation commit | `3f5a00e` |
 | Final branch head | corrective documentation commit containing this handoff; exact SHA reported after push |
 
 ---

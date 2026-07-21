@@ -3,7 +3,7 @@
 - **Task ID:** `M3-DEEPSEEK-MEDIA-UPLOAD-RESPONSE-CONTRACT-REVIEW`
 - **Branch:** `ai/deepseek/m3-media-upload-response-contract-review`
 - **Base SHA (assignment):** `4efe23c0f4e59f0e1af8b1dc6dcb2cbac459e668`
-- **Initial review documentation commit:** (to be set by commit)
+- **Initial review documentation commit:** `3f5a00e
 - **Final branch head:** corrective documentation commit containing this handoff; exact SHA reported after push
 - **Candidate reviewed:** `ef33207`
 - **Implementation SHA:** `2647529`
@@ -54,7 +54,7 @@ All eight review requirements were satisfied:
 | `npm run prisma:validate` | **PASS** — Schema valid |
 | `npm run build` | **PASS** — Production build, 23 routes |
 | `git diff --check` | **PASS** — Clean |
-| `TASK_MANIFEST=... npm run check:scope` | **PASS** — 0 changed files within lease |
+| `TASK_MANIFEST=... npm run check:scope` | **PASS** — 2 changed files within lease |
 
 ## Untested areas, risks, and follow-ups
 
