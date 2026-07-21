@@ -3,13 +3,14 @@
 - **Task ID:** `M3-DEEPSEEK-POST-ADMIN-TRANSPORT-RUNTIME-REVIEW`
 - **Branch:** `ai/deepseek/m3-post-admin-transport-runtime-review`
 - **Base SHA (assignment):** `deb54709185001864a8a11e3418490b2855d2adb`
-- **Head SHA (review):** (to be set by commit)
+- **Initial review documentation commit:** `bf09fa8`
+- **Final branch head:** corrective documentation commit containing this handoff; exact SHA reported after push
 - **Candidate reviewed:** `1364bf4862f7e38efe41866c0254f65aa28296be`
 - **Implementation SHA:** `0510103`
 
 ## Summary
 
-Performed a bounded, read-only adversarial review of the GPT M3 Post Admin Transport Runtime (candidate `1364bf4`). Inspected all eight candidate files — two Route Handlers, the transport runtime, the `deletePost` mutation, and five test files — against the thirteen review requirements in the manifest. Also verified all frozen contracts, auth/permission runtime, optimistic lock, revision, activity log, and sanitizer as readonly context. Ran every acceptance command; integration tests were blocked by reviewer environment (no PostgreSQL), and the integrator's recorded 74/74 evidence was accepted per manifest instructions.
+Performed a bounded, read-only adversarial review of the GPT M3 Post Admin Transport Runtime (candidate `1364bf4`). Inspected all nine candidate files — two Route Handlers, the transport runtime, the `deletePost` mutation, and five test files — against the thirteen review requirements in the manifest. Also verified all frozen contracts, auth/permission runtime, optimistic lock, revision, activity log, and sanitizer as readonly context. Ran every acceptance command; integration tests were blocked by reviewer environment (no PostgreSQL), and the integrator's recorded 74/74 evidence was accepted per manifest instructions.
 
 **Verdict: APPROVE** — No Critical or High transport, authorization, ownership, transaction, XSS, data-disclosure, or candidate-caused acceptance defect found.
 

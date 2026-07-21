@@ -213,10 +213,11 @@ These are already documented in the GPT handoff and are not candidate defects:
 | Assignment commit | `deb54709185001864a8a11e3418490b2855d2adb` |
 | Candidate under review | `1364bf4862f7e38efe41866c0254f65aa28296be` |
 | Implementation commit | `0510103` |
-| Head of review branch | `deb54709185001864a8a11e3418490b2855d2adb` (no code changes; review documents only) |
+| Initial review documentation commit | `bf09fa8` |
+| Final branch head | corrective documentation commit containing this handoff; exact SHA reported after push |
 
 ---
 
 ## Final Verdict: APPROVE
 
-The GPT candidate `1364bf4` implements a secure, contract-compliant Berita admin transport runtime with zero Critical or High defects. Session/role/ownership is validated at every trust boundary. Same-origin is checked before body parsing. Repeated/hostile query parameters and oversized/invalid bodies fail before Prisma access. All command envelopes use frozen strict schemas. Publication, scheduling, archive, return-to-draft, and optimistic delete semantics are correctly separated. TITLE_ASC uses parameterized raw SQL with ownership predicates. DELETE is transactional with version claim, audit recording, and rollback on inconsistency. All failure codes map deterministically to HTTP statuses. Unexpected exceptions become generic `UNAVAILABLE` without technical detail leakage. All acceptance commands pass. One Medium architectural coupling finding (Berita type guard in mutation core) is consistent with the documented design pattern and not a runtime bypass.
+The GPT candidate `1364bf4` implements a secure, contract-compliant Berita admin transport runtime with zero Critical or High defects. Session/role/ownership is validated at every trust boundary. Same-origin is checked before body parsing. Repeated/hostile query parameters and oversized/invalid bodies fail before Prisma access. All command envelopes use frozen strict schemas. Publication, scheduling, archive, return-to-draft, and optimistic delete semantics are correctly separated. TITLE_ASC uses parameterized raw SQL with ownership predicates. DELETE is transactional with version claim, audit recording, and rollback on inconsistency. All failure codes map deterministically to HTTP statuses. Unexpected exceptions become generic `UNAVAILABLE` without technical detail leakage. All locally executable acceptance commands passed; `npm run test:integration` was blocked by the reviewer environment, and the manifest-authorized integrator evidence of 74/74 was inspected. One Medium architectural coupling finding (Berita type guard in mutation core) is consistent with the documented design pattern and not a runtime bypass.
