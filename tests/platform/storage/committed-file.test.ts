@@ -3,7 +3,11 @@ import os from "node:os";
 import path from "node:path";
 import {afterEach, describe, expect, it} from "vitest";
 
-import {parseStorageRoots, removeCommittedFile} from "@/lib/storage";
+import {
+  parseStorageRoots,
+  removeCommittedFile,
+  stageCommittedFileDeletion,
+} from "@/lib/storage";
 
 const rootsToRemove: string[] = [];
 const KEY = `2026/07/${"a".repeat(64)}.webp`;
@@ -60,5 +64,39 @@ describe("committed storage compensation", () => {
       `2026/07/${"b".repeat(64)}.enc`,
     )).rejects.toMatchObject({name: "StorageBoundaryError"});
     await expect(readFile(target)).resolves.toEqual(Buffer.from("keep"));
+  });
+
+  it("quarantines a committed file and restores it on rollback", async () => {
+    const storageRoots = await roots();
+    const destination = path.join(storageRoots.PUBLIC, KEY);
+    await mkdir(path.dirname(destination), {recursive: true});
+    await writeFile(destination, "restore");
+
+    const staged = await stageCommittedFileDeletion(storageRoots, "PUBLIC", KEY);
+    await expect(readFile(destination)).rejects.toMatchObject({code: "ENOENT"});
+    await staged.rollback();
+    await expect(readFile(destination)).resolves.toEqual(Buffer.from("restore"));
+    await expect(staged.rollback()).rejects.toMatchObject({name: "StorageBoundaryError"});
+    await expect(staged.commit()).rejects.toMatchObject({name: "StorageBoundaryError"});
+  });
+
+  it("finalizes a quarantined deletion and rejects missing or replaced targets", async () => {
+    const storageRoots = await roots();
+    const destination = path.join(storageRoots.PUBLIC, KEY);
+    await mkdir(path.dirname(destination), {recursive: true});
+    await expect(stageCommittedFileDeletion(storageRoots, "PUBLIC", KEY))
+      .rejects.toMatchObject({name: "StorageBoundaryError"});
+
+    await writeFile(destination, "delete");
+    const committed = await stageCommittedFileDeletion(storageRoots, "PUBLIC", KEY);
+    await committed.commit();
+    await expect(readFile(destination)).rejects.toMatchObject({code: "ENOENT"});
+    await expect(committed.commit()).rejects.toMatchObject({name: "StorageBoundaryError"});
+
+    await writeFile(destination, "original");
+    const staged = await stageCommittedFileDeletion(storageRoots, "PUBLIC", KEY);
+    await writeFile(destination, "replacement");
+    await expect(staged.rollback()).rejects.toMatchObject({name: "StorageBoundaryError"});
+    await expect(readFile(destination)).resolves.toEqual(Buffer.from("replacement"));
   });
 });

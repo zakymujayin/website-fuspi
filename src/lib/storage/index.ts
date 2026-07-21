@@ -1,5 +1,9 @@
 export {PpksAttachmentError, StorageBoundaryError} from "@/lib/storage/error";
-export {removeCommittedFile} from "@/lib/storage/committed-file";
+export {
+  removeCommittedFile,
+  stageCommittedFileDeletion,
+  type StagedCommittedFileDeletion,
+} from "@/lib/storage/committed-file";
 export {
   decryptPpksAttachment,
   encryptAndStagePpksAttachment,
