@@ -9,10 +9,12 @@
 
 ## Summary
 
-Completed a bounded read-only GPT review of Claude's first Media Library browse presentation.
-Verdict is **CHANGES_REQUESTED**: no Critical/High defect, two Medium acceptance defects, and four
-bounded Low UI/polish defects. No candidate source, test, messages, dependency, schema, contract,
-task status, lease, or milestone file was changed.
+Completed a bounded read-only GPT review and correction re-review of Claude's first Media Library
+browse presentation. Initial verdict was CHANGES_REQUESTED with no Critical/High defect, two Medium
+acceptance defects, and four bounded Low UI/polish defects. Claude corrected all six on the same
+lease; final verdict is **APPROVE** for corrected head `dbdeda2` (implementation `fd0ea2a`). No
+candidate source, test, messages, dependency, schema, contract, task status, lease, or milestone
+file was changed by GPT review.
 
 ## Files changed
 
@@ -32,16 +34,21 @@ None. This task is review documentation only.
 - `npm run typecheck`: passed in the candidate worktree.
 - Candidate scope check: 17 changed files within lease.
 - `git diff --check 4f01bbb...0eee728`: clean.
+- Corrected target UI suite: 43/43 passed.
+- Corrected full unit suite: 579 passed; 75 database-gated skipped in unit configuration.
+- Corrected isolated PostgreSQL integration suite: 82/82 passed.
+- Corrected Prisma validation and Next.js production build: passed; 28 routes/pages generated.
+- Corrected candidate scope check: 18 changed files within lease.
+- `git diff --check 4f01bbb...dbdeda2`: clean.
 - Review `git diff --check`: clean.
 - Review scope check: 2 changed files within lease.
 
 ## Risks and follow-ups
 
-- Query validation and route-level environment failure handling block approval.
-- Touch target, reduced motion, required brass detail, and implementation-facing copy should be
-  corrected in the same bounded writer pass.
-- Browser/axe/viewport QA remains intentionally closed until the corrected candidate passes GPT
-  re-review.
+- Query validation, route-level failure handling, touch target, reduced motion, brass detail, and
+  copy findings are resolved in corrected implementation `fd0ea2a`.
+- Browser/axe/viewport and role-backed ownership QA are now the next required independent gate.
+- The pre-existing Turbopack NFT tracing warning remains a non-blocking deployment follow-up.
 
 ## Requested contract/dependency change
 

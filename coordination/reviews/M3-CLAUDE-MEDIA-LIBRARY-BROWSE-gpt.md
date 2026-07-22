@@ -1,14 +1,50 @@
 # GPT Review — M3 Claude Media Library Browse
 
-Verdict: **CHANGES_REQUESTED**
+Verdict: **APPROVE after correction**
 
 Candidate: `0eee72854ca579e56339107dc1c2398d9ce3509d`
 Implementation: `9a36cd9866fc21239b1d7c34872cc67dde69505d`
 
-No Critical or High defect was found. Two Medium acceptance defects remain, so the candidate must
-return to Claude on the existing lease before DeepSeek browser/negative QA or integration.
+The initial review found no Critical/High defect but did find two Medium acceptance defects, so the
+candidate returned to Claude on the existing lease before DeepSeek browser/negative QA or integration.
+
+## Re-review — corrected candidate
+
+Corrected branch head: `dbdeda28152043cebe47bd9d0ce0c1754c21b612`
+Corrected implementation: `fd0ea2a`
+
+Claude resolved both Medium and all four bounded Low findings without expanding scope:
+
+- full-record query normalization now accepts only `page`/`kind`, mirrors the frozen strict page
+  form, and resets the complete query to `{page: 1, kind: "ALL", pageSize: 24}` for any unknown,
+  repeated, malformed, leading-zero, or excessive member;
+- client acquisition and the Media service call now execute inside a non-technical route-level
+  failure boundary;
+- deterministic tests cover the strict query and thrown/rejected load cases;
+- filter links are 40 px tall, all skeleton pulses honor reduced motion, the heading uses the one
+  existing brass-rule token, and ID/EN/AR descriptions are user-facing.
+
+Independent re-review found no remaining Critical, High, Medium, or Low defect in the bounded
+slice. Current Web Interface Guidelines, FUSPI identity, RTL/logical utilities, frozen Media
+contracts, and scope boundaries pass. The earlier findings below are retained as durable history;
+they are resolved and no longer block QA/integration.
+
+Re-review evidence:
+
+- target UI suite: **43/43 passed**;
+- lint, typecheck, and Prisma validation: passed;
+- unit suite: **579 passed**, 75 database-gated skipped in the unit configuration;
+- isolated PostgreSQL integration: **82/82 passed**;
+- Next.js 16 production build: passed, 28 routes/pages generated including
+  `ƒ /[locale]/admin/media`;
+- task scope: **18 changed files within lease**;
+- `git diff --check 4f01bbb...dbdeda2`: clean;
+- working tree: clean after restoring generated `next-env.d.ts` and deleting the isolated test
+  database. The known Turbopack NFT tracing warning remains non-blocking and predates this UI slice.
 
 ## Medium
+
+Resolved by corrected implementation `fd0ea2a`; retained below as initial-review history.
 
 ### `src/app/[locale]/admin/media/page.tsx`
 
@@ -39,6 +75,8 @@ return to Claude on the existing lease before DeepSeek browser/negative QA or in
   failure produces non-technical unavailable presentation.
 
 ## Low
+
+Resolved by corrected implementation `fd0ea2a`; retained below as initial-review history.
 
 ### `src/components/admin/media/media-filter-tabs.tsx`
 
