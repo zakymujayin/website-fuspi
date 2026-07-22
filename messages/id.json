@@ -143,7 +143,7 @@
   "AdminMediaLibrary": {
     "metaTitle": "Pustaka Media",
     "title": "Pustaka Media",
-    "description": "Jelajahi seluruh gambar dan PDF yang telah diunggah ke situs. Tampilan ini hanya untuk melihat; unggah dan pengelolaan tersedia pada tahap berikutnya.",
+    "description": "Telusuri seluruh gambar dan PDF yang telah disetujui untuk situs ini, lalu saring menurut jenis untuk menemukan berkas yang Anda cari.",
     "filterAriaLabel": "Saring media berdasarkan jenis",
     "gridAriaLabel": "Daftar item media",
     "totalCount": "{count} item media",

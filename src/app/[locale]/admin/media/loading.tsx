@@ -8,7 +8,7 @@ export default async function AdminMediaLoading() {
   return (
     <section aria-labelledby="admin-media-loading-title" className="flex flex-col gap-6">
       <div>
-        <h1 id="admin-media-loading-title" className="font-display text-2xl text-slate-900">
+        <h1 id="admin-media-loading-title" className="section-rule font-display text-2xl text-slate-900">
           {t("title")}
         </h1>
         <p className="mt-2 max-w-prose text-sm text-slate-500">{t("description")}</p>

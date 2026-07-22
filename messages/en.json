@@ -143,7 +143,7 @@
   "AdminMediaLibrary": {
     "metaTitle": "Media Library",
     "title": "Media Library",
-    "description": "Browse every image and PDF uploaded to the site. This view is read-only; upload and management arrive in a later stage.",
+    "description": "Browse every image and PDF approved for this site, and filter by type to find the file you need.",
     "filterAriaLabel": "Filter media by type",
     "gridAriaLabel": "Media item list",
     "totalCount": "{count} media items",

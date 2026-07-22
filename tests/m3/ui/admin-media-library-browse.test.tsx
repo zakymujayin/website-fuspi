@@ -19,12 +19,14 @@ vi.mock("next/image", () => ({
   ),
 }));
 
-const { parseAdminMediaKind, parseAdminMediaPage, buildAdminMediaHref, totalPagesFor, buildPaginationItems } =
-  await import("@/components/admin/media/media-query");
+const { normalizeAdminMediaQuery, buildAdminMediaHref, totalPagesFor, buildPaginationItems } = await import(
+  "@/components/admin/media/media-query"
+);
 const { formatAdminMediaBytes, formatAdminMediaDimensions, formatAdminMediaCreatedAt } = await import(
   "@/components/admin/media/media-format"
 );
 const { resolveAdminMediaThumbnail } = await import("@/components/admin/media/media-thumbnail-resolver");
+const { loadAdminMediaSafely } = await import("@/components/admin/media/media-safe-load");
 const { AdminMediaFilterTabs } = await import("@/components/admin/media/media-filter-tabs");
 const { AdminMediaPagination } = await import("@/components/admin/media/media-pagination");
 const { AdminMediaStateNotice } = await import("@/components/admin/media/media-state-notice");
@@ -58,37 +60,52 @@ const SAMPLE_LABELS = {
   uploadedByLabel: (name: string) => `Diunggah oleh ${name}`,
 };
 
-describe("query normalization to a canonical default", () => {
-  it.each([
-    ["abc", 1],
-    ["0", 1],
-    ["-3", 1],
-    ["2.5", 1],
-    ["", 1],
-    [undefined, 1],
-    ["5", 5],
-    ["99999", 10_000],
-  ])("normalizes page candidate %p to %p", (raw, expected) => {
-    expect(parseAdminMediaPage(raw as string | undefined)).toBe(expected);
+const CANONICAL_DEFAULT = { page: 1, kind: "ALL", pageSize: 24 } as const;
+
+describe("whole-record query normalization to a canonical default", () => {
+  it("passes through a valid page and kind", () => {
+    expect(normalizeAdminMediaQuery({ page: "5", kind: "IMAGE" })).toEqual({
+      page: 5,
+      kind: "IMAGE",
+      pageSize: 24,
+    });
   });
 
-  it("treats a repeated/array page param as invalid", () => {
-    expect(parseAdminMediaPage(["2", "3"])).toBe(1);
+  it("defaults page and kind independently when either is omitted", () => {
+    expect(normalizeAdminMediaQuery({ kind: "PDF" })).toEqual({ page: 1, kind: "PDF", pageSize: 24 });
+    expect(normalizeAdminMediaQuery({ page: "3" })).toEqual({ page: 3, kind: "ALL", pageSize: 24 });
+    expect(normalizeAdminMediaQuery({})).toEqual(CANONICAL_DEFAULT);
   });
 
-  it.each([
-    ["ALL", "ALL"],
-    ["IMAGE", "IMAGE"],
-    ["PDF", "PDF"],
-    ["image", "ALL"],
-    ["OTHER", "ALL"],
-    [undefined, "ALL"],
-  ])("normalizes kind candidate %p to %p", (raw, expected) => {
-    expect(parseAdminMediaKind(raw as string | undefined)).toBe(expected);
+  it("resets the entire query when an excessive page is requested, never clamping to 10000", () => {
+    expect(normalizeAdminMediaQuery({ page: "99999", kind: "IMAGE" })).toEqual(CANONICAL_DEFAULT);
+    expect(normalizeAdminMediaQuery({ page: "10001" })).toEqual(CANONICAL_DEFAULT);
+    expect(normalizeAdminMediaQuery({ page: "10000" })).toEqual({ page: 10_000, kind: "ALL", pageSize: 24 });
   });
 
-  it("treats a repeated/array kind param as invalid", () => {
-    expect(parseAdminMediaKind(["IMAGE", "PDF"])).toBe("ALL");
+  it("resets the entire query for an unknown key, even alongside otherwise-valid fields", () => {
+    expect(normalizeAdminMediaQuery({ owner: "other", page: "2" })).toEqual(CANONICAL_DEFAULT);
+    expect(normalizeAdminMediaQuery({ pageSize: "48" })).toEqual(CANONICAL_DEFAULT);
+  });
+
+  it("resets the entire query for a repeated/array value on either field", () => {
+    expect(normalizeAdminMediaQuery({ page: ["2", "3"], kind: "IMAGE" })).toEqual(CANONICAL_DEFAULT);
+    expect(normalizeAdminMediaQuery({ kind: ["IMAGE", "PDF"] })).toEqual(CANONICAL_DEFAULT);
+  });
+
+  it("resets the entire query for a leading-zero, fractional, negative, or non-numeric page", () => {
+    expect(normalizeAdminMediaQuery({ page: "0" })).toEqual(CANONICAL_DEFAULT);
+    expect(normalizeAdminMediaQuery({ page: "01" })).toEqual(CANONICAL_DEFAULT);
+    expect(normalizeAdminMediaQuery({ page: "007" })).toEqual(CANONICAL_DEFAULT);
+    expect(normalizeAdminMediaQuery({ page: "2.5" })).toEqual(CANONICAL_DEFAULT);
+    expect(normalizeAdminMediaQuery({ page: "-3" })).toEqual(CANONICAL_DEFAULT);
+    expect(normalizeAdminMediaQuery({ page: "abc" })).toEqual(CANONICAL_DEFAULT);
+    expect(normalizeAdminMediaQuery({ page: "" })).toEqual(CANONICAL_DEFAULT);
+  });
+
+  it("resets the entire query — including an otherwise-valid page — when kind is unrecognized", () => {
+    expect(normalizeAdminMediaQuery({ page: "3", kind: "image" })).toEqual(CANONICAL_DEFAULT);
+    expect(normalizeAdminMediaQuery({ page: "3", kind: "OTHER" })).toEqual(CANONICAL_DEFAULT);
   });
 
   it("computes total pages from the fixed page size of 24", () => {
@@ -100,6 +117,32 @@ describe("query normalization to a canonical default", () => {
   it("builds a windowed pagination list with ellipses", () => {
     expect(buildPaginationItems(1, 1)).toEqual([1]);
     expect(buildPaginationItems(5, 10)).toEqual([1, "ellipsis", 4, 5, 6, "ellipsis", 10]);
+  });
+});
+
+describe("route-level failure boundary around client acquisition and the service call", () => {
+  it("passes through a successful load unchanged", async () => {
+    const result = await loadAdminMediaSafely(async () => ({ ok: true as const, data: "loaded" }));
+    expect(result).toEqual({ ok: true, data: "loaded" });
+  });
+
+  it("fails closed to a non-technical unavailable result when client acquisition throws", async () => {
+    const result = await loadAdminMediaSafely(() => {
+      throw new Error("DATABASE_URL is required to create a Prisma client.");
+    });
+    expect(result).toEqual({ ok: false, code: "UNAVAILABLE" });
+  });
+
+  it("fails closed to a non-technical unavailable result when the service call rejects", async () => {
+    const result = await loadAdminMediaSafely(() => Promise.reject(new Error("ECONNREFUSED")));
+    expect(result).toEqual({ ok: false, code: "UNAVAILABLE" });
+  });
+
+  it("never leaks the underlying exception message into the returned result", async () => {
+    const result = await loadAdminMediaSafely(() => {
+      throw new Error("password authentication failed for user \"prisma\"");
+    });
+    expect(JSON.stringify(result)).not.toContain("password authentication");
   });
 });
 
@@ -463,5 +506,39 @@ describe("Arabic direction-safe markup", () => {
         expect(contents, `${relativePath} matched ${pattern}`).not.toMatch(pattern);
       }
     }
+  });
+});
+
+describe("Web Interface Guidelines touch target and motion-safety corrections", () => {
+  it("gives every filter tab a 40px control height, matching docs/17-A", () => {
+    const markup = renderToStaticMarkup(
+      <AdminMediaFilterTabs
+        active="ALL"
+        ariaLabel="Saring media berdasarkan jenis"
+        labels={{ ALL: "Semua", IMAGE: "Gambar", PDF: "PDF" }}
+      />,
+    );
+    for (const anchor of markupToContainer(markup).querySelectorAll("a")) {
+      expect(anchor.getAttribute("class")).toContain("h-10");
+    }
+  });
+
+  it("pairs every skeleton pulse block with motion-reduce:animate-none", async () => {
+    const { AdminMediaGridSkeleton } = await import("@/components/admin/media/media-grid-skeleton");
+    const markup = renderToStaticMarkup(<AdminMediaGridSkeleton loadingLabel="Memuat…" />);
+    const container = markupToContainer(markup);
+    const pulseElements = Array.from(container.querySelectorAll('[class*="animate-pulse"]'));
+    expect(pulseElements.length).toBeGreaterThan(0);
+    for (const element of pulseElements) {
+      expect(element.getAttribute("class")).toContain("motion-reduce:animate-none");
+    }
+  });
+
+  it("marks the page heading with the site's single existing brass-rule token, not a new ornament", () => {
+    const pageContents = readFileSync(
+      path.join(process.cwd(), "src/app/[locale]/admin/media/page.tsx"),
+      "utf8",
+    );
+    expect(pageContents).toMatch(/<h1[^>]*className="[^"]*\bsection-rule\b/);
   });
 });

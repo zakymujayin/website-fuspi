@@ -23,7 +23,7 @@ export function AdminMediaFilterTabs({ active, ariaLabel, labels }: AdminMediaFi
             href={buildAdminMediaHref(filter, 1)}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
+              "inline-flex h-10 items-center justify-center rounded-lg px-3 text-sm font-medium transition-colors",
               isActive
                 ? "bg-royal-500 text-white"
                 : "border border-slate-300 text-slate-600 hover:bg-slate-100",

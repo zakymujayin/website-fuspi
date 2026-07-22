@@ -2,30 +2,53 @@ export type AdminMediaKindFilter = "ALL" | "IMAGE" | "PDF";
 
 export const ADMIN_MEDIA_PAGE_SIZE = 24;
 
-const MAX_PAGE = 10_000;
-const STRICT_INTEGER_PATTERN = /^[0-9]+$/;
 const KIND_FILTERS: readonly AdminMediaKindFilter[] = ["ALL", "IMAGE", "PDF"];
+const ALLOWED_QUERY_KEYS = new Set(["page", "kind"]);
 
-type SearchParamValue = string | string[] | undefined;
+// Mirrors the frozen `AdminMediaListSearchParamsSchema` page form exactly: 1-4 digits with
+// no leading zero, or the literal upper bound "10000" — never a clamp of a larger value.
+const STRICT_PAGE_PATTERN = /^(?:[1-9]\d{0,3}|10000)$/;
+
+export type AdminMediaNormalizedQuery = {
+  page: number;
+  kind: AdminMediaKindFilter;
+  pageSize: number;
+};
+
+const ADMIN_MEDIA_CANONICAL_QUERY: AdminMediaNormalizedQuery = {
+  page: 1,
+  kind: "ALL",
+  pageSize: ADMIN_MEDIA_PAGE_SIZE,
+};
+
+type RawSearchParams = Record<string, string | string[] | undefined>;
 
 /**
- * Structural-only normalization of the raw `page` search param. Unknown,
- * repeated/array, empty, negative, and fractional input all fall back to the
- * canonical default of 1 without ever reflecting the untrusted value back
- * into the page (manifest data requirement 3).
+ * Whole-record search param normalization (manifest data requirement 3). This
+ * route accepts only `page` and `kind`, with a fixed `pageSize` — never taken
+ * from the URL. Any unknown key, any repeated/array value, or any `page`
+ * value outside the frozen strict form collapses the *entire* query back to
+ * the canonical default rather than partially trusting the remaining field,
+ * so a single invalid member can never leak whether hidden Media exists.
  */
-export function parseAdminMediaPage(raw: SearchParamValue): number {
-  if (Array.isArray(raw) || raw === undefined) return 1;
-  if (!STRICT_INTEGER_PATTERN.test(raw)) return 1;
-  const parsed = Number(raw);
-  if (!Number.isFinite(parsed) || parsed < 1) return 1;
-  return Math.min(parsed, MAX_PAGE);
-}
+export function normalizeAdminMediaQuery(raw: RawSearchParams): AdminMediaNormalizedQuery {
+  for (const key of Object.keys(raw)) {
+    if (!ALLOWED_QUERY_KEYS.has(key)) return ADMIN_MEDIA_CANONICAL_QUERY;
+  }
 
-/** Unknown, repeated, or otherwise unrecognized `kind` values fall back to the canonical "ALL" default. */
-export function parseAdminMediaKind(raw: SearchParamValue): AdminMediaKindFilter {
-  if (typeof raw !== "string") return "ALL";
-  return (KIND_FILTERS as readonly string[]).includes(raw) ? (raw as AdminMediaKindFilter) : "ALL";
+  const rawPage = raw.page;
+  const rawKind = raw.kind;
+  if (Array.isArray(rawPage) || Array.isArray(rawKind)) return ADMIN_MEDIA_CANONICAL_QUERY;
+  if (rawPage !== undefined && !STRICT_PAGE_PATTERN.test(rawPage)) return ADMIN_MEDIA_CANONICAL_QUERY;
+  if (rawKind !== undefined && !(KIND_FILTERS as readonly string[]).includes(rawKind)) {
+    return ADMIN_MEDIA_CANONICAL_QUERY;
+  }
+
+  return {
+    page: rawPage !== undefined ? Number(rawPage) : 1,
+    kind: rawKind !== undefined ? (rawKind as AdminMediaKindFilter) : "ALL",
+    pageSize: ADMIN_MEDIA_PAGE_SIZE,
+  };
 }
 
 /** Builds a `/admin/media` link that preserves the active filter; the active locale is added by `@/i18n/navigation`'s `Link`. */

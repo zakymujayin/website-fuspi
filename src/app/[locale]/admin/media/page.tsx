@@ -6,7 +6,8 @@ import { AdminMediaFilterTabs } from "@/components/admin/media/media-filter-tabs
 import { AdminMediaGrid } from "@/components/admin/media/media-grid";
 import { AdminMediaPagination } from "@/components/admin/media/media-pagination";
 import { AdminMediaStateNotice } from "@/components/admin/media/media-state-notice";
-import { parseAdminMediaKind, parseAdminMediaPage, totalPagesFor } from "@/components/admin/media/media-query";
+import { normalizeAdminMediaQuery, totalPagesFor } from "@/components/admin/media/media-query";
+import { loadAdminMediaSafely } from "@/components/admin/media/media-safe-load";
 import { decideProtectedRoute, getRequestSession } from "@/lib/auth/runtime/request-session";
 import { parseAppLocale } from "@/lib/auth/runtime/redirect";
 import { listAdminMedia } from "@/lib/content/media-admin-transport";
@@ -33,23 +34,24 @@ export default async function AdminMediaPage({ params, searchParams }: AdminMedi
   if (!decision.allow) redirect(decision.redirectTo);
 
   const rawSearchParams = await searchParams;
-  const kind = parseAdminMediaKind(rawSearchParams.kind);
-  const page = parseAdminMediaPage(rawSearchParams.page);
+  const { page, kind } = normalizeAdminMediaQuery(rawSearchParams);
 
   const t = await getTranslations("AdminMediaLibrary");
   const uploadPublicUrl = process.env.UPLOAD_PUBLIC_URL ?? "";
 
-  const result = await listAdminMedia(
-    getPrismaClient(),
-    session.ok ? session.session : null,
-    { page, kind },
-    uploadPublicUrl,
+  const result = await loadAdminMediaSafely(() =>
+    listAdminMedia(
+      getPrismaClient(),
+      session.ok ? session.session : null,
+      { page, kind },
+      uploadPublicUrl,
+    ),
   );
 
   return (
     <section aria-labelledby="admin-media-title" className="flex flex-col gap-6">
       <div>
-        <h1 id="admin-media-title" className="font-display text-2xl text-slate-900">
+        <h1 id="admin-media-title" className="section-rule font-display text-2xl text-slate-900">
           {t("title")}
         </h1>
         <p className="mt-2 max-w-prose text-sm text-slate-500">{t("description")}</p>
