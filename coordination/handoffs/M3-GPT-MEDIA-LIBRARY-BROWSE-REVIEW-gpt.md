@@ -4,7 +4,7 @@
 - **Branch**: `ai/gpt/m3-media-library-browse-review`
 - **Base SHA**: `bd192b67d676236a3b2827a1940d98ada25268bb`
 - **Reviewed candidate**: `0eee72854ca579e56339107dc1c2398d9ce3509d`
-- **Review commit**: `PENDING_REVIEW_COMMIT`
+- **Review commit**: `714531efd147d65c6e2dbcea4a26528b4c252f0c`
 - **Final branch head**: the metadata-correction commit containing the resolved review SHA
 
 ## Summary
@@ -32,8 +32,8 @@ None. This task is review documentation only.
 - `npm run typecheck`: passed in the candidate worktree.
 - Candidate scope check: 17 changed files within lease.
 - `git diff --check 4f01bbb...0eee728`: clean.
-- Review `git diff --check`: pending final metadata commit.
-- Review scope check: pending final metadata commit.
+- Review `git diff --check`: clean.
+- Review scope check: 2 changed files within lease.
 
 ## Risks and follow-ups
 
