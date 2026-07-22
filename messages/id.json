@@ -139,5 +139,37 @@
       "description": "Kabar dan kegiatan terbaru Fakultas Ushuluddin dan Pemikiran Islam.",
       "metaDescription": "Kumpulan berita dan kegiatan terbaru Fakultas Ushuluddin dan Pemikiran Islam (FUSPI)."
     }
+  },
+  "AdminMediaLibrary": {
+    "metaTitle": "Pustaka Media",
+    "title": "Pustaka Media",
+    "description": "Jelajahi seluruh gambar dan PDF yang telah diunggah ke situs. Tampilan ini hanya untuk melihat; unggah dan pengelolaan tersedia pada tahap berikutnya.",
+    "filterAriaLabel": "Saring media berdasarkan jenis",
+    "gridAriaLabel": "Daftar item media",
+    "totalCount": "{count} item media",
+    "kind": {
+      "all": "Semua",
+      "image": "Gambar",
+      "pdf": "PDF"
+    },
+    "decorative": "Dekoratif (tanpa teks alternatif)",
+    "altLabel": "Teks alternatif: {alt}",
+    "uploadedBy": "Diunggah oleh {name}",
+    "loading": "Memuat pustaka media…",
+    "pagination": {
+      "ariaLabel": "Navigasi halaman pustaka media",
+      "previous": "Halaman sebelumnya",
+      "next": "Halaman berikutnya",
+      "pageStatus": "Hal {page} dari {totalPages}",
+      "goToPage": "Ke halaman {page}"
+    },
+    "empty": {
+      "title": "Belum ada media",
+      "description": "Media akan tampil di sini setelah diunggah."
+    },
+    "unavailable": {
+      "title": "Pustaka media sedang tidak dapat dimuat",
+      "description": "Silakan muat ulang halaman ini beberapa saat lagi."
+    }
   }
 }

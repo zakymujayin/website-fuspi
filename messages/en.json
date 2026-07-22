@@ -139,5 +139,37 @@
       "description": "Latest news and activities from the Faculty of Ushuluddin and Islamic Thought.",
       "metaDescription": "Latest news and activities from the Faculty of Ushuluddin and Islamic Thought (FUSPI)."
     }
+  },
+  "AdminMediaLibrary": {
+    "metaTitle": "Media Library",
+    "title": "Media Library",
+    "description": "Browse every image and PDF uploaded to the site. This view is read-only; upload and management arrive in a later stage.",
+    "filterAriaLabel": "Filter media by type",
+    "gridAriaLabel": "Media item list",
+    "totalCount": "{count} media items",
+    "kind": {
+      "all": "All",
+      "image": "Image",
+      "pdf": "PDF"
+    },
+    "decorative": "Decorative (no alternative text)",
+    "altLabel": "Alternative text: {alt}",
+    "uploadedBy": "Uploaded by {name}",
+    "loading": "Loading media library…",
+    "pagination": {
+      "ariaLabel": "Media library page navigation",
+      "previous": "Previous page",
+      "next": "Next page",
+      "pageStatus": "Page {page} of {totalPages}",
+      "goToPage": "Go to page {page}"
+    },
+    "empty": {
+      "title": "No media yet",
+      "description": "Media will appear here once it has been uploaded."
+    },
+    "unavailable": {
+      "title": "The media library is temporarily unavailable",
+      "description": "Please reload this page again shortly."
+    }
   }
 }
