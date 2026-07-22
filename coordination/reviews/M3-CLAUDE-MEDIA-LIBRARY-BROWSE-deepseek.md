@@ -124,6 +124,7 @@ All identities use `example.invalid` domain. No production, staging, or another 
 | `npm run prisma:validate` | **PASS** — Schema valid |
 | `npm run build` | **PASS** — Production build (known Turbopack warning unchanged) |
 | `git diff --check` | **PASS** — Clean |
+| `TASK_MANIFEST=... npm run check:scope` | **PASS** — 3 changed files within lease |
 
 ---
 
@@ -135,7 +136,7 @@ All identities use `example.invalid` domain. No production, staging, or another 
 | Claude candidate (handoff) | `dbdeda2` |
 | Claude implementation | `fd0ea2a` |
 | GPT re-review approval | `59c4944` |
-| Initial review documentation commit | (to be set by commit) |
+| Initial review documentation commit | `435eb69` |
 | Final branch head | corrective documentation commit containing this handoff; exact SHA reported after push |
 
 ---

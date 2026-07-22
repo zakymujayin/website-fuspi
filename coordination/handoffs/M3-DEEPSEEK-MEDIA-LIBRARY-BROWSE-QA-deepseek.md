@@ -3,7 +3,7 @@
 - **Task ID:** `M3-DEEPSEEK-MEDIA-LIBRARY-BROWSE-QA`
 - **Branch:** `ai/deepseek/m3-media-library-browse-qa`
 - **Base SHA (assignment):** `cd3eeef91f9a5d651ade1244aa205d03cab64741`
-- **Initial review documentation commit:** (to be set by commit)
+- **Initial review documentation commit:** `435eb69`
 - **Final branch head:** corrective documentation commit containing this handoff; exact SHA reported after push
 - **Claude candidate reviewed:** `dbdeda2`
 - **Claude implementation:** `fd0ea2a`
@@ -60,7 +60,7 @@ Performed a PostgreSQL-backed browser QA review of the Claude M3 Media Library B
 | `npm run prisma:validate` | **PASS** — Schema valid |
 | `npm run build` | **PASS** — Production build (pre-existing Turbopack NFT warning unchanged) |
 | `git diff --check` | **PASS** — Clean |
-| `TASK_MANIFEST=... npm run check:scope` | **PASS** — will report 2 changed files after commit |
+| `TASK_MANIFEST=... npm run check:scope` | **PASS** — 3 changed files within lease |
 
 ## Untested areas, risks, and follow-ups
 
