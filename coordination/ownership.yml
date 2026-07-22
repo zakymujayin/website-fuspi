@@ -58,3 +58,9 @@ active_leases:
       - messages/ar.json
       - tests/m3/ui/admin-media-library-browse.test.tsx
       - coordination/handoffs/M3-CLAUDE-MEDIA-LIBRARY-BROWSE-claude.md
+  - task: M3-DEEPSEEK-MEDIA-LIBRARY-BROWSE-QA
+    owner: deepseek
+    paths:
+      - e2e/m3/admin-media-library-browse.spec.ts
+      - coordination/reviews/M3-CLAUDE-MEDIA-LIBRARY-BROWSE-deepseek.md
+      - coordination/handoffs/M3-DEEPSEEK-MEDIA-LIBRARY-BROWSE-QA-deepseek.md
