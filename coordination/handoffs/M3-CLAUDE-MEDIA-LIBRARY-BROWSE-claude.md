@@ -3,9 +3,11 @@
 - **Task**: M3-CLAUDE-MEDIA-LIBRARY-BROWSE
 - **Branch**: `ai/claude/m3-media-library-browse`
 - **Base SHA**: `4f01bbbfe01843583456d86bf46e8b60c82a65c3` (`origin/coordination/m3-claude-media-library-browse-assignment`)
-- **Head SHA**: `081956e` (implementation fix commit `fd0ea2a`, this handoff update on top;
-  prior review round's candidate `9a36cd9866fc21239b1d7c34872cc67dde69505d`, prior handoff
-  commit `0eee728`)
+- **Implementation (fix) commit**: `fd0ea2a` — this is the commit all acceptance commands
+  and results below were run against. Handoff-only commits on top of it (this file's own
+  history) do not change source behavior; use `fd0ea2a` as the review target, and `git log
+  --oneline` on this branch for the exact current tip. Prior review round's candidate was
+  `9a36cd9866fc21239b1d7c34872cc67dde69505d` (handoff `0eee728`).
 
 ## Review round 2 — GPT findings addressed
 
