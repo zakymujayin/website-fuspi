@@ -1,6 +1,6 @@
 # M3 Reference Slice Entry
 
-Status: **M3 active — Post and Media admin transport runtimes reviewed and merged; public IA/manual-content contract merged**
+Status: **M3 active — admin transport runtimes, public IA contract, and Claude Media Library browse merged**
 
 **Temporary integrator note (2026-07-23 to 2026-07-29):** Codex (GPT) usage limit is exhausted;
 GPT's next scheduled activity is 2026-07-29. Claude Sonnet 5 is standing in as integrator and for
@@ -8,6 +8,11 @@ GPT-lane review/merge duties for this window only, per human coordinator decisio
 `coordination/adr/ADR-0002-temporary-gpt-integrator-standin.md`. New cross-lane contract changes
 (schema, auth, proxy, dependency, navigation registry) opened during this window should be treated
 as provisional until GPT/Codex reviews them on return.
+
+**Independence gap on the Media Library slice (2026-07-23):** DeepSeek also exhausted its usage
+limit mid-task, so Claude authored the Media Library UI, corrected its QA harness, and approved
+both as integrator. No independent party reviewed that slice. It is merged to keep M3 moving, but
+Codex and DeepSeek must re-verify it on return before it counts toward the M3 exit gate.
 
 M3 starts from the accepted M2 development head
 `f83a00e6816a91f72b9ade654b012be8a1a0b2d0`. That head passed GitHub Actions run
@@ -34,8 +39,11 @@ tracked by the M2 exit contract.
    transport contract and Post admin runtime passed independent DeepSeek adversarial review with
    no Critical/High defect. The batch-upload response gap is now closed and independently reviewed;
    the Media admin runtime is also independently reviewed and merged with no Critical/High defect.
-   The next bounded lane is Claude's admin editor/Media Library presentation, followed by executable
-   ownership/IDOR browser evidence.
+   Claude's bounded read-only Media Library browse presentation is now **merged**, with its
+   PostgreSQL-backed browser QA passing 84/84 across Chromium and mobile — subject to the
+   independence gap noted above. Picker/upload/metadata/delete UI and the Post editor remain closed
+   until their own non-overlapping manifests, followed by executable ownership/IDOR browser
+   evidence.
 6. **Integrator gate:** merge serially, run the full PostgreSQL and browser suites, reconcile the
    carried security cases, then freeze the reference pattern for M4.
 
