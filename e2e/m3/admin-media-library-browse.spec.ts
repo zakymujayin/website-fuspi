@@ -2,7 +2,7 @@ import { createHash, randomUUID } from "node:crypto";
 
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { Pool } from "pg";
+import { Pool, type PoolClient } from "pg";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 
@@ -33,8 +33,17 @@ const BREAKPOINTS = [360, 390, 768, 1024, 1440] as const;
 test.describe("M3 Media Library browse QA", () => {
   test.skip(!DATABASE_URL, "Media Library browser tests require an isolated PostgreSQL database.");
 
-  const marker = "m3-media-qa-browse";
-  const database = new Pool({ connectionString: DATABASE_URL });
+  const MARKER_BASE = "m3-media-qa-browse";
+  /** Fixture identity is scoped per Playwright project. Chromium and mobile must never share
+   *  rows, storage keys, emails, or cleanup scope, or a combined run collides on the
+   *  "User_email_key" and "Media_storageKey_key" unique constraints. */
+  let marker = MARKER_BASE;
+  let database!: Pool;
+  /** ADMIN-visible counts and pagination are global, so only one Playwright project may hold
+   *  fixtures at a time. Projects serialize on a PostgreSQL advisory lock rather than depending
+   *  on a particular --workers value. */
+  const FIXTURE_LOCK_KEY = 883_112_045;
+  let lockClient: PoolClient | null = null;
   let adminId = "";
   let editorAId = "";
   let editorBId = "";
@@ -58,10 +67,33 @@ test.describe("M3 Media Library browse QA", () => {
     return createHash("sha256").update(`${marker}-chk-${ownerMarker}-${mime}-${index}`).digest("hex");
   }
 
-  test.beforeAll(async () => {
-    // Idempotency: skip if fixtures already inserted (e.g., from a previous attempt in same process)
-    const existing = await database.query(`SELECT 1 FROM "Media" WHERE "originalName" LIKE $1 LIMIT 1`, [`${marker}-%`]);
-    if (existing.rowCount && existing.rowCount > 0) return;
+  /** Remove every fixture row belonging to this suite, in foreign-key-safe order. Callers hold
+   *  the advisory lock, so sweeping the shared base prefix also clears rows abandoned by an
+   *  aborted earlier run of the other project. Used both to make setup idempotent and to
+   *  guarantee teardown after a beforeAll that failed part-way through. */
+  async function purgeFixtures() {
+    const prefix = `${MARKER_BASE}-%`;
+    await database.query(
+      `DELETE FROM "Session" WHERE "userId" IN (SELECT "id" FROM "User" WHERE "email" LIKE $1)`,
+      [prefix],
+    ).catch(() => {});
+    await database.query(`DELETE FROM "Media" WHERE "originalName" LIKE $1`, [prefix]).catch(() => {});
+    await database.query(`DELETE FROM "User" WHERE "email" LIKE $1`, [prefix]).catch(() => {});
+  }
+
+  test.beforeAll(async ({}, testInfo) => {
+    // Waiting for the other project to finish its whole run can exceed the default hook timeout.
+    testInfo.setTimeout(300_000);
+    marker = `${MARKER_BASE}-${testInfo.project.name}`;
+    database = new Pool({ connectionString: DATABASE_URL });
+
+    lockClient = await database.connect();
+    await lockClient.query("SELECT pg_advisory_lock($1)", [FIXTURE_LOCK_KEY]);
+
+    // Idempotent setup: clear any leftover rows, then insert fresh. Never early-return when
+    // rows already exist — that would leave the ids and session tokens below empty for the
+    // whole project run.
+    await purgeFixtures();
 
     adminId = randomUUID();
     editorAId = randomUUID();
@@ -146,16 +178,47 @@ test.describe("M3 Media Library browse QA", () => {
   });
 
   test.afterAll(async () => {
-    const allUserIds = [adminId, editorAId, editorBId, ...auxiliaryUserIds].filter(Boolean);
-    const allTokens = [adminSessionToken, editorASessionToken, editorBSessionToken, ...auxiliaryTokens].filter(Boolean);
-    if (allTokens.length > 0) {
-      await database.query(`DELETE FROM "Session" WHERE "sessionToken" = ANY($1::text[])`, [allTokens]).catch(() => {});
+    try {
+      const allUserIds = [adminId, editorAId, editorBId, ...auxiliaryUserIds].filter(Boolean);
+      const allTokens = [adminSessionToken, editorASessionToken, editorBSessionToken, ...auxiliaryTokens].filter(Boolean);
+      if (allTokens.length > 0) {
+        await database.query(`DELETE FROM "Session" WHERE "sessionToken" = ANY($1::text[])`, [allTokens]).catch(() => {});
+      }
+      await database.query(`DELETE FROM "Media" WHERE "originalName" LIKE $1`, [`${marker}-%`]).catch(() => {});
+      if (allUserIds.length > 0) {
+        await database.query(`DELETE FROM "User" WHERE "id" = ANY($1::text[])`, [allUserIds]).catch(() => {});
+      }
+      // Marker-scoped sweep catches anything the tracked id lists missed, including rows
+      // created by a beforeAll that failed part-way through.
+      await purgeFixtures();
+    } finally {
+      auxiliaryUserIds.length = 0;
+      auxiliaryTokens.length = 0;
+      // Release the lock only after cleanup, so the next project starts from an empty database.
+      if (lockClient) {
+        await lockClient.query("SELECT pg_advisory_unlock($1)", [FIXTURE_LOCK_KEY]).catch(() => {});
+        lockClient.release();
+        lockClient = null;
+      }
+      await database.end().catch(() => {});
     }
-    await database.query(`DELETE FROM "Media" WHERE "originalName" LIKE $1`, [`${marker}-%`]).catch(() => {});
-    if (allUserIds.length > 0) {
-      await database.query(`DELETE FROM "User" WHERE "id" = ANY($1::text[])`, [allUserIds]).catch(() => {});
+  });
+
+  /** 1x1 deterministic PNG. Thumbnail assertions must never pass or fail based on real
+   *  storage bytes or network conditions, so synthetic media requests are fulfilled locally. */
+  const DETERMINISTIC_IMAGE = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+    "base64",
+  );
+
+  test.beforeEach(async ({ page }) => {
+    // Intercept only synthetic media traffic: the next/image optimizer endpoint and the
+    // /uploads/ prefix this isolated environment serves fixture bytes from.
+    for (const pattern of ["**/_next/image**", "**/uploads/**"]) {
+      await page.route(pattern, async (route) => {
+        await route.fulfill({ status: 200, contentType: "image/png", body: DETERMINISTIC_IMAGE });
+      });
     }
-    await database.end();
   });
 
   function sessionCookie(token: string) {

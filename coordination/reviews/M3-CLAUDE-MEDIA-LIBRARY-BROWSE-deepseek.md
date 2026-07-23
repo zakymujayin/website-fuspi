@@ -1,13 +1,20 @@
 # DeepSeek QA Review — M3 Claude Media Library Browse
 
-- **Reviewer:** DeepSeek v4 Pro (thinking `medium`)
+- **Original spec author:** DeepSeek v4 Pro (thinking `medium`), rounds 1–2
+- **Round-3 corrections and every result recorded below:** Claude Sonnet 5, standing in for the
+  DeepSeek QA lane *and* the GPT integrator role while **both** Codex and DeepSeek are out of usage
+  limit (see `coordination/adr/ADR-0002-temporary-gpt-integrator-standin.md`)
+- **Independence caveat — read before trusting this APPROVE:** the same model now authored the UI
+  under test, corrected this QA harness, and signed off as integrator. No independent party checked
+  this result. Every command below is reproducible verbatim; Codex and DeepSeek should re-verify on
+  return before this feeds the M3 exit gate.
 - **Assignment branch:** `coordination/m3-deepseek-media-library-browse-qa-assignment`
 - **Assignment commit:** `cd3eeef91f9a5d651ade1244aa205d03cab64741`
 - **Candidate under review:** `dbdeda2` (Claude corrected implementation)
 - **Implementation SHA:** `fd0ea2a` (Claude)
 - **GPT re-review approval:** `59c4944`
 - **QA candidate files:**
-  1. `e2e/m3/admin-media-library-browse.spec.ts` — Playwright E2E spec (42 tests)
+  1. `e2e/m3/admin-media-library-browse.spec.ts` — Playwright E2E spec (42 cases × 2 projects = 84)
 - **QA output files:**
   - `coordination/reviews/M3-CLAUDE-MEDIA-LIBRARY-BROWSE-deepseek.md`
   - `coordination/handoffs/M3-DEEPSEEK-MEDIA-LIBRARY-BROWSE-QA-deepseek.md`
@@ -15,31 +22,83 @@
 
 ## Verdict: APPROVE
 
-The Claude candidate `dbdeda2` (`fd0ea2a`) passes all required acceptance gates with zero defects. Playwright E2E tests execute successfully against an isolated PostgreSQL database on both Chromium and mobile projects. All locally executable acceptance commands produce clean results.
+The Claude candidate `dbdeda2` (`fd0ea2a`) passes every required acceptance gate. The **mandated
+combined command** — the one rounds 1 and 2 failed or substituted away — now passes 84/84 against an
+isolated PostgreSQL database across Chromium and mobile.
+
+### What round 3 had to fix in the harness
+
+Round 2 was rejected in `coordination/reviews/M3-DEEPSEEK-MEDIA-LIBRARY-BROWSE-QA-round2-claude.md`
+for two unresolved items. Both are now implemented:
+
+1. **Cross-project fixture collision (item #2).** Fixture identity is scoped per Playwright project
+   (`marker`, emails, storage-key digest, checksum digest all mix in `testInfo.project.name`), the
+   `beforeAll` idempotency guard no longer early-returns leaving session tokens empty, and
+   `afterAll` cleans up in a `finally` with an FK-safe marker sweep.
+2. **Deterministic image bytes (item #11).** A `beforeEach` intercepts `**/_next/image**` and
+   `**/uploads/**` and fulfils them with a fixed 1×1 PNG. Verified: broken-image server errors
+   dropped from ~30 per run to **0**.
+
+Fixing (1) exposed a third problem earlier rounds never reached: with both projects' fixtures
+resident in one database, ADMIN-visible **global** counts and pagination double (35 → 70), failing
+11 cases. Because ADMIN legitimately sees all media, per-project isolation alone cannot fix it. The
+suite now holds a **PostgreSQL advisory lock** (`pg_advisory_lock(883112045)`) for the duration of
+each project's fixtures, releasing it only after cleanup, so projects serialize correctly at any
+`--workers` value instead of silently depending on `workers: 1`.
 
 ---
 
 ## Execution Evidence
 
+All commands below were executed on `2026-07-23` against `ai/deepseek/m3-media-library-browse-qa`.
+
 | Command | Result |
 | --- | --- |
-| `npx playwright test e2e/m3/admin-media-library-browse.spec.ts --project=chromium` | **PASS — 42/42** (121s) |
-| `npx playwright test e2e/m3/admin-media-library-browse.spec.ts --project=mobile` | **PASS — 42/42** (94s) |
-| `npx vitest run tests/m3/ui/admin-media-library-browse.test.tsx` | **PASS — 43/43** |
-| `npm run lint` | **PASS — No issues** |
-| `npm run typecheck` | **PASS — Clean** |
-| `npm test` | **PASS — 43 passed, 18 skipped, 579 tests** |
-| `npm run test:integration` | **PASS — 79/82** (3 pre-existing auth HMAC failures unrelated to this QA) |
-| `npm run prisma:validate` | **PASS — Schema valid** |
-| `npm run build` | **PASS — Production build** |
-| `git diff --check` | **PASS — Clean** |
-| `npm run check:scope` | **PASS — 3 changed files within lease** |
+| `npx playwright test … --project=chromium --project=mobile` (**mandated**) | **PASS — 84/84** (2.0m) |
+| `npx playwright test … --project=chromium` (single project) | **PASS — 42/42** (1.5m) |
+| `npm run lint` | **PASS — no issues** |
+| `npx tsc --noEmit` | **PASS — no errors** |
+| `npm test` | **PASS — 43 files passed, 18 skipped; 579 tests passed, 0 failed** |
+| `npm run test:integration` | **79/82 — 3 failures confirmed pre-existing (see below)** |
+| `npm run prisma:validate` | **PASS — schema valid** |
+| `git diff --check` | **PASS — clean** |
+
+### The 3 integration failures are pre-existing and out of scope
+
+`tests/security/auth-runtime/credentials-route.integration.test.ts` fails 3 cases (expects `401`,
+receives `503`). Round 2 asserted these were "pre-existing and unrelated"; that claim was
+**verified, not accepted** — the identical 3 failures reproduce on `integration/m3-reference-slice`,
+a branch containing none of this QA work:
+
+```bash
+RUN_PLATFORM_DB_TESTS=true npx vitest run \
+  tests/security/auth-runtime/credentials-route.integration.test.ts
+```
+
+This is GPT-lane auth-runtime behaviour, outside the three leased QA paths. It does not block this
+task but **should block M3 exit**.
+
+### Reproducing this run
+
+```bash
+cd /home/zhev/myproject/fuspi-deepseek
+set -a && . ./.env.local && set +a
+npx playwright test e2e/m3/admin-media-library-browse.spec.ts --project=chromium --project=mobile
+```
+
+### Not re-run in round 3
+
+`npm run build` was not re-executed: round 3 changed only a Playwright spec, which the production
+build excludes. A stale `.next/standalone/` directory was making `npm test` collect copied e2e specs
+and report 11 phantom file failures; it was deleted (gitignored build output) before the `npm test`
+result above was recorded.
 
 ### Test environment
 
 - **Database:** Isolated PostgreSQL 16, database `fuspi_m3_media_library_qa_audit`, user `fuspi_m3_qa`, loopback only
 - **Storage:** `/tmp/fuspi-m3-qa-{public,private,ppks}` directories
-- **Upload URL:** `/uploads` (relative — thumbnail placeholders render as broken images since no files exist on disk; this is expected and does not affect assertions)
+- **Thumbnails:** served by the deterministic in-test interceptor, never from disk
+- **Verified clean:** no `m3-media-qa-browse-%` rows and no leaked advisory locks after every run
 - **Auth secrets:** Synthetic 64-byte HMAC secrets (AUTH_SECRET, EMAIL_HMAC_SECRET, IP_HASH_SECRET)
 - **Dev server:** Next.js 16 dev server on port 3004, managed by Playwright webServer config
 - **No production, staging, or another model's data was used**
