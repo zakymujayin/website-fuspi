@@ -136,7 +136,7 @@ The Claude candidate `dbdeda2` (`fd0ea2a`) passes all required acceptance gates 
 | Claude candidate (handoff) | `dbdeda2` |
 | Claude implementation | `fd0ea2a` |
 | GPT re-review approval | `59c4944` |
-| Initial review documentation commit | (to be set by commit) |
+| Initial review documentation commit | `37e3b60` |
 | Final branch head | corrective documentation commit containing this handoff; exact SHA reported after push |
 
 ## Final Verdict: APPROVE
