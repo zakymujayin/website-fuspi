@@ -171,5 +171,48 @@
       "title": "تتعذر إتاحة مكتبة الوسائط حاليًا",
       "description": "يرجى إعادة تحميل هذه الصفحة بعد قليل."
     }
+  },
+  "AdminPostList": {
+    "metaTitle": "الأخبار",
+    "title": "الأخبار",
+    "description": "تصفّح جميع أخبار الكلية، ثم صفِّها بحسب حالة النشر للعثور على ما تبحث عنه.",
+    "filterAriaLabel": "تصفية الأخبار بحسب الحالة",
+    "listAriaLabel": "قائمة الأخبار",
+    "totalCount": "{count} خبرًا",
+    "status": {
+      "all": "الكل",
+      "draft": "مسودة",
+      "published": "منشور",
+      "archived": "مؤرشف"
+    },
+    "state": {
+      "DRAFT": "مسودة",
+      "PUBLISHED": "منشور",
+      "SCHEDULED": "مجدول",
+      "ARCHIVED": "مؤرشف"
+    },
+    "featured": "مميّز",
+    "localesLabel": "اللغات المتاحة: {locales}",
+    "uncategorized": "بدون تصنيف",
+    "unknownAuthor": "كاتب غير معروف",
+    "byLabel": "بقلم {name}",
+    "publishedAtLabel": "نُشر في {instant}",
+    "updatedAtLabel": "حُدِّث في {instant}",
+    "loading": "جارٍ تحميل قائمة الأخبار…",
+    "pagination": {
+      "ariaLabel": "تنقّل صفحات قائمة الأخبار",
+      "previous": "الصفحة السابقة",
+      "next": "الصفحة التالية",
+      "pageStatus": "صفحة {page} من {totalPages}",
+      "goToPage": "الانتقال إلى الصفحة {page}"
+    },
+    "empty": {
+      "title": "لا توجد أخبار بعد",
+      "description": "ستظهر الأخبار هنا بعد إنشائها."
+    },
+    "unavailable": {
+      "title": "تعذّر تحميل قائمة الأخبار الآن",
+      "description": "يرجى إعادة تحميل الصفحة بعد قليل."
+    }
   }
 }
