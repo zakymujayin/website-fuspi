@@ -46,18 +46,4 @@ ui_hotspots:
     - src/app/globals.css
     - src/components/ui/**
     - messages/**
-active_leases:
-  - task: M3-GPT-PUBLIC-IA-MANUAL-CONTENT-CONTRACT
-    owner: gpt
-    paths:
-      - docs/README.md
-      - docs/05-halaman-publik.md
-      - docs/07-upload-media-hostinger.md
-      - docs/10-menu-branding-referensi.md
-      - docs/13-celah-fitur-keamanan-operasional.md
-      - docs/16-audit-kelengkapan.md
-      - docs/18-beranda-editable.md
-      - docs/20-test-acceptance-go-live.md
-      - docs/24-implementation-plan-multi-model.md
-      - docs/26-fuspi-public-ia-design-brief.md
-      - coordination/handoffs/M3-GPT-PUBLIC-IA-MANUAL-CONTENT-CONTRACT-gpt.md
+active_leases: []

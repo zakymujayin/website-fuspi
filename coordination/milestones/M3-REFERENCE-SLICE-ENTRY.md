@@ -1,6 +1,13 @@
 # M3 Reference Slice Entry
 
-Status: **M3 active — Post and Media admin transport runtimes reviewed and merged**
+Status: **M3 active — Post and Media admin transport runtimes reviewed and merged; public IA/manual-content contract merged**
+
+**Temporary integrator note (2026-07-23 to 2026-07-29):** Codex (GPT) usage limit is exhausted;
+GPT's next scheduled activity is 2026-07-29. Claude Sonnet 5 is standing in as integrator and for
+GPT-lane review/merge duties for this window only, per human coordinator decision recorded in
+`coordination/adr/ADR-0002-temporary-gpt-integrator-standin.md`. New cross-lane contract changes
+(schema, auth, proxy, dependency, navigation registry) opened during this window should be treated
+as provisional until GPT/Codex reviews them on return.
 
 M3 starts from the accepted M2 development head
 `f83a00e6816a91f72b9ade654b012be8a1a0b2d0`. That head passed GitHub Actions run
