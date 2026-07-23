@@ -39,11 +39,11 @@ tracked by the M2 exit contract.
    transport contract and Post admin runtime passed independent DeepSeek adversarial review with
    no Critical/High defect. The batch-upload response gap is now closed and independently reviewed;
    the Media admin runtime is also independently reviewed and merged with no Critical/High defect.
-   Claude's bounded read-only Media Library browse presentation is now **merged**, with its
-   PostgreSQL-backed browser QA passing 84/84 across Chromium and mobile — subject to the
-   independence gap noted above. Picker/upload/metadata/delete UI and the Post editor remain closed
-   until their own non-overlapping manifests, followed by executable ownership/IDOR browser
-   evidence.
+   Claude's bounded read-only Media Library browse presentation passed GPT correction re-review and
+   is now **merged**, with its PostgreSQL-backed browser QA passing 84/84 across Chromium and mobile
+   on the mandated combined command — subject to the independence gap noted above. Picker/upload/
+   metadata/delete UI and the Post editor remain closed until their own non-overlapping manifests,
+   followed by executable ownership/IDOR browser evidence.
 6. **Integrator gate:** merge serially, run the full PostgreSQL and browser suites, reconcile the
    carried security cases, then freeze the reference pattern for M4.
 
