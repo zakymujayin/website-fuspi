@@ -171,5 +171,48 @@
       "title": "The media library is temporarily unavailable",
       "description": "Please reload this page again shortly."
     }
+  },
+  "AdminPostList": {
+    "metaTitle": "News",
+    "title": "News",
+    "description": "Browse every faculty news item, then filter by publication status to find the piece you are looking for.",
+    "filterAriaLabel": "Filter news by status",
+    "listAriaLabel": "News list",
+    "totalCount": "{count} news items",
+    "status": {
+      "all": "All",
+      "draft": "Draft",
+      "published": "Published",
+      "archived": "Archived"
+    },
+    "state": {
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published",
+      "SCHEDULED": "Scheduled",
+      "ARCHIVED": "Archived"
+    },
+    "featured": "Featured",
+    "localesLabel": "Available languages: {locales}",
+    "uncategorized": "Uncategorized",
+    "unknownAuthor": "Unknown author",
+    "byLabel": "By {name}",
+    "publishedAtLabel": "Published {instant}",
+    "updatedAtLabel": "Updated {instant}",
+    "loading": "Loading the news list…",
+    "pagination": {
+      "ariaLabel": "News list pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "pageStatus": "Page {page} of {totalPages}",
+      "goToPage": "Go to page {page}"
+    },
+    "empty": {
+      "title": "No news yet",
+      "description": "News items will appear here once they are created."
+    },
+    "unavailable": {
+      "title": "The news list cannot be loaded right now",
+      "description": "Please reload this page in a moment."
+    }
   }
 }

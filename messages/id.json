@@ -171,5 +171,48 @@
       "title": "Pustaka media sedang tidak dapat dimuat",
       "description": "Silakan muat ulang halaman ini beberapa saat lagi."
     }
+  },
+  "AdminPostList": {
+    "metaTitle": "Berita",
+    "title": "Berita",
+    "description": "Telusuri seluruh berita fakultas, lalu saring menurut status penerbitan untuk menemukan tulisan yang Anda cari.",
+    "filterAriaLabel": "Saring berita berdasarkan status",
+    "listAriaLabel": "Daftar berita",
+    "totalCount": "{count} berita",
+    "status": {
+      "all": "Semua",
+      "draft": "Draf",
+      "published": "Terbit",
+      "archived": "Arsip"
+    },
+    "state": {
+      "DRAFT": "Draf",
+      "PUBLISHED": "Terbit",
+      "SCHEDULED": "Terjadwal",
+      "ARCHIVED": "Arsip"
+    },
+    "featured": "Unggulan",
+    "localesLabel": "Bahasa tersedia: {locales}",
+    "uncategorized": "Tanpa kategori",
+    "unknownAuthor": "Penulis tidak diketahui",
+    "byLabel": "Oleh {name}",
+    "publishedAtLabel": "Terbit {instant}",
+    "updatedAtLabel": "Diperbarui {instant}",
+    "loading": "Memuat daftar berita…",
+    "pagination": {
+      "ariaLabel": "Navigasi halaman daftar berita",
+      "previous": "Halaman sebelumnya",
+      "next": "Halaman berikutnya",
+      "pageStatus": "Hal {page} dari {totalPages}",
+      "goToPage": "Ke halaman {page}"
+    },
+    "empty": {
+      "title": "Belum ada berita",
+      "description": "Berita akan tampil di sini setelah dibuat."
+    },
+    "unavailable": {
+      "title": "Daftar berita sedang tidak dapat dimuat",
+      "description": "Silakan muat ulang halaman ini beberapa saat lagi."
+    }
   }
 }
