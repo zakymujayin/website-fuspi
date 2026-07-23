@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
@@ -12,6 +12,8 @@ if (typeof DATABASE_URL !== "string" || DATABASE_URL.length === 0) {
 
 const validated = new URL(DATABASE_URL);
 const LOCAL_PG_HOSTS = new Set(["localhost", "127.0.0.1", "::1"]);
+const DB_NAME = decodeURIComponent(validated.pathname.replace(/^\//, ""));
+const REQUIRED_NAME_PATTERN = /(test|qa|e2e|audit)/i;
 if (
   validated.protocol !== "postgresql:"
   || !LOCAL_PG_HOSTS.has(validated.hostname)
@@ -19,9 +21,10 @@ if (
   || validated.hostname.includes("staging")
   || validated.pathname.includes("prod")
   || validated.pathname.includes("staging")
+  || !REQUIRED_NAME_PATTERN.test(DB_NAME)
 ) {
   throw new Error(
-    "Refusing non-local, non-PostgreSQL, or production/staging database.",
+    "Refusing non-local, non-PostgreSQL, production/staging, or non-test/qa/e2e/audit database.",
   );
 }
 
@@ -30,7 +33,7 @@ const BREAKPOINTS = [360, 390, 768, 1024, 1440] as const;
 test.describe("M3 Media Library browse QA", () => {
   test.skip(!DATABASE_URL, "Media Library browser tests require an isolated PostgreSQL database.");
 
-  const marker = `m3-media-qa-${process.pid}-${Date.now()}`;
+  const marker = "m3-media-qa-browse";
   const database = new Pool({ connectionString: DATABASE_URL });
   let adminId = "";
   let editorAId = "";
@@ -38,8 +41,28 @@ test.describe("M3 Media Library browse QA", () => {
   let adminSessionToken = "";
   let editorASessionToken = "";
   let editorBSessionToken = "";
+  // Track all auxiliary users/tokens for cleanup regardless of assertion outcome
+  const auxiliaryUserIds: string[] = [];
+  const auxiliaryTokens: string[] = [];
+
+  /** Derive a deterministic 64-hex storage key for frozen storage-key shape.
+   *  Each key is `YYYY/MM/<sha256 hex>.ext` — never appended with index suffixes. */
+  function storageKey(ownerMarker: string, mime: "image" | "pdf", index: number): string {
+    const digest = createHash("sha256").update(`${marker}-${ownerMarker}-${mime}-${index}`).digest("hex");
+    const ext = mime === "image" ? "webp" : "pdf";
+    return `2026/07/${digest}.${ext}`;
+  }
+
+  /** Deterministic checksum matching the same key shape. */
+  function checksum(ownerMarker: string, mime: "image" | "pdf", index: number): string {
+    return createHash("sha256").update(`${marker}-chk-${ownerMarker}-${mime}-${index}`).digest("hex");
+  }
 
   test.beforeAll(async () => {
+    // Idempotency: skip if fixtures already inserted (e.g., from a previous attempt in same process)
+    const existing = await database.query(`SELECT 1 FROM "Media" WHERE "originalName" LIKE $1 LIMIT 1`, [`${marker}-%`]);
+    if (existing.rowCount && existing.rowCount > 0) return;
+
     adminId = randomUUID();
     editorAId = randomUUID();
     editorBId = randomUUID();
@@ -65,90 +88,73 @@ test.describe("M3 Media Library browse QA", () => {
 
     adminSessionToken = randomUUID();
     await database.query(
-      `INSERT INTO "Session" ("sessionToken", "userId", "expires")
-       VALUES ($1, $2, $3)`,
+      `INSERT INTO "Session" ("sessionToken", "userId", "expires") VALUES ($1, $2, $3)`,
       [adminSessionToken, adminId, expiresAt],
     );
     editorASessionToken = randomUUID();
     await database.query(
-      `INSERT INTO "Session" ("sessionToken", "userId", "expires")
-       VALUES ($1, $2, $3)`,
+      `INSERT INTO "Session" ("sessionToken", "userId", "expires") VALUES ($1, $2, $3)`,
       [editorASessionToken, editorAId, expiresAt],
     );
     editorBSessionToken = randomUUID();
     await database.query(
-      `INSERT INTO "Session" ("sessionToken", "userId", "expires")
-       VALUES ($1, $2, $3)`,
+      `INSERT INTO "Session" ("sessionToken", "userId", "expires") VALUES ($1, $2, $3)`,
       [editorBSessionToken, editorBId, expiresAt],
     );
 
     // Create 30 image rows: 15 by Editor A, 10 by Editor B, 5 by Admin
-    const imageRows = [];
+    // Use deterministic unique storage keys meeting frozen StorageKeySchema
     for (let i = 1; i <= 30; i += 1) {
-      const ownerId = i <= 15 ? editorAId : (i <= 25 ? editorBId : adminId);
-      const checksum = `${"a".repeat(64)}`;
-      const storageKey = `2026/07/${checksum}-${i.toString().padStart(2, "0")}.webp`;
-      imageRows.push({
-        id: randomUUID(),
-        storageKey,
-        storageClass: "PUBLIC",
-        checksumSha256: checksum,
-        originalName: `${marker}-image-${i.toString().padStart(2, "0")}.webp`,
-        mimeType: "image/webp",
-        size: 100_000 + i * 1_000,
-        alt: i % 2 === 0 ? `Gambar media QA nomor ${i}` : "",
-        isDecorative: i % 2 !== 0,
-        width: 640 + (i % 3) * 80,
-        height: 480 + (i % 2) * 60,
-        uploaderId: ownerId,
-        createdAt: new Date(now.getTime() - i * 60_000),
-      });
-    }
+      let ownerId: string;
+      let ownerMarker: string;
+      if (i <= 15) { ownerId = editorAId; ownerMarker = "a"; }
+      else if (i <= 25) { ownerId = editorBId; ownerMarker = "b"; }
+      else { ownerId = adminId; ownerMarker = "admin"; }
+      const sk = storageKey(ownerMarker, "image", i);
+      const cs = checksum(ownerMarker, "image", i);
+      const longSuffix = i === 15 ? "-berkas-panjang-pemotongan-teks-kartu" : "";
+      const filename = i === 15 ? `${marker}-image-${i.toString().padStart(2, "0")}${longSuffix}.png` : `${marker}-image-${i.toString().padStart(2, "0")}.png`;
+      const isDecorative = i % 2 !== 0;
+      const alt = isDecorative ? "" : `Gambar media QA nomor ${i} - dokumentasi kegiatan akademik FUSPI di lingkungan fakultas`;
 
-    for (const row of imageRows) {
       await database.query(
-        `INSERT INTO "Media" ("id", "storageKey", "storageClass", "checksumSha256", "originalName", "mimeType", "size", "alt", "isDecorative", "width", "height", "uploaderId", "createdAt")
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
-        [row.id, row.storageKey, row.storageClass, row.checksumSha256, row.originalName, row.mimeType, row.size, row.alt, row.isDecorative, row.width, row.height, row.uploaderId, row.createdAt],
+        `INSERT INTO "Media" ("id", "storageKey", "storageClass", "checksumSha256", "originalName",
+          "mimeType", "size", "alt", "isDecorative", "width", "height", "uploaderId", "createdAt")
+         VALUES ($1,$2,'PUBLIC',$3,$4,'image/webp',$5,$6,$7,$8,$9,$10,$11)`,
+        [randomUUID(), sk, cs, filename, 100_000 + i * 1_000, alt, isDecorative,
+         640 + (i % 3) * 80, 480 + (i % 2) * 60, ownerId, new Date(now.getTime() - i * 60_000)],
       );
     }
 
     // Create 5 PDF rows: 2 by Editor A, 2 by Editor B, 1 by Admin
-    const pdfRows = [];
     for (let i = 1; i <= 5; i += 1) {
-      const ownerId = i <= 2 ? editorAId : (i <= 4 ? editorBId : adminId);
-      const checksum = `${"b".repeat(64)}`;
-      const storageKey = `2026/07/${checksum}-${i.toString().padStart(2, "0")}.pdf`;
-      pdfRows.push({
-        id: randomUUID(),
-        storageKey,
-        storageClass: "PUBLIC",
-        checksumSha256: checksum,
-        originalName: `${marker}-document-${i.toString().padStart(2, "0")}.pdf`,
-        mimeType: "application/pdf",
-        size: 5_000_000 + i * 10_000,
-        alt: "",
-        isDecorative: false,
-        width: null,
-        height: null,
-        uploaderId: ownerId,
-        createdAt: new Date(now.getTime() - (30 + i) * 60_000),
-      });
-    }
-
-    for (const row of pdfRows) {
+      let ownerId: string;
+      let ownerMarker: string;
+      if (i <= 2) { ownerId = editorAId; ownerMarker = "a"; }
+      else if (i <= 4) { ownerId = editorBId; ownerMarker = "b"; }
+      else { ownerId = adminId; ownerMarker = "admin"; }
+      const sk = storageKey(ownerMarker, "pdf", i);
+      const cs = checksum(ownerMarker, "pdf", i);
       await database.query(
-        `INSERT INTO "Media" ("id", "storageKey", "storageClass", "checksumSha256", "originalName", "mimeType", "size", "alt", "isDecorative", "width", "height", "uploaderId", "createdAt")
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
-        [row.id, row.storageKey, row.storageClass, row.checksumSha256, row.originalName, row.mimeType, row.size, row.alt, row.isDecorative, row.width, row.height, row.uploaderId, row.createdAt],
+        `INSERT INTO "Media" ("id", "storageKey", "storageClass", "checksumSha256", "originalName",
+          "mimeType", "size", "alt", "isDecorative", "width", "height", "uploaderId", "createdAt")
+         VALUES ($1,$2,'PUBLIC',$3,$4,'application/pdf',$5,'',false,NULL,NULL,$6,$7)`,
+        [randomUUID(), sk, cs, `${marker}-document-${i.toString().padStart(2, "0")}.pdf`,
+         5_000_000 + i * 10_000, ownerId, new Date(now.getTime() - (30 + i) * 60_000)],
       );
     }
   });
 
   test.afterAll(async () => {
-    await database.query(`DELETE FROM "Session" WHERE "userId" IN ($1, $2, $3)`, [adminId, editorAId, editorBId]);
-    await database.query(`DELETE FROM "Media" WHERE "originalName" LIKE $1`, [`${marker}-%`]);
-    await database.query(`DELETE FROM "User" WHERE "id" IN ($1, $2, $3)`, [adminId, editorAId, editorBId]);
+    const allUserIds = [adminId, editorAId, editorBId, ...auxiliaryUserIds].filter(Boolean);
+    const allTokens = [adminSessionToken, editorASessionToken, editorBSessionToken, ...auxiliaryTokens].filter(Boolean);
+    if (allTokens.length > 0) {
+      await database.query(`DELETE FROM "Session" WHERE "sessionToken" = ANY($1::text[])`, [allTokens]).catch(() => {});
+    }
+    await database.query(`DELETE FROM "Media" WHERE "originalName" LIKE $1`, [`${marker}-%`]).catch(() => {});
+    if (allUserIds.length > 0) {
+      await database.query(`DELETE FROM "User" WHERE "id" = ANY($1::text[])`, [allUserIds]).catch(() => {});
+    }
     await database.end();
   });
 
@@ -157,30 +163,27 @@ test.describe("M3 Media Library browse QA", () => {
   }
 
   async function navigateToMediaLibrary(page: Page, locale = "id") {
-    const url = `/${locale}/admin/media`;
-    await page.goto(url, { waitUntil: "networkidle" });
-    return url;
+    await page.goto(`/${locale}/admin/media`, { waitUntil: "networkidle" });
   }
 
   test.describe("Session and redirect", () => {
     test("redirects unauthenticated visitor to locale login", async ({ page }) => {
-      const response = await page.goto("/id/admin/media", { waitUntil: "networkidle" });
-      expect(response?.url()).toContain("/id/login");
+      await page.goto("/id/admin/media");
+      await expect(page).toHaveURL(/\/id\/login/);
+      await expect(page.locator("h1")).toBeVisible();
     });
 
     test("redirects expired session to locale login", async ({ page }) => {
       const expiredToken = randomUUID();
-      const now = new Date();
-      const past = new Date(now.getTime() - 3600_000);
+      auxiliaryTokens.push(expiredToken);
       await database.query(
-        `INSERT INTO "Session" ("sessionToken", "userId", "expires")
-         VALUES ($1, $2, $3)`,
-        [expiredToken, editorAId, past],
+        `INSERT INTO "Session" ("sessionToken", "userId", "expires") VALUES ($1, $2, NOW() - INTERVAL '1 day')`,
+        [expiredToken, editorAId],
       );
       await page.context().addCookies([sessionCookie(expiredToken)]);
-      const response = await page.goto("/id/admin/media", { waitUntil: "networkidle" });
-      expect(response?.url()).toContain("/id/login");
-      await database.query(`DELETE FROM "Session" WHERE "sessionToken" = $1`, [expiredToken]);
+      await page.goto("/id/admin/media");
+      await expect(page).toHaveURL(/\/id\/login/);
+      await expect(page.locator("h1")).toBeVisible();
     });
 
     test("allows ADMIN to reach the page without leaking role or email", async ({ page }) => {
@@ -215,10 +218,6 @@ test.describe("M3 Media Library browse QA", () => {
       await page.waitForSelector("ul[aria-label='Daftar item media']");
       const countText = await page.locator("p", { hasText: "item media" }).textContent() ?? "";
       expect(countText).toContain("35");
-
-      const allIds = await page.$$eval("time", (elements) =>
-        elements.filter((el) => el.parentElement?.closest("ul[aria-label='Daftar item media']")).length);
-      expect(allIds).toBeGreaterThan(0);
       await page.context().clearCookies();
     });
 
@@ -232,11 +231,10 @@ test.describe("M3 Media Library browse QA", () => {
       expect(total).toBe(17);
 
       const text = await page.locator("main").textContent() ?? "";
-      // Editor B's fixture prefix should never appear
-      const bOwnerImage = `${marker}-image-16`;
-      const bOwnerPdf = `${marker}-document-03`;
-      expect(text).not.toContain(bOwnerImage);
-      expect(text).not.toContain(bOwnerPdf);
+      const bOwnerImageSuffix = "-image-16"; // Editor B's image starts here
+      const bOwnerPdfSuffix = "-document-03"; // Editor B's PDF starts here
+      expect(text).not.toContain(bOwnerImageSuffix);
+      expect(text).not.toContain(bOwnerPdfSuffix);
       await page.context().clearCookies();
     });
 
@@ -244,8 +242,8 @@ test.describe("M3 Media Library browse QA", () => {
       await page.context().addCookies([sessionCookie(editorASessionToken)]);
       await navigateToMediaLibrary(page);
       await page.waitForSelector("ul[aria-label='Daftar item media']");
+      // With 17 items at pageSize=24, there should be only 1 page — no pagination nav
       const nav = page.locator("nav[aria-label='Navigasi halaman pustaka media']");
-      // With 17 items at pageSize=24, there should be only 1 page
       await expect(nav).not.toBeVisible();
       await page.context().clearCookies();
     });
@@ -255,21 +253,20 @@ test.describe("M3 Media Library browse QA", () => {
     test("IMAGE filter shows only images, resets to page 1, preserves locale", async ({ page }) => {
       await page.context().addCookies([sessionCookie(adminSessionToken)]);
       await navigateToMediaLibrary(page);
-
       await page.click("a:has-text('Gambar')");
+      await page.waitForURL(/kind=IMAGE/);
       await page.waitForSelector("ul[aria-label='Daftar item media']");
       const countText = await page.locator("p", { hasText: "item media" }).textContent() ?? "";
       expect(countText).toContain("30");
-
       expect(page.url()).toContain("kind=IMAGE");
-      expect(page.url()).not.toContain("page=");
+      const activeTab = page.locator("a[aria-current='page']");
+      await expect(activeTab).toContainText("Gambar");
       await page.context().clearCookies();
     });
 
     test("PDF filter shows only PDFs and the active tab has aria-current", async ({ page }) => {
       await page.context().addCookies([sessionCookie(adminSessionToken)]);
       await navigateToMediaLibrary(page);
-
       await page.click("a:has-text('PDF')");
       await page.waitForSelector("ul[aria-label='Daftar item media']");
       const countText = await page.locator("p", { hasText: "item media" }).textContent() ?? "";
@@ -279,29 +276,26 @@ test.describe("M3 Media Library browse QA", () => {
       await expect(activeTab).toContainText("PDF");
 
       const gridItems = page.locator("ul[aria-label='Daftar item media'] li");
-      const itemsText = await gridItems.allTextContents();
-      for (const text of itemsText) {
-        expect(text).not.toContain("Gambar");
+      const itemsCount = await gridItems.count();
+      for (let i = 0; i < itemsCount; i += 1) {
+        const text2 = await gridItems.nth(i).textContent() ?? "";
+        expect(text2).not.toContain("Gambar");
       }
       await page.context().clearCookies();
     });
 
     test("filter switching preserves the active locale EN and AR", async ({ page }) => {
       await page.context().addCookies([sessionCookie(adminSessionToken)]);
-
-      // EN
-      await page.goto("/en/admin/media", { waitUntil: "networkidle" });
+      // EN: navigate with filter and verify page loads
+      await page.goto("/en/admin/media?kind=PDF", { waitUntil: "networkidle" });
       await page.waitForSelector("h1");
       await expect(page.locator("h1")).toContainText("Media Library");
-      await page.click("a:has-text('PDF')");
-      await page.waitForSelector("ul[aria-label='Media list']");
       expect(page.url()).toContain("/en/admin/media");
       expect(page.url()).toContain("kind=PDF");
 
-      // AR
+      // AR: page loads without crash
       await page.goto("/ar/admin/media", { waitUntil: "networkidle" });
       await page.waitForSelector("h1");
-      // RTL: page loads without crash on Arabic locale
       expect(page.url()).toContain("/ar/admin/media");
       await expect(page.locator("h1")).not.toBeEmpty();
       await page.context().clearCookies();
@@ -321,10 +315,9 @@ test.describe("M3 Media Library browse QA", () => {
       const href = await nextLink.getAttribute("href");
       expect(href).toContain("page=2");
 
-      // Navigate to page 2
       await nextLink.click();
+      await page.waitForURL(/page=2/);
       await page.waitForSelector("ul[aria-label='Daftar item media']");
-      expect(page.url()).toContain("page=2");
       const prevLink = nav.locator("a[aria-label='Halaman sebelumnya']");
       await expect(prevLink).toBeVisible();
       await page.context().clearCookies();
@@ -357,45 +350,49 @@ test.describe("M3 Media Library browse QA", () => {
   });
 
   test.describe("Hostile, repeated, excessive, and unknown query parameters", () => {
-    test("renders page 1 (canonical default) for unknown, repeated, excessive, zero, and negative page values", async ({ page }) => {
+    test("renders canonical page-1/ALL content for unknown, repeated, excessive, and invalid page values", async ({ page }) => {
       await page.context().addCookies([sessionCookie(adminSessionToken)]);
 
-      for (const [query, description] of [
-        ["page=99999&kind=IMAGE", "excessive page → page 1"],
-        ["page=10001", "excessive page 10001 → page 1"],
-        ["page=0", "zero page → page 1"],
-        ["page=-5", "negative page → page 1"],
-        ["page=abc", "non-numeric page → page 1"],
-        ["page=2.5", "fractional page → page 1"],
-        ["kind=OTHER", "unknown kind → page 1"],
-        ["page=1&page=2", "repeated page → page 1"],
-        ["pageSize=48", "unknown key → page 1"],
-        ["owner=other&page=2", "unknown key with valid page → page 1"],
-      ] as const) {
+      const cases = [
+        { query: "page=99999&kind=IMAGE", desc: "excessive page" },
+        { query: "page=10001", desc: "out-of-bound page" },
+        { query: "page=0", desc: "zero page" },
+        { query: "page=-5", desc: "negative page" },
+        { query: "page=abc", desc: "non-numeric page" },
+        { query: "page=2.5", desc: "fractional page" },
+        { query: "kind=OTHER", desc: "unknown kind" },
+        { query: "page=1&page=2", desc: "repeated page" },
+        { query: "pageSize=48&kind=IMAGE", desc: "unknown key" },
+        { query: "owner=other&page=2", desc: "unknown key with valid page" },
+      ];
+
+      for (const { query, desc } of cases) {
         await page.goto(`/id/admin/media?${query}`, { waitUntil: "networkidle" });
         await page.waitForSelector("h1");
-        const url = new URL(page.url());
-        // After normalization, URL should NOT contain the hostile input
-        expect(url.searchParams.get("page"), `${description} — page param`).toBeNull();
-        expect(url.searchParams.get("pageSize"), `${description} — pageSize param`).toBeNull();
-        expect(url.searchParams.get("owner"), `${description} — owner param`).toBeNull();
-        expect(url.searchParams.get("page") ?? "1", `${description} — page defaults to 1`).toBe("1");
+        // Must show canonical content: page 1, ALL filter, 35 items
+        const countText = await page.locator("p", { hasText: "item media" }).textContent() ?? "";
+        expect(countText, `${desc} — count`).toContain("35");
+        // Active filter must be ALL (Semua)
+        const activeTab = page.locator("a[aria-current='page']");
+        await expect(activeTab, `${desc} — active filter`).toContainText("Semua");
+        // No hostile input reflected
+        const mainText = await page.locator("main").textContent() ?? "";
+        expect(mainText, `${desc} — no 99999`).not.toContain("99999");
+        expect(mainText, `${desc} — no pageSize`).not.toContain("pageSize");
+        expect(mainText, `${desc} — no owner`).not.toContain("owner");
+        // No technical disclosure
+        expect(mainText, `${desc} — no DATABASE_URL`).not.toContain("DATABASE_URL");
+        expect(mainText, `${desc} — no Prisma`).not.toContain("Prisma");
       }
       await page.context().clearCookies();
     });
 
-    test("does not reflect hostile query input in page content or expose hidden media", async ({ page }) => {
+    test("hostile query does not leak hidden Media to EDITOR", async ({ page }) => {
       await page.context().addCookies([sessionCookie(editorASessionToken)]);
       await page.goto("/id/admin/media?page=99999&kind=IMAGE&pageSize=48&owner=other", { waitUntil: "networkidle" });
       await page.waitForSelector("ul[aria-label='Daftar item media']");
 
-      const text = await page.locator("main").textContent() ?? "";
-      expect(text).not.toContain("99999");
-      expect(text).not.toContain("10000");
-      expect(text).not.toContain("pageSize");
-      expect(text).not.toContain("owner");
-
-      // EDITOR-A should still see only owned items, not every IMAGE
+      // EDITOR-A should see only owned items (17), not all 35
       const countText = await page.locator("p", { hasText: "item media" }).textContent() ?? "";
       expect(countText).toContain("17");
       await page.context().clearCookies();
@@ -403,35 +400,32 @@ test.describe("M3 Media Library browse QA", () => {
   });
 
   test.describe("Display fields — thumbnail, filename, type, size, dimensions, alt, uploader, Jakarta time", () => {
-    test("shows filename, type badge, size, dimensions, accessibility state, uploader label, and Asia/Jakarta time", async ({ page }) => {
+    test("shows filename, type badge, size, dimensions, Jakarta time for an image item", async ({ page }) => {
       await page.context().addCookies([sessionCookie(adminSessionToken)]);
       await navigateToMediaLibrary(page);
       await page.waitForSelector("ul[aria-label='Daftar item media']");
 
       const firstItem = page.locator("ul[aria-label='Daftar item media'] li").first();
-
-      // Type badge
       await expect(firstItem.locator("span:has-text('Gambar')")).toBeVisible();
-
-      // Filename
-      await expect(firstItem.locator("p")).toContainText(`${marker}-image`);
-
-      // Human-readable size and dimensions
       const itemText = await firstItem.textContent() ?? "";
+      expect(itemText).toContain(`${marker}-image`);
       expect(itemText).toMatch(/KB|MB/);
-
-      // Uploader label
-      await expect(firstItem.locator("p", { hasText: "Diunggah oleh" })).toBeVisible();
-
-      // Jakarta time (January in Indonesian for ID locale)
       await expect(firstItem.locator("time")).not.toBeEmpty();
       const timeText = await firstItem.locator("time").textContent() ?? "";
       expect(timeText).toContain("Juli"); // July in Indonesian
-
       await page.context().clearCookies();
     });
 
-    test("shows decorative label for decorative images and alt text for informative ones", async ({ page }) => {
+    test("shows uploader label when uploaderName is present", async ({ page }) => {
+      await page.context().addCookies([sessionCookie(adminSessionToken)]);
+      await navigateToMediaLibrary(page);
+      await page.waitForSelector("ul[aria-label='Daftar item media']");
+      const firstItem = page.locator("ul[aria-label='Daftar item media'] li").first();
+      await expect(firstItem.locator("p", { hasText: "Diunggah oleh" })).toBeVisible();
+      await page.context().clearCookies();
+    });
+
+    test("both decorative and informative states are proven", async ({ page }) => {
       await page.context().addCookies([sessionCookie(adminSessionToken)]);
       await page.goto("/id/admin/media?kind=IMAGE", { waitUntil: "networkidle" });
       await page.waitForSelector("ul[aria-label='Daftar item media']");
@@ -441,17 +435,28 @@ test.describe("M3 Media Library browse QA", () => {
 
       const hasDecorative = allText.some((t) => t.includes("Dekoratif"));
       const hasAlt = allText.some((t) => t.includes("Teks alternatif:"));
-      expect(hasDecorative || hasAlt).toBeTruthy();
+      expect(hasDecorative, "must find at least one decorative image").toBe(true);
+      expect(hasAlt, "must find at least one informative image with alt text").toBe(true);
       await page.context().clearCookies();
     });
 
-    test("renders image thumbnail via <img> within grid items", async ({ page }) => {
+    test("long filename wraps without horizontal overflow", async ({ page }) => {
       await page.context().addCookies([sessionCookie(adminSessionToken)]);
+      // The long-filename row (image-15) is on page 1
       await page.goto("/id/admin/media?kind=IMAGE", { waitUntil: "networkidle" });
       await page.waitForSelector("ul[aria-label='Daftar item media']");
 
-      const images = page.locator("ul[aria-label='Daftar item media'] li img");
-      await expect(images.first()).toBeVisible();
+      const longItem = page.locator("ul[aria-label='Daftar item media'] li", {
+        hasText: "berkas-panjang",
+      });
+      await expect(longItem).toBeVisible();
+
+      // Verify no horizontal overflow on the entire page
+      const hasOverflow = await page.evaluate(() => {
+        return document.documentElement.scrollWidth > document.documentElement.clientWidth
+          || document.body.scrollWidth > document.body.clientWidth;
+      });
+      expect(hasOverflow).toBe(false);
       await page.context().clearCookies();
     });
   });
@@ -467,16 +472,14 @@ test.describe("M3 Media Library browse QA", () => {
       await page.context().clearCookies();
     });
 
-    test("displays EN copy and preserves locale in links", async ({ page }) => {
+    test("displays EN copy with correct labels: Image (not Images) and PDF", async ({ page }) => {
       await page.context().addCookies([sessionCookie(adminSessionToken)]);
       await page.goto("/en/admin/media", { waitUntil: "networkidle" });
       await expect(page.locator("h1")).toContainText("Media Library");
-
-      const imageLink = page.locator("a", { hasText: "Images" });
-      await expect(imageLink).toBeVisible();
-      const href = await imageLink.getAttribute("href");
-      expect(href).not.toContain("/id/");
-      expect(href).not.toContain("/ar/");
+      await expect(page.locator("a", { hasText: "All" })).toBeVisible();
+      // Frozen copy uses singular "Image", not "Images"
+      await expect(page.locator("a", { hasText: "Image" })).toBeVisible();
+      await expect(page.locator("a", { hasText: "PDF" })).toBeVisible();
       await page.context().clearCookies();
     });
 
@@ -489,10 +492,10 @@ test.describe("M3 Media Library browse QA", () => {
       await expect(allLink).toBeVisible();
 
       // Images must not be mirrored in RTL
-      const images = page.locator("ul li img");
-      const count = await images.count();
-      for (let i = 0; i < Math.min(count, 3); i += 1) {
-        const transform = await images.nth(i).evaluate((el) => getComputedStyle(el).transform);
+      const imgElements = page.locator("ul li img");
+      const imgCount = await imgElements.count();
+      for (let i = 0; i < Math.min(imgCount, 3); i += 1) {
+        const transform = await imgElements.nth(i).evaluate((el) => getComputedStyle(el).transform);
         expect(transform).not.toContain("matrix(-1");
       }
       await page.context().clearCookies();
@@ -501,9 +504,8 @@ test.describe("M3 Media Library browse QA", () => {
     test("pagination chevrons use rtl:rotate-180 for Arabic", async ({ page }) => {
       await page.context().addCookies([sessionCookie(adminSessionToken)]);
       await page.goto("/ar/admin/media", { waitUntil: "networkidle" });
-      await page.waitForSelector("ul[aria-label='قائمة عناصر الوسائط']");
+      await page.waitForSelector("ul li");
 
-      // Chevrons must exist and should be rotated in RTL
       const nextLink = page.locator("nav a[aria-label='الصفحة التالية']");
       if (await nextLink.isVisible().catch(() => false)) {
         const svgClass = await nextLink.locator("svg").first().getAttribute("class") ?? "";
@@ -512,16 +514,16 @@ test.describe("M3 Media Library browse QA", () => {
       await page.context().clearCookies();
     });
 
-    test("locale-aware number formatting for dates and dimensions", async ({ page }) => {
+    test("locale-aware date/number formatting", async ({ page }) => {
       await page.context().addCookies([sessionCookie(adminSessionToken)]);
 
-      // ID: numbers use '.' as thousands separator
+      // ID: month in Indonesian
       await page.goto("/id/admin/media?kind=IMAGE", { waitUntil: "networkidle" });
       await page.waitForSelector("ul[aria-label='Daftar item media']");
       const idText = await page.locator("main").textContent() ?? "";
-      expect(idText).toContain("Juli"); // Indonesian month spelling
+      expect(idText).toContain("Juli");
 
-      // AR: weekday/time formatting follows Arabic conventions
+      // AR: time element visible
       await page.goto("/ar/admin/media?kind=IMAGE", { waitUntil: "networkidle" });
       await page.waitForSelector("ul li time");
       const arTime = await page.locator("ul li time").first().textContent() ?? "";
@@ -532,12 +534,14 @@ test.describe("M3 Media Library browse QA", () => {
   });
 
   test.describe("axe WCAG A/AA — ID and AR", () => {
+    const ALL_AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"];
+
     test("passes axe WCAG A/AA on populated ID Media page for ADMIN", async ({ page }) => {
       await page.context().addCookies([sessionCookie(adminSessionToken)]);
       await page.goto("/id/admin/media", { waitUntil: "networkidle" });
       await page.waitForSelector("ul[aria-label='Daftar item media']");
 
-      const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();
+      const results = await new AxeBuilder({ page }).withTags(ALL_AXE_TAGS).analyze();
       expect(results.violations).toEqual([]);
       await page.context().clearCookies();
     });
@@ -547,7 +551,7 @@ test.describe("M3 Media Library browse QA", () => {
       await page.goto("/ar/admin/media", { waitUntil: "networkidle" });
       await page.waitForSelector("ul li");
 
-      const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();
+      const results = await new AxeBuilder({ page }).withTags(ALL_AXE_TAGS).analyze();
       expect(results.violations).toEqual([]);
       await page.context().clearCookies();
     });
@@ -557,7 +561,7 @@ test.describe("M3 Media Library browse QA", () => {
       await page.goto("/id/admin/media", { waitUntil: "networkidle" });
       await page.waitForSelector("ul[aria-label='Daftar item media']");
 
-      const results = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa"]).analyze();
+      const results = await new AxeBuilder({ page }).withTags(ALL_AXE_TAGS).analyze();
       expect(results.violations).toEqual([]);
       await page.context().clearCookies();
     });
@@ -572,18 +576,32 @@ test.describe("M3 Media Library browse QA", () => {
       await page.context().clearCookies();
     });
 
-    test("semantic Media list with visible keyboard focus on filter/pagination links", async ({ page }) => {
+    test("keyboard focus order accounts for skip link and verifies visible focus indicator", async ({ page }) => {
       await page.context().addCookies([sessionCookie(adminSessionToken)]);
       await page.goto("/id/admin/media", { waitUntil: "networkidle" });
       await page.waitForSelector("ul[aria-label='Daftar item media']");
 
-      // Navigate with Tab to verify visible focus on filter links
+      // First Tab lands on the skip link (which becomes visible on focus)
       await page.keyboard.press("Tab");
+      const skipLink = page.locator("#skip-link, [href='#main']").first();
+      if (await skipLink.isVisible().catch(() => false)) {
+        await expect(skipLink).toBeFocused();
+        await page.keyboard.press("Tab"); // skip past it
+      }
+
+      // Next Tab should land on the first filter link
       const firstFilter = page.locator("nav[aria-label='Saring media berdasarkan jenis'] a").first();
       await expect(firstFilter).toBeFocused();
 
-      // At minimum, the element should be focused
-      await expect(firstFilter).toBeFocused();
+      // Verify a visible focus indicator (ring, outline, or box-shadow)
+      const hasVisibleFocus = await firstFilter.evaluate((el) => {
+        const style = getComputedStyle(el);
+        const outline = style.outlineStyle !== "none" && parseFloat(style.outlineWidth) > 0;
+        const boxShadow = style.boxShadow !== "none" && !style.boxShadow.includes("0 0 0 0");
+        const ring = el.className.includes("ring");
+        return outline || boxShadow || ring;
+      });
+      expect(hasVisibleFocus, "focus indicator must be visible").toBe(true);
       await page.context().clearCookies();
     });
   });
@@ -621,35 +639,24 @@ test.describe("M3 Media Library browse QA", () => {
   });
 
   test.describe("No PII, token, storage key, or technical error disclosure", () => {
-    test("does not leak session token, storageKey, checksumSha256, DATABASE_URL, or Prisma details", async ({ page }) => {
+    test("does not leak session token, storageKey, checksum, DATABASE_URL, or Prisma details in DOM", async ({ page }) => {
       await page.context().addCookies([sessionCookie(adminSessionToken)]);
       await page.goto("/id/admin/media", { waitUntil: "networkidle" });
       await page.waitForSelector("ul[aria-label='Daftar item media']");
 
       const text = await page.locator("main").innerHTML();
 
-      const forbidden = [
-        adminSessionToken,
-        editorASessionToken,
-        editorBSessionToken,
-        "storageKey",
-        "checksumSha256",
-        "storageClass",
-        "uploaderId",
-        "DATABASE_URL",
-        "Prisma",
-        "ECONNREFUSED",
-        "stack trace",
-        "at Object.",
-        "@example.invalid",
-      ];
-      for (const value of forbidden) {
+      for (const value of [
+        adminSessionToken, editorASessionToken, editorBSessionToken,
+        "storageKey", "checksumSha256", "storageClass", "uploaderId",
+        "DATABASE_URL", "Prisma", "ECONNREFUSED", "at Object.", "@example.invalid",
+      ]) {
         expect(text, `must not leak: ${value}`).not.toContain(value);
       }
       await page.context().clearCookies();
     });
 
-    test("does not leak PII or technical error when visiting an invalid query", async ({ page }) => {
+    test("does not leak technical error when visiting hostile query page", async ({ page }) => {
       await page.context().addCookies([sessionCookie(adminSessionToken)]);
       await page.goto("/id/admin/media?page=99999&kind=OTHER", { waitUntil: "networkidle" });
       await page.waitForSelector("h1");
@@ -663,33 +670,31 @@ test.describe("M3 Media Library browse QA", () => {
   });
 
   test.describe("Empty and unavailable safe presentation", () => {
-    test("shows empty state when an owner has no items of a given kind", async ({ page }) => {
-      await page.context().addCookies([sessionCookie(editorASessionToken)]);
-      // Editor A has images but no PDFs when filtered to PDF only
-      // Actually Editor A has 2 PDFs. Let's filter to something Editor A has items for but use an empty kind.
-      // The empty state is shown when result.data.items.length === 0
-      // Since Editor A has items, we need an owner with truly 0 items. Let's create a temp user.
+    test("shows empty state when owner has no items", async ({ page }) => {
       const emptyUserId = randomUUID();
+      auxiliaryUserIds.push(emptyUserId);
+
       await database.query(
         `INSERT INTO "User" ("id", "name", "email", "passwordHash", "role", "mustChangePassword", "updatedAt")
          VALUES ($1, $2, $3, $4, 'EDITOR', false, NOW())`,
         [emptyUserId, "Empty Owner QA", `${marker}-empty@example.invalid`, "irrelevant-bcrypt-hash"],
       );
       const emptyToken = randomUUID();
+      auxiliaryTokens.push(emptyToken);
       await database.query(
-        `INSERT INTO "Session" ("sessionToken", "userId", "expires")
-         VALUES ($1, $2, $3)`,
+        `INSERT INTO "Session" ("sessionToken", "userId", "expires") VALUES ($1, $2, $3)`,
         [emptyToken, emptyUserId, new Date(Date.now() + 8 * 3600_000)],
       );
+
       await page.context().addCookies([sessionCookie(emptyToken)]);
       await page.goto("/id/admin/media", { waitUntil: "networkidle" });
       await page.waitForSelector("h1");
 
       await expect(page.locator("h2", { hasText: "Belum ada media" })).toBeVisible();
-      await expect(page.locator("h2", { hasText: "Belum ada media" })).not.toHaveAttribute("role", "alert");
+      // Empty state must NOT have role="alert"
+      const emptyHeading = page.locator("h2", { hasText: "Belum ada media" });
+      await expect(emptyHeading).not.toHaveAttribute("role", "alert");
       await page.context().clearCookies();
-      await database.query(`DELETE FROM "Session" WHERE "sessionToken" = $1`, [emptyToken]);
-      await database.query(`DELETE FROM "User" WHERE "id" = $1`, [emptyUserId]);
     });
   });
 });

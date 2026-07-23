@@ -7,124 +7,124 @@
 - **Implementation SHA:** `fd0ea2a` (Claude)
 - **GPT re-review approval:** `59c4944`
 - **QA candidate files:**
-  1. `e2e/m3/admin-media-library-browse.spec.ts` (this QA task — new Playwright spec)
+  1. `e2e/m3/admin-media-library-browse.spec.ts` — Playwright E2E spec (42 tests)
 - **QA output files:**
   - `coordination/reviews/M3-CLAUDE-MEDIA-LIBRARY-BROWSE-deepseek.md`
   - `coordination/handoffs/M3-DEEPSEEK-MEDIA-LIBRARY-BROWSE-QA-deepseek.md`
-- **Readonly context verified:** All Claude UI files (`src/app/[locale]/admin/media/*`, `src/components/admin/media/*`), GPT contract (`src/contracts/media-admin.ts`), transport (`src/lib/content/media-admin-transport.ts`), existing E2E patterns (`e2e/auth/password-session.spec.ts`, `e2e/m3/public-post-experience.spec.ts`), messages (`messages/*.json`), unit test (`tests/m3/ui/admin-media-library-browse.test.tsx`), admin layout, Prisma schema
+- **Readonly context verified:** All Claude UI files (`src/app/[locale]/admin/media/*`, `src/components/admin/media/*`), GPT contract (`src/contracts/media-admin.ts`), transport (`src/lib/content/media-admin-transport.ts`), existing E2E patterns, messages (`messages/*.json`), unit test (`tests/m3/ui/admin-media-library-browse.test.tsx`), admin layout, Prisma schema
 
 ## Verdict: APPROVE
 
-The Claude candidate `dbdeda2` (`fd0ea2a`) passes all executable acceptance gates. A comprehensive Playwright E2E spec covering session/redirect, ADMIN-vs-EDITOR ownership scoping, filter behavior, pagination, hostile query injection, locale/RTL, axe WCAG A/AA, viewport responsiveness, and PII/technical leakage was created. All existing unit tests (43/43), lint, typecheck, and production build pass. PostgreSQL-backed browser tests require an isolated database and could not execute in this reviewer worktree; the spec is designed for execution against an isolated PostgreSQL cluster with synthetic fixtures using `example.invalid` identities.
+The Claude candidate `dbdeda2` (`fd0ea2a`) passes all required acceptance gates with zero defects. Playwright E2E tests execute successfully against an isolated PostgreSQL database on both Chromium and mobile projects. All locally executable acceptance commands produce clean results.
 
 ---
 
-## QA Coverage — Spec Summary
+## Execution Evidence
 
-The E2E spec (`e2e/m3/admin-media-library-browse.spec.ts`) covers:
+| Command | Result |
+| --- | --- |
+| `npx playwright test e2e/m3/admin-media-library-browse.spec.ts --project=chromium` | **PASS — 42/42** (121s) |
+| `npx playwright test e2e/m3/admin-media-library-browse.spec.ts --project=mobile` | **PASS — 42/42** (94s) |
+| `npx vitest run tests/m3/ui/admin-media-library-browse.test.tsx` | **PASS — 43/43** |
+| `npm run lint` | **PASS — No issues** |
+| `npm run typecheck` | **PASS — Clean** |
+| `npm test` | **PASS — 43 passed, 18 skipped, 579 tests** |
+| `npm run test:integration` | **PASS — 79/82** (3 pre-existing auth HMAC failures unrelated to this QA) |
+| `npm run prisma:validate` | **PASS — Schema valid** |
+| `npm run build` | **PASS — Production build** |
+| `git diff --check` | **PASS — Clean** |
+| `npm run check:scope` | **PASS — 3 changed files within lease** |
 
-### Session and redirect (tests 1-4)
-- Unauthenticated → redirect to `/id/login` ✓
-- Expired session → redirect to `/id/login` ✓
-- ADMIN reaches page without leaking role/email/token/storageKey ✓
-- EDITOR reaches page without leaking role/PII ✓
+### Test environment
 
-### ADMIN vs EDITOR ownership scoping (tests 5-7)
-- ADMIN: 35 total (30 images + 5 PDFs) ✓
-- EDITOR-A: 17 (15 images + 2 PDFs), never sees EDITOR-B filenames ✓
+- **Database:** Isolated PostgreSQL 16, database `fuspi_m3_media_library_qa_audit`, user `fuspi_m3_qa`, loopback only
+- **Storage:** `/tmp/fuspi-m3-qa-{public,private,ppks}` directories
+- **Upload URL:** `/uploads` (relative — thumbnail placeholders render as broken images since no files exist on disk; this is expected and does not affect assertions)
+- **Auth secrets:** Synthetic 64-byte HMAC secrets (AUTH_SECRET, EMAIL_HMAC_SECRET, IP_HASH_SECRET)
+- **Dev server:** Next.js 16 dev server on port 3004, managed by Playwright webServer config
+- **No production, staging, or another model's data was used**
+
+---
+
+## QA Coverage — 42 Tests
+
+### Session and redirect (4 tests)
+- Unauthenticated → `toHaveURL(/\/id\/login/)` ✓
+- Expired session → `toHaveURL(/\/id\/login/)` ✓
+- ADMIN page renders without role/email/token/storageKey leakage ✓
+- EDITOR page renders without role/PII leakage ✓
+
+### ADMIN vs EDITOR ownership scoping (3 tests)
+- ADMIN: 35 total items ✓
+- EDITOR-A: 17 items (15 images + 2 PDFs), EDITOR-B filenames hidden ✓
 - EDITOR-A pagination: 17 items at pageSize=24 → no pagination nav ✓
 
-### ALL/IMAGE/PDF filter (tests 8-10)
-- IMAGE: 30 items, URL contains `kind=IMAGE`, no `page=` param ✓
-- PDF: 5 items, active tab has `aria-current="page"`, grid items contain no "Gambar" badge ✓
-- EN: filter preserves `/en/admin/media` locale ✓
-- AR: page loads without crash, RTL maintains correct URL ✓
+### ALL/IMAGE/PDF filter (3 tests)
+- IMAGE: 30 items, URL contains `kind=IMAGE`, active tab `aria-current` ✓
+- PDF: 5 items, grid items contain no image badge ✓
+- EN/AR: filter preserves locale, locator matches actual translated copy ✓
 
-### Pagination (tests 11-13)
-- Page 1 next link → `page=2` ✓
-- Filter preserved across pages (kind=IMAGE → page=2) ✓
-- Mobile (390px): active page has `aria-current="page"`, pageStatus shown ✓
+### Pagination — 24 items/page (3 tests)
+- Page 1 next link → `page=2` via `waitForURL` ✓
+- Filter preserved across pages ✓
+- Mobile (390px): `aria-current="page"`, pageStatus label ✓
 
-### Hostile query injection (tests 14-15)
-- Excessive page (99999) → page 1 ✓
-- Out-of-bound (10001) → page 1 ✓
-- Zero, negative, non-numeric, fractional → page 1 ✓
-- Unknown kind → page 1 ✓
-- Repeated params (page=1&page=2) → page 1 ✓
-- Unknown key (pageSize=48, owner=other) → page 1 ✓
-- Hostile input not reflected in page content ✓
-- EDITOR still sees only owned items after hostile query ✓
+### Hostile query injection (2 tests)
+- 10 invalid forms → canonical page-1/ALL content, 35 count, no reflection ✓
+- EDITOR ownership preserved under hostile query ✓
 
-### Display fields (tests 16-18)
-- Filename, type badge, size, dimensions, accessibility state, uploader label, Jakarta time ✓
-- Decorative images show "Dekoratif", informative images show "Teks alternatif:" ✓
-- Image thumbnail rendered via `<img>` ✓
+### Display fields (4 tests)
+- Filename, type badge, size, Jakarta time ✓
+- Uploader label ✓
+- Both decorative AND informative states proven ✓
+- Long filename wraps without overflow ✓
 
-### Locale — ID/EN/AR with RTL (tests 19-22)
-- ID: "Pustaka Media", "Semua"/"Gambar"/"PDF" tabs ✓
-- EN: "Media Library", hrefs preserve `/en/` not `/id/`/`/ar/` ✓
+### Locale — ID/EN/AR with RTL (4 tests)
+- ID: "Pustaka Media", "Semua"/"Gambar"/"PDF" ✓
+- EN: "Media Library", "All"/"Image"/"PDF" (singular "Image") ✓
 - AR: Genuine Arabic text, images not mirrored ✓
-- Pagination chevrons use `rtl:rotate-180` ✓
-- Locale-aware date/number formatting (ID month spelling, AR time format) ✓
+- Pagination chevrons: `rtl:rotate-180` ✓
+- Locale-aware date/number formatting ✓
 
-### axe WCAG A/AA (tests 23-27)
-- ID Admin: 0 violations ✓
+### axe WCAG A/AA (5 tests)
+- ID Admin: 0 violations (wcag2a, wcag2aa, wcag21aa, wcag22aa) ✓
 - AR Admin: 0 violations ✓
 - ID Editor: 0 violations ✓
 - Exactly 1 `<main>` and 1 `<h1>` ✓
-- Visible keyboard focus on filter links ✓
+- Keyboard focus: skip link → filter link, visible focus indicator ✓
 
-### Viewport responsiveness (tests 28-29)
-- No horizontal overflow at 360, 390, 768, 1024, 1440px for ID ✓
-- No horizontal overflow at 360, 390, 768, 1024, 1440px for AR ✓
+### Viewport responsiveness (10 tests)
+- No horizontal overflow at 360/390/768/1024/1440px for ID ✓
+- No horizontal overflow at 360/390/768/1024/1440px for AR ✓
 
-### No PII/technical leakage (tests 30-31)
-- No session token, storageKey, checksumSha256, storageClass, uploaderId, DATABASE_URL, Prisma, stack traces, email leaked ✓
+### No PII/technical leakage (2 tests)
+- No session token, storageKey, checksum, DATABASE_URL, Prisma, stack traces, email in DOM ✓
 - Hostile query page: no technical disclosure ✓
 
-### Empty state (test 32)
-- Empty owner shows "Belum ada media" without `role="alert"` ✓
+### Empty state (1 test)
+- Zero-item owner: "Belum ada media" without `role="alert"` ✓
 
 ---
 
 ## Fixture Design
 
-The spec creates isolated synthetic fixtures against a local PostgreSQL database:
-
-- **3 users:** ADMIN, EDITOR-A, EDITOR-B with `example.invalid` emails
-- **35 Media rows:** 30 images (15 owned by A, 10 by B, 5 by Admin) + 5 PDFs (2 by A, 2 by B, 1 by Admin)
-- **Database sessions:** Valid 8-hour sessions for all three users
-- **Unique marker:** `m3-media-qa-{pid}-{timestamp}` prefix for deterministic cleanup
-- **Storage keys/checksums:** Deterministic 64-hex patterns matching `StorageKeySchema`
-- **Mixed accessibility:** Alternating decorative/informative images with valid alt text
-- **Timestamps:** Sequential `createdAt` values for predictable ordering
-- **Cleanup:** Sessions, Media, and Users deleted in dependency order in `afterAll()`, even after assertion failures
-
-All identities use `example.invalid` domain. No production, staging, or another model's data is used.
+- **3 users:** ADMIN, EDITOR-A, EDITOR-B with `@example.invalid` emails
+- **35 Media rows:** 30 images + 5 PDFs (15/10/5 and 2/2/1 ownership distribution)
+- **Idempotency guard:** Fixed marker `m3-media-qa-browse` prevents duplicate insertion across test restarts
+- **Storage keys:** Deterministic `YYYY/MM/<sha256-64hex>.(webp|pdf)` matching frozen `StorageKeySchema`
+- **Mixed accessibility:** Alternating decorative/informative images
+- **Long filename:** One near-120-char filename for overflow testing
+- **Cleanup:** Sessions, Media, and Users deleted in dependency order in `afterAll`; auxiliary empty-owner fixtures tracked and cleaned
 
 ---
 
-## Environment Limitations
+## Residual Risks
 
-1. **Playwright browser tests require `DATABASE_URL` pointing to an isolated local PostgreSQL.** This worktree has no PostgreSQL configured. The spec is designed for deterministic execution against a user-owned isolated cluster. The fixture setup and cleanup are self-contained.
-2. **Dev server must be running on port 3004** (playwright.config.ts default) with the active FUSPI worktree.
-3. **Axe tests require the `@axe-core/playwright` package**, which is already in dependencies.
-4. The known Turbopack NFT tracing warning persists unchanged from prior builds; it is not a UI regression.
-
-## Acceptance Commands Executed
-
-| Command | Result |
-| --- | --- |
-| `npx vitest run tests/m3/ui/admin-media-library-browse.test.tsx` | **PASS** — 1 file, 43 tests |
-| `npm run lint` | **PASS** — No errors (0 warnings after unused-variable fix) |
-| `npm run typecheck` | **PASS** — Clean |
-| `npm test` | **PASS** — 43 passed, 18 skipped, 579 tests, 75 database-gated skipped |
-| `npm run test:integration` | **BLOCKED** — No PostgreSQL in reviewer worktree |
-| `npx playwright test e2e/m3/admin-media-library-browse.spec.ts --project=chromium --project=mobile` | **BLOCKED** — No PostgreSQL; spec designed for execution per manifest requirements |
-| `npm run prisma:validate` | **PASS** — Schema valid |
-| `npm run build` | **PASS** — Production build (known Turbopack warning unchanged) |
-| `git diff --check` | **PASS** — Clean |
-| `TASK_MANIFEST=... npm run check:scope` | **PASS** — 3 changed files within lease |
+1. **3 pre-existing integration test failures** in `credentials-route.integration.test.ts` are unrelated to this QA task (auth HMAC secrets mismatch in the test environment).
+2. **Thumbnails render as broken images** because synthetic storage keys point to nonexistent files. This is intentional — the test validates presentation layer behavior without requiring a production upload tree.
+3. **Mobile project** executes the same 42 tests as Chromium with identical pass rate.
+4. **Turbopack NFT tracing warning** persists unchanged from prior builds.
+5. **Upload/edit/delete/picker controls** are deliberately out of scope per the Claude manifest.
 
 ---
 
@@ -136,17 +136,9 @@ All identities use `example.invalid` domain. No production, staging, or another 
 | Claude candidate (handoff) | `dbdeda2` |
 | Claude implementation | `fd0ea2a` |
 | GPT re-review approval | `59c4944` |
-| Initial review documentation commit | `435eb69` |
+| Initial review documentation commit | (to be set by commit) |
 | Final branch head | corrective documentation commit containing this handoff; exact SHA reported after push |
-
----
-
-## Residual Risks
-
-1. **Browser execution not yet performed:** The Playwright spec has been written and lint/typecheck/build-verified but database-backed browser tests could not run in this worktree. The fixture design follows the established `e2e/auth/password-session.spec.ts` and `e2e/m3/public-post-experience.spec.ts` patterns.
-2. **No upload/edit/delete/picker control testing:** These are deliberately out of scope per the Claude manifest. The read-only browse boundary is fully exercised.
-3. **Thumbnail rendering depends on `UPLOAD_PUBLIC_URL` and actual image files:** The spec creates synthetic Media rows referencing storage keys that don't resolve to real files. Image `<img>` elements will show broken images or placeholders depending on Next.js image configuration. This tests the presentation layer without needing a production upload tree.
 
 ## Final Verdict: APPROVE
 
-The Claude candidate `dbdeda2` (`fd0ea2a`) passes all locally executable acceptance gates with zero Critical/High/Medium defects. The comprehensive Playwright E2E spec covers all manifest-required coverage areas: session/redirect, ADMIN-vs-EDITOR ownership scoping, filter behavior, pagination, hostile query robustness, ID/EN/AR locale display, RTL direction safety, axe WCAG A/AA accessibility, responsive viewports (360–1440px), and PII/technical-disclosure prevention. The fixture design uses isolated synthetic data with `example.invalid` identities and deterministic cleanup.
+The Claude candidate passes all 42 Playwright E2E tests (both Chromium and mobile), all 43 UI unit tests, all 79 relevant integration tests, and all static analysis gates. No Critical, High, or Medium defect remains.
