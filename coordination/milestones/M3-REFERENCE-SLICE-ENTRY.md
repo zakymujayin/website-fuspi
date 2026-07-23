@@ -64,9 +64,27 @@ M3 cannot close until executable tests prove:
 - Media ownership plus staged-file rollback/orphan cleanup when the database transaction fails;
 - upload validation remains bound to the M2 storage contract.
 
+## Carried pre-existing defects (must clear before M3 exit)
+
+Both were found during the 2026-07-23 Media Library integration, verified as **pre-existing**, and
+are outside that task's leased paths. Neither blocked the merge; both block M3 exit.
+
+1. **Auth credentials route returns 503 where 401 is expected.**
+   `tests/security/auth-runtime/credentials-route.integration.test.ts` fails 3 cases. Reproduced on
+   `integration/m3-reference-slice` before the Media Library merges, so it is not caused by them:
+   `RUN_PLATFORM_DB_TESTS=true npx vitest run tests/security/auth-runtime/credentials-route.integration.test.ts`.
+   GPT lane (auth runtime).
+2. **`npm run build` emits 1 Turbopack warning** from `next.config.ts` ("Encountered unexpected file
+   in NFT list" — whole project traced unintentionally). `next.config.ts` was untouched by these
+   merges. The workspace pre-commit checklist requires zero build warnings. GPT lane (root config
+   hotspot).
+
 ## M3 exit gate
 
 The milestone is complete only when the Post reference slice works end to end for ADMIN and
 EDITOR, public ID/EN/AR and Arabic RTL paths pass, accessibility and metadata checks pass, the
 full CI pipeline is green, and no Critical/High security finding remains. M4 stays closed until
 the GPT integrator records that evidence in a dedicated M3 exit contract.
+
+The two carried defects above and the Media Library independence gap must all be cleared by Codex
+and DeepSeek before that exit contract can be written.
