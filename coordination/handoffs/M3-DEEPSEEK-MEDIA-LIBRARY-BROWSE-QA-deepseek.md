@@ -76,7 +76,7 @@ Executed `2026-07-23` in `/home/zhev/myproject/fuspi-deepseek`.
 | `npm run lint` | **PASS — no issues** |
 | `npx tsc --noEmit` | **PASS — no errors** |
 | `npm test` | **PASS — 579 passed, 75 skipped, 0 failed** |
-| `npm run test:integration` | **79/82** — 3 failures verified pre-existing |
+| `npm run test:integration` | **PASS — 82/82** (after `TOKEN_HMAC_SECRET` env fix) |
 | `npm run prisma:validate` | **PASS — schema valid** |
 | `git diff --check` | **PASS — clean** |
 
@@ -93,10 +93,11 @@ build excludes.
 ## Untested areas and follow-ups
 
 - Upload, edit, delete, picker dialogs, Tiptap integration, and browser E2E for mutation flows are deferred to their owning lanes per manifest.
-- 3 failures in `credentials-route.integration.test.ts` (expects `401`, gets `503`) are **verified**
-  pre-existing, not asserted: they reproduce identically on `integration/m3-reference-slice`, which
-  contains none of this QA work. GPT-lane auth-runtime issue, outside the three leased QA paths.
-  Does not block this task but **should block M3 exit**.
+- **Corrected:** the 3 failures in `credentials-route.integration.test.ts` were not a defect. The QA
+  worktree's `.env.local` set `EMAIL_HMAC_SECRET`, while the env contract, CI, and
+  `src/lib/auth/runtime/config.ts` use `TOKEN_HMAC_SECRET` (`EMAIL_HMAC_SECRET` is used nowhere).
+  After the rename, `npm run test:integration` passes 82/82. The original "verified pre-existing"
+  claim was unsound: the same misconfigured env file was sourced on both branches compared.
 - Thumbnail bytes are now supplied by a deterministic in-test interceptor. Real upload-tree
   rendering is therefore still unproven by this suite and belongs to the upload/media lane.
 - The advisory lock serializes the two Playwright projects. If a future suite shares the same

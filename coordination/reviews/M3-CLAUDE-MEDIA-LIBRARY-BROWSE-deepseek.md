@@ -59,24 +59,26 @@ All commands below were executed on `2026-07-23` against `ai/deepseek/m3-media-l
 | `npm run lint` | **PASS — no issues** |
 | `npx tsc --noEmit` | **PASS — no errors** |
 | `npm test` | **PASS — 43 files passed, 18 skipped; 579 tests passed, 0 failed** |
-| `npm run test:integration` | **79/82 — 3 failures confirmed pre-existing (see below)** |
+| `npm run test:integration` | **PASS — 82/82** (see correction below) |
 | `npm run prisma:validate` | **PASS — schema valid** |
 | `git diff --check` | **PASS — clean** |
 
-### The 3 integration failures are pre-existing and out of scope
+### Correction: the 3 integration failures were an env misconfiguration, not a defect
 
-`tests/security/auth-runtime/credentials-route.integration.test.ts` fails 3 cases (expects `401`,
-receives `503`). Round 2 asserted these were "pre-existing and unrelated"; that claim was
-**verified, not accepted** — the identical 3 failures reproduce on `integration/m3-reference-slice`,
-a branch containing none of this QA work:
+An earlier revision of this review recorded 3 failures in
+`tests/security/auth-runtime/credentials-route.integration.test.ts` (expects `401`, receives `503`)
+as a pre-existing GPT-lane defect. **That was wrong.**
 
-```bash
-RUN_PLATFORM_DB_TESTS=true npx vitest run \
-  tests/security/auth-runtime/credentials-route.integration.test.ts
-```
+The QA worktree's gitignored `.env.local` defined `EMAIL_HMAC_SECRET`, but the env contract
+(`.env.example`), CI, and `src/lib/auth/runtime/config.ts` all use **`TOKEN_HMAC_SECRET`**;
+`EMAIL_HMAC_SECRET` appears nowhere in the codebase. Unset, `getAuthSecrets()` threw, the broad
+`catch` in `credentials.ts` mapped it to `AUTH_UNAVAILABLE`, and the route returned `503`.
 
-This is GPT-lane auth-runtime behaviour, outside the three leased QA paths. It does not block this
-task but **should block M3 exit**.
+After renaming the variable in `.env.local`, `npm run test:integration` passes **82/82**.
+
+Note on method: the failure was originally "confirmed pre-existing" by reproducing it on a branch
+without this QA work — but the same misconfigured `.env.local` was sourced both times, so the
+reproduction only proved the environment was constant, not that the product was at fault.
 
 ### Reproducing this run
 
