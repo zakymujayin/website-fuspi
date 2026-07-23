@@ -14,17 +14,19 @@
 | 2 | **Akses Cepat** | `QuickLink` | Label, ikon, URL, urutan, aktif | `/admin/beranda/akses-cepat` |
 | 3 | **Sambutan Dekan** | `SiteSetting` | **Foto dekan, nama, jabatan, kalimat sambutan** | `/admin/beranda/dekan` |
 | 4 | **Statistik (counter)** | `Statistic` | **Tambah/hapus counter**, label, angka, sufiks (+/%), ikon, urutan | `/admin/beranda/statistik` |
-| 5 | **Berita Terbaru** | `Post` (BERITA) | Otomatis 4 terbaru. Judul section & jumlah tampil dapat diatur | otomatis + `/admin/beranda` |
-| 6 | **Pengumuman & Informasi** | `Post` (PENGUMUMAN) | Otomatis terbaru | otomatis |
-| 7 | **Program Studi** | `StudyProgram` | Nama, akreditasi, logo, urutan | `/admin/program-studi` |
-| 8 | **Logo Kerjasama (marquee)** | `Partnership` | **Logo mitra**, urutan, aktif → langsung tampil di marquee | `/admin/kerjasama` |
-| 9 | **Video** | `SiteSetting` | URL YouTube, judul, deskripsi | `/admin/beranda/video` |
-| 10 | **Agenda** | `Event` | Otomatis (agenda mendatang) | `/admin/agenda` |
-| 11 | **Testimoni Alumni** | `Testimonial` | Foto, nama, tahun lulus, pekerjaan, kutipan | `/admin/testimoni` |
-| 12 | **Kolom / Opini** | `Post` (KOLOM) | Otomatis per rubrik | otomatis |
-| 13 | **CTA Akhir** | `HomeSection` | Judul, subjudul, label & URL tombol, gambar latar | `/admin/beranda` |
+| 5 | **Pengantar Fakultas** | `Page` / `HomeSection` | Ringkasan, media, label & URL detail | `/admin/beranda` |
+| 6 | **Program Studi** | `StudyProgram` | Nama, akreditasi terverifikasi, logo, urutan kontrak | `/admin/program-studi` |
+| 7 | **Pengumuman & Informasi** | `Post` (PENGUMUMAN) | Otomatis terbaru | otomatis |
+| 8 | **Layanan** | `Service` | Layanan aktif, kategori, urutan; judul dan jumlah tampil | `/admin/layanan` + `/admin/beranda` |
+| 9 | **Berita Terbaru** | `Post` (BERITA) | Otomatis 4 terbaru. Judul section & jumlah tampil dapat diatur | otomatis + `/admin/beranda` |
+| 10 | **Logo Kerja Sama** | `Partnership` | **Logo mitra**, urutan, aktif | `/admin/kerjasama` |
+| 11 | **Kolom / Opini** | `Post` (KOLOM) | Otomatis per rubrik | otomatis |
+| 12 | **Video** | `SiteSetting` | URL video, poster, judul, deskripsi | `/admin/beranda/video` |
+| 13 | **Agenda** | `Event` | Otomatis (agenda mendatang) | `/admin/agenda` |
+| 14 | **Testimoni Alumni** | `Testimonial` | Foto, nama, tahun lulus, pekerjaan, kutipan, izin publikasi | `/admin/testimoni` |
+| 15 | **CTA Akhir** | `HomeSection` | Judul, subjudul, label & URL tombol, gambar latar | `/admin/beranda` |
 
-**Semua section** (1–13) juga punya kontrol universal lewat `HomeSection`:
+**Semua section** (1–15) juga punya kontrol universal lewat `HomeSection`:
 - **Judul & subjudul section** (diterjemahkan ID/EN/AR)
 - **Tampil / sembunyi** (`isVisible`)
 - **Urutan section** (`order`, diatur dengan drag)
@@ -79,12 +81,12 @@ Admin bisa **menambah counter baru kapan saja** tanpa developer.
 
 Tampilan publik: latar `royal-900`, teks putih, grid 3–4 kolom (mobile: 2 kolom). **Animasi count-up** saat masuk viewport (`IntersectionObserver`, durasi ~1.5 detik, ease-out). **Wajib hormati `prefers-reduced-motion`** — bila aktif, tampilkan angka final langsung tanpa animasi.
 
-### 3. Marquee Logo Kerjasama — dari `/admin/kerjasama`
+### 3. Logo Kerja Sama — dari `/admin/kerjasama`
 Tidak ada halaman terpisah — **logo diambil otomatis** dari `Partnership` yang `isActive = true` dan punya `logo`. Jadi saat admin menambah mitra kerjasama baru beserta logonya, logo itu **langsung muncul di marquee beranda**. Ini disengaja: satu sumber data, tidak ada duplikasi.
 
 Yang bisa diatur: logo, urutan (`order`), aktif/nonaktif — semua di modul Kerjasama.
 
-Tampilan publik (spesifikasi teknis marquee):
+Tampilan publik boleh berupa grid atau marquee. Bila menggunakan marquee:
 - Baris logo bergerak kontinu. Konten **diduplikasi 2×** dalam container agar loop mulus tanpa jeda (`translateX(-50%)` lalu reset).
 - Animasi: CSS `@keyframes` pada `transform` saja (bukan `left`) — agar hemat GPU. Durasi ~`30s` linear infinite.
 - **Pause saat hover** (`animation-play-state: paused`).
@@ -95,14 +97,15 @@ Tampilan publik (spesifikasi teknis marquee):
 
 ---
 
-## D. Seed awal (agar beranda tidak kosong saat pertama deploy)
+## D. Seed struktural dan kesiapan konten manual
 
-`prisma/seed.ts` wajib mengisi:
-1. **13 baris `HomeSection`** sesuai daftar di bagian A, dengan judul default Indonesia + urutan default.
-2. **3 `Statistic`** default: Mahasiswa (1000+), Dosen, Tenaga Kependidikan — sesuai data FUSPI.
-3. **Beberapa `QuickLink`**: Layanan, Pengaduan, Survei, Peminjaman Ruangan, PMB, E-Learning.
-4. **1 `HomeSlider`** placeholder.
-5. `SiteSetting` dengan data dekan.
+Seed hanya menyiapkan struktur teknis yang netral. Ia tidak boleh menciptakan konten institusional seolah-olah nyata.
+
+1. Seed boleh membuat baris `HomeSection` beserta key dan urutan awal setelah enum/schema disahkan melalui task kontrak GPT.
+2. Seed tidak mengisi angka statistik, nama/foto/sambutan Dekan, media hero, testimoni, berita, mitra, atau klaim publik.
+3. Quick link hanya boleh diisi bila route/URL resminya sudah dikonfigurasi. URL SILA dibaca dari `NEXT_PUBLIC_SILA_URL`, bukan ditebak.
+4. Section yang membutuhkan konten manual harus default tersembunyi atau otomatis tidak dirender sampai record valid tersedia.
+5. Pemilik konten memasukkan materi melalui CMS dan memberi persetujuan sebelum publikasi. Checklist lengkap mengikuti `26-H`.
 
 ---
 
@@ -121,10 +124,12 @@ Tampilan publik (spesifikasi teknis marquee):
 Sebelum dianggap selesai, pastikan admin dapat melakukan semua ini **tanpa developer**:
 
 - [ ] Mengganti foto & kalimat sambutan Dekan.
-- [ ] Mengubah angka statistik, **menambah counter baru** (mis. "Alumni: 5000+").
+- [ ] Mengubah angka statistik terverifikasi dan **menambah counter baru** tanpa perubahan kode.
 - [ ] Menambah mitra kerjasama → logonya **otomatis muncul di marquee**.
 - [ ] Mengganti judul section dari "Berita Terbaru" menjadi "Kabar FUSPI".
 - [ ] **Menyembunyikan** section Video sepenuhnya.
 - [ ] **Memindahkan** section Testimoni ke atas section Berita (drag).
 - [ ] Mengganti gambar & tombol hero slider.
 - [ ] Melakukan semuanya juga dalam **bahasa Inggris dan Arab**.
+- [ ] Menyembunyikan section tanpa data dan menampilkan empty state yang jujur pada halaman arsip.
+- [ ] Memastikan tidak ada seed yang menampilkan identitas orang, angka, media, atau klaim institusional rekaan.
