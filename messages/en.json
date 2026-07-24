@@ -214,5 +214,48 @@
       "title": "The news list cannot be loaded right now",
       "description": "Please reload this page in a moment."
     }
+  },
+  "AdminPostEditor": {
+    "createMetaTitle": "Write News",
+    "createTitle": "Write News",
+    "createDescription": "Enter the news content in Indonesian. English and Arabic translations are optional and can be added later. The item is saved as a draft.",
+    "editMetaTitle": "Edit News",
+    "editTitle": "Edit News",
+    "editDescription": "Update the news content. Publication status is not changed from this page.",
+    "slug": "Slug",
+    "slugDescription": "The URL segment, for example wisuda-fuspi-2026. Use lowercase letters and hyphens.",
+    "featured": "Mark as featured",
+    "featuredDescription": "Featured news can be highlighted on public pages.",
+    "localeLegend": "{locale} content",
+    "localeOptional": "(optional)",
+    "title": "Title",
+    "excerpt": "Excerpt",
+    "content": "Body",
+    "contentDescription": "The news body. A rich-text editor arrives in a later stage.",
+    "submitCreate": "Save draft",
+    "submitUpdate": "Save changes",
+    "submitting": "Saving…",
+    "cancel": "Cancel",
+    "locale": {
+      "id": "Indonesian",
+      "en": "English",
+      "ar": "Arabic"
+    },
+    "unavailable": {
+      "title": "This news item cannot be loaded",
+      "description": "It was not found, is not yours, or is temporarily unavailable."
+    },
+    "error": {
+      "SESSION_INVALID": "Your session has ended. Please sign in again and retry.",
+      "CSRF_INVALID": "The request could not be verified. Reload the page and try again.",
+      "REQUEST_INVALID": "The request could not be processed. Check your entries and try again.",
+      "VALIDATION_FAILED": "Some entries need attention. Check the highlighted fields.",
+      "NOT_FOUND": "This news item was not found, or it is not yours.",
+      "VERSION_CONFLICT": "Someone else changed this news item. Reload the page to see the latest version before saving.",
+      "INVALID_STATE": "That action is not allowed for this news item's current status.",
+      "SLUG_CONFLICT": "That slug is already used by another news item. Choose a different one.",
+      "MEDIA_INVALID": "The linked media is not valid.",
+      "UNAVAILABLE": "Your changes could not be saved right now. Please try again shortly."
+    }
   }
 }
