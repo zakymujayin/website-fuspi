@@ -13,8 +13,9 @@ as provisional until GPT/Codex reviews them on return.
 authored the Media Library UI, corrected its QA harness, authored the Post admin list and its tests,
 and approved all of it as integrator. No independent party reviewed these slices. They are merged to
 keep M3 moving, but Codex and DeepSeek must re-verify them on return before they count toward the M3
-exit gate. Outstanding for the Post admin list specifically: a browser/axe/viewport E2E suite and
-EDITOR-vs-ADMIN ownership evidence (only ADMIN was exercised at runtime).
+exit gate. The Post admin list now has its browser/axe/viewport E2E suite (80/80) including
+EDITOR-vs-ADMIN read ownership; what remains for Posts is the **editor/mutation** UI and its
+mutation ownership/IDOR evidence.
 
 M3 starts from the accepted M2 development head
 `f83a00e6816a91f72b9ade654b012be8a1a0b2d0`. That head passed GitHub Actions run
@@ -44,11 +45,13 @@ tracked by the M2 exit contract.
    Claude's bounded read-only Media Library browse presentation passed GPT correction re-review and
    is now **merged**, with its PostgreSQL-backed browser QA passing 84/84 across Chromium and mobile
    on the mandated combined command — subject to the independence gap noted above. The read-only
-   **Post admin list** (`/[locale]/admin/posts`) is also merged, with 49 unit tests and
-   PostgreSQL-backed runtime verification of filtering, fail-closed hostile queries, Arabic RTL, and
-   scheduled-state rendering — but **no browser/axe E2E suite yet**, unlike the Media slice.
-   Picker/upload/metadata/delete UI and the Post editor remain closed until their own
-   non-overlapping manifests, followed by executable ownership/IDOR browser evidence.
+   **Post admin list** (`/[locale]/admin/posts`) is also merged, with 49 unit tests and a
+   PostgreSQL-backed Playwright suite passing **80/80** across Chromium and mobile (session/redirect,
+   ADMIN-vs-EDITOR ownership, status filter with the scheduled-state contract, hostile-query
+   fail-closed, ID/EN/AR + RTL, ADMIN pagination, axe WCAG A/AA, viewport overflow, no PII
+   disclosure). Both M3 admin browser suites pass together (164/164). Picker/upload/metadata/delete
+   UI and the Post **editor** remain closed until their own non-overlapping manifests, followed by
+   executable mutation ownership/IDOR browser evidence.
 6. **Integrator gate:** merge serially, run the full PostgreSQL and browser suites, reconcile the
    carried security cases, then freeze the reference pattern for M4.
 
