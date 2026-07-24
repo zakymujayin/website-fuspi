@@ -80,6 +80,23 @@ M3 cannot close until executable tests prove:
 - Media ownership plus staged-file rollback/orphan cleanup when the database transaction fails;
 - upload validation remains bound to the M2 storage contract.
 
+## DB-gated evidence now executes (2026-07-24)
+
+Most carried evidence above sits in 18 files gated behind `RUN_PLATFORM_DB_TESTS`, which neither
+`npm test` nor `.github/workflows/ci.yml` sets — so the suite was reporting green by omission. With
+the gate on, 4 Media tests failed on a jsdom/`Buffer` realm mismatch (`z.instanceof(Uint8Array)`
+rejects a Node `Buffer` under the jsdom environment). Product code was correct throughout; the fix
+was `@vitest-environment node` on the two Media runtime files.
+
+Verified: `RUN_PLATFORM_DB_TESTS=true npm test` → **63 files, 744 passed, 0 failed**.
+
+A derived, regenerable inventory of what each gated file actually proves is in
+`coordination/reviews/M3-DB-GATED-EVIDENCE-INVENTORY.md`. Use that — not prose descriptions — when
+ticking off the carried-evidence list.
+
+**Still open (GPT/CI contract task):** CI does not set `RUN_PLATFORM_DB_TESTS`, so this evidence
+still does not run in the pipeline. M3 must not close while the gate is off in CI.
+
 ## Carried pre-existing defects (must clear before M3 exit)
 
 1. **`npm run build` emits 1 Turbopack warning** — "Encountered unexpected file in NFT list", i.e.
