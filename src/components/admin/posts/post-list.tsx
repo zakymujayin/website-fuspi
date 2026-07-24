@@ -1,3 +1,6 @@
+import { PencilLineIcon } from "lucide-react";
+
+import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 
 import { formatAdminPostInstant, formatAdminPostLocales } from "./post-format";
@@ -14,6 +17,9 @@ export type AdminPostListItem = {
   updatedAt: string;
   category: { id: string; label: string } | null;
   author: { name: string } | null;
+  /** From the frozen `AdminPostSummarySchema`. The edit link is presentation of this server
+   *  decision — a row the actor cannot update must not offer an edit affordance. */
+  capabilities: { update: boolean };
 };
 
 export type AdminPostListLabels = {
@@ -25,6 +31,9 @@ export type AdminPostListLabels = {
   byLabel: (name: string) => string;
   publishedAtLabel: (instant: string) => string;
   updatedAtLabel: (instant: string) => string;
+  edit: string;
+  /** Per-row accessible name; a bare "edit" repeated 20 times is not distinguishable. */
+  editLabelFor: (title: string) => string;
 };
 
 type AdminPostListProps = {
@@ -35,9 +44,9 @@ type AdminPostListProps = {
 };
 
 /**
- * Read-only Post rows. This task is presentation only: no row is a link and no mutation affordance
- * is rendered, because the editor, publish, and delete flows are not yet built. Adding a dead
- * control here would advertise capability the product does not have.
+ * Post rows. The only affordance is a navigation link to the editor, shown only where the server
+ * reported `capabilities.update`. The list itself still performs no mutation — no publish, archive,
+ * or delete control lives here, because those flows are not built.
  */
 export function AdminPostList({ items, locale, ariaLabel, labels }: AdminPostListProps) {
   return (
@@ -61,6 +70,16 @@ export function AdminPostList({ items, locale, ariaLabel, labels }: AdminPostLis
                 state={item.publicationState}
                 label={labels.stateLabel(item.publicationState)}
               />
+              {item.capabilities.update ? (
+                <Link
+                  href={`/admin/posts/${item.id}/edit`}
+                  aria-label={labels.editLabelFor(item.title)}
+                  className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-slate-300 px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
+                >
+                  <PencilLineIcon aria-hidden data-icon strokeWidth={1.5} />
+                  {labels.edit}
+                </Link>
+              ) : null}
             </div>
           </div>
 
