@@ -13,9 +13,13 @@ as provisional until GPT/Codex reviews them on return.
 authored the Media Library UI, corrected its QA harness, authored the Post admin list and its tests,
 and approved all of it as integrator. No independent party reviewed these slices. They are merged to
 keep M3 moving, but Codex and DeepSeek must re-verify them on return before they count toward the M3
-exit gate. The Post admin list now has its browser/axe/viewport E2E suite (80/80) including
-EDITOR-vs-ADMIN read ownership; what remains for Posts is the **editor/mutation** UI and its
-mutation ownership/IDOR evidence.
+exit gate. Two items need Codex's attention first when he returns:
+
+1. **The basic Post editor is the highest-risk unreviewed work** — the first mutation surface,
+   touching CSRF, optimistic locking, and ownership. Re-review it specifically.
+2. The editor has **no Playwright suite** driving the actual form; its evidence is API-level plus
+   page-render checks. It is also **not reachable from the list UI** yet (no "write" or "edit"
+   link), because the list page sits outside that task's lease.
 
 M3 starts from the accepted M2 development head
 `f83a00e6816a91f72b9ade654b012be8a1a0b2d0`. That head passed GitHub Actions run
@@ -49,9 +53,13 @@ tracked by the M2 exit contract.
    PostgreSQL-backed Playwright suite passing **80/80** across Chromium and mobile (session/redirect,
    ADMIN-vs-EDITOR ownership, status filter with the scheduled-state contract, hostile-query
    fail-closed, ID/EN/AR + RTL, ADMIN pagination, axe WCAG A/AA, viewport overflow, no PII
-   disclosure). Both M3 admin browser suites pass together (164/164). Picker/upload/metadata/delete
-   UI and the Post **editor** remain closed until their own non-overlapping manifests, followed by
-   executable mutation ownership/IDOR browser evidence.
+   disclosure). The **basic Post editor** (`/admin/posts/new` and `/admin/posts/[postId]/edit`) is
+   merged too: create-draft and edit only, submitting to the existing `POST /api/admin/posts`
+   boundary with no new server behaviour. Its runtime evidence covers CSRF rejection, session
+   rejection, `VERSION_CONFLICT` on a stale version, and EDITOR-B receiving `NOT_FOUND` (not
+   `FORBIDDEN`) for another editor's post. The whole `e2e/m3/` browser directory now passes
+   **224/224** after a cross-suite fixture-isolation fix. Autosave, publish/schedule/archive,
+   delete, rich text, and the picker UIs remain closed until their own manifests.
 6. **Integrator gate:** merge serially, run the full PostgreSQL and browser suites, reconcile the
    carried security cases, then freeze the reference pattern for M4.
 
