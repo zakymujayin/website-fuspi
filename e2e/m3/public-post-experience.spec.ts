@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
-import { Pool } from "pg";
+import { Pool, type PoolClient } from "pg";
 
 const DATABASE_URL = process.env.DATABASE_URL;
 
@@ -61,6 +61,11 @@ test.describe("M3 public Berita experience", () => {
 
   const m = marker();
   const pool = new Pool({ connectionString: DATABASE_URL });
+  /** Shared with every other M3 browser suite. Those suites assert global ADMIN-visible Post and
+   *  Media counts, and this suite's fixtures would inflate them while it runs, so only one M3 suite
+   *  may hold fixtures at a time. The key must stay identical across all of them. */
+  const FIXTURE_LOCK_KEY = 883_112_045;
+  let lockClient: PoolClient | null = null;
   const userIds: string[] = [];
   const mediaIds: string[] = [];
   const categoryIds: string[] = [];
@@ -91,7 +96,12 @@ test.describe("M3 public Berita experience", () => {
   const contentMultiAR = "المحتوى باللغة العربية.";
   const coverCaption = "Keterangan gambar berita pertama.";
 
-  test.beforeAll(async () => {
+  test.beforeAll(async ({}, testInfo) => {
+    // Waiting for another M3 suite to finish can exceed the default hook timeout.
+    testInfo.setTimeout(300_000);
+    lockClient = await pool.connect();
+    await lockClient.query("SELECT pg_advisory_lock($1)", [FIXTURE_LOCK_KEY]);
+
     const authorId = randomUUID();
     userIds.push(authorId);
     await pool.query(
@@ -236,6 +246,20 @@ test.describe("M3 public Berita experience", () => {
   });
 
   test.afterAll(async () => {
+    try {
+      await cleanupFixtures();
+    } finally {
+      // Release only after cleanup, so the next suite starts from a clean database.
+      if (lockClient) {
+        await lockClient.query("SELECT pg_advisory_unlock($1)", [FIXTURE_LOCK_KEY]).catch(() => {});
+        lockClient.release();
+        lockClient = null;
+      }
+      await pool.end().catch(() => {});
+    }
+  });
+
+  async function cleanupFixtures() {
     for (const postId of postIds) {
       await pool.query(`DELETE FROM "PostTranslation" WHERE "postId" = $1`, [postId]);
       await pool.query(`DELETE FROM "PostTag" WHERE "postId" = $1`, [postId]);
@@ -254,8 +278,7 @@ test.describe("M3 public Berita experience", () => {
       await pool.query(`DELETE FROM "Session" WHERE "userId" = $1`, [userId]);
       await pool.query(`DELETE FROM "User" WHERE "id" = $1`, [userId]);
     }
-    await pool.end();
-  });
+  }
 
   // ═══ LIST ROUTE ═══
 
