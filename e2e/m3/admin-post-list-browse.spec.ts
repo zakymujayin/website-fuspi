@@ -42,8 +42,10 @@ test.describe("M3 Post admin list QA", () => {
   let database!: Pool;
   /** ADMIN-visible counts and pagination are global, so only one project may hold fixtures at a
    *  time. Projects serialize on a PostgreSQL advisory lock rather than depending on --workers.
-   *  A different key from the Media suite's lock avoids cross-suite blocking. */
-  const FIXTURE_LOCK_KEY = 883_112_046;
+   *  Every M3 browser suite shares this one key: they all assert global ADMIN-visible counts
+   *  against the same database, so only one suite may hold fixtures at a time. A per-suite key
+   *  would let suites overlap and inflate each other's counts. */
+  const FIXTURE_LOCK_KEY = 883_112_045;
   let lockClient: PoolClient | null = null;
 
   let adminId = "";
