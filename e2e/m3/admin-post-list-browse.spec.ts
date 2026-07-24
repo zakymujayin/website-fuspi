@@ -549,15 +549,28 @@ test.describe("M3 Post admin list QA", () => {
       await page.context().clearCookies();
     });
 
-    test("keyboard focus order accounts for skip link and reaches the first filter", async ({ page }) => {
+    test("keyboard focus walks skip link, then the create action, then the first filter", async ({ page }) => {
       await page.context().addCookies([sessionCookie(adminSessionToken)]);
       await gotoPosts(page);
+
       await page.keyboard.press("Tab");
       const skip = page.locator("a[href='#main']").first();
       if (await skip.isVisible().catch(() => false)) {
         await expect(skip).toBeFocused();
         await page.keyboard.press("Tab");
       }
+
+      // The page header carries the create action and precedes the filter row in DOM order, so it
+      // is the tab stop between the skip link and the filters.
+      const createAction = page.locator("a[href='/id/admin/posts/new']").first();
+      await expect(createAction).toBeFocused();
+      const createOutline = await createAction.evaluate((el) => {
+        const style = getComputedStyle(el);
+        return `${style.outlineStyle}|${style.boxShadow}`;
+      });
+      expect(createOutline).not.toBe("none|none");
+
+      await page.keyboard.press("Tab");
       const firstFilter = page.locator(
         "nav[aria-label='Saring berita berdasarkan status'] a",
       ).first();
@@ -567,6 +580,60 @@ test.describe("M3 Post admin list QA", () => {
         return `${style.outlineStyle}|${style.boxShadow}`;
       });
       expect(outline).not.toBe("none|none");
+      await page.context().clearCookies();
+    });
+  });
+
+  test.describe("Editor navigation affordances", () => {
+    test("ADMIN sees a create action pointing at the new-post route", async ({ page }) => {
+      await page.context().addCookies([sessionCookie(adminSessionToken)]);
+      await gotoPosts(page);
+      await expect(page.locator("a[href='/id/admin/posts/new']")).toHaveCount(1);
+      await page.context().clearCookies();
+    });
+
+    test("every visible row offers an edit link keyed by id, never by slug", async ({ page }) => {
+      await page.context().addCookies([sessionCookie(editorASessionToken)]);
+      await gotoPosts(page);
+      const items = await listItems(page);
+      const rowCount = await items.count();
+      const editLinks = page.locator(`${LIST_SELECTOR.id} > li a[href*="/edit"]`);
+      expect(await editLinks.count()).toBe(rowCount);
+
+      const hrefs = await editLinks.evaluateAll((els) =>
+        els.map((el) => el.getAttribute("href") ?? ""),
+      );
+      for (const href of hrefs) {
+        expect(href).toMatch(/\/id\/admin\/posts\/[^/]+\/edit$/);
+        // The slug must never appear in the DOM; the editor route is keyed by post id.
+        expect(href).not.toContain(`${marker}-a-`);
+      }
+      await page.context().clearCookies();
+    });
+
+    test("edit links carry distinct per-row accessible names", async ({ page }) => {
+      await page.context().addCookies([sessionCookie(editorASessionToken)]);
+      await gotoPosts(page);
+      await page.waitForSelector(LIST_SELECTOR.id);
+      const names = await page
+        .locator(`${LIST_SELECTOR.id} > li a[href*="/edit"]`)
+        .evaluateAll((els) => els.map((el) => el.getAttribute("aria-label") ?? ""));
+      expect(names.length).toBeGreaterThan(1);
+      expect(names.every((n) => n.length > 0)).toBe(true);
+      expect(new Set(names).size).toBe(names.length);
+      await page.context().clearCookies();
+    });
+
+    test("the create action reaches the editor and the edit link opens an owned post", async ({ page }) => {
+      await page.context().addCookies([sessionCookie(editorASessionToken)]);
+      await gotoPosts(page);
+      await page.locator("a[href='/id/admin/posts/new']").first().click();
+      await expect(page).toHaveURL(/\/id\/admin\/posts\/new$/);
+
+      await gotoPosts(page);
+      await page.locator(`${LIST_SELECTOR.id} > li a[href*="/edit"]`).first().click();
+      await expect(page).toHaveURL(/\/id\/admin\/posts\/[^/]+\/edit$/);
+      await expect(page.locator("h1")).toBeVisible();
       await page.context().clearCookies();
     });
   });
