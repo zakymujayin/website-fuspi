@@ -3,7 +3,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { PostEditorForm } from "@/components/admin/posts/post-editor-form";
-import { buildPostEditorLabels } from "@/components/admin/posts/post-editor-labels";
 import { decideProtectedRoute, getRequestSession } from "@/lib/auth/runtime/request-session";
 import { parseAppLocale } from "@/lib/auth/runtime/redirect";
 
@@ -37,11 +36,7 @@ export default async function NewPostPage({ params }: NewPostPageProps) {
         <p className="mt-2 max-w-prose text-sm text-slate-500">{t("createDescription")}</p>
       </div>
 
-      <PostEditorForm
-        mode="create"
-        listHref="/admin/posts"
-        labels={buildPostEditorLabels(t)}
-      />
+      <PostEditorForm mode="create" listHref="/admin/posts" />
     </section>
   );
 }
