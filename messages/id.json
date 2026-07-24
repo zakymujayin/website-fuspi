@@ -214,5 +214,48 @@
       "title": "Daftar berita sedang tidak dapat dimuat",
       "description": "Silakan muat ulang halaman ini beberapa saat lagi."
     }
+  },
+  "AdminPostEditor": {
+    "createMetaTitle": "Tulis Berita",
+    "createTitle": "Tulis Berita",
+    "createDescription": "Isi konten berita dalam Bahasa Indonesia. Terjemahan Inggris dan Arab bersifat opsional dan dapat dilengkapi kemudian. Berita disimpan sebagai draf.",
+    "editMetaTitle": "Sunting Berita",
+    "editTitle": "Sunting Berita",
+    "editDescription": "Perbarui isi berita. Status penerbitan tidak berubah dari halaman ini.",
+    "slug": "Slug",
+    "slugDescription": "Penggal URL berita, contoh: wisuda-fuspi-2026. Gunakan huruf kecil dan tanda hubung.",
+    "featured": "Jadikan berita unggulan",
+    "featuredDescription": "Berita unggulan dapat ditonjolkan di halaman publik.",
+    "localeLegend": "Konten {locale}",
+    "localeOptional": "(opsional)",
+    "title": "Judul",
+    "excerpt": "Ringkasan",
+    "content": "Isi",
+    "contentDescription": "Isi berita. Penyunting teks kaya akan ditambahkan pada tahap berikutnya.",
+    "submitCreate": "Simpan draf",
+    "submitUpdate": "Simpan perubahan",
+    "submitting": "Menyimpan…",
+    "cancel": "Batal",
+    "locale": {
+      "id": "Bahasa Indonesia",
+      "en": "Bahasa Inggris",
+      "ar": "Bahasa Arab"
+    },
+    "unavailable": {
+      "title": "Berita tidak dapat dimuat",
+      "description": "Berita tidak ditemukan, bukan milik Anda, atau sedang tidak dapat diakses."
+    },
+    "error": {
+      "SESSION_INVALID": "Sesi Anda telah berakhir. Silakan masuk kembali lalu coba lagi.",
+      "CSRF_INVALID": "Permintaan tidak dapat diverifikasi. Muat ulang halaman lalu coba lagi.",
+      "REQUEST_INVALID": "Permintaan tidak dapat diproses. Periksa isian Anda lalu coba lagi.",
+      "VALIDATION_FAILED": "Ada isian yang belum sesuai. Periksa bagian yang ditandai.",
+      "NOT_FOUND": "Berita tidak ditemukan atau bukan milik Anda.",
+      "VERSION_CONFLICT": "Berita ini telah diubah orang lain. Muat ulang halaman untuk melihat versi terbaru sebelum menyimpan.",
+      "INVALID_STATE": "Tindakan ini tidak dapat dilakukan pada status berita saat ini.",
+      "SLUG_CONFLICT": "Slug ini sudah dipakai berita lain. Gunakan slug yang berbeda.",
+      "MEDIA_INVALID": "Media yang tertaut tidak valid.",
+      "UNAVAILABLE": "Perubahan tidak dapat disimpan saat ini. Coba lagi beberapa saat lagi."
+    }
   }
 }
