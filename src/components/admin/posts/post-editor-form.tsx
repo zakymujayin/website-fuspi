@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useId, useState, type FormEvent } from "react";
 
@@ -30,28 +31,8 @@ import {
   type PostEditorLocale,
 } from "./post-editor-payload";
 
-export type PostEditorLabels = {
-  slug: string;
-  slugDescription: string;
-  featured: string;
-  featuredDescription: string;
-  localeLegend: (locale: string) => string;
-  localeOptional: string;
-  title: string;
-  excerpt: string;
-  content: string;
-  contentDescription: string;
-  submitCreate: string;
-  submitUpdate: string;
-  submitting: string;
-  cancel: string;
-  localeName: Record<PostEditorLocale, string>;
-  errorFor: (key: string) => string;
-};
-
 type PostEditorFormProps = {
   mode: "create" | "edit";
-  labels: PostEditorLabels;
   listHref: string;
   initialDraft?: PostEditorDraft;
   /** Present only in edit mode; drives optimistic locking and field preservation. */
@@ -68,13 +49,15 @@ const CREATE_CARRIED: PostEditorCarriedFields = {
 
 export function PostEditorForm({
   mode,
-  labels,
   listHref,
   initialDraft,
   postId,
   expectedVersion,
   carried,
 }: PostEditorFormProps) {
+  // Resolve strings on the client. This form is a Client Component, so it cannot receive functions
+  // (e.g. a label formatter) across the server/client boundary — doing so crashes the page render.
+  const t = useTranslations("AdminPostEditor");
   const router = useRouter();
   const formId = useId();
   const [draft, setDraft] = useState<PostEditorDraft>(() => initialDraft ?? emptyDraft());
@@ -108,7 +91,7 @@ export function PostEditorForm({
 
     if (!parsed.success) {
       setFieldErrors(collectFieldErrors(parsed.error.issues));
-      setFormError(labels.errorFor("error.VALIDATION_FAILED"));
+      setFormError(t("error.VALIDATION_FAILED"));
       return;
     }
 
@@ -141,7 +124,7 @@ export function PostEditorForm({
         ? (result as { code?: unknown }).code
         : undefined;
       const messageKey = failureMessageKey(isFailureCode(code) ? code : "UNAVAILABLE");
-      const message = labels.errorFor(messageKey);
+      const message = t(messageKey);
       const scopedField = isFailureCode(code) ? FIELD_SCOPED_FAILURES[code] : undefined;
       if (scopedField) {
         setFieldErrors({ [scopedField]: message });
@@ -150,7 +133,7 @@ export function PostEditorForm({
       }
     } catch {
       // Network/parse failure must read like the generic unavailable state, never a stack.
-      setFormError(labels.errorFor("error.UNAVAILABLE"));
+      setFormError(t("error.UNAVAILABLE"));
     } finally {
       setSubmitting(false);
     }
@@ -169,7 +152,7 @@ export function PostEditorForm({
 
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor={`${formId}-slug`}>{labels.slug}</FieldLabel>
+          <FieldLabel htmlFor={`${formId}-slug`}>{t("slug")}</FieldLabel>
           <Input
             id={`${formId}-slug`}
             name="slug"
@@ -180,7 +163,7 @@ export function PostEditorForm({
             autoComplete="off"
           />
           <FieldDescription id={`${formId}-slug-description`}>
-            {labels.slugDescription}
+            {t("slugDescription")}
           </FieldDescription>
           {fieldErrors.slug ? <FieldError>{fieldErrors.slug}</FieldError> : null}
         </Field>
@@ -194,9 +177,9 @@ export function PostEditorForm({
               setDraft((c) => ({ ...c, isFeatured: checked === true }))
             }
           />
-          <FieldLabel htmlFor={`${formId}-featured`}>{labels.featured}</FieldLabel>
+          <FieldLabel htmlFor={`${formId}-featured`}>{t("featured")}</FieldLabel>
         </Field>
-        <FieldDescription>{labels.featuredDescription}</FieldDescription>
+        <FieldDescription>{t("featuredDescription")}</FieldDescription>
       </FieldGroup>
 
       {POST_EDITOR_LOCALES.map((locale) => {
@@ -205,16 +188,16 @@ export function PostEditorForm({
         return (
           <FieldSet key={locale}>
             <FieldLegend>
-              {labels.localeLegend(labels.localeName[locale])}
+              {t("localeLegend", { locale: t(`locale.${locale}`) })}
               {required ? null : (
                 <span className="ms-2 text-sm font-normal text-muted-foreground">
-                  {labels.localeOptional}
+                  {t("localeOptional")}
                 </span>
               )}
             </FieldLegend>
             <FieldGroup>
               <Field>
-                <FieldLabel htmlFor={`${formId}-${locale}-title`}>{labels.title}</FieldLabel>
+                <FieldLabel htmlFor={`${formId}-${locale}-title`}>{t("title")}</FieldLabel>
                 <Input
                   id={`${formId}-${locale}-title`}
                   value={translation.title}
@@ -230,7 +213,7 @@ export function PostEditorForm({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor={`${formId}-${locale}-excerpt`}>{labels.excerpt}</FieldLabel>
+                <FieldLabel htmlFor={`${formId}-${locale}-excerpt`}>{t("excerpt")}</FieldLabel>
                 <Textarea
                   id={`${formId}-${locale}-excerpt`}
                   rows={2}
@@ -245,7 +228,7 @@ export function PostEditorForm({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor={`${formId}-${locale}-content`}>{labels.content}</FieldLabel>
+                <FieldLabel htmlFor={`${formId}-${locale}-content`}>{t("content")}</FieldLabel>
                 <Textarea
                   id={`${formId}-${locale}-content`}
                   rows={10}
@@ -256,7 +239,7 @@ export function PostEditorForm({
                   dir={locale === "ar" ? "rtl" : undefined}
                 />
                 <FieldDescription id={`${formId}-${locale}-content-description`}>
-                  {labels.contentDescription}
+                  {t("contentDescription")}
                 </FieldDescription>
                 {fieldErrors[`translations.${locale}.content`] ? (
                   <FieldError>{fieldErrors[`translations.${locale}.content`]}</FieldError>
@@ -271,13 +254,13 @@ export function PostEditorForm({
         <Button type="submit" disabled={submitting}>
           {submitting ? <Spinner data-icon /> : null}
           {submitting
-            ? labels.submitting
+            ? t("submitting")
             : mode === "create"
-              ? labels.submitCreate
-              : labels.submitUpdate}
+              ? t("submitCreate")
+              : t("submitUpdate")}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.push(listHref)}>
-          {labels.cancel}
+          {t("cancel")}
         </Button>
       </div>
     </form>

@@ -3,7 +3,6 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { PostEditorForm } from "@/components/admin/posts/post-editor-form";
-import { buildPostEditorLabels } from "@/components/admin/posts/post-editor-labels";
 import { draftFromEditorView } from "@/components/admin/posts/post-editor-view";
 import { AdminPostStateNotice } from "@/components/admin/posts/post-state-notice";
 import { loadAdminPostsSafely } from "@/components/admin/posts/post-safe-load";
@@ -82,7 +81,6 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
       <PostEditorForm
         mode="edit"
         listHref="/admin/posts"
-        labels={buildPostEditorLabels(t)}
         initialDraft={draftFromEditorView(view)}
         postId={view.id}
         expectedVersion={view.version}
