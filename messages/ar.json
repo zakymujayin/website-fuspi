@@ -213,7 +213,10 @@
     "unavailable": {
       "title": "تعذّر تحميل قائمة الأخبار الآن",
       "description": "يرجى إعادة تحميل الصفحة بعد قليل."
-    }
+    },
+    "createAction": "كتابة خبر",
+    "edit": "تحرير",
+    "editLabelFor": "تحرير الخبر: {title}"
   },
   "AdminPostEditor": {
     "createMetaTitle": "كتابة خبر",

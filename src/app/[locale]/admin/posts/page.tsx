@@ -1,6 +1,9 @@
+import { PlusIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
+
+import { Link } from "@/i18n/navigation";
 
 import { AdminPostFilterTabs } from "@/components/admin/posts/post-filter-tabs";
 import { AdminPostList } from "@/components/admin/posts/post-list";
@@ -53,11 +56,20 @@ export default async function AdminPostsPage({ params, searchParams }: AdminPost
 
   return (
     <section aria-labelledby="admin-posts-title" className="flex flex-col gap-6">
-      <div>
-        <h1 id="admin-posts-title" className="section-rule font-display text-2xl text-slate-900">
-          {t("title")}
-        </h1>
-        <p className="mt-2 max-w-prose text-sm text-slate-500">{t("description")}</p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 id="admin-posts-title" className="section-rule font-display text-2xl text-slate-900">
+            {t("title")}
+          </h1>
+          <p className="mt-2 max-w-prose text-sm text-slate-500">{t("description")}</p>
+        </div>
+        <Link
+          href="/admin/posts/new"
+          className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-lg bg-royal-500 px-4 text-sm font-medium text-white transition-colors hover:bg-royal-600"
+        >
+          <PlusIcon aria-hidden data-icon strokeWidth={1.5} />
+          {t("createAction")}
+        </Link>
       </div>
 
       {result.ok ? (
@@ -89,6 +101,8 @@ export default async function AdminPostsPage({ params, searchParams }: AdminPost
                 byLabel: (name: string) => t("byLabel", { name }),
                 publishedAtLabel: (instant: string) => t("publishedAtLabel", { instant }),
                 updatedAtLabel: (instant: string) => t("updatedAtLabel", { instant }),
+                edit: t("edit"),
+                editLabelFor: (title: string) => t("editLabelFor", { title }),
               }}
             />
           ) : (
