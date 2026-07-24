@@ -2,6 +2,24 @@
 
 Verdict: **APPROVE the code change. REJECT the handoff document.**
 
+> ## Correction appended 2026-07-24 — the premise of this whole task was mine, and it was wrong
+>
+> This review (and the manifest that produced the task) rested on the claim that the 18 files gated
+> behind `RUN_PLATFORM_DB_TESTS` "do not run in the pipeline". **They do.** CI runs
+> `npm run test:integration`, which sets the gate and uses `vitest.integration.config.ts`
+> (`environment: "node"`, including every `*.integration.test.ts`). The pre-fix Media tests pass
+> 21/21 under that exact configuration.
+>
+> The 4 failures that triggered this task appeared only because *I* forced integration tests through
+> the **unit** config (`RUN_PLATFORM_DB_TESTS=true npm test`, `environment: "jsdom"`), where Node's
+> `Buffer` is not `instanceof` the jsdom realm's `Uint8Array`. CI never runs them that way.
+>
+> Consequences: there was **no evidence gap**, and no CI contract task is warranted. DeepSeek's
+> pragma is harmless hardening rather than a repair. The findings below about the *handoff's*
+> accuracy still stand on their own evidence and are unaffected.
+>
+> Full correction recorded in `coordination/milestones/M3-REFERENCE-SLICE-ENTRY.md`.
+
 - **Reviewer:** Claude Sonnet 5, temporary integrator stand-in
   (`coordination/adr/ADR-0002-temporary-gpt-integrator-standin.md`).
 - **Candidate:** `ai/deepseek/m3-db-gated-evidence-repair` @ `1cfe5b8`

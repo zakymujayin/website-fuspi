@@ -80,22 +80,51 @@ M3 cannot close until executable tests prove:
 - Media ownership plus staged-file rollback/orphan cleanup when the database transaction fails;
 - upload validation remains bound to the M2 storage contract.
 
-## DB-gated evidence now executes (2026-07-24)
+## DB-gated evidence: there was never a CI gap (2026-07-24, corrected)
 
-Most carried evidence above sits in 18 files gated behind `RUN_PLATFORM_DB_TESTS`, which neither
-`npm test` nor `.github/workflows/ci.yml` sets — so the suite was reporting green by omission. With
-the gate on, 4 Media tests failed on a jsdom/`Buffer` realm mismatch (`z.instanceof(Uint8Array)`
-rejects a Node `Buffer` under the jsdom environment). Product code was correct throughout; the fix
-was `@vitest-environment node` on the two Media runtime files.
+An earlier revision of this section claimed the 18 files gated behind `RUN_PLATFORM_DB_TESTS` "do
+not run in the pipeline" and that M3 must not close until CI enables the gate. **That was wrong and
+is withdrawn.**
 
-Verified: `RUN_PLATFORM_DB_TESTS=true npm test` → **63 files, 744 passed, 0 failed**.
+CI already runs every one of them. `package.json` defines
+`test:integration = RUN_PLATFORM_DB_TESTS=true vitest run --config vitest.integration.config.ts`,
+that config uses `environment: "node"` and includes `tests/**/*.integration.test.ts` +
+`src/**/*.integration.test.ts` (20 files, which covers all 18 gated ones — every gated file ends in
+`.integration.test.ts`), and `.github/workflows/ci.yml` runs `npm run test:integration` against a
+`postgres:17` service with `TOKEN_HMAC_SECRET`/`IP_HASH_SECRET`/`AUTH_SECRET` set.
 
-A derived, regenerable inventory of what each gated file actually proves is in
+Proof the evidence was passing in CI's configuration all along — the **pre-fix** Media files under
+CI's exact config:
+
+```text
+git checkout 8312635 -- tests/m3/runtime/
+RUN_PLATFORM_DB_TESTS=true npx vitest run --config vitest.integration.config.ts tests/m3/runtime/
+→ 21 passed
+```
+
+### What the false alarm actually was
+
+`vitest.config.ts` (the **unit** config, `environment: "jsdom"`) sets no `include` and excludes only
+`e2e/**` and `node_modules/**`, so it *also* collects the 20 integration files, where they self-skip
+because the gate is unset. That is the "18 skipped" line in `npm test`. Forcing them to run through
+that unit config — `RUN_PLATFORM_DB_TESTS=true npm test` — executes integration tests under **jsdom**,
+where Node's `Buffer` is not `instanceof` the jsdom realm's `Uint8Array`, producing 4 Media failures
+that CI never sees. The alarm was an artifact of that invocation, not a gap in coverage.
+
+DeepSeek's `@vitest-environment node` pragma on the two Media files is therefore **harmless
+hardening**, not a repair of a real CI hole: it makes those files behave correctly even when
+collected by the unit config.
+
+### Remaining real (minor) issue
+
+The unit config double-collecting integration files produces a misleading "18 skipped" signal — the
+signal that caused this false alarm. Restricting `vitest.config.ts` to exclude
+`**/*.integration.test.ts` would remove the ambiguity. Root-config hotspot, GPT lane, low risk.
+This is a clarity improvement, **not** an M3 exit blocker.
+
+A derived, regenerable inventory of what each gated file proves is in
 `coordination/reviews/M3-DB-GATED-EVIDENCE-INVENTORY.md`. Use that — not prose descriptions — when
 ticking off the carried-evidence list.
-
-**Still open (GPT/CI contract task):** CI does not set `RUN_PLATFORM_DB_TESTS`, so this evidence
-still does not run in the pipeline. M3 must not close while the gate is off in CI.
 
 ## Carried pre-existing defects (must clear before M3 exit)
 
