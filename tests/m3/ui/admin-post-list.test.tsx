@@ -47,6 +47,7 @@ const SAMPLE_ITEM = {
   updatedAt: "2026-07-16T04:00:00.000Z",
   category: { id: "cat-1", label: "Akademik" },
   author: { name: "Editor FUSPI" },
+  capabilities: { update: true },
 };
 
 const SAMPLE_LABELS = {
@@ -58,6 +59,8 @@ const SAMPLE_LABELS = {
   byLabel: (name: string) => `Oleh ${name}`,
   publishedAtLabel: (instant: string) => `Terbit ${instant}`,
   updatedAtLabel: (instant: string) => `Diperbarui ${instant}`,
+  edit: "Sunting",
+  editLabelFor: (title: string) => `Sunting berita: ${title}`,
 };
 
 const FILTER_LABELS = {
@@ -356,15 +359,103 @@ describe("AdminPostList", () => {
     expect(container.querySelectorAll("li")).toHaveLength(2);
   });
 
-  it("never renders the slug, id, or a mutation affordance in this read-only task", () => {
+  it("never renders the slug, and performs no mutation from the list itself", () => {
     const markup = renderToStaticMarkup(
       <AdminPostList items={[SAMPLE_ITEM]} locale="id" ariaLabel="Daftar" labels={SAMPLE_LABELS} />,
     );
     const container = markupToContainer(markup);
-    expect(container.textContent).not.toContain(SAMPLE_ITEM.slug);
+    // The slug must stay out of the DOM entirely — the E2E suite asserts this too, and the edit
+    // route is keyed by id, not slug.
+    expect(container.innerHTML).not.toContain(SAMPLE_ITEM.slug);
     expect(container.textContent).not.toContain(SAMPLE_ITEM.id);
+    // Navigation only: no publish/archive/delete control mutates from this list.
     expect(container.querySelectorAll("button")).toHaveLength(0);
     expect(container.querySelectorAll("form")).toHaveLength(0);
+  });
+});
+
+describe("editor navigation", () => {
+  it("links each updatable row to its editor by id, not slug", () => {
+    const markup = renderToStaticMarkup(
+      <AdminPostList items={[SAMPLE_ITEM]} locale="id" ariaLabel="Daftar" labels={SAMPLE_LABELS} />,
+    );
+    const link = markupToContainer(markup).querySelector("a");
+    expect(link?.getAttribute("href")).toBe(`/admin/posts/${SAMPLE_ITEM.id}/edit`);
+    expect(link?.getAttribute("href")).not.toContain(SAMPLE_ITEM.slug);
+  });
+
+  it("gives every edit link a per-row accessible name", () => {
+    const markup = renderToStaticMarkup(
+      <AdminPostList
+        items={[SAMPLE_ITEM, { ...SAMPLE_ITEM, id: "post-2", title: "Berita Kedua" }]}
+        locale="id"
+        ariaLabel="Daftar"
+        labels={SAMPLE_LABELS}
+      />,
+    );
+    const names = Array.from(markupToContainer(markup).querySelectorAll("a")).map((a) =>
+      a.getAttribute("aria-label"),
+    );
+    expect(names).toEqual([
+      "Sunting berita: Wisuda FUSPI Tahun 2026",
+      "Sunting berita: Berita Kedua",
+    ]);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it("hides the edit link when the server says the actor cannot update the row", () => {
+    const locked = { ...SAMPLE_ITEM, capabilities: { update: false } };
+    const markup = renderToStaticMarkup(
+      <AdminPostList items={[locked]} locale="id" ariaLabel="Daftar" labels={SAMPLE_LABELS} />,
+    );
+    expect(markupToContainer(markup).querySelectorAll("a")).toHaveLength(0);
+  });
+
+  it("shows edit only on the rows that permit it in a mixed list", () => {
+    const markup = renderToStaticMarkup(
+      <AdminPostList
+        items={[
+          SAMPLE_ITEM,
+          { ...SAMPLE_ITEM, id: "post-2", capabilities: { update: false } },
+          { ...SAMPLE_ITEM, id: "post-3" },
+        ]}
+        locale="id"
+        ariaLabel="Daftar"
+        labels={SAMPLE_LABELS}
+      />,
+    );
+    const hrefs = Array.from(markupToContainer(markup).querySelectorAll("a")).map((a) =>
+      a.getAttribute("href"),
+    );
+    expect(hrefs).toEqual(["/admin/posts/post-1/edit", "/admin/posts/post-3/edit"]);
+  });
+
+  it("keeps the edit control at the 40px height contract", () => {
+    const markup = renderToStaticMarkup(
+      <AdminPostList items={[SAMPLE_ITEM]} locale="id" ariaLabel="Daftar" labels={SAMPLE_LABELS} />,
+    );
+    const link = markupToContainer(markup).querySelector("a");
+    expect(link?.getAttribute("class")).toContain("h-10");
+  });
+
+  it("exposes a create action on the list page that targets the new-post route", () => {
+    const pageContents = readFileSync(
+      path.join(process.cwd(), "src/app/[locale]/admin/posts/page.tsx"),
+      "utf8",
+    );
+    expect(pageContents).toContain('href="/admin/posts/new"');
+    expect(pageContents).toContain('t("createAction")');
+  });
+
+  it("translates the new navigation labels in all three locales", () => {
+    for (const locale of ["id", "en", "ar"]) {
+      const raw = readFileSync(path.join(process.cwd(), `messages/${locale}.json`), "utf8");
+      const block = JSON.parse(raw).AdminPostList;
+      for (const key of ["createAction", "edit", "editLabelFor"]) {
+        expect(block[key], `${locale} missing ${key}`).toBeTruthy();
+      }
+      expect(block.editLabelFor).toContain("{title}");
+    }
   });
 });
 

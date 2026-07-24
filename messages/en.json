@@ -213,7 +213,10 @@
     "unavailable": {
       "title": "The news list cannot be loaded right now",
       "description": "Please reload this page in a moment."
-    }
+    },
+    "createAction": "Write news",
+    "edit": "Edit",
+    "editLabelFor": "Edit news item: {title}"
   },
   "AdminPostEditor": {
     "createMetaTitle": "Write News",

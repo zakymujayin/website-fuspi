@@ -213,7 +213,10 @@
     "unavailable": {
       "title": "Daftar berita sedang tidak dapat dimuat",
       "description": "Silakan muat ulang halaman ini beberapa saat lagi."
-    }
+    },
+    "createAction": "Tulis berita",
+    "edit": "Sunting",
+    "editLabelFor": "Sunting berita: {title}"
   },
   "AdminPostEditor": {
     "createMetaTitle": "Tulis Berita",
