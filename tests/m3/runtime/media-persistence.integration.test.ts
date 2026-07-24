@@ -1,3 +1,7 @@
+/**
+ * @vitest-environment node
+ */
+
 import {createHash} from "node:crypto";
 import {mkdir, mkdtemp, readFile, rm} from "node:fs/promises";
 import os from "node:os";
