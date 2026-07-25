@@ -105,7 +105,13 @@ function safeCover(media: {
   if (!media || media.storageClass !== "PUBLIC" || media.alt === null || !StorageKeySchema.safeParse(media.storageKey).success) {
     return null;
   }
-  const parsed = PublicMediaViewSchema.safeParse({...media, url: `${uploadBase}/${media.storageKey}`});
+  // PublicMediaViewSchema is `.strict()` and does not declare storageKey/storageClass; spreading the
+  // whole `media` would fail parsing on those extra keys. Pass only the declared fields.
+  const {id, mimeType, size, alt, isDecorative, width, height} = media;
+  const parsed = PublicMediaViewSchema.safeParse({
+    id, mimeType, size, alt, isDecorative, width, height,
+    url: `${uploadBase}/${media.storageKey}`,
+  });
   return parsed.success ? parsed.data : null;
 }
 
