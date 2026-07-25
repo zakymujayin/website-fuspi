@@ -113,6 +113,60 @@ suite("M3 Post admin transport on PostgreSQL", () => {
     expect(missing).toEqual(crossOwner);
   });
 
+  it("returns a strict safe cover view for a cover-bearing post, without storage internals", async () => {
+    // Regression: safeCover previously spread the whole Media row (including storageKey/storageClass)
+    // into the strict PublicMediaViewSchema, which rejected the extra keys — so every cover-bearing
+    // post failed the editor view and getAdminPostEditor returned NOT_FOUND.
+    const {createHash} = await import("node:crypto");
+    const checksum = createHash("sha256").update(`${marker}-cover`).digest("hex");
+    const media = await prisma.media.create({
+      data: {
+        storageKey: `2026/07/${checksum}.webp`,
+        storageClass: "PUBLIC",
+        checksumSha256: checksum,
+        originalName: `${marker}-cover.png`,
+        mimeType: "image/webp",
+        size: 100,
+        alt: "Cover accessible text",
+        isDecorative: false,
+        width: 640,
+        height: 480,
+        uploaderId: editorId,
+      },
+    });
+    const covered = await prisma.post.create({
+      data: {
+        slug: `${marker}-covered`,
+        type: "BERITA",
+        status: "DRAFT",
+        authorId: editorId,
+        contentOwnerId: editorId,
+        coverMediaId: media.id,
+        translations: {create: {
+          locale: "id",
+          title: "Judul bersampul",
+          excerpt: null,
+          content: "<p>Konten.</p>",
+          status: "DRAFT",
+        }},
+      },
+    });
+
+    const view = await getAdminPostEditor(prisma, actor(editorId, "EDITOR"), covered.id, "/uploads", clock);
+    expect(view.ok).toBe(true);
+    if (!view.ok) return;
+    expect(view.data.coverMediaId).toBe(media.id);
+    expect(view.data.cover).not.toBeNull();
+    expect(view.data.cover?.id).toBe(media.id);
+    expect(view.data.cover?.url).toBe(`/uploads/2026/07/${checksum}.webp`);
+    // The safe view must not expose storage internals.
+    expect(view.data.cover).not.toHaveProperty("storageKey");
+    expect(view.data.cover).not.toHaveProperty("storageClass");
+
+    await prisma.post.deleteMany({where: {id: covered.id}});
+    await prisma.media.deleteMany({where: {id: media.id}});
+  });
+
   it("deletes only an owned Berita with optimistic version and records an audit event", async () => {
     const denied = await executeAdminPostCommand(prisma, actor(editorId, "EDITOR"), {
       action: "DELETE",
