@@ -40,6 +40,13 @@ cross-suite interference failures. This is a local-only artifact, not a product 
 problem. Run `--workers=1` locally to match CI. Each suite, and each suite's mandated combined
 chromium+mobile command, passes on its own.
 
+The local dev server (`next-server`, ~1.2 GB) must also have room to boot within Playwright's 120s
+`webServer` timeout; on a memory-constrained shared machine (≈600 MB free), it times out and the whole
+run fails with `Timed out waiting … from config.webServer` — an environment artifact, not a product
+or test failure. Freeing memory (≈2 GB free) restores healthy execution. Verified 2026-07-25: the
+media suite failed alone with the webServer timeout under memory pressure, then ran cleanly after
+freeing memory.
+
 M3 starts from the accepted M2 development head
 `f83a00e6816a91f72b9ade654b012be8a1a0b2d0`. That head passed GitHub Actions run
 `29460510481`. The integration branch is `integration/m3-reference-slice`.
