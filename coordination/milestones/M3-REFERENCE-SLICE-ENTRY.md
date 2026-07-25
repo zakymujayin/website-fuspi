@@ -17,9 +17,28 @@ exit gate. Two items need Codex's attention first when he returns:
 
 1. **The basic Post editor is the highest-risk unreviewed work** — the first mutation surface,
    touching CSRF, optimistic locking, and ownership. Re-review it specifically.
-2. The editor has **no Playwright suite** driving the actual form; its evidence is API-level plus
-   page-render checks. Navigation into it is now covered (click-through to both routes), but nothing
-   exercises the form itself — filling fields, submitting, or the `VERSION_CONFLICT` reload path.
+2. The editor now has a **PostgreSQL-backed Playwright suite** (`e2e/m3/admin-post-editor.spec.ts`,
+   16/16 on the mandated combined command) driving the real form. Writing it exposed **three product
+   defects** that unit tests and the editor's original API-only verification missed — all fixed and
+   merged:
+   - RSC boundary crash (`M3-CLAUDE-POST-EDITOR-RSC-FIX`);
+   - no navigation after a successful save (`M3-CLAUDE-POST-EDITOR-NAV-FIX`);
+   - `getAdminPostEditor` NOT_FOUND for every cover-bearing post, i.e. the editor could not open any
+     post with a cover image (`M3-GPT-EDITOR-COVER-VIEW-FIX`, GPT platform lane, +1 integration
+     regression case).
+   These strongly vindicate the independent-QA design and are the clearest evidence that the
+   stand-in's self-review is not a substitute for it — Codex should re-review all three on return,
+   especially the platform-lane cover fix.
+
+### Operational note — running the full e2e/m3 directory
+
+The M3 browser suites serialize on a shared advisory lock. **CI runs them with `workers: 1`**
+(`playwright.config.ts`: `workers: process.env.CI ? 1 : undefined`), which is correct. A **local**
+run of the whole directory at the default worker count (CPU-many) makes the suites contend for the
+one lock; the last suite to wait can exceed its 300s hook timeout and then run unlocked, causing
+cross-suite interference failures. This is a local-only artifact, not a product defect and not a CI
+problem. Run `--workers=1` locally to match CI. Each suite, and each suite's mandated combined
+chromium+mobile command, passes on its own.
 
 M3 starts from the accepted M2 development head
 `f83a00e6816a91f72b9ade654b012be8a1a0b2d0`. That head passed GitHub Actions run
