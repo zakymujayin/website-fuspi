@@ -101,6 +101,11 @@ tracked by the M2 exit contract.
 Claude and DeepSeek may work only from a newly committed task manifest and non-overlapping frozen
 assignment branch. They must not infer permission from this entry document or a chat prompt alone.
 
+**Update (2026-07-26):** the Post editor now includes publication actions (publish-now, schedule,
+return-to-draft, archive) via the existing PUBLICATION command, gated on `capabilities.publish`,
+verified in a real browser. The reference slice's admin write path is now create → edit → publish/
+schedule/archive end to end.
+
 ## Carried mandatory security evidence
 
 M3 cannot close until executable tests prove:
