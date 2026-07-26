@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 
+import { PostDeleteAction } from "@/components/admin/posts/post-delete-action";
 import { PostEditorForm } from "@/components/admin/posts/post-editor-form";
 import { PostPublicationActions } from "@/components/admin/posts/post-publication-actions";
 import { draftFromEditorView } from "@/components/admin/posts/post-editor-view";
@@ -97,6 +98,13 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
           coverMediaId: view.coverMediaId,
           tagIds: view.tagIds,
         }}
+      />
+
+      <PostDeleteAction
+        postId={view.id}
+        expectedVersion={view.version}
+        canDelete={view.capabilities.delete}
+        listHref="/admin/posts"
       />
     </section>
   );
