@@ -103,8 +103,10 @@ assignment branch. They must not infer permission from this entry document or a 
 
 **Update (2026-07-26):** the Post editor now includes publication actions (publish-now, schedule,
 return-to-draft, archive) via the existing PUBLICATION command, gated on `capabilities.publish`,
-verified in a real browser. The reference slice's admin write path is now create → edit → publish/
-schedule/archive end to end.
+verified in a real browser. Delete (with an accessible confirmation dialog, gated on `capabilities.delete`, audit-logged) is
+also merged, so the reference slice's admin write path is now **full CRUD**: create → edit →
+publish/schedule/archive → delete, each verified in a real browser. Remaining Post/Media UI:
+cover media picker, media upload UI, autosave, and rich text — each its own manifest.
 
 ## Carried mandatory security evidence
 
