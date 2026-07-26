@@ -43,9 +43,16 @@ chromium+mobile command, passes on its own.
 The local dev server (`next-server`, ~1.2 GB) must also have room to boot within Playwright's 120s
 `webServer` timeout; on a memory-constrained shared machine (≈600 MB free), it times out and the whole
 run fails with `Timed out waiting … from config.webServer` — an environment artifact, not a product
-or test failure. Freeing memory (≈2 GB free) restores healthy execution. Verified 2026-07-25: the
-media suite failed alone with the webServer timeout under memory pressure, then ran cleanly after
-freeing memory.
+or test failure. **Correction (2026-07-26):** an earlier version of this note claimed freeing memory made the media
+suite "run cleanly". That claim was premature and is withdrawn — it was read from mid-run buffered
+output before the run finished. On re-run, this local machine (7.5 GB RAM, ~3.6 GB already in swap,
+shared with other tools) still could not run even a single browser suite reliably: media alone took
+**23.7 min and ended 56/84 failed**, all from Next dev thrashing swap and tripping 30s selector
+timeouts — not product or test-logic failures. **Conclusion: the full browser directory is not
+runnable on this local machine in its current state.** The authoritative verification is CI (fresh
+container, adequate memory, `workers: 1`). Each suite's clean pass and each mandated combined
+chromium+mobile pass recorded above were captured earlier when the machine had headroom; they stand,
+but do not attempt the full local directory run under memory pressure.
 
 M3 starts from the accepted M2 development head
 `f83a00e6816a91f72b9ade654b012be8a1a0b2d0`. That head passed GitHub Actions run
