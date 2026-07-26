@@ -291,5 +291,26 @@
       "MEDIA_INVALID": "The linked media is not valid.",
       "UNAVAILABLE": "Your changes could not be saved right now. Please try again shortly."
     }
+  },
+  "AdminPostDelete": {
+    "title": "Delete news",
+    "description": "Deleting a news item is permanent and cannot be undone.",
+    "action": "Delete news",
+    "confirmTitle": "Delete this news item?",
+    "confirmDescription": "This action is permanent. The news item and all its translations will be removed.",
+    "cancel": "Cancel",
+    "confirmAction": "Yes, delete",
+    "error": {
+      "SESSION_INVALID": "Your session has ended. Please sign in again and retry.",
+      "CSRF_INVALID": "The request could not be verified. Reload the page and try again.",
+      "REQUEST_INVALID": "The request could not be processed. Check your entries and try again.",
+      "VALIDATION_FAILED": "Some entries need attention. Check the highlighted fields.",
+      "NOT_FOUND": "This news item was not found, or it is not yours.",
+      "VERSION_CONFLICT": "Someone else changed this news item. Reload the page to see the latest version before saving.",
+      "INVALID_STATE": "That action is not allowed for this news item's current status.",
+      "SLUG_CONFLICT": "That slug is already used by another news item. Choose a different one.",
+      "MEDIA_INVALID": "The linked media is not valid.",
+      "UNAVAILABLE": "Your changes could not be saved right now. Please try again shortly."
+    }
   }
 }
