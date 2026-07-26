@@ -260,5 +260,36 @@
       "MEDIA_INVALID": "Media yang tertaut tidak valid.",
       "UNAVAILABLE": "Perubahan tidak dapat disimpan saat ini. Coba lagi beberapa saat lagi."
     }
+  },
+  "AdminPostPublication": {
+    "title": "Status penerbitan",
+    "currentLabel": "Saat ini:",
+    "state": {
+      "DRAFT": "Draf",
+      "PUBLISHED": "Terbit",
+      "SCHEDULED": "Terjadwal",
+      "ARCHIVED": "Arsip"
+    },
+    "action": {
+      "PUBLISH_NOW": "Terbitkan sekarang",
+      "SCHEDULE": "Jadwalkan",
+      "RETURN_TO_DRAFT": "Kembalikan ke draf",
+      "ARCHIVE": "Arsipkan"
+    },
+    "scheduleLabel": "Jadwalkan terbit pada",
+    "scheduleRequired": "Pilih waktu terbit terlebih dahulu.",
+    "scheduleFuture": "Waktu terbit harus di masa depan.",
+    "error": {
+      "SESSION_INVALID": "Sesi Anda telah berakhir. Silakan masuk kembali lalu coba lagi.",
+      "CSRF_INVALID": "Permintaan tidak dapat diverifikasi. Muat ulang halaman lalu coba lagi.",
+      "REQUEST_INVALID": "Permintaan tidak dapat diproses. Periksa isian Anda lalu coba lagi.",
+      "VALIDATION_FAILED": "Ada isian yang belum sesuai. Periksa bagian yang ditandai.",
+      "NOT_FOUND": "Berita tidak ditemukan atau bukan milik Anda.",
+      "VERSION_CONFLICT": "Berita ini telah diubah orang lain. Muat ulang halaman untuk melihat versi terbaru sebelum menyimpan.",
+      "INVALID_STATE": "Tindakan ini tidak dapat dilakukan pada status berita saat ini.",
+      "SLUG_CONFLICT": "Slug ini sudah dipakai berita lain. Gunakan slug yang berbeda.",
+      "MEDIA_INVALID": "Media yang tertaut tidak valid.",
+      "UNAVAILABLE": "Perubahan tidak dapat disimpan saat ini. Coba lagi beberapa saat lagi."
+    }
   }
 }

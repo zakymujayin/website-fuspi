@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { PostEditorForm } from "@/components/admin/posts/post-editor-form";
+import { PostPublicationActions } from "@/components/admin/posts/post-publication-actions";
 import { draftFromEditorView } from "@/components/admin/posts/post-editor-view";
 import { AdminPostStateNotice } from "@/components/admin/posts/post-state-notice";
 import { loadAdminPostsSafely } from "@/components/admin/posts/post-safe-load";
@@ -77,6 +78,13 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
         </h1>
         <p className="mt-2 max-w-prose text-sm text-slate-500">{t("editDescription")}</p>
       </div>
+
+      <PostPublicationActions
+        postId={view.id}
+        expectedVersion={view.version}
+        state={view.publicationState}
+        canPublish={view.capabilities.publish}
+      />
 
       <PostEditorForm
         mode="edit"
