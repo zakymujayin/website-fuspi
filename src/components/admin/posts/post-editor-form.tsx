@@ -20,6 +20,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 
 import { PostCoverPicker, type CoverPreview } from "./post-cover-picker";
+import { RichTextField } from "./post-rich-text-field";
 import { FIELD_SCOPED_FAILURES, failureMessageKey, isFailureCode } from "./post-editor-errors";
 import {
   POST_EDITOR_LOCALES,
@@ -240,19 +241,16 @@ export function PostEditorForm({
               </Field>
 
               <Field>
-                <FieldLabel htmlFor={`${formId}-${locale}-content`}>{t("content")}</FieldLabel>
-                <Textarea
-                  id={`${formId}-${locale}-content`}
-                  rows={10}
+                <span id={`${formId}-${locale}-content-label`} className="text-sm font-medium">
+                  {t("content")}
+                </span>
+                <RichTextField
                   value={translation.content}
-                  onChange={(event) => updateTranslation(locale, "content", event.target.value)}
-                  aria-invalid={fieldErrors[`translations.${locale}.content`] ? true : undefined}
-                  aria-describedby={`${formId}-${locale}-content-description`}
+                  onChange={(html) => updateTranslation(locale, "content", html)}
+                  ariaLabel={t("content")}
                   dir={locale === "ar" ? "rtl" : undefined}
                 />
-                <FieldDescription id={`${formId}-${locale}-content-description`}>
-                  {t("contentDescription")}
-                </FieldDescription>
+                <FieldDescription>{t("contentDescription")}</FieldDescription>
                 {fieldErrors[`translations.${locale}.content`] ? (
                   <FieldError>{fieldErrors[`translations.${locale}.content`]}</FieldError>
                 ) : null}
