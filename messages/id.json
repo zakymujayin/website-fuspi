@@ -234,7 +234,7 @@
     "title": "Judul",
     "excerpt": "Ringkasan",
     "content": "Isi",
-    "contentDescription": "Isi berita. Penyunting teks kaya akan ditambahkan pada tahap berikutnya.",
+    "contentDescription": "Isi berita. Gunakan bilah alat untuk pemformatan dasar.",
     "submitCreate": "Simpan draf",
     "submitUpdate": "Simpan perubahan",
     "submitting": "Menyimpan…",
@@ -363,6 +363,19 @@
       "MEDIA_IN_USE": "Media sedang digunakan.",
       "UPLOAD_FAILED": "Unggahan gagal diproses. Coba lagi.",
       "UNAVAILABLE": "Unggahan tidak dapat diproses saat ini. Coba lagi beberapa saat lagi."
+    }
+  },
+  "AdminPostRichText": {
+    "toolbarLabel": "Alat pemformatan",
+    "tool": {
+      "bold": "Tebal",
+      "italic": "Miring",
+      "h2": "Judul tingkat 2",
+      "h3": "Judul tingkat 3",
+      "bulletList": "Daftar berbutir",
+      "orderedList": "Daftar bernomor",
+      "blockquote": "Kutipan",
+      "code": "Kode"
     }
   }
 }

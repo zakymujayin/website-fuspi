@@ -234,7 +234,7 @@
     "title": "Title",
     "excerpt": "Excerpt",
     "content": "Body",
-    "contentDescription": "The news body. A rich-text editor arrives in a later stage.",
+    "contentDescription": "The news body. Use the toolbar for basic formatting.",
     "submitCreate": "Save draft",
     "submitUpdate": "Save changes",
     "submitting": "Saving…",
@@ -363,6 +363,19 @@
       "MEDIA_IN_USE": "The media is in use.",
       "UPLOAD_FAILED": "The upload could not be processed. Try again.",
       "UNAVAILABLE": "The upload cannot be processed right now. Please try again shortly."
+    }
+  },
+  "AdminPostRichText": {
+    "toolbarLabel": "Formatting tools",
+    "tool": {
+      "bold": "Bold",
+      "italic": "Italic",
+      "h2": "Heading level 2",
+      "h3": "Heading level 3",
+      "bulletList": "Bullet list",
+      "orderedList": "Numbered list",
+      "blockquote": "Quote",
+      "code": "Code"
     }
   }
 }
