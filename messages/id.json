@@ -328,21 +328,30 @@
     "empty": "Belum ada gambar di Pustaka Media."
   },
   "AdminMediaUpload": {
-    "title": "Unggah gambar",
-    "description": "Unggah gambar WebP untuk Pustaka Media (maksimal 5 MB).",
-    "file": "Berkas gambar",
-    "fileHint": "Format WebP, maksimal 5 MB.",
-    "decorative": "Gambar dekoratif (tanpa teks alternatif)",
+    "title": "Unggah media",
+    "description": "Unggah gambar WebP (hingga 20) atau satu berkas PDF ke Pustaka Media.",
+    "policyLabel": "Jenis unggahan",
+    "policy": {
+      "CMS_IMAGE": "Gambar",
+      "PUBLIC_PDF": "PDF"
+    },
+    "images": "Berkas gambar",
+    "imagesHint": "Format WebP, maksimal {max} berkas, masing-masing 5 MB.",
+    "pdf": "Berkas PDF",
+    "pdfHint": "Satu berkas PDF, maksimal 20 MB.",
     "alt": "Teks alternatif",
-    "altHint": "Jelaskan gambar secara singkat untuk pembaca layar.",
+    "decorative": "Dekoratif (tanpa teks alternatif)",
+    "selectedLabel": "Gambar terpilih",
+    "removeLabel": "Hapus {name}",
     "action": "Unggah",
     "uploading": "Mengunggah…",
-    "success": "Gambar berhasil diunggah.",
+    "success": "{count} berkas berhasil diunggah.",
     "validation": {
-      "missing": "Pilih berkas gambar terlebih dahulu.",
-      "type": "Hanya berkas WebP yang diperbolehkan.",
-      "size": "Ukuran gambar melebihi 5 MB.",
-      "altRequired": "Isi teks alternatif atau tandai sebagai dekoratif.",
+      "missing": "Pilih berkas terlebih dahulu.",
+      "count": "Maksimal 20 gambar per unggahan.",
+      "type": "Jenis berkas tidak diperbolehkan.",
+      "size": "Ukuran berkas melebihi batas.",
+      "altRequired": "Isi teks alternatif atau tandai dekoratif.",
       "altNotEmpty": "Gambar dekoratif tidak boleh memiliki teks alternatif."
     },
     "error": {
