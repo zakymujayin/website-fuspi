@@ -247,8 +247,12 @@ test.describe("M3 Post admin list QA", () => {
     }
   });
 
+  // Bind the auth cookie to the base URL's host instead of a hardcoded domain, so the whole e2e/m3
+  // admin suite runs at one host. The editor spec must run at localhost:3004 (its mutations hit the
+  // CSRF same-origin check against AUTH_URL); a cookie pinned to 127.0.0.1 would not be sent there.
+  const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3004";
   function sessionCookie(token: string) {
-    return { name: "authjs.session-token", value: token, domain: "127.0.0.1", path: "/" };
+    return { name: "authjs.session-token", value: token, url: BASE_URL };
   }
 
   async function gotoPosts(page: Page, path = "/id/admin/posts") {
