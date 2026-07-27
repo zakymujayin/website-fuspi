@@ -105,8 +105,9 @@ assignment branch. They must not infer permission from this entry document or a 
 return-to-draft, archive) via the existing PUBLICATION command, gated on `capabilities.publish`,
 verified in a real browser. Delete (with an accessible confirmation dialog, gated on `capabilities.delete`, audit-logged) is
 also merged, so the reference slice's admin write path is now **full CRUD**: create → edit →
-publish/schedule/archive → delete, each verified in a real browser. Remaining Post/Media UI:
-cover media picker, media upload UI, autosave, and rich text — each its own manifest.
+publish/schedule/archive → delete, each verified in a real browser. The editor now also has a **cover image picker** (choose/clear a cover from the Media Library;
+coverMediaId is editable via the draft), verified in a real browser. Remaining Post/Media UI:
+media upload UI, autosave, and rich text — each its own manifest.
 
 ## Carried mandatory security evidence
 
