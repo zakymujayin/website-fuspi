@@ -1,7 +1,9 @@
 # M3 Claude Stand-in Independent Review — GPT
 
-Date: 2026-07-28  
-Integration head reviewed: `f8a40ebe5b0279d08f45864863f2642f56dedeae`  
+Date: 2026-07-28
+
+Integration head reviewed: `f8a40ebe5b0279d08f45864863f2642f56dedeae`
+
 Review task: `M3-GPT-CLAUDE-INDEPENDENT-REVIEW`
 
 ## Verdict
