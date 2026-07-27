@@ -328,21 +328,30 @@
     "empty": "No images in the Media Library yet."
   },
   "AdminMediaUpload": {
-    "title": "Upload image",
-    "description": "Upload a WebP image to the Media Library (max 5 MB).",
-    "file": "Image file",
-    "fileHint": "WebP format, up to 5 MB.",
-    "decorative": "Decorative image (no alternative text)",
+    "title": "Upload media",
+    "description": "Upload WebP images (up to 20) or a single PDF to the Media Library.",
+    "policyLabel": "Upload type",
+    "policy": {
+      "CMS_IMAGE": "Images",
+      "PUBLIC_PDF": "PDF"
+    },
+    "images": "Image files",
+    "imagesHint": "WebP format, up to {max} files, 5 MB each.",
+    "pdf": "PDF file",
+    "pdfHint": "One PDF file, up to 20 MB.",
     "alt": "Alternative text",
-    "altHint": "Briefly describe the image for screen readers.",
+    "decorative": "Decorative (no alternative text)",
+    "selectedLabel": "Selected images",
+    "removeLabel": "Remove {name}",
     "action": "Upload",
     "uploading": "Uploading…",
-    "success": "Image uploaded.",
+    "success": "{count} file(s) uploaded.",
     "validation": {
-      "missing": "Choose an image file first.",
-      "type": "Only WebP files are allowed.",
-      "size": "The image exceeds 5 MB.",
-      "altRequired": "Enter alternative text or mark the image decorative.",
+      "missing": "Choose a file first.",
+      "count": "At most 20 images per upload.",
+      "type": "File type not allowed.",
+      "size": "The file exceeds the size limit.",
+      "altRequired": "Enter alternative text or mark decorative.",
       "altNotEmpty": "A decorative image must have no alternative text."
     },
     "error": {

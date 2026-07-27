@@ -10,82 +10,116 @@ vi.mock("@/i18n/navigation", () => ({
 }));
 
 const {
-  validateImageUpload,
-  buildImageUploadFormData,
+  validateImageBatch,
+  validatePdf,
+  buildImageBatchFormData,
+  buildPdfFormData,
   uploadFailureKey,
   MAX_IMAGE_BYTES,
-  ACCEPTED_IMAGE_TYPE,
+  MAX_PDF_BYTES,
+  MAX_IMAGE_COUNT,
 } = await import("@/components/admin/media/media-upload");
 
-function webp(bytes: number): File {
-  return new File([new Uint8Array(bytes)], "x.webp", { type: "image/webp" });
-}
+const webp = (bytes: number, name = "x.webp"): File =>
+  new File([new Uint8Array(bytes)], name, { type: "image/webp" });
+const pdf = (bytes: number): File =>
+  new File([new Uint8Array(bytes)], "d.pdf", { type: "application/pdf" });
 
-describe("validateImageUpload", () => {
-  it("accepts a valid informative webp with alt", () => {
-    expect(validateImageUpload(webp(1000), "A photo", false)).toEqual({ ok: true });
+const img = (alt: string, isDecorative = false, bytes = 100) => ({
+  file: webp(bytes),
+  alt,
+  isDecorative,
+});
+
+describe("validateImageBatch", () => {
+  it("accepts a batch of informative and decorative images", () => {
+    expect(validateImageBatch([img("a"), img("", true), img("c")])).toEqual({ ok: true });
   });
 
-  it("accepts a decorative webp with empty alt", () => {
-    expect(validateImageUpload(webp(1000), "", true)).toEqual({ ok: true });
+  it("rejects an empty batch", () => {
+    expect(validateImageBatch([])).toEqual({ ok: false, index: null, reason: "missing" });
   });
 
-  it("rejects a missing file", () => {
-    expect(validateImageUpload(null, "A", false)).toEqual({ ok: false, reason: "missing" });
+  it("rejects more than the image limit", () => {
+    const rows = Array.from({ length: MAX_IMAGE_COUNT + 1 }, () => img("a"));
+    expect(validateImageBatch(rows)).toEqual({ ok: false, index: null, reason: "count" });
   });
 
-  it("rejects a non-webp type", () => {
-    const png = new File([new Uint8Array(10)], "x.png", { type: "image/png" });
-    expect(validateImageUpload(png, "A", false)).toEqual({ ok: false, reason: "type" });
+  it("reports the offending index for a non-webp file", () => {
+    const png = { file: new File([new Uint8Array(1)], "x.png", { type: "image/png" }), alt: "a", isDecorative: false };
+    expect(validateImageBatch([img("a"), png])).toEqual({ ok: false, index: 1, reason: "type" });
   });
 
-  it("rejects an oversized file", () => {
-    expect(validateImageUpload(webp(MAX_IMAGE_BYTES + 1), "A", false)).toEqual({
+  it("reports the offending index for an oversized file", () => {
+    expect(validateImageBatch([img("a"), img("b", false, MAX_IMAGE_BYTES + 1)])).toEqual({
       ok: false,
+      index: 1,
       reason: "size",
     });
   });
 
-  it("requires alt when not decorative", () => {
-    expect(validateImageUpload(webp(100), "   ", false)).toEqual({
+  it("requires alt for a non-decorative image and forbids it for a decorative one", () => {
+    expect(validateImageBatch([img("   ")])).toEqual({ ok: false, index: 0, reason: "altRequired" });
+    expect(validateImageBatch([img("has text", true)])).toEqual({
       ok: false,
-      reason: "altRequired",
-    });
-  });
-
-  it("forbids alt when decorative", () => {
-    expect(validateImageUpload(webp(100), "something", true)).toEqual({
-      ok: false,
+      index: 0,
       reason: "altNotEmpty",
     });
   });
 });
 
-describe("buildImageUploadFormData", () => {
-  it("assembles the exact CMS_IMAGE multipart body", () => {
-    const form = buildImageUploadFormData(webp(100), "  A photo  ", false);
+describe("validatePdf", () => {
+  it("accepts a pdf under the limit", () => {
+    expect(validatePdf(pdf(1000))).toEqual({ ok: true });
+  });
+  it("rejects a missing file", () => {
+    expect(validatePdf(null)).toEqual({ ok: false, index: null, reason: "missing" });
+  });
+  it("rejects a non-pdf type", () => {
+    expect(validatePdf(webp(100))).toEqual({ ok: false, index: null, reason: "type" });
+  });
+  it("rejects an oversized pdf", () => {
+    expect(validatePdf(pdf(MAX_PDF_BYTES + 1))).toEqual({ ok: false, index: null, reason: "size" });
+  });
+});
+
+describe("buildImageBatchFormData", () => {
+  it("assembles one CMS_IMAGE intent + one file per row, in order", () => {
+    const form = buildImageBatchFormData([img("  First  "), img("", true)]);
     const metadata = JSON.parse(form.get("metadata") as string);
     expect(metadata).toEqual({
       policy: "CMS_IMAGE",
-      uploadCount: 1,
-      intents: [{ policy: "CMS_IMAGE", alt: "A photo", isDecorative: false }],
+      uploadCount: 2,
+      intents: [
+        { policy: "CMS_IMAGE", alt: "First", isDecorative: false },
+        { policy: "CMS_IMAGE", alt: "", isDecorative: true },
+      ],
     });
-    expect(form.get("files")).toBeInstanceOf(File);
-    // Only the two expected multipart keys are present (the route rejects any others).
-    expect([...new Set([...form.keys()])].sort()).toEqual(["files", "metadata"]);
+    expect(form.getAll("files")).toHaveLength(2);
+    expect([...new Set(form.keys())].sort()).toEqual(["files", "metadata"]);
   });
 
-  it("sends an empty alt for a decorative image regardless of the field value", () => {
-    const form = buildImageUploadFormData(webp(100), "leftover text", true);
-    const metadata = JSON.parse(form.get("metadata") as string);
-    expect(metadata.intents[0]).toEqual({ policy: "CMS_IMAGE", alt: "", isDecorative: true });
+  it("forces empty alt for a decorative image regardless of the field", () => {
+    const form = buildImageBatchFormData([img("leftover", true)]);
+    expect(JSON.parse(form.get("metadata") as string).intents[0].alt).toBe("");
+  });
+});
+
+describe("buildPdfFormData", () => {
+  it("assembles the single PUBLIC_PDF body with no accessibility metadata", () => {
+    const form = buildPdfFormData(pdf(500));
+    expect(JSON.parse(form.get("metadata") as string)).toEqual({
+      policy: "PUBLIC_PDF",
+      uploadCount: 1,
+      intents: [{ policy: "PUBLIC_PDF", alt: "", isDecorative: false }],
+    });
+    expect(form.getAll("files")).toHaveLength(1);
   });
 });
 
 describe("uploadFailureKey — no raw code reaches the UI", () => {
   it("maps known codes and collapses unknown to UNAVAILABLE", () => {
     expect(uploadFailureKey("UPLOAD_FAILED")).toBe("error.UPLOAD_FAILED");
-    expect(uploadFailureKey("VALIDATION_FAILED")).toBe("error.VALIDATION_FAILED");
     expect(uploadFailureKey("SOMETHING_ELSE")).toBe("error.UNAVAILABLE");
     expect(uploadFailureKey(undefined)).toBe("error.UNAVAILABLE");
   });
@@ -97,11 +131,12 @@ describe("component wiring and i18n", () => {
     "utf8",
   );
 
-  it("posts multipart to the upload route same-origin, images only", () => {
+  it("posts multipart to the upload route same-origin, with image and pdf policies", () => {
     expect(source).toContain('"/api/admin/media/upload"');
     expect(source).toContain('credentials: "same-origin"');
-    expect(ACCEPTED_IMAGE_TYPE).toBe("image/webp");
-    expect(source).toContain("accept={ACCEPTED_IMAGE_TYPE}");
+    expect(source).toContain('accept={ACCEPTED_IMAGE_TYPE}');
+    expect(source).toContain('accept={ACCEPTED_PDF_TYPE}');
+    expect(source).toContain("multiple");
   });
 
   it("refreshes the grid on success", () => {
@@ -122,7 +157,7 @@ describe("component wiring and i18n", () => {
       const raw = readFileSync(path.join(process.cwd(), `messages/${locale}.json`), "utf8");
       return flatten(JSON.parse(raw).AdminMediaUpload).sort();
     });
-    expect(id.length).toBeGreaterThan(15);
+    expect(id.length).toBeGreaterThan(20);
     expect(en).toEqual(id);
     expect(ar).toEqual(id);
 
@@ -130,6 +165,7 @@ describe("component wiring and i18n", () => {
       readFileSync(path.join(process.cwd(), "messages/ar.json"), "utf8"),
     ).AdminMediaUpload;
     expect(arBlock.title).toMatch(/[؀-ۿ]/);
+    expect(arBlock.policy.PUBLIC_PDF).toBeTruthy();
     for (const code of ["SESSION_INVALID", "UPLOAD_FAILED", "UNAVAILABLE"]) {
       expect(arBlock.error[code]).toBeTruthy();
     }
