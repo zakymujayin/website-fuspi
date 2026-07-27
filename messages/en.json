@@ -239,6 +239,12 @@
     "submitUpdate": "Save changes",
     "submitting": "Saving…",
     "cancel": "Cancel",
+    "autosave": {
+      "saving": "Autosaving draft…",
+      "saved": "Autosaved {time}",
+      "conflict": "The version changed elsewhere. Reload the page.",
+      "error": "Autosave failed. Your changes are not saved yet."
+    },
     "locale": {
       "id": "Indonesian",
       "en": "English",

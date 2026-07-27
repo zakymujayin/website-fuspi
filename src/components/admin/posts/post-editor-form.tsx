@@ -2,7 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { useId, useState, type FormEvent } from "react";
+import { useCallback, useEffect, useId, useRef, useState, type FormEvent } from "react";
+
+import { ADMIN_POST_AUTOSAVE_INTERVAL_MS } from "@/contracts/post-admin";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,6 +26,7 @@ import { RichTextField } from "./post-rich-text-field";
 import { FIELD_SCOPED_FAILURES, failureMessageKey, isFailureCode } from "./post-editor-errors";
 import {
   POST_EDITOR_LOCALES,
+  buildAutosavePayload,
   buildCreatePayload,
   buildUpdatePayload,
   collectFieldErrors,
@@ -44,7 +47,16 @@ type PostEditorFormProps = {
   /** Current cover (edit mode) so the picker shows it without a refetch. */
   initialCover?: CoverPreview | null;
   uploadPublicUrl: string;
+  /** Report a version bump from autosave up to the shared owner (edit mode). */
+  onVersionChange?: (version: number) => void;
 };
+
+type AutosaveState =
+  | { status: "idle" }
+  | { status: "saving" }
+  | { status: "saved"; at: number }
+  | { status: "conflict" }
+  | { status: "error" };
 
 const CREATE_CARRIED: PostEditorCarriedFields = {
   categoryId: null,
@@ -60,6 +72,7 @@ export function PostEditorForm({
   carried,
   initialCover = null,
   uploadPublicUrl,
+  onVersionChange,
 }: PostEditorFormProps) {
   // Resolve strings on the client. This form is a Client Component, so it cannot receive functions
   // (e.g. a label formatter) across the server/client boundary — doing so crashes the page render.
@@ -70,6 +83,72 @@ export function PostEditorForm({
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [autosave, setAutosave] = useState<AutosaveState>({ status: "idle" });
+
+  // Everything the autosave timer needs, read through a ref so the interval always sees the latest
+  // draft/version without being torn down and rebuilt on every keystroke.
+  const latest = useRef({ draft, expectedVersion, submitting, onVersionChange });
+  useEffect(() => {
+    latest.current = { draft, expectedVersion, submitting, onVersionChange };
+  });
+  // Serialised snapshot of the last persisted draft; a mismatch means "dirty, worth autosaving".
+  const savedSnapshotRef = useRef(JSON.stringify(initialDraft ?? emptyDraft()));
+  // Once a conflict is seen, stop autosaving — the local version can no longer be trusted.
+  const stoppedRef = useRef(false);
+
+  const runAutosave = useCallback(async () => {
+    if (mode !== "edit" || !postId || stoppedRef.current) return;
+    const { draft: current, expectedVersion: version, submitting: busy, onVersionChange: report } =
+      latest.current;
+    // Never autosave over an in-flight manual submit, and skip when nothing changed.
+    if (busy) return;
+    const snapshot = JSON.stringify(current);
+    if (snapshot === savedSnapshotRef.current) return;
+
+    const parsed = buildAutosavePayload(current, postId, version ?? 0, carried ?? CREATE_CARRIED);
+    // An invalid draft is not an autosave error; the manual save surfaces the field messages.
+    if (!parsed.success) return;
+
+    setAutosave({ status: "saving" });
+    try {
+      const response = await fetch("/api/admin/posts", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({ action: "AUTOSAVE", payload: parsed.data }),
+      });
+      const result: unknown = await response.json().catch(() => null);
+      if (
+        response.ok
+        && typeof result === "object"
+        && result !== null
+        && (result as { ok?: unknown }).ok === true
+      ) {
+        savedSnapshotRef.current = snapshot;
+        const nextVersion = (result as { version?: unknown }).version;
+        if (typeof nextVersion === "number") report?.(nextVersion);
+        setAutosave({ status: "saved", at: Date.now() });
+        return;
+      }
+      const code = typeof result === "object" && result !== null
+        ? (result as { code?: unknown }).code
+        : undefined;
+      if (code === "VERSION_CONFLICT") {
+        stoppedRef.current = true;
+        setAutosave({ status: "conflict" });
+      } else {
+        setAutosave({ status: "error" });
+      }
+    } catch {
+      setAutosave({ status: "error" });
+    }
+  }, [mode, postId, carried]);
+
+  useEffect(() => {
+    if (mode !== "edit") return;
+    const id = window.setInterval(() => void runAutosave(), ADMIN_POST_AUTOSAVE_INTERVAL_MS);
+    return () => window.clearInterval(id);
+  }, [mode, runAutosave]);
 
   function updateTranslation(
     locale: PostEditorLocale,
@@ -272,6 +351,29 @@ export function PostEditorForm({
         <Button type="button" variant="outline" onClick={() => router.push(listHref)}>
           {t("cancel")}
         </Button>
+        {mode === "edit" ? (
+          <p
+            role="status"
+            aria-live="polite"
+            className="text-sm text-muted-foreground"
+            data-autosave-status={autosave.status}
+          >
+            {autosave.status === "saving"
+              ? t("autosave.saving")
+              : autosave.status === "saved"
+                ? t("autosave.saved", {
+                    time: new Date(autosave.at).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    }),
+                  })
+                : autosave.status === "conflict"
+                  ? t("autosave.conflict")
+                  : autosave.status === "error"
+                    ? t("autosave.error")
+                    : null}
+          </p>
+        ) : null}
       </div>
     </form>
   );

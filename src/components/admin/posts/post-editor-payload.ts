@@ -1,4 +1,5 @@
 import {
+  AdminPostAutosavePayloadSchema,
   AdminPostCreatePayloadSchema,
   AdminPostUpdatePayloadSchema,
 } from "@/contracts/post-admin";
@@ -101,6 +102,30 @@ export function buildUpdatePayload(
   carried: PostEditorCarriedFields,
 ) {
   return AdminPostUpdatePayloadSchema.safeParse({
+    postId,
+    expectedVersion,
+    slug: draft.slug.trim(),
+    isFeatured: draft.isFeatured,
+    categoryId: carried.categoryId,
+    coverMediaId: draft.coverMediaId,
+    tagIds: [...carried.tagIds],
+    translations: toTranslationsInput(draft),
+  });
+}
+
+/**
+ * Build the frozen AUTOSAVE payload. Identical mutable fields to UPDATE plus the AUTOSAVE_DRAFT
+ * intent; the transport persists the draft without changing its publication status and bumps the
+ * version, so autosave must always send the *current* shared `expectedVersion`.
+ */
+export function buildAutosavePayload(
+  draft: PostEditorDraft,
+  postId: string,
+  expectedVersion: number,
+  carried: PostEditorCarriedFields,
+) {
+  return AdminPostAutosavePayloadSchema.safeParse({
+    intent: "AUTOSAVE_DRAFT",
     postId,
     expectedVersion,
     slug: draft.slug.trim(),
