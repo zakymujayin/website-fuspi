@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { PostDeleteAction } from "./post-delete-action";
 import { PostEditorForm } from "./post-editor-form";
@@ -44,9 +44,13 @@ export function PostEditorShell({
 
   // Adopt the server's version whenever it advances (after a publication/delete router.refresh()).
   // Between refreshes `initialVersion` is unchanged, so an autosave-advanced local version is kept.
-  useEffect(() => {
+  // This adjusts state during render (the React-sanctioned pattern) rather than in an effect, so it
+  // takes effect without an extra render and does not trip `react-hooks/set-state-in-effect`.
+  const [prevInitialVersion, setPrevInitialVersion] = useState(initialVersion);
+  if (initialVersion !== prevInitialVersion) {
+    setPrevInitialVersion(initialVersion);
     setVersion(initialVersion);
-  }, [initialVersion]);
+  }
 
   return (
     <>
