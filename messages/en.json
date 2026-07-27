@@ -312,5 +312,19 @@
       "MEDIA_INVALID": "The linked media is not valid.",
       "UNAVAILABLE": "Your changes could not be saved right now. Please try again shortly."
     }
+  },
+  "AdminPostCoverPicker": {
+    "label": "Cover image",
+    "description": "Choose a cover image from the Media Library for this news item.",
+    "none": "No cover yet",
+    "selected": "Cover selected",
+    "choose": "Choose cover",
+    "change": "Change cover",
+    "clear": "Remove cover",
+    "listLabel": "Images available as cover",
+    "selectLabel": "Select {name} as the cover",
+    "loading": "Loading images…",
+    "loadError": "Could not load images. Try again.",
+    "empty": "No images in the Media Library yet."
   }
 }

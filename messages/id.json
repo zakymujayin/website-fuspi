@@ -312,5 +312,19 @@
       "MEDIA_INVALID": "Media yang tertaut tidak valid.",
       "UNAVAILABLE": "Perubahan tidak dapat disimpan saat ini. Coba lagi beberapa saat lagi."
     }
+  },
+  "AdminPostCoverPicker": {
+    "label": "Gambar sampul",
+    "description": "Pilih gambar sampul dari Pustaka Media untuk berita ini.",
+    "none": "Belum ada sampul",
+    "selected": "Sampul terpilih",
+    "choose": "Pilih sampul",
+    "change": "Ganti sampul",
+    "clear": "Hapus sampul",
+    "listLabel": "Daftar gambar untuk sampul",
+    "selectLabel": "Pilih {name} sebagai sampul",
+    "loading": "Memuat gambar…",
+    "loadError": "Gagal memuat gambar. Coba lagi.",
+    "empty": "Belum ada gambar di Pustaka Media."
   }
 }

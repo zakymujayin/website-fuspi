@@ -36,7 +36,11 @@ export default async function NewPostPage({ params }: NewPostPageProps) {
         <p className="mt-2 max-w-prose text-sm text-slate-500">{t("createDescription")}</p>
       </div>
 
-      <PostEditorForm mode="create" listHref="/admin/posts" />
+      <PostEditorForm
+        mode="create"
+        listHref="/admin/posts"
+        uploadPublicUrl={process.env.UPLOAD_PUBLIC_URL ?? ""}
+      />
     </section>
   );
 }

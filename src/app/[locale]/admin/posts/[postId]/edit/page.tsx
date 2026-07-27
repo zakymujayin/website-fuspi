@@ -95,9 +95,10 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
         expectedVersion={view.version}
         carried={{
           categoryId: view.categoryId,
-          coverMediaId: view.coverMediaId,
           tagIds: view.tagIds,
         }}
+        initialCover={view.cover}
+        uploadPublicUrl={process.env.UPLOAD_PUBLIC_URL ?? ""}
       />
 
       <PostDeleteAction

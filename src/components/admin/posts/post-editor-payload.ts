@@ -16,17 +16,19 @@ export type PostEditorTranslationDraft = {
 export type PostEditorDraft = {
   slug: string;
   isFeatured: boolean;
+  /** Editable via the cover picker; null means no cover. */
+  coverMediaId: string | null;
   translations: Record<PostEditorLocale, PostEditorTranslationDraft>;
 };
 
 /**
- * Fields this task cannot edit but must preserve. `AdminPostUpdatePayloadSchema` requires all three
- * on every update, so an edit that omitted them would silently erase an existing category, cover
- * image, or tags. They are carried through untouched from the loaded editor view.
+ * Fields the editor still cannot edit but must preserve. `AdminPostUpdatePayloadSchema` requires
+ * them on every update, so an edit that omitted them would silently erase an existing category or
+ * tags. They are carried through untouched from the loaded editor view. (coverMediaId used to live
+ * here too; it is now editable via the cover picker and lives on `PostEditorDraft`.)
  */
 export type PostEditorCarriedFields = {
   categoryId: string | null;
-  coverMediaId: string | null;
   tagIds: readonly string[];
 };
 
@@ -40,6 +42,7 @@ export function emptyDraft(): PostEditorDraft {
   return {
     slug: "",
     isFeatured: false,
+    coverMediaId: null,
     translations: {
       id: { ...EMPTY_TRANSLATION },
       en: { ...EMPTY_TRANSLATION },
@@ -83,7 +86,7 @@ export function buildCreatePayload(draft: PostEditorDraft) {
     slug: draft.slug.trim(),
     isFeatured: draft.isFeatured,
     categoryId: null,
-    coverMediaId: null,
+    coverMediaId: draft.coverMediaId,
     tagIds: [],
     translations: toTranslationsInput(draft),
     publication: { intent: "SAVE_DRAFT" },
@@ -103,7 +106,7 @@ export function buildUpdatePayload(
     slug: draft.slug.trim(),
     isFeatured: draft.isFeatured,
     categoryId: carried.categoryId,
-    coverMediaId: carried.coverMediaId,
+    coverMediaId: draft.coverMediaId,
     tagIds: [...carried.tagIds],
     translations: toTranslationsInput(draft),
   });
