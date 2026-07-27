@@ -88,8 +88,10 @@ describe("shared-version wiring (source contracts)", () => {
   });
 
   it("the shell adopts a newer server version after a refresh", () => {
+    // Adoption happens during render (the React-sanctioned pattern), not in an effect, so it does not
+    // trip react-hooks/set-state-in-effect: a prevInitialVersion sentinel detects the advance.
     expect(shell).toContain("setVersion(initialVersion)");
-    expect(shell).toContain("}, [initialVersion]);");
+    expect(shell).toContain("initialVersion !== prevInitialVersion");
   });
 
   it("the edit page renders the shell, not the three components directly", () => {
