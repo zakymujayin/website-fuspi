@@ -7,6 +7,9 @@ tester: deepseek
 base_sha: e4d5b5c
 allowed_paths:
   - "src/components/admin/posts/post-editor-shell.tsx"
+  # Source-coupled: this test greps the shell source for the version-adoption code, so it changes
+  # with the shell. Extended in-task rather than deferred to keep `npm test` green.
+  - "tests/m3/ui/admin-post-autosave.test.tsx"
   - "coordination/handoffs/M3-CLAUDE-EDITOR-SHELL-LINT-FIX-claude.md"
 forbidden_paths:
   - ".env*"

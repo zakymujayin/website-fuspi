@@ -254,21 +254,20 @@ ticking off the carried-evidence list.
    is easy to get subtly wrong and warrants GPT ownership plus the Next 16 tracing docs under
    `node_modules/next/dist/docs/`. GPT lane.
 
-2. **`npm run lint` fails (exit 1) — `react-hooks/set-state-in-effect` in
-   `src/components/admin/posts/post-editor-shell.tsx`.** Found 2026-07-27 while gating the feature #4
-   E2E merge. The rule flags the autosave shell's `useEffect(() => { setVersion(initialVersion); },
-   [initialVersion])` — the intentional "adopt the server version after a `router.refresh()`" pattern.
-   It is **pre-existing**: present at `656480a` (the autosave merge), *before* the E2E merge, which is
-   test-only and lint-clean. So the autosave task's recorded "lint 0 errors" gate did not actually
-   hold — that task's final combined gate command was OOM-killed (Exit 137) before lint completed, so
-   the clean-lint claim was never truly confirmed.
+### Resolved: the `react-hooks/set-state-in-effect` lint failure (2026-07-28)
 
-   Not fixed by the stand-in: `post-editor-shell.tsx` is Claude/UI lane and is the load-bearing owner
-   of the shared optimistic-locking version, so changing how it seeds/updates `version` risks the
-   autosave-vs-manual-save correctness the shell exists to guarantee. The idiomatic fixes (a `key` to
-   remount on version change, or deriving instead of mirroring the prop) need their own Claude-lane
-   task with a re-run of the autosave browser proof. Per the human directive to defer error/warning
-   cleanup, this is left for Codex/Claude UI to fix before the exit gate. Claude/UI lane.
+`npm run lint` was failing (exit 1) on `react-hooks/set-state-in-effect` in
+`src/components/admin/posts/post-editor-shell.tsx` — the autosave shell's
+`useEffect(() => { setVersion(initialVersion); }, [initialVersion])` version-adoption. It was
+**pre-existing** (present at `656480a`, the autosave merge, before the feature #4 E2E merge, which was
+test-only and lint-clean); the autosave task's recorded "lint 0 errors" never truly held because that
+task's final combined gate was OOM-killed (Exit 137) before lint completed.
+
+Fixed under `M3-CLAUDE-EDITOR-SHELL-LINT-FIX` (merge `7ddb95f`) with the React-sanctioned
+adjust-state-during-render pattern (a `prevInitialVersion` sentinel), no behavior change. The
+source-coupled autosave unit test was updated in the same task. Verified: `tsc` 0, **`npm run lint`
+exit 0**, `npm test` 738/738, `npm run build` Compiled successfully, and the editor browser suite
+15/15 (chromium) including the autosave shared-version proof. Codex must re-review on return.
 
 ### Withdrawn: the "auth credentials 503" defect was never real
 
