@@ -326,5 +326,34 @@
     "loading": "Loading images…",
     "loadError": "Could not load images. Try again.",
     "empty": "No images in the Media Library yet."
+  },
+  "AdminMediaUpload": {
+    "title": "Upload image",
+    "description": "Upload a WebP image to the Media Library (max 5 MB).",
+    "file": "Image file",
+    "fileHint": "WebP format, up to 5 MB.",
+    "decorative": "Decorative image (no alternative text)",
+    "alt": "Alternative text",
+    "altHint": "Briefly describe the image for screen readers.",
+    "action": "Upload",
+    "uploading": "Uploading…",
+    "success": "Image uploaded.",
+    "validation": {
+      "missing": "Choose an image file first.",
+      "type": "Only WebP files are allowed.",
+      "size": "The image exceeds 5 MB.",
+      "altRequired": "Enter alternative text or mark the image decorative.",
+      "altNotEmpty": "A decorative image must have no alternative text."
+    },
+    "error": {
+      "SESSION_INVALID": "Your session has ended. Sign in again and retry.",
+      "CSRF_INVALID": "The request could not be verified. Reload the page and try again.",
+      "REQUEST_INVALID": "The request could not be processed. Check your file and try again.",
+      "VALIDATION_FAILED": "The file or data is invalid. Check and try again.",
+      "NOT_FOUND": "The resource was not found.",
+      "MEDIA_IN_USE": "The media is in use.",
+      "UPLOAD_FAILED": "The upload could not be processed. Try again.",
+      "UNAVAILABLE": "The upload cannot be processed right now. Please try again shortly."
+    }
   }
 }
