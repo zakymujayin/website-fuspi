@@ -106,8 +106,9 @@ return-to-draft, archive) via the existing PUBLICATION command, gated on `capabi
 verified in a real browser. Delete (with an accessible confirmation dialog, gated on `capabilities.delete`, audit-logged) is
 also merged, so the reference slice's admin write path is now **full CRUD**: create → edit →
 publish/schedule/archive → delete, each verified in a real browser. The editor now also has a **cover image picker** (choose/clear a cover from the Media Library;
-coverMediaId is editable via the draft), verified in a real browser. Remaining Post/Media UI:
-media upload UI, autosave, and rich text — each its own manifest.
+coverMediaId is editable via the draft), verified in a real browser. Single-image **media upload** is merged too (WebP, alt/decorative, via the existing upload route),
+closing the loop upload → picker → cover, verified in a real browser. Remaining Post/Media UI:
+batch/PDF upload, autosave, and rich text — each its own manifest.
 
 ## Carried mandatory security evidence
 
