@@ -165,8 +165,11 @@ fixed inside the spec:
 `isSameOriginRequest` (`src/lib/auth/runtime/csrf.ts`) rejects a mismatched `Origin` as
 `CSRF_INVALID`. The `127.0.0.1` default baseURL in `playwright.config.ts` is inconsistent with
 `AUTH_URL=localhost`; reconciling that (GPT lane, root config) would let the suite pass on the default
-without an env override. The same `domain:"localhost"` coupling still exists in
-`admin-media-library-browse.spec.ts` and `admin-post-list-browse.spec.ts` (out of this task's paths).
+without an env override. The two browse specs (`admin-media-library-browse.spec.ts`,
+`admin-post-list-browse.spec.ts`) had the mirror-image coupling (`domain:"127.0.0.1"`); both were made
+host-agnostic under `M3-DEEPSEEK-ADMIN-E2E-HOST-CONSISTENCY` (merge below), so the whole `e2e/m3`
+admin suite now runs at one host (`localhost:3004`) — 85/86 on the browse specs, the one failure being
+the pre-existing focus-order defect recorded above.
 
 With feature #4 done, all Post/Media reference-slice UI surfaces (CRUD, publish lifecycle, cover,
 single + batch/PDF upload, rich text, autosave) now have executable browser evidence — **subject to
@@ -253,6 +256,18 @@ ticking off the carried-evidence list.
    (symlink and `realpath` checks) and sits in the GPT storage hotspot. A tracing workaround there
    is easy to get subtly wrong and warrants GPT ownership plus the Next 16 tracing docs under
    `node_modules/next/dist/docs/`. GPT lane.
+
+2. **Media Library browse keyboard focus-order test fails** —
+   `e2e/m3/admin-media-library-browse.spec.ts:646` "keyboard focus order accounts for skip link and
+   verifies visible focus indicator" fails at `expect(firstFilter).toBeFocused()` (line 661) with
+   `Received: inactive`. Found 2026-07-28 while making the admin browse specs host-consistent. It
+   fails **identically at both `127.0.0.1` and `localhost:3004`** (2/2 each), so it is independent of
+   the cookie-host change and of the run host. The media page renders the filter tabs *before* the
+   upload control, so nothing focusable was inserted ahead of the filter nav — this is a fragile
+   focus-order assertion whose expected `Tab → skip link → Tab → first filter link` sequence no longer
+   holds against the admin-layout chrome. Needs a UI/a11y-lane decision: repair the skip-link/focus
+   order if it is a real regression, or update the test's expected Tab sequence. Not fixed under the
+   cookie task (would widen it). Claude/UI (a11y) lane.
 
 ### Resolved: the `react-hooks/set-state-in-effect` lint failure (2026-07-28)
 
