@@ -137,6 +137,42 @@ hardening of every mutation surface** (publish/schedule/archive/return-to-draft,
 picker, batch/PDF upload, rich text, autosave), which supplies the "executable mutation browser
 evidence" the exit gate requires; the authoritative run is CI, not this memory-constrained machine.
 
+**Update (2026-07-27, stand-in) — feature #4, Post mutation E2E hardening merged (`4b82ed4`):**
+`M3-DEEPSEEK-POST-MUTATIONS-E2E` extends `e2e/m3/admin-post-editor.spec.ts` from 8 to 15 test bodies
+(× chromium + mobile = **30/30 passing** at `--workers=1`), covering every post-editor mutation
+surface in a real browser: publish-now (`publishedAt <= now()`, version bump), schedule (future +
+past-time client rejection), archive → return-to-draft, delete via the confirm dialog with an
+`ActivityLog` `operation:"DELETE"` audit and navigation, cover picker set/clear, the rich-text bold
+toolbar round-tripping to sanitized `<strong>`, and the **autosave shared-version proof** (autosave
+1→2 over the real 30s interval, then a manual save 2→3 with no `VERSION_CONFLICT`). This closes the
+"executable mutation browser evidence" exit item for the Post reference slice.
+
+Writing it exposed **three real defects the earlier one-off "browser-verified" claims had missed**
+(CI does not run Playwright, so nothing had driven this suite against the merged rich-text DOM) — all
+fixed inside the spec:
+
+1. The **Tiptap rich-text merge broke the existing editor E2E**: `getByLabel("Judul")` began matching
+   three elements (the title plus the toolbar's "Judul tingkat 2/3" buttons), failing every
+   create/edit case with a strict-mode violation. Fixed with `{ exact: true }`.
+2. The **AR RTL assertion broke**: the Arabic content field is now a `[role=textbox]` contenteditable,
+   not a `<textarea>`, so the dir=rtl count dropped below 3. Fixed by counting the textbox.
+3. A **latent host coupling**: the spec hardcoded `domain:"localhost"`, silently dropped on the
+   config's `127.0.0.1` default, redirecting every admin route to login. Fixed by binding the cookie
+   to the resolved base URL.
+
+**Host requirement:** the suite must run where the browser host equals `AUTH_URL`
+(`http://localhost:3004`), i.e. `PLAYWRIGHT_BASE_URL=http://localhost:3004`, because
+`isSameOriginRequest` (`src/lib/auth/runtime/csrf.ts`) rejects a mismatched `Origin` as
+`CSRF_INVALID`. The `127.0.0.1` default baseURL in `playwright.config.ts` is inconsistent with
+`AUTH_URL=localhost`; reconciling that (GPT lane, root config) would let the suite pass on the default
+without an env override. The same `domain:"localhost"` coupling still exists in
+`admin-media-library-browse.spec.ts` and `admin-post-list-browse.spec.ts` (out of this task's paths).
+
+With feature #4 done, all Post/Media reference-slice UI surfaces (CRUD, publish lifecycle, cover,
+single + batch/PDF upload, rich text, autosave) now have executable browser evidence — **subject to
+the independence gap: Codex and DeepSeek must re-verify on return before any of it counts toward the
+exit gate.**
+
 ## Carried mandatory security evidence
 
 M3 cannot close until executable tests prove:
@@ -217,6 +253,22 @@ ticking off the carried-evidence list.
    (symlink and `realpath` checks) and sits in the GPT storage hotspot. A tracing workaround there
    is easy to get subtly wrong and warrants GPT ownership plus the Next 16 tracing docs under
    `node_modules/next/dist/docs/`. GPT lane.
+
+2. **`npm run lint` fails (exit 1) — `react-hooks/set-state-in-effect` in
+   `src/components/admin/posts/post-editor-shell.tsx`.** Found 2026-07-27 while gating the feature #4
+   E2E merge. The rule flags the autosave shell's `useEffect(() => { setVersion(initialVersion); },
+   [initialVersion])` — the intentional "adopt the server version after a `router.refresh()`" pattern.
+   It is **pre-existing**: present at `656480a` (the autosave merge), *before* the E2E merge, which is
+   test-only and lint-clean. So the autosave task's recorded "lint 0 errors" gate did not actually
+   hold — that task's final combined gate command was OOM-killed (Exit 137) before lint completed, so
+   the clean-lint claim was never truly confirmed.
+
+   Not fixed by the stand-in: `post-editor-shell.tsx` is Claude/UI lane and is the load-bearing owner
+   of the shared optimistic-locking version, so changing how it seeds/updates `version` risks the
+   autosave-vs-manual-save correctness the shell exists to guarantee. The idiomatic fixes (a `key` to
+   remount on version change, or deriving instead of mirroring the prop) need their own Claude-lane
+   task with a re-run of the autosave browser proof. Per the human directive to defer error/warning
+   cleanup, this is left for Codex/Claude UI to fix before the exit gate. Claude/UI lane.
 
 ### Withdrawn: the "auth credentials 503" defect was never real
 
