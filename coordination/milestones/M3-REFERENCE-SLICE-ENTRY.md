@@ -1,6 +1,6 @@
 # M3 Reference Slice Entry
 
-Status: **M3 active — admin transport runtimes, public IA contract, and Claude Media Library browse merged**
+Status: **M3 reference slice feature- and evidence-complete; CI green at `4ab84c4`; awaiting Codex independent review + Turbopack-warning fix (2026-07-29) before the exit contract can be written.** The full public+admin Post/Media/i18n slice — CRUD, publish/schedule/archive/return-to-draft, delete, cover picker, single + batch/PDF upload, Tiptap rich text, and 30s autosave — is built and browser-proven (`e2e/m3/admin-post-editor.spec.ts` 30/30). All nine mandatory security-evidence items map to passing tests (see `coordination/reviews/M3-EXIT-GATE-EVIDENCE-MAP.md`). CI pipeline (lint → typecheck → prisma validate/migrate/seed → test → test:integration → build) is green. Remaining, both Codex-owned: the carried Turbopack build warning and the mandatory independent re-review of all stand-in work.
 
 **Temporary integrator note (2026-07-23 to 2026-07-29):** Codex (GPT) usage limit is exhausted;
 GPT's next scheduled activity is 2026-07-29. Claude Sonnet 5 is standing in as integrator and for
