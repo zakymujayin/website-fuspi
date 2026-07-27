@@ -239,6 +239,12 @@
     "submitUpdate": "Simpan perubahan",
     "submitting": "Menyimpan…",
     "cancel": "Batal",
+    "autosave": {
+      "saving": "Menyimpan draf otomatis…",
+      "saved": "Tersimpan otomatis {time}",
+      "conflict": "Versi berubah di tempat lain. Muat ulang halaman.",
+      "error": "Gagal menyimpan otomatis. Perubahan Anda belum tersimpan."
+    },
     "locale": {
       "id": "Bahasa Indonesia",
       "en": "Bahasa Inggris",

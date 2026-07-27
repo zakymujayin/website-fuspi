@@ -2,9 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 
-import { PostDeleteAction } from "@/components/admin/posts/post-delete-action";
-import { PostEditorForm } from "@/components/admin/posts/post-editor-form";
-import { PostPublicationActions } from "@/components/admin/posts/post-publication-actions";
+import { PostEditorShell } from "@/components/admin/posts/post-editor-shell";
 import { draftFromEditorView } from "@/components/admin/posts/post-editor-view";
 import { AdminPostStateNotice } from "@/components/admin/posts/post-state-notice";
 import { loadAdminPostsSafely } from "@/components/admin/posts/post-safe-load";
@@ -80,32 +78,22 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
         <p className="mt-2 max-w-prose text-sm text-slate-500">{t("editDescription")}</p>
       </div>
 
-      <PostPublicationActions
+      <PostEditorShell
         postId={view.id}
-        expectedVersion={view.version}
-        state={view.publicationState}
-        canPublish={view.capabilities.publish}
-      />
-
-      <PostEditorForm
-        mode="edit"
-        listHref="/admin/posts"
+        initialVersion={view.version}
         initialDraft={draftFromEditorView(view)}
-        postId={view.id}
-        expectedVersion={view.version}
         carried={{
           categoryId: view.categoryId,
           tagIds: view.tagIds,
         }}
         initialCover={view.cover}
         uploadPublicUrl={process.env.UPLOAD_PUBLIC_URL ?? ""}
-      />
-
-      <PostDeleteAction
-        postId={view.id}
-        expectedVersion={view.version}
-        canDelete={view.capabilities.delete}
         listHref="/admin/posts"
+        publicationState={view.publicationState}
+        capabilities={{
+          publish: view.capabilities.publish,
+          delete: view.capabilities.delete,
+        }}
       />
     </section>
   );
