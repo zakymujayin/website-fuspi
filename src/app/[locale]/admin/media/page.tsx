@@ -8,6 +8,7 @@ import { AdminMediaPagination } from "@/components/admin/media/media-pagination"
 import { AdminMediaStateNotice } from "@/components/admin/media/media-state-notice";
 import { normalizeAdminMediaQuery, totalPagesFor } from "@/components/admin/media/media-query";
 import { loadAdminMediaSafely } from "@/components/admin/media/media-safe-load";
+import { MediaUpload } from "@/components/admin/media/media-upload";
 import { decideProtectedRoute, getRequestSession } from "@/lib/auth/runtime/request-session";
 import { parseAppLocale } from "@/lib/auth/runtime/redirect";
 import { listAdminMedia } from "@/lib/content/media-admin-transport";
@@ -56,6 +57,8 @@ export default async function AdminMediaPage({ params, searchParams }: AdminMedi
         </h1>
         <p className="mt-2 max-w-prose text-sm text-slate-500">{t("description")}</p>
       </div>
+
+      <MediaUpload />
 
       {result.ok ? (
         <>

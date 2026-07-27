@@ -326,5 +326,34 @@
     "loading": "Memuat gambar…",
     "loadError": "Gagal memuat gambar. Coba lagi.",
     "empty": "Belum ada gambar di Pustaka Media."
+  },
+  "AdminMediaUpload": {
+    "title": "Unggah gambar",
+    "description": "Unggah gambar WebP untuk Pustaka Media (maksimal 5 MB).",
+    "file": "Berkas gambar",
+    "fileHint": "Format WebP, maksimal 5 MB.",
+    "decorative": "Gambar dekoratif (tanpa teks alternatif)",
+    "alt": "Teks alternatif",
+    "altHint": "Jelaskan gambar secara singkat untuk pembaca layar.",
+    "action": "Unggah",
+    "uploading": "Mengunggah…",
+    "success": "Gambar berhasil diunggah.",
+    "validation": {
+      "missing": "Pilih berkas gambar terlebih dahulu.",
+      "type": "Hanya berkas WebP yang diperbolehkan.",
+      "size": "Ukuran gambar melebihi 5 MB.",
+      "altRequired": "Isi teks alternatif atau tandai sebagai dekoratif.",
+      "altNotEmpty": "Gambar dekoratif tidak boleh memiliki teks alternatif."
+    },
+    "error": {
+      "SESSION_INVALID": "Sesi Anda telah berakhir. Masuk kembali lalu coba lagi.",
+      "CSRF_INVALID": "Permintaan tidak dapat diverifikasi. Muat ulang halaman lalu coba lagi.",
+      "REQUEST_INVALID": "Permintaan tidak dapat diproses. Periksa berkas Anda lalu coba lagi.",
+      "VALIDATION_FAILED": "Berkas atau data tidak valid. Periksa lalu coba lagi.",
+      "NOT_FOUND": "Sumber daya tidak ditemukan.",
+      "MEDIA_IN_USE": "Media sedang digunakan.",
+      "UPLOAD_FAILED": "Unggahan gagal diproses. Coba lagi.",
+      "UNAVAILABLE": "Unggahan tidak dapat diproses saat ini. Coba lagi beberapa saat lagi."
+    }
   }
 }
