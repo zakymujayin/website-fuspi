@@ -128,22 +128,28 @@ test.describe("M3 Post editor QA", () => {
     await database.end();
   });
 
+  // Bind the auth cookie to the base URL's host. A hardcoded `domain: "localhost"` is silently
+  // dropped when the tests run against the config default `http://127.0.0.1:3004`, so every admin
+  // route redirects to the login page and the whole suite fails. Using `url` follows whatever host
+  // `PLAYWRIGHT_BASE_URL`/the config resolves to.
+  const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? "http://127.0.0.1:3004";
   function sessionCookie(token: string) {
-    return { name: "authjs.session-token", value: token, domain: "localhost", path: "/" };
+    return { name: "authjs.session-token", value: token, url: BASE_URL };
   }
 
   function idSection(page: Page) {
-    // The form has one fieldset per locale; the first fieldset with a label "Judul" is Indonesian
-    // Use the nth(0) group containing "Judul" to scope ID content
-    return page.getByRole("group").filter({ has: page.getByLabel("Judul") }).first();
+    // The form has one fieldset per locale; the first fieldset with a label "Judul" is Indonesian.
+    // "Judul" must be matched exactly: the rich-text toolbar adds buttons labelled "Judul tingkat 2"
+    // and "Judul tingkat 3", so a substring match resolves to three elements per section.
+    return page.getByRole("group").filter({ has: page.getByLabel("Judul", { exact: true }) }).first();
   }
 
   async function fillIndonesianFields(page: Page, title: string, slug: string, excerpt: string, content: string) {
-    await page.getByLabel("Slug").fill(slug);
+    await page.getByLabel("Slug", { exact: true }).fill(slug);
     const section = idSection(page);
-    await section.getByLabel("Judul").fill(title);
-    await section.getByLabel("Ringkasan").fill(excerpt);
-    await section.getByLabel("Isi").fill(content);
+    await section.getByLabel("Judul", { exact: true }).fill(title);
+    await section.getByLabel("Ringkasan", { exact: true }).fill(excerpt);
+    await section.getByLabel("Isi", { exact: true }).fill(content);
   }
 
   // ─────────────────────────────────────────────
@@ -238,7 +244,7 @@ test.describe("M3 Post editor QA", () => {
 
     await database.query(`UPDATE "Post" SET "version" = version + 1 WHERE "id" = $1`, [postId]);
 
-    await idSection(page).getByLabel("Judul").fill("Berita Versi Diubah");
+    await idSection(page).getByLabel("Judul", { exact: true }).fill("Berita Versi Diubah");
     await page.getByRole("button", { name: "Simpan perubahan" }).click();
 
     await expect(page.locator("form > [role='alert']")).toBeVisible();
@@ -302,7 +308,7 @@ test.describe("M3 Post editor QA", () => {
     await expect(page.locator("h1")).toContainText("Sunting Berita");
 
     const newTitle = "Title After Edit";
-    await idSection(page).getByLabel("Judul").fill(newTitle);
+    await idSection(page).getByLabel("Judul", { exact: true }).fill(newTitle);
     await page.getByRole("button", { name: "Simpan perubahan" }).click();
     await page.waitForURL(/\/id\/admin\/posts(\?|$)/);
 
@@ -362,7 +368,11 @@ test.describe("M3 Post editor QA", () => {
     await page.context().addCookies([sessionCookie(editorASessionToken)]);
     await page.goto("/ar/admin/posts/new", { waitUntil: "networkidle" });
 
-    const arInputs = page.locator("input[dir='rtl'], textarea[dir='rtl']");
+    // Content is now a Tiptap contenteditable ([role=textbox]), not a <textarea>, so it must be
+    // counted alongside the title and excerpt inputs.
+    const arInputs = page.locator(
+      "input[dir='rtl'], textarea[dir='rtl'], [role='textbox'][dir='rtl']",
+    );
     const count = await arInputs.count();
     expect(count).toBeGreaterThanOrEqual(3); // title, excerpt, content
     await page.context().clearCookies();
@@ -382,6 +392,233 @@ test.describe("M3 Post editor QA", () => {
     expect(text).not.toContain("DATABASE_URL");
     expect(text).not.toContain("storageKey");
     expect(text).not.toContain("stack");
+    await page.context().clearCookies();
+  });
+
+  // ─────────────────────────────────────────────
+  // Post-editor mutation surfaces added after the basic editor.
+  // EDITOR-A owns every seeded post, and the RBAC matrix grants EDITOR POST
+  // PUBLISH/SCHEDULE/DELETE on OWN posts, so the existing fixture has full write capability here.
+  // ─────────────────────────────────────────────
+
+  type PostRow = {
+    id: string;
+    slug: string;
+    status: string;
+    version: number;
+    publishedAt: string | null;
+    coverMediaId: string | null;
+  };
+
+  async function seedOwnedPost(
+    slugTag: string,
+    status: "DRAFT" | "PUBLISHED" | "ARCHIVED",
+    publishedAt: string | null,
+    withCover: boolean,
+  ): Promise<{ postId: string; slug: string }> {
+    const postId = randomUUID();
+    createdPostIds.push(postId);
+    const slug = `${marker}-${slugTag}-${Date.now()}`;
+    await database.query(
+      `INSERT INTO "Post" ("id","slug","type","status","authorId","contentOwnerId","categoryId","coverMediaId","isFeatured","version","publishedAt","createdAt","updatedAt") VALUES ($1,$2,'BERITA',$3,$4,$4,$5,$6,false,1,$7,NOW(),NOW())`,
+      [postId, slug, status, editorAId, categoryId, withCover ? mediaId : null, publishedAt],
+    );
+    await database.query(
+      `INSERT INTO "PostTranslation" ("id","locale","title","excerpt","content","status","sourceVersion","postId") VALUES ($1,'id',$2,'Ringkasan QA','<p>Isi</p>','DRAFT',1,$3)`,
+      [randomUUID(), `Judul ${slugTag}`, postId],
+    );
+    return { postId, slug };
+  }
+
+  async function pollPost(postId: string, until: (row: PostRow) => boolean): Promise<PostRow> {
+    const sql = `SELECT "id","slug","status","version","publishedAt","coverMediaId" FROM "Post" WHERE "id" = $1`;
+    let result = await database.query(sql, [postId]);
+    for (let i = 0; i < 30 && ((result.rowCount ?? 0) === 0 || !until(result.rows[0] as PostRow)); i += 1) {
+      await new Promise((r) => setTimeout(r, 200));
+      result = await database.query(sql, [postId]);
+    }
+    return result.rows[0] as PostRow;
+  }
+
+  // ─────────────────────────────────────────────
+  // 9. PUBLISH NOW
+  // ─────────────────────────────────────────────
+  test("publishes a draft now, stamps publishedAt, and bumps the version", async ({ page }) => {
+    await page.context().addCookies([sessionCookie(editorASessionToken)]);
+    const { postId } = await seedOwnedPost("publish", "DRAFT", null, false);
+
+    await page.goto(`/id/admin/posts/${postId}/edit`, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Terbitkan sekarang" }).click();
+
+    const row = await pollPost(postId, (r) => r.status === "PUBLISHED");
+    expect(row.status).toBe("PUBLISHED");
+    expect(row.version).toBe(2);
+    expect(row.publishedAt).not.toBeNull();
+    expect(new Date(row.publishedAt as string).getTime()).toBeLessThanOrEqual(Date.now() + 5_000);
+
+    const main = (await page.locator("main").textContent()) ?? "";
+    expect(main).not.toContain("PUBLICATION");
+    expect(main).not.toContain("Prisma");
+    await page.context().clearCookies();
+  });
+
+  // ─────────────────────────────────────────────
+  // 10. SCHEDULE (future) + client rejection of a past time
+  // ─────────────────────────────────────────────
+  test("schedules a draft for a future time and rejects a past time client-side", async ({ page }) => {
+    await page.context().addCookies([sessionCookie(editorASessionToken)]);
+    const { postId } = await seedOwnedPost("schedule", "DRAFT", null, false);
+
+    await page.goto(`/id/admin/posts/${postId}/edit`, { waitUntil: "networkidle" });
+
+    // A past time is rejected before any request leaves the browser.
+    await page.getByLabel("Jadwalkan terbit pada").fill("2020-01-01T09:00");
+    await page.getByRole("button", { name: "Jadwalkan" }).click();
+    await expect(page.getByText("Waktu terbit harus di masa depan.")).toBeVisible();
+    const stillDraft = await database.query(`SELECT "status" FROM "Post" WHERE "id" = $1`, [postId]);
+    expect(stillDraft.rows[0].status).toBe("DRAFT");
+
+    // A future time schedules: PUBLISHED status with a future publishedAt (SCHEDULED display state).
+    await page.getByLabel("Jadwalkan terbit pada").fill("2035-06-01T09:00");
+    await page.getByRole("button", { name: "Jadwalkan" }).click();
+    const scheduled = await pollPost(postId, (r) => r.status === "PUBLISHED");
+    expect(scheduled.status).toBe("PUBLISHED");
+    expect(new Date(scheduled.publishedAt as string).getTime()).toBeGreaterThan(Date.now());
+    await page.context().clearCookies();
+  });
+
+  // ─────────────────────────────────────────────
+  // 11. ARCHIVE then RETURN TO DRAFT
+  // ─────────────────────────────────────────────
+  test("archives a published post, then returns the archived post to draft", async ({ page }) => {
+    await page.context().addCookies([sessionCookie(editorASessionToken)]);
+    const past = new Date(Date.now() - 3_600_000).toISOString();
+    const { postId } = await seedOwnedPost("lifecycle", "PUBLISHED", past, false);
+
+    await page.goto(`/id/admin/posts/${postId}/edit`, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Arsipkan" }).click();
+    const archived = await pollPost(postId, (r) => r.status === "ARCHIVED");
+    expect(archived.status).toBe("ARCHIVED");
+
+    // Reload so the actions pick up the new version and the ARCHIVED transition set.
+    await page.reload({ waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Kembalikan ke draf" }).click();
+    const returned = await pollPost(postId, (r) => r.status === "DRAFT");
+    expect(returned.status).toBe("DRAFT");
+    await page.context().clearCookies();
+  });
+
+  // ─────────────────────────────────────────────
+  // 12. DELETE via confirm dialog + audit + navigation
+  // ─────────────────────────────────────────────
+  test("deletes an owned post via the confirm dialog, audits it, and returns to the list", async ({ page }) => {
+    await page.context().addCookies([sessionCookie(editorASessionToken)]);
+    const { postId } = await seedOwnedPost("delete", "DRAFT", null, false);
+
+    await page.goto(`/id/admin/posts/${postId}/edit`, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Hapus berita" }).click();
+    await expect(page.getByText("Hapus berita ini?")).toBeVisible();
+    await page.getByRole("button", { name: "Ya, hapus" }).click();
+
+    await page.waitForURL(/\/id\/admin\/posts(\?|$)/);
+
+    let gone = await database.query(`SELECT "id" FROM "Post" WHERE "id" = $1`, [postId]);
+    for (let i = 0; i < 30 && (gone.rowCount ?? 0) > 0; i += 1) {
+      await new Promise((r) => setTimeout(r, 200));
+      gone = await database.query(`SELECT "id" FROM "Post" WHERE "id" = $1`, [postId]);
+    }
+    expect(gone.rowCount).toBe(0);
+
+    const audit = await database.query(
+      `SELECT "action","metadata" FROM "ActivityLog" WHERE "resourceType" = 'Post' AND "resourceId" = $1`,
+      [postId],
+    );
+    expect(audit.rowCount ?? 0).toBeGreaterThanOrEqual(1);
+    const hasDelete = audit.rows.some(
+      (r: { metadata: { operation?: string } | null }) => (r.metadata?.operation ?? null) === "DELETE",
+    );
+    expect(hasDelete).toBe(true);
+    await page.context().clearCookies();
+  });
+
+  // ─────────────────────────────────────────────
+  // 13. COVER PICKER — set then clear
+  // ─────────────────────────────────────────────
+  test("sets and clears the cover image through the picker", async ({ page }) => {
+    await page.context().addCookies([sessionCookie(editorASessionToken)]);
+    const { postId } = await seedOwnedPost("cover", "DRAFT", null, false);
+
+    await page.goto(`/id/admin/posts/${postId}/edit`, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Pilih sampul" }).click();
+    await page.getByRole("button", { name: `Pilih ${marker}-cover.png sebagai sampul` }).click();
+    await page.getByRole("button", { name: "Simpan perubahan" }).click();
+    await page.waitForURL(/\/id\/admin\/posts(\?|$)/);
+    const withCover = await pollPost(postId, (r) => r.coverMediaId === mediaId);
+    expect(withCover.coverMediaId).toBe(mediaId);
+
+    // Re-open and clear the cover.
+    await page.goto(`/id/admin/posts/${postId}/edit`, { waitUntil: "networkidle" });
+    await page.getByRole("button", { name: "Hapus sampul" }).click();
+    await page.getByRole("button", { name: "Simpan perubahan" }).click();
+    await page.waitForURL(/\/id\/admin\/posts(\?|$)/);
+    const cleared = await pollPost(postId, (r) => r.coverMediaId === null);
+    expect(cleared.coverMediaId).toBeNull();
+    await page.context().clearCookies();
+  });
+
+  // ─────────────────────────────────────────────
+  // 14. RICH TEXT — bold toolbar round-trips to sanitized <strong>
+  // ─────────────────────────────────────────────
+  test("applies bold via the toolbar and stores <strong> after server sanitization", async ({ page }) => {
+    await page.context().addCookies([sessionCookie(editorASessionToken)]);
+    const { postId } = await seedOwnedPost("richtext", "DRAFT", null, false);
+
+    await page.goto(`/id/admin/posts/${postId}/edit`, { waitUntil: "networkidle" });
+    const content = idSection(page).getByLabel("Isi", { exact: true });
+    // Type the text first, then select all and bold it. Toggling bold *before* typing races the
+    // editor's refocus and drops the first keystrokes; selecting existing text and bolding it is
+    // deterministic and matches how an author actually applies formatting.
+    await content.click();
+    await content.press("End");
+    await content.pressSequentially("TEKSTEBAL");
+    await content.press("ControlOrMeta+a");
+    await idSection(page).getByRole("button", { name: "Tebal", exact: true }).click();
+
+    await page.getByRole("button", { name: "Simpan perubahan" }).click();
+    await page.waitForURL(/\/id\/admin\/posts(\?|$)/);
+
+    const row = await database.query(
+      `SELECT "content" FROM "PostTranslation" WHERE "postId" = $1 AND "locale" = 'id'`,
+      [postId],
+    );
+    // The whole line is now bold, so TEKSTEBAL sits inside the sanitized <strong> the server kept.
+    expect(row.rows[0].content).toMatch(/<strong>[^<]*TEKSTEBAL[^<]*<\/strong>/);
+    await page.context().clearCookies();
+  });
+
+  // ─────────────────────────────────────────────
+  // 15. AUTOSAVE — shared version; manual save after autosave has no conflict
+  // ─────────────────────────────────────────────
+  test("autosaves the draft, then a manual save reuses the shared version without a conflict", async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.context().addCookies([sessionCookie(editorASessionToken)]);
+    const { postId } = await seedOwnedPost("autosave", "DRAFT", null, false);
+
+    await page.goto(`/id/admin/posts/${postId}/edit`, { waitUntil: "networkidle" });
+    // Dirty the draft so the 30s autosave interval has something to persist.
+    await idSection(page).getByLabel("Judul", { exact: true }).fill("Judul Diubah Autosave");
+
+    // The interval fires ~30s after mount; wait for the status element to report "saved".
+    await expect(page.locator('[data-autosave-status="saved"]')).toBeAttached({ timeout: 45_000 });
+    const afterAutosave = await pollPost(postId, (r) => r.version === 2);
+    expect(afterAutosave.version).toBe(2);
+
+    // The shell lifted the version to 2; a manual save must reuse it (2 → 3), not conflict at 1.
+    await page.getByRole("button", { name: "Simpan perubahan" }).click();
+    await page.waitForURL(/\/id\/admin\/posts(\?|$)/);
+    const afterManual = await pollPost(postId, (r) => r.version === 3);
+    expect(afterManual.version).toBe(3);
+    expect(afterManual.status).toBe("DRAFT");
     await page.context().clearCookies();
   });
 });
