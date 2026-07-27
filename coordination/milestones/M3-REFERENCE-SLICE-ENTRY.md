@@ -110,6 +110,33 @@ coverMediaId is editable via the draft), verified in a real browser. Single-imag
 closing the loop upload → picker → cover, verified in a real browser. Remaining Post/Media UI:
 batch/PDF upload, autosave, and rich text — each its own manifest.
 
+**Update (2026-07-27, stand-in):** the three remaining Post/Media UI manifests are now merged to
+`integration/m3-reference-slice` (head `656480a`):
+
+- **Batch + PDF upload** (`M3-CLAUDE-MEDIA-BATCH-UPLOAD`, merge above `bbd355c`) — the Media Library
+  accepts multiple images and PDFs through the existing upload route, verified in a real browser.
+- **Tiptap rich-text editor** (`M3-CLAUDE-POST-RICH-TEXT`, merge above `a7d783a`) — the three Post
+  translation bodies (ID/EN/AR) use a Tiptap 3 editor (`immediatelyRender: false` for SSR). Verified
+  end to end: bold + bullet round-trip through `sanitizeRichTextHtml` to stored `<strong>` /
+  `<ul><li>`, 0 page errors. The toolbar is UX; server-side sanitization remains the security
+  boundary.
+- **30-second draft autosave** (`M3-CLAUDE-POST-AUTOSAVE`, feat `a31fd4b`, merge `656480a`) — a new
+  `PostEditorShell` client component owns a single post `version` and feeds it to publication, the
+  editor form, and delete, so all three optimistic-locking surfaces lock against the same value.
+  Autosave POSTs the frozen `AUTOSAVE` command on `ADMIN_POST_AUTOSAVE_INTERVAL_MS` (30s), reports
+  the new version back up, and stops on `VERSION_CONFLICT`. Browser-verified by the load-bearing
+  case: a **manual save after an autosave succeeds with no `VERSION_CONFLICT`** (version 1→2 via
+  autosave, then 2→3 via manual save), proving the shared-version design. An aria-live status
+  surfaces saving/saved/conflict/error in ID/EN/AR.
+
+Integrator gates at merge time: `tsc` 0 errors, `Tests 738 passed (738)`, `Compiled successfully`.
+**Independence caveat (same window):** all three were authored and merged by the Claude stand-in
+with no independent review; per the independence gap above, Codex and DeepSeek must re-verify them on
+return before they count toward the M3 exit gate. The remaining M3 work is **feature #4 — browser E2E
+hardening of every mutation surface** (publish/schedule/archive/return-to-draft, delete, cover
+picker, batch/PDF upload, rich text, autosave), which supplies the "executable mutation browser
+evidence" the exit gate requires; the authoritative run is CI, not this memory-constrained machine.
+
 ## Carried mandatory security evidence
 
 M3 cannot close until executable tests prove:
