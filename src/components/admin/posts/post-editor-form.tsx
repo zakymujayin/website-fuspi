@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 
+import { PostCoverPicker, type CoverPreview } from "./post-cover-picker";
 import { FIELD_SCOPED_FAILURES, failureMessageKey, isFailureCode } from "./post-editor-errors";
 import {
   POST_EDITOR_LOCALES,
@@ -39,11 +40,13 @@ type PostEditorFormProps = {
   postId?: string;
   expectedVersion?: number;
   carried?: PostEditorCarriedFields;
+  /** Current cover (edit mode) so the picker shows it without a refetch. */
+  initialCover?: CoverPreview | null;
+  uploadPublicUrl: string;
 };
 
 const CREATE_CARRIED: PostEditorCarriedFields = {
   categoryId: null,
-  coverMediaId: null,
   tagIds: [],
 };
 
@@ -54,6 +57,8 @@ export function PostEditorForm({
   postId,
   expectedVersion,
   carried,
+  initialCover = null,
+  uploadPublicUrl,
 }: PostEditorFormProps) {
   // Resolve strings on the client. This form is a Client Component, so it cannot receive functions
   // (e.g. a label formatter) across the server/client boundary — doing so crashes the page render.
@@ -181,6 +186,13 @@ export function PostEditorForm({
         </Field>
         <FieldDescription>{t("featuredDescription")}</FieldDescription>
       </FieldGroup>
+
+      <PostCoverPicker
+        value={draft.coverMediaId}
+        onChange={(coverMediaId) => setDraft((c) => ({ ...c, coverMediaId }))}
+        initialCover={initialCover}
+        uploadPublicUrl={uploadPublicUrl}
+      />
 
       {POST_EDITOR_LOCALES.map((locale) => {
         const required = locale === "id";

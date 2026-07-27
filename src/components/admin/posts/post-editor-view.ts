@@ -13,6 +13,7 @@ export function draftFromEditorView(view: AdminPostEditorView): PostEditorDraft 
   return {
     slug: view.slug,
     isFeatured: view.isFeatured,
+    coverMediaId: view.coverMediaId,
     translations: {
       id: {
         title: translations.id.title,

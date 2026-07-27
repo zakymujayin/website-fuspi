@@ -28,9 +28,10 @@ function validDraft() {
 
 const CARRIED = {
   categoryId: "11111111-1111-4111-8111-111111111111",
-  coverMediaId: "22222222-2222-4222-8222-222222222222",
   tagIds: ["33333333-3333-4333-8333-333333333333"],
 };
+// coverMediaId is now editable via the cover picker, so it travels on the draft, not `carried`.
+const COVER_ID = "22222222-2222-4222-8222-222222222222";
 
 describe("buildCreatePayload", () => {
   it("produces a SAVE_DRAFT payload with empty carried fields", () => {
@@ -106,9 +107,10 @@ describe("buildCreatePayload", () => {
 });
 
 describe("buildUpdatePayload — carried-field preservation", () => {
-  it("round-trips categoryId, coverMediaId, and tagIds unchanged", () => {
+  it("round-trips categoryId and tagIds unchanged, and takes coverMediaId from the draft", () => {
+    const draft = { ...validDraft(), coverMediaId: COVER_ID };
     const result = buildUpdatePayload(
-      validDraft(),
+      draft,
       "44444444-4444-4444-8444-444444444444",
       7,
       CARRIED,
@@ -116,8 +118,9 @@ describe("buildUpdatePayload — carried-field preservation", () => {
     expect(result.success).toBe(true);
     if (!result.success) return;
     expect(result.data.categoryId).toBe(CARRIED.categoryId);
-    expect(result.data.coverMediaId).toBe(CARRIED.coverMediaId);
     expect(result.data.tagIds).toEqual(CARRIED.tagIds);
+    // Cover now comes from the editable draft, not the carried set.
+    expect(result.data.coverMediaId).toBe(COVER_ID);
   });
 
   it("never silently erases an existing category when the form cannot edit it", () => {
@@ -159,7 +162,7 @@ describe("buildUpdatePayload — carried-field preservation", () => {
       validDraft(),
       "44444444-4444-4444-8444-444444444444",
       3,
-      { categoryId: null, coverMediaId: null, tagIds: [] },
+      { categoryId: null, tagIds: [] },
     );
     expect(result.success).toBe(true);
     if (!result.success) return;
@@ -263,13 +266,14 @@ describe("draftFromEditorView", () => {
     const draft = draftFromEditorView(baseView as never);
     const result = buildUpdatePayload(draft, baseView.id, baseView.version, {
       categoryId: baseView.categoryId,
-      coverMediaId: baseView.coverMediaId,
       tagIds: baseView.tagIds,
     });
     expect(result.success).toBe(true);
     if (!result.success) return;
     expect(result.data.translations.id.excerpt).toBeNull();
     expect(result.data.categoryId).toBe(CARRIED.categoryId);
+    // draftFromEditorView carries the view's cover onto the editable draft.
+    expect(result.data.coverMediaId).toBe(baseView.coverMediaId);
   });
 });
 
