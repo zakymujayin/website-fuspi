@@ -1,11 +1,12 @@
 # ADR-0004: Temporary Claude operational control
 
-- Status: accepted; active when this ADR and `coordinator: claude` are merged into
-  `integration/m3-reference-slice`
+- Status: accepted; activates at the first `integration/m3-reference-slice` head containing
+  delegation payload commit `45fd76d449fdd2c066e4f3ff67c9ddd2df38d556`
 - Date: 2026-07-28
 - Authorizing principal: human owner
 - Delegated controller: Claude Sonnet 5
 - Baseline before delegation: `f617de9dd6c2146c932ebde86152b8a8d73dfb5d`
+- Delegation payload: `45fd76d449fdd2c066e4f3ff67c9ddd2df38d556`
 
 ## Decision
 
