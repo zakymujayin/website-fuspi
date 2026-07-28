@@ -65,6 +65,16 @@ active_leases:
     owner: deepseek
     paths:
       - coordination/reviews/M3-GPT-BUILD-TRACING-WARNING-deepseek.md
+  - task: M3-DEEPSEEK-AUTOSAVE-SERIALIZATION-REVIEW
+    owner: deepseek
+    paths:
+      - coordination/reviews/M3-GPT-AUTOSAVE-MUTATION-SERIALIZATION-deepseek.md
+      - coordination/handoffs/M3-DEEPSEEK-AUTOSAVE-SERIALIZATION-REVIEW-deepseek.md
+  - task: M3-DEEPSEEK-MEDIA-FOCUS-ORDER-REVIEW
+    owner: deepseek
+    paths:
+      - coordination/reviews/M3-GPT-MEDIA-FOCUS-ORDER-CORRECTION-deepseek.md
+      - coordination/handoffs/M3-DEEPSEEK-MEDIA-FOCUS-ORDER-REVIEW-deepseek.md
   - task: M3-GPT-CLAUDE-GOVERNANCE-RECONCILIATION
     owner: gpt
     paths:
