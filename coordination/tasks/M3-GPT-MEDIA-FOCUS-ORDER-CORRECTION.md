@@ -1,13 +1,13 @@
 ---
-id: M3-DEEPSEEK-MEDIA-FOCUS-ORDER-CORRECTION
+id: M3-GPT-MEDIA-FOCUS-ORDER-CORRECTION
 milestone: M3
-owner: deepseek
-reviewer: gpt
+owner: gpt
+reviewer: deepseek
 tester: deepseek
 base_sha: f8a40ebe5b0279d08f45864863f2642f56dedeae
 allowed_paths:
   - "e2e/m3/admin-media-library-browse.spec.ts"
-  - "coordination/handoffs/M3-DEEPSEEK-MEDIA-FOCUS-ORDER-CORRECTION-deepseek.md"
+  - "coordination/handoffs/M3-GPT-MEDIA-FOCUS-ORDER-CORRECTION-gpt.md"
 forbidden_paths:
   - ".env*"
   - "package.json"
@@ -33,7 +33,7 @@ acceptance_commands:
   - npx tsc --noEmit
   - "PLAYWRIGHT_BASE_URL=http://localhost:3004 npx playwright test e2e/m3/admin-media-library-browse.spec.ts --project=chromium --project=mobile --workers=1"
   - git diff --check
-  - "TASK_MANIFEST=coordination/tasks/M3-DEEPSEEK-MEDIA-FOCUS-ORDER-CORRECTION.md TASK_BASE=origin/coordination/m3-review-corrections npm run check:scope"
+  - "TASK_MANIFEST=coordination/tasks/M3-GPT-MEDIA-FOCUS-ORDER-CORRECTION.md TASK_BASE=origin/coordination/m3-review-corrections npm run check:scope"
 risk: low
 token_class: S
 status: assigned

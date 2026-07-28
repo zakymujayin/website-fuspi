@@ -1,8 +1,8 @@
 ---
-id: M3-CLAUDE-AUTOSAVE-MUTATION-SERIALIZATION
+id: M3-GPT-AUTOSAVE-MUTATION-SERIALIZATION
 milestone: M3
-owner: claude
-reviewer: gpt
+owner: gpt
+reviewer: deepseek
 tester: deepseek
 base_sha: f8a40ebe5b0279d08f45864863f2642f56dedeae
 allowed_paths:
@@ -13,7 +13,7 @@ allowed_paths:
   - "tests/m3/ui/admin-post-autosave.test.tsx"
   - "tests/m3/ui/admin-post-editor.test.tsx"
   - "e2e/m3/admin-post-editor.spec.ts"
-  - "coordination/handoffs/M3-CLAUDE-AUTOSAVE-MUTATION-SERIALIZATION-claude.md"
+  - "coordination/handoffs/M3-GPT-AUTOSAVE-MUTATION-SERIALIZATION-gpt.md"
 forbidden_paths:
   - ".env*"
   - "package.json"
@@ -44,7 +44,7 @@ acceptance_commands:
   - npm run build
   - "PLAYWRIGHT_BASE_URL=http://localhost:3004 npx playwright test e2e/m3/admin-post-editor.spec.ts --project=chromium --project=mobile --workers=1"
   - git diff --check
-  - "TASK_MANIFEST=coordination/tasks/M3-CLAUDE-AUTOSAVE-MUTATION-SERIALIZATION.md TASK_BASE=origin/coordination/m3-review-corrections npm run check:scope"
+  - "TASK_MANIFEST=coordination/tasks/M3-GPT-AUTOSAVE-MUTATION-SERIALIZATION.md TASK_BASE=origin/coordination/m3-review-corrections npm run check:scope"
 risk: high
 token_class: M
 status: assigned

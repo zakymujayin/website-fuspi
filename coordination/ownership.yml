@@ -47,12 +47,12 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
-  - task: M3-DEEPSEEK-MEDIA-FOCUS-ORDER-CORRECTION
-    owner: deepseek
+  - task: M3-GPT-MEDIA-FOCUS-ORDER-CORRECTION
+    owner: gpt
     paths:
       - e2e/m3/admin-media-library-browse.spec.ts
-  - task: M3-CLAUDE-AUTOSAVE-MUTATION-SERIALIZATION
-    owner: claude
+  - task: M3-GPT-AUTOSAVE-MUTATION-SERIALIZATION
+    owner: gpt
     paths:
       - src/components/admin/posts/post-editor-shell.tsx
       - src/components/admin/posts/post-editor-form.tsx
