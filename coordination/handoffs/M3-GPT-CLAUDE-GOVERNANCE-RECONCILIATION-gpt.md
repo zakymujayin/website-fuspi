@@ -11,8 +11,9 @@
 - Recorded exact implementation and merge SHAs, identities, paths, claims, and evidence for the
   unleased Post editor navigation fix and the out-of-lease cover-picker unit-test edit.
 - Assessed unauthorized scope, contract drift, and security impact.
-- Recommended retaining both with a human-approved historical exception.
-- Kept the verdict `PENDING_HUMAN_DECISION`; this task does not fabricate a retroactive lease.
+- Recorded the human-owner disposition `RETAIN_WITH_EXCEPTION`.
+- Closed the decision as `RECONCILED — RETAIN_WITH_EXCEPTION`; this task does not fabricate a
+  retroactive lease or erase either violation.
 - Added concrete merge-queue and scope-check preventive controls.
 
 ## Files changed
@@ -35,9 +36,9 @@
 ## Untested areas, risks, and follow-ups
 
 - No product code was changed by this reconciliation.
-- The governance issue cannot be closed until the human owner records either
-  `RETAIN_WITH_EXCEPTION` or `REVERT_AND_REIMPLEMENT`.
-- The recommended exception does not erase either historical violation.
+- The retained exception does not erase either historical violation and is not precedent for
+  bypassing future task manifests or leases.
+- Preventive controls remain required at future merge gates.
 
 ## Contract or dependency requests
 

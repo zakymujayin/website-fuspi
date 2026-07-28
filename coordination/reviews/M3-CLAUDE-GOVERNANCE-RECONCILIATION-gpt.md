@@ -6,15 +6,15 @@ Task: `M3-GPT-CLAUDE-GOVERNANCE-RECONCILIATION`
 
 ## Verdict
 
-**PENDING_HUMAN_DECISION**
+**RECONCILED — RETAIN_WITH_EXCEPTION**
 
 The two violations are fully identified and assessed below, but they are not historically cured.
 A document created after implementation cannot create a lease that did not exist at the time, erase
 an out-of-scope edit, or turn either event into compliant work.
 
-The evidence supports retaining both changes with an explicit human-owner governance exception.
-That disposition has not yet been recorded. This review therefore must not claim `RECONCILED` or
-`APPROVED`.
+The human owner explicitly accepted the recommended historical exception on 2026-07-28. Both
+changes are retained. This disposition reconciles the open governance decision; it does not create
+a retroactive lease, erase either violation, or establish a precedent for bypassing scope controls.
 
 ## Incident 1: localized editor navigation fix had no manifest or active lease
 
@@ -144,11 +144,13 @@ integration task, then reimplement the desired behavior through new, correctly l
 6. A model acting as temporary integrator must not self-approve its own lane exception; unresolved
    governance deviations go to the human owner.
 
-## Human-owner disposition required
+## Human-owner disposition
 
-The human owner must add an explicit, durable decision after reviewing this record:
+On 2026-07-28, the human owner supplied this explicit decision:
 
-- `RETAIN_WITH_EXCEPTION`, with acknowledgement of both violations and the four terms above; or
-- `REVERT_AND_REIMPLEMENT`, with new leased task IDs.
+> RETAIN_WITH_EXCEPTION — saya mengakui kedua pelanggaran historis, menerima perubahan yang sudah
+> diverifikasi, dan memahami bahwa keputusan ini bukan lease retroaktif atau preseden bypass scope.
 
-Until then, the durable verdict remains **PENDING_HUMAN_DECISION**.
+The disposition acknowledges both documented violations and accepts the reviewed changes under the
+four terms in the recommendation. The durable verdict is therefore
+**RECONCILED — RETAIN_WITH_EXCEPTION**.
