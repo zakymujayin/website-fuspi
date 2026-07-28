@@ -648,27 +648,40 @@ test.describe("M3 Media Library browse QA", () => {
       await page.goto("/id/admin/media", { waitUntil: "networkidle" });
       await page.waitForSelector("ul[aria-label='Daftar item media']");
 
-      // First Tab lands on the skip link (which becomes visible on focus)
-      await page.keyboard.press("Tab");
-      const skipLink = page.locator("#skip-link, [href='#main']").first();
-      if (await skipLink.isVisible().catch(() => false)) {
-        await expect(skipLink).toBeFocused();
-        await page.keyboard.press("Tab"); // skip past it
+      async function expectVisibleFocusIndicator(locator: ReturnType<typeof page.locator>) {
+        await expect(locator).toBeFocused();
+        const hasVisibleFocus = await locator.evaluate((element) => {
+          const style = getComputedStyle(element);
+          const outline = style.outlineStyle !== "none" && parseFloat(style.outlineWidth) > 0;
+          const boxShadow = style.boxShadow !== "none" && !style.boxShadow.includes("0 0 0 0");
+          return outline || boxShadow;
+        });
+        expect(hasVisibleFocus, "focused control must have a visible focus indicator").toBe(true);
       }
 
-      // Next Tab should land on the first filter link
-      const firstFilter = page.locator("nav[aria-label='Saring media berdasarkan jenis'] a").first();
-      await expect(firstFilter).toBeFocused();
+      await page.keyboard.press("Tab");
+      const skipLink = page.locator("#skip-link, [href='#main']").first();
+      await expectVisibleFocusIndicator(skipLink);
 
-      // Verify a visible focus indicator (ring, outline, or box-shadow)
-      const hasVisibleFocus = await firstFilter.evaluate((el) => {
-        const style = getComputedStyle(el);
-        const outline = style.outlineStyle !== "none" && parseFloat(style.outlineWidth) > 0;
-        const boxShadow = style.boxShadow !== "none" && !style.boxShadow.includes("0 0 0 0");
-        const ring = el.className.includes("ring");
-        return outline || boxShadow || ring;
-      });
-      expect(hasVisibleFocus, "focus indicator must be visible").toBe(true);
+      await page.keyboard.press("Tab");
+      const imagePolicy = page.getByRole("button", { name: "Gambar", exact: true });
+      await expectVisibleFocusIndicator(imagePolicy);
+
+      await page.keyboard.press("Tab");
+      const pdfPolicy = page.getByRole("button", { name: "PDF", exact: true });
+      await expectVisibleFocusIndicator(pdfPolicy);
+
+      await page.keyboard.press("Tab");
+      const imageInput = page.getByLabel("Berkas gambar", { exact: true });
+      await expectVisibleFocusIndicator(imageInput);
+
+      await page.keyboard.press("Tab");
+      const uploadButton = page.getByRole("button", { name: "Unggah", exact: true });
+      await expectVisibleFocusIndicator(uploadButton);
+
+      await page.keyboard.press("Tab");
+      const firstFilter = page.locator("nav[aria-label='Saring media berdasarkan jenis'] a").first();
+      await expectVisibleFocusIndicator(firstFilter);
       await page.context().clearCookies();
     });
   });
