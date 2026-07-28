@@ -46,4 +46,26 @@ ui_hotspots:
     - src/app/globals.css
     - src/components/ui/**
     - messages/**
-active_leases: []
+active_leases:
+  - task: M3-GPT-MEDIA-FOCUS-ORDER-CORRECTION
+    owner: gpt
+    paths:
+      - e2e/m3/admin-media-library-browse.spec.ts
+  - task: M3-GPT-AUTOSAVE-MUTATION-SERIALIZATION
+    owner: gpt
+    paths:
+      - src/components/admin/posts/post-editor-shell.tsx
+      - src/components/admin/posts/post-editor-form.tsx
+      - src/components/admin/posts/post-publication-actions.tsx
+      - src/components/admin/posts/post-delete-action.tsx
+      - tests/m3/ui/admin-post-autosave.test.tsx
+      - tests/m3/ui/admin-post-editor.test.tsx
+      - e2e/m3/admin-post-editor.spec.ts
+  - task: M3-DEEPSEEK-BUILD-TRACING-REVIEW
+    owner: deepseek
+    paths:
+      - coordination/reviews/M3-GPT-BUILD-TRACING-WARNING-deepseek.md
+  - task: M3-GPT-CLAUDE-GOVERNANCE-RECONCILIATION
+    owner: gpt
+    paths:
+      - coordination/reviews/M3-CLAUDE-GOVERNANCE-RECONCILIATION-gpt.md
