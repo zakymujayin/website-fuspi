@@ -47,6 +47,12 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
+  - task: M3-GPT-CLAUDE-OPERATIONAL-CONTROL
+    owner: gpt
+    paths:
+      - coordination/adr/ADR-0004-claude-operational-control-handoff.md
+      - coordination/ownership.yml
+      - coordination/handoffs/M3-GPT-CLAUDE-OPERATIONAL-CONTROL-gpt.md
   - task: M3-GPT-MEDIA-FOCUS-ORDER-CORRECTION
     owner: gpt
     paths:
