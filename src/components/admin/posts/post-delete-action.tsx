@@ -22,16 +22,20 @@ import { failureMessageKey, isFailureCode } from "./post-editor-errors";
 
 type PostDeleteActionProps = {
   postId: string;
-  expectedVersion: number;
   canDelete: boolean;
   listHref: string;
+  mutationBusy: boolean;
+  beginMutation: () => { token: number; version: number } | null;
+  finishMutation: (token: number, nextVersion?: number) => void;
 };
 
 export function PostDeleteAction({
   postId,
-  expectedVersion,
   canDelete,
   listHref,
+  mutationBusy,
+  beginMutation,
+  finishMutation,
 }: PostDeleteActionProps) {
   const t = useTranslations("AdminPostDelete");
   const router = useRouter();
@@ -43,9 +47,13 @@ export function PostDeleteAction({
   if (!canDelete) return null;
 
   async function confirmDelete() {
-    if (deleting) return;
+    if (deleting || mutationBusy) return;
+    const lease = beginMutation();
+    if (!lease) return;
+    const expectedVersion = lease.version;
     setError(null);
     setDeleting(true);
+    let released = false;
     try {
       const response = await fetch("/api/admin/posts", {
         method: "POST",
@@ -63,6 +71,12 @@ export function PostDeleteAction({
         && result !== null
         && (result as { ok?: unknown }).ok === true
       ) {
+        const nextVersion = (result as { version?: unknown }).version;
+        finishMutation(
+          lease.token,
+          typeof nextVersion === "number" ? nextVersion : undefined,
+        );
+        released = true;
         router.push(listHref);
         router.refresh();
         return;
@@ -74,6 +88,7 @@ export function PostDeleteAction({
     } catch {
       setError(t("error.UNAVAILABLE"));
     } finally {
+      if (!released) finishMutation(lease.token);
       setDeleting(false);
     }
   }
@@ -99,7 +114,12 @@ export function PostDeleteAction({
       >
         <AlertDialogTrigger
           render={
-            <Button type="button" variant="destructive" className="w-fit">
+            <Button
+              type="button"
+              variant="destructive"
+              className="w-fit"
+              disabled={mutationBusy}
+            >
               {t("action")}
             </Button>
           }
@@ -126,7 +146,7 @@ export function PostDeleteAction({
             <AlertDialogAction
               type="button"
               variant="destructive"
-              disabled={deleting}
+              disabled={deleting || mutationBusy}
               onClick={() => void confirmDelete()}
             >
               {deleting ? <Spinner data-icon /> : null}

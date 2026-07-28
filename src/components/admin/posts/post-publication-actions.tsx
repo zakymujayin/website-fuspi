@@ -17,16 +17,20 @@ import { AdminPostStatusBadge, type AdminPostPublicationState } from "./post-sta
 
 type PostPublicationActionsProps = {
   postId: string;
-  expectedVersion: number;
   state: AdminPostPublicationState;
   canPublish: boolean;
+  mutationBusy: boolean;
+  beginMutation: () => { token: number; version: number } | null;
+  finishMutation: (token: number, nextVersion?: number) => void;
 };
 
 export function PostPublicationActions({
   postId,
-  expectedVersion,
   state,
   canPublish,
+  mutationBusy,
+  beginMutation,
+  finishMutation,
 }: PostPublicationActionsProps) {
   const t = useTranslations("AdminPostPublication");
   const router = useRouter();
@@ -40,14 +44,17 @@ export function PostPublicationActions({
   if (intents.length === 0) return null;
 
   async function submit(intent: PostPublicationIntent, publishedAt?: string) {
-    if (pending) return;
+    if (pending || mutationBusy) return;
+    const lease = beginMutation();
+    if (!lease) return;
     setError(null);
     setPending(intent);
+    let released = false;
     try {
       const payload =
         intent === "SCHEDULE"
-          ? { intent, postId, expectedVersion, publishedAt }
-          : { intent, postId, expectedVersion };
+          ? { intent, postId, expectedVersion: lease.version, publishedAt }
+          : { intent, postId, expectedVersion: lease.version };
       const response = await fetch("/api/admin/posts", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -61,6 +68,12 @@ export function PostPublicationActions({
         && result !== null
         && (result as { ok?: unknown }).ok === true
       ) {
+        const nextVersion = (result as { version?: unknown }).version;
+        finishMutation(
+          lease.token,
+          typeof nextVersion === "number" ? nextVersion : undefined,
+        );
+        released = true;
         router.refresh();
         return;
       }
@@ -71,6 +84,7 @@ export function PostPublicationActions({
     } catch {
       setError(t("error.UNAVAILABLE"));
     } finally {
+      if (!released) finishMutation(lease.token);
       setPending(null);
     }
   }
@@ -130,7 +144,7 @@ export function PostPublicationActions({
               key={intent}
               type="button"
               variant={intent === "PUBLISH_NOW" ? "default" : "outline"}
-              disabled={pending !== null}
+              disabled={pending !== null || mutationBusy}
               onClick={() => void submit(intent)}
             >
               {pending === intent ? <Spinner data-icon /> : null}
@@ -156,7 +170,7 @@ export function PostPublicationActions({
             <Button
               type="button"
               variant="outline"
-              disabled={pending !== null}
+              disabled={pending !== null || mutationBusy}
               onClick={onSchedule}
             >
               {pending === "SCHEDULE" ? <Spinner data-icon /> : null}

@@ -599,26 +599,70 @@ test.describe("M3 Post editor QA", () => {
   // ─────────────────────────────────────────────
   // 15. AUTOSAVE — shared version; manual save after autosave has no conflict
   // ─────────────────────────────────────────────
-  test("autosaves the draft, then a manual save reuses the shared version without a conflict", async ({ page }) => {
+  test("serializes manual save behind autosave and reuses the advanced version", async ({ page }) => {
     test.setTimeout(120_000);
     await page.context().addCookies([sessionCookie(editorASessionToken)]);
     const { postId } = await seedOwnedPost("autosave", "DRAFT", null, false);
+
+    type MutationRequest = {
+      action?: string;
+      payload?: { expectedVersion?: number };
+    };
+    const mutationRequests: MutationRequest[] = [];
+    let releaseAutosave: (() => void) | undefined;
+    const autosaveRelease = new Promise<void>((resolve) => {
+      releaseAutosave = resolve;
+    });
+    let autosaveCommitted = false;
+
+    await page.route("**/api/admin/posts", async (route) => {
+      if (route.request().method() !== "POST") {
+        await route.continue();
+        return;
+      }
+      const body = route.request().postDataJSON() as MutationRequest;
+      mutationRequests.push(body);
+      if (body.action !== "AUTOSAVE") {
+        await route.continue();
+        return;
+      }
+
+      // Let the server commit version 2, but hold the response so the browser's autosave mutation
+      // remains in flight. This creates the overlap window deterministically.
+      const response = await route.fetch();
+      autosaveCommitted = true;
+      await autosaveRelease;
+      await route.fulfill({ response });
+    });
 
     await page.goto(`/id/admin/posts/${postId}/edit`, { waitUntil: "networkidle" });
     // Dirty the draft so the 30s autosave interval has something to persist.
     await idSection(page).getByLabel("Judul", { exact: true }).fill("Judul Diubah Autosave");
 
-    // The interval fires ~30s after mount; wait for the status element to report "saved".
-    await expect(page.locator('[data-autosave-status="saved"]')).toBeAttached({ timeout: 45_000 });
+    // The request has committed upstream but its response remains unresolved in the browser.
+    await expect.poll(() => autosaveCommitted, { timeout: 45_000 }).toBe(true);
+    await expect(page.locator('[data-autosave-status="saving"]')).toBeAttached();
     const afterAutosave = await pollPost(postId, (r) => r.version === 2);
     expect(afterAutosave.version).toBe(2);
 
-    // The shell lifted the version to 2; a manual save must reuse it (2 → 3), not conflict at 1.
-    await page.getByRole("button", { name: "Simpan perubahan" }).click();
+    // Every competing mutation is disabled while autosave owns the atomic shell lease.
+    const manualSave = page.getByRole("button", { name: "Simpan perubahan" });
+    await expect(manualSave).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Terbitkan sekarang" })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Hapus berita" })).toBeDisabled();
+    expect(mutationRequests.map((request) => request.action)).toEqual(["AUTOSAVE"]);
+
+    // Releasing autosave synchronously advances the shared version before mutations unlock.
+    releaseAutosave?.();
+    await expect(page.locator('[data-autosave-status="saved"]')).toBeAttached();
+    await expect(manualSave).toBeEnabled();
+    await manualSave.click();
     await page.waitForURL(/\/id\/admin\/posts(\?|$)/);
     const afterManual = await pollPost(postId, (r) => r.version === 3);
     expect(afterManual.version).toBe(3);
     expect(afterManual.status).toBe("DRAFT");
+    expect(mutationRequests.map((request) => request.action)).toEqual(["AUTOSAVE", "UPDATE"]);
+    expect(mutationRequests[1]?.payload?.expectedVersion).toBe(2);
     await page.context().clearCookies();
   });
 });

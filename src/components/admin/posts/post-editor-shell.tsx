@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { PostDeleteAction } from "./post-delete-action";
 import { PostEditorForm } from "./post-editor-form";
@@ -24,10 +24,9 @@ type PostEditorShellProps = {
 
 /**
  * Owns the single, shared `version` for the whole edit page so that autosave, manual save,
- * publication, and delete all lock against the same value. Autosave bumps the version client-side
- * (`onVersionChange`); publication/delete refresh the server, which sends a newer `initialVersion`
- * that the effect adopts. Without this, an autosave would make the publish/delete buttons stale and
- * they would fail with VERSION_CONFLICT.
+ * publication, and delete all lock against the same value. A tokenized lease serializes their
+ * requests and advances `versionRef` before the next writer can acquire it. Publication/delete also
+ * refresh the server, whose newer `initialVersion` is adopted below.
  */
 export function PostEditorShell({
   postId,
@@ -41,6 +40,10 @@ export function PostEditorShell({
   capabilities,
 }: PostEditorShellProps) {
   const [version, setVersion] = useState(initialVersion);
+  const versionRef = useRef(initialVersion);
+  const activeMutationRef = useRef<number | null>(null);
+  const nextMutationTokenRef = useRef(0);
+  const [mutationBusy, setMutationBusy] = useState(false);
 
   // Adopt the server's version whenever it advances (after a publication/delete router.refresh()).
   // Between refreshes `initialVersion` is unchanged, so an autosave-advanced local version is kept.
@@ -51,14 +54,39 @@ export function PostEditorShell({
     setPrevInitialVersion(initialVersion);
     setVersion(initialVersion);
   }
+  useEffect(() => {
+    versionRef.current = version;
+  }, [version]);
+
+  const beginMutation = useCallback(() => {
+    if (activeMutationRef.current !== null) return null;
+    const token = nextMutationTokenRef.current + 1;
+    nextMutationTokenRef.current = token;
+    activeMutationRef.current = token;
+    setMutationBusy(true);
+    return { token, version: versionRef.current };
+  }, []);
+
+  const finishMutation = useCallback((token: number, nextVersion?: number) => {
+    // A stale request must never release a newer mutation's lock.
+    if (activeMutationRef.current !== token) return;
+    if (typeof nextVersion === "number") {
+      versionRef.current = nextVersion;
+      setVersion(nextVersion);
+    }
+    activeMutationRef.current = null;
+    setMutationBusy(false);
+  }, []);
 
   return (
     <>
       <PostPublicationActions
         postId={postId}
-        expectedVersion={version}
         state={publicationState}
         canPublish={capabilities.publish}
+        mutationBusy={mutationBusy}
+        beginMutation={beginMutation}
+        finishMutation={finishMutation}
       />
 
       <PostEditorForm
@@ -70,14 +98,18 @@ export function PostEditorShell({
         carried={carried}
         initialCover={initialCover}
         uploadPublicUrl={uploadPublicUrl}
-        onVersionChange={setVersion}
+        mutationBusy={mutationBusy}
+        beginMutation={beginMutation}
+        finishMutation={finishMutation}
       />
 
       <PostDeleteAction
         postId={postId}
-        expectedVersion={version}
         canDelete={capabilities.delete}
         listHref={listHref}
+        mutationBusy={mutationBusy}
+        beginMutation={beginMutation}
+        finishMutation={finishMutation}
       />
     </>
   );
