@@ -36,7 +36,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M3-GPT-MEDIA-FOCUS-ORDER-CORRECTION.md TASK_BASE=origin/coordination/m3-review-corrections npm run check:scope"
 risk: low
 token_class: S
-status: assigned
+status: merged
 ---
 
 # M3 Media Library focus-order correction

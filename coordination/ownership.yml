@@ -47,10 +47,6 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
-  - task: M3-GPT-MEDIA-FOCUS-ORDER-CORRECTION
-    owner: gpt
-    paths:
-      - e2e/m3/admin-media-library-browse.spec.ts
   - task: M3-GPT-AUTOSAVE-MUTATION-SERIALIZATION
     owner: gpt
     paths:
