@@ -61,7 +61,22 @@ active_leases:
       - tests/m3/ui/admin-post-autosave.test.tsx
       - tests/m3/ui/admin-post-editor.test.tsx
       - e2e/m3/admin-post-editor.spec.ts
-  - task: M3-GPT-CLAUDE-GOVERNANCE-RECONCILIATION
+  - task: M3-GPT-BUILD-TRACING-WARNING-R3
     owner: gpt
     paths:
-      - coordination/reviews/M3-CLAUDE-GOVERNANCE-RECONCILIATION-gpt.md
+      - src/lib/storage/staged-file.ts
+      - coordination/handoffs/M3-GPT-BUILD-TRACING-WARNING-R3-gpt.md
+  - task: M3-GPT-PROCESS-RECONCILIATION-AND-EXIT
+    owner: gpt
+    paths:
+      - coordination/ownership.yml
+      - coordination/tasks/M3-GPT-PROCESS-RECONCILIATION-AND-EXIT.md
+      - coordination/tasks/M3-GPT-BUILD-TRACING-WARNING-R3.md
+      - coordination/tasks/M3-GPT-CLAUDE-OPERATIONAL-CONTROL.md
+      - coordination/tasks/M3-GPT-MEDIA-FOCUS-ORDER-CORRECTION.md
+      - coordination/tasks/M3-GPT-AUTOSAVE-MUTATION-SERIALIZATION.md
+      - coordination/reviews/M3-DEEPSEEK-REVIEW-QUARANTINE.md
+      - coordination/reviews/M3-EXIT-GATE-EVIDENCE-MAP.md
+      - coordination/reviews/M3-FINAL-ACCEPTANCE-gpt.md
+      - coordination/milestones/M3-REFERENCE-SLICE-EXIT.md
+      - coordination/handoffs/M3-GPT-PROCESS-RECONCILIATION-AND-EXIT-gpt.md
