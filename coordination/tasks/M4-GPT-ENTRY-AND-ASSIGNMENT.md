@@ -55,7 +55,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-GPT-ENTRY-AND-ASSIGNMENT.md TASK_BASE=a8f06ffddbcdebfaa84913fd05692b4f06aa3ce0 npm run check:scope"
 risk: high
 token_class: M
-status: in_progress
+status: merged
 ---
 
 # M4 entry and first-wave assignment
