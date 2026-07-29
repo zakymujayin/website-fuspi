@@ -63,7 +63,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M3-GPT-PROCESS-RECONCILIATION-AND-EXIT.md TASK_BASE=origin/coordination/m3-final-exit-assignment npm run check:scope"
 risk: high
 token_class: L
-status: review
+status: merged
 ---
 
 # M3 process reconciliation and exit
