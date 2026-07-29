@@ -60,10 +60,10 @@ acceptance_commands:
   - npm run test:integration
   - npm run build
   - "PLAYWRIGHT_BASE_URL=http://localhost:3004 npx playwright test e2e/m3 --project=chromium --project=mobile --workers=1"
-  - "TASK_MANIFEST=coordination/tasks/M3-GPT-PROCESS-RECONCILIATION-AND-EXIT.md TASK_BASE=a8408b17a581862d6cc92c493939e58549f56a77 npm run check:scope"
+  - "TASK_MANIFEST=coordination/tasks/M3-GPT-PROCESS-RECONCILIATION-AND-EXIT.md TASK_BASE=origin/coordination/m3-final-exit-assignment npm run check:scope"
 risk: high
 token_class: L
-status: active
+status: review
 ---
 
 # M3 process reconciliation and exit

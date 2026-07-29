@@ -159,3 +159,34 @@ with two caveats recorded honestly rather than waived:
 The three quarantined commits in section 1 remain permanently un-mergeable.
 
 Release of the M3 exit gate is the human coordinator's decision.
+
+---
+
+## 8. Final reconciliation — 2026-07-29
+
+The returning GPT coordinator found an additional process defect: all three R2 review commits
+predate their R2 task manifests.
+
+| Review | Review commit time | Manifest first recorded |
+| --- | --- | --- |
+| Media R2 head `bf027552…` | 2026-07-29 09:07 +07:00 | `c2de94e…`, 10:20 +07:00 |
+| Autosave R2 head `7853ba2…` | 2026-07-29 09:20 +07:00 | `c2de94e…`, 10:20 +07:00 |
+| Build R2 head `eada22e…` | 2026-07-29 09:41 +07:00 | `c2de94e…`, 10:20 +07:00 |
+
+Those manifests do not create retroactive leases. The R2 documents remain independent DeepSeek
+technical findings, but their agent-attested command results are not the authority for M3
+acceptance.
+
+Remediation:
+
+1. GPT created and merged a prospective reconciliation task and lease before replaying evidence.
+2. Media and autosave were integrated one at a time from their valid writer-leased candidates.
+3. The original build candidate was not merged because its implementation was authored while its
+   task remained `ready` and `active_leases` was empty.
+4. Build R3 was assigned and leased prospectively, then reimplemented with a stable patch ID exactly
+   matching the source diff DeepSeek had reviewed.
+5. GPT reran every mandatory static, unit, integration, build, browser, NFT, and standalone gate on
+   fresh GPT-owned runtime state.
+
+The three R1 commits remain permanently quarantined. The R2 timing violation remains immutable
+history and is neither erased nor treated as precedent.

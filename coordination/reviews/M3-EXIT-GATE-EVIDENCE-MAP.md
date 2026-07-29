@@ -1,4 +1,4 @@
-# M3 Exit-Gate Evidence Map (draft, integrator)
+# M3 Exit-Gate Evidence Map
 
 Maps each item of the **carried mandatory security evidence** (from
 `coordination/milestones/M3-REFERENCE-SLICE-ENTRY.md`) to the specific executing test(s) that prove
@@ -6,24 +6,22 @@ it. Every cited test is real — names were taken from source, not described fro
 cited file runs in CI via `npm run test:integration` (node env, `RUN_PLATFORM_DB_TESTS=true`) or the
 Playwright suite.
 
-**Status: DRAFT — evidence complete, CI green, awaiting Codex.** All nine mandatory security-evidence
-items map to executing tests that pass; the CI-equivalent pipeline is green at head `da9f1fc`; and the
-reference-slice UI (CRUD + publish lifecycle + cover + upload + rich text + autosave) is built and
-E2E-proven. This is still the integrator's working map, **not** the exit contract itself. Only two
-items block writing the exit contract, and both require Codex on return (2026-07-29): the carried
-Turbopack build warning (item 2) and the mandatory independent review of all stand-in work since
-2026-07-23 (item 3). A non-CI test-fragility (item 4) is recorded for the a11y lane but does not gate
-CI. Until Codex signs off, this map — like all stand-in work in this window (ADR-0002) — is
-provisional.
+**Status: FINAL — ACCEPTED.** The authoritative tested source head is
+`dccb123de207eb91779345e612ae88953948f479`. On 2026-07-29 GPT replayed the full gate from a fresh
+database: identity and five-program contract passed; Prisma validation and both migrations passed;
+seed ran twice; lint and typecheck passed; 738 unit tests passed; 83 PostgreSQL integration tests
+passed; production build passed with zero warnings; and the complete M3 browser directory passed
+262/262 across Chromium and mobile with one worker.
 
-Verified suite state at head `da9f1fc` (2026-07-28, stand-in):
-`npm run lint` → exit 0; `npx tsc --noEmit` → 0 errors; `npm run prisma:validate` → valid;
-`npm test` → 738 passed; `npm run test:integration` → 83 passed; `npm run build` → compiled
-successfully (one carried Turbopack warning, item 2 below). Browser (`--workers=1`, at
-`localhost:3004` so `Origin` matches `AUTH_URL`): `e2e/m3/admin-post-editor.spec.ts` chromium+mobile
-→ **30/30**; the two admin browse specs at `localhost` → 85/86 (the one failure is the pre-existing
-media focus-order fragility, item 4 below). CI runs everything except Playwright, so the CI pipeline
-(lint → typecheck → prisma validate/migrate/seed → test → test:integration → build) is green.
+The same production standalone artifact passed a TLS-loopback smoke using a real credentials login:
+login, Media list, upload, and delete each returned HTTP 200. The Media route NFT contains 235 files,
+including only seven repository source files, all required `src/lib/storage/**` runtime modules.
+
+The Media focus correction, autosave serialization correction, and process-correct build R3 were
+merged and pushed serially with a post-merge gate and lease closure between candidates. Historical
+draft statements below about unresolved focus order, build warning, Codex return, or R2 evidence are
+retained as chronology only and are superseded by this final status and
+`coordination/reviews/M3-FINAL-ACCEPTANCE-gpt.md`.
 
 ## Requirement → proof
 
