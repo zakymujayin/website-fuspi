@@ -48,7 +48,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M3-GPT-BUILD-TRACING-WARNING-R3.md TASK_BASE=a8408b17a581862d6cc92c493939e58549f56a77 npm run check:scope"
 risk: high
 token_class: M
-status: assigned
+status: active
 ---
 
 # M3 build-tracing warning R3 — process-correct reimplementation
@@ -71,4 +71,3 @@ audit evidence and must not be merged.
    Media list, upload, and delete. A forged session cookie is not acceptable.
 7. Use a fresh GPT-owned database and `/tmp/fuspi-gpt/` storage. Do not borrow another model's
    database, environment file, or upload directory.
-
