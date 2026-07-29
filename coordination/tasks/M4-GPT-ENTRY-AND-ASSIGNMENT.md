@@ -10,6 +10,7 @@ allowed_paths:
   - "coordination/ownership.yml"
   - "coordination/milestones/M4-FEATURES-ENTRY.md"
   - "coordination/tasks/M4-GPT-ENTRY-AND-ASSIGNMENT.md"
+  - "coordination/tasks/M4-GPT-PPKS-QUERY-ISOLATION.md"
   - "coordination/tasks/M4-CLAUDE-PUBLIC-SHELL-HARDENING.md"
   - "coordination/tasks/M4-DEEPSEEK-PAGE-DOMAIN-CRUD.md"
   - "coordination/prompts/M4-CLAUDE-PUBLIC-SHELL-HARDENING.md"
@@ -73,11 +74,10 @@ dependencies, configuration, tests, or M3 evidence.
 2. The M4 entry contract records lane boundaries, dependency policy, mandatory
    evidence, and the absolute PPKS-isolation and booking-concurrency blockers.
 3. Claude and DeepSeek receive bounded manifests whose leases do not overlap
-   each other or GPT-owned sensitive/platform paths.
+   each other or the GPT-owned first sensitive-operation task.
 4. Prompts instruct both agents to read only their required context, work in
    their own worktree and branch, run every acceptance command, commit a
    handoff, and stop without merging or changing governance state.
 5. The obsolete local `coordination/m4-entry` branch is not treated as
    authority because it predates M3 acceptance and names a superseded
    coordinator/base.
-

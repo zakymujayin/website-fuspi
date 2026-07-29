@@ -53,6 +53,7 @@ active_leases:
       - coordination/ownership.yml
       - coordination/milestones/M4-FEATURES-ENTRY.md
       - coordination/tasks/M4-GPT-ENTRY-AND-ASSIGNMENT.md
+      - coordination/tasks/M4-GPT-PPKS-QUERY-ISOLATION.md
       - coordination/tasks/M4-CLAUDE-PUBLIC-SHELL-HARDENING.md
       - coordination/tasks/M4-DEEPSEEK-PAGE-DOMAIN-CRUD.md
       - coordination/prompts/M4-CLAUDE-PUBLIC-SHELL-HARDENING.md
