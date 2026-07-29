@@ -4,7 +4,7 @@
 - Branch: `ai/deepseek/m3-media-focus-order-review-r2`
 - Coordination base: `f9acfc16642e523de4bbc81372c2f221b9eba56a`
 - Candidate: `8b8b35d5ed3206fe01fa2c198376554746044010`
-- Review head: 512d9098bb5bdade65e3a4af4f73d053d63dfb0a
+- Review content SHA: `0c8a6b052700c92903d5a6794405deb1fcb0168f`
 
 ## Summary
 

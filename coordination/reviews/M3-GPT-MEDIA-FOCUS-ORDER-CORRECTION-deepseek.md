@@ -81,13 +81,22 @@ No Medium findings.
 - Only Chromium + mobile (Pixel 7) projects tested. No WebKit/Safari.
 - Focus indicator heuristic works for Chromium-derivatives; Safari reports `outlineStyle: "auto"`.
 
+## Structural proofs
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Single parent | `git log -1 --format=%P HEAD` | `f9acfc16642e523de4bbc81372c2f221b9eba56a` (exactly 1 SHA) |
+| Only doc files | `git diff --name-only f9acfc16..HEAD` | 2 files, both in allowed_paths |
+| Candidate NOT ancestor | `git merge-base --is-ancestor 8b8b35d5..HEAD` | Exit 1 (non-zero = PASSING) |
+
 ## Non-committing merge status
 - Candidate merged with `git merge --no-commit --no-ff 8b8b35d5ed3206fe01fa2c198376554746044010`.
 - `git merge --abort` executed after evidence collection.
 - `git status --porcelain` confirms clean working tree.
+- No `git checkout -- .`, `git reset`, or `git clean -fd` used.
 
 ## Confirmation
 - Only review and handoff documents committed.
-- Review branch has exactly one parent: `f9acfc16642e523de4bbc81372c2f221b9eba56a`.
+- Review branch has exactly one parent.
 - Candidate is not an ancestor of the review branch.
 - No merge to `integration/*` or `main`.
