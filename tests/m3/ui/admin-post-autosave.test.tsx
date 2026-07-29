@@ -70,6 +70,14 @@ describe("shared-version wiring (source contracts)", () => {
     path.join(process.cwd(), "src/components/admin/posts/post-editor-form.tsx"),
     "utf8",
   );
+  const publication = readFileSync(
+    path.join(process.cwd(), "src/components/admin/posts/post-publication-actions.tsx"),
+    "utf8",
+  );
+  const deletion = readFileSync(
+    path.join(process.cwd(), "src/components/admin/posts/post-delete-action.tsx"),
+    "utf8",
+  );
   const page = readFileSync(
     path.join(
       process.cwd(),
@@ -78,13 +86,16 @@ describe("shared-version wiring (source contracts)", () => {
     "utf8",
   );
 
-  it("the shell owns one version and feeds it to publication, form, and delete", () => {
+  it("the shell owns one version and one atomic mutation lease for every writer", () => {
     expect(shell).toContain("useState(initialVersion)");
-    // The same `version` value reaches all three mutation surfaces.
-    expect(shell).toMatch(/PostPublicationActions[\s\S]*expectedVersion=\{version\}/);
-    expect(shell).toMatch(/PostEditorForm[\s\S]*expectedVersion=\{version\}/);
-    expect(shell).toMatch(/PostDeleteAction[\s\S]*expectedVersion=\{version\}/);
-    expect(shell).toContain("onVersionChange={setVersion}");
+    expect(shell).toContain("versionRef.current");
+    expect(shell).toContain("activeMutationRef.current !== null");
+    expect(shell).toContain("return { token, version: versionRef.current }");
+    expect(shell).toContain("activeMutationRef.current !== token");
+    for (const component of ["PostPublicationActions", "PostEditorForm", "PostDeleteAction"]) {
+      const block = new RegExp(`${component}[\\s\\S]*?finishMutation=\\{finishMutation\\}`);
+      expect(shell).toMatch(block);
+    }
   });
 
   it("the shell adopts a newer server version after a refresh", () => {
@@ -100,17 +111,24 @@ describe("shared-version wiring (source contracts)", () => {
     expect(page).not.toContain("<PostDeleteAction");
   });
 
-  it("autosave posts the AUTOSAVE action on the contract interval and reports the new version", () => {
+  it("autosave posts on the contract interval and advances the version before releasing", () => {
     expect(form).toContain('action: "AUTOSAVE"');
     expect(form).toContain("ADMIN_POST_AUTOSAVE_INTERVAL_MS");
-    expect(form).toContain("report?.(nextVersion)");
+    expect(form).toMatch(/finishMutation\(\s*lease\.token,[\s\S]*?nextVersion/);
     // A conflict must stop autosaving so a stale local version can't keep firing.
     expect(form).toContain('code === "VERSION_CONFLICT"');
     expect(form).toContain("stoppedRef.current = true");
   });
 
-  it("autosave never runs over an in-flight manual submit", () => {
+  it("all edit mutations acquire the shared lease and disable competing controls", () => {
     expect(form).toContain("if (busy) return;");
+    expect(form).toContain("const lease = beginMutation();");
+    expect(form).toContain("disabled={submitting || mutationBusy}");
+    expect(publication).toContain("const lease = beginMutation();");
+    expect(publication).toContain("disabled={pending !== null || mutationBusy}");
+    expect(deletion).toContain("const lease = beginMutation();");
+    expect(deletion).toContain("disabled={mutationBusy}");
+    expect(deletion).toContain("disabled={deleting || mutationBusy}");
   });
 
   it("defines the autosave strings in id, en, ar with a real Arabic value", () => {

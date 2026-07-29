@@ -47,8 +47,9 @@ type PostEditorFormProps = {
   /** Current cover (edit mode) so the picker shows it without a refetch. */
   initialCover?: CoverPreview | null;
   uploadPublicUrl: string;
-  /** Report a version bump from autosave up to the shared owner (edit mode). */
-  onVersionChange?: (version: number) => void;
+  mutationBusy?: boolean;
+  beginMutation?: () => { token: number; version: number } | null;
+  finishMutation?: (token: number, nextVersion?: number) => void;
 };
 
 type AutosaveState =
@@ -72,7 +73,9 @@ export function PostEditorForm({
   carried,
   initialCover = null,
   uploadPublicUrl,
-  onVersionChange,
+  mutationBusy = false,
+  beginMutation,
+  finishMutation,
 }: PostEditorFormProps) {
   // Resolve strings on the client. This form is a Client Component, so it cannot receive functions
   // (e.g. a label formatter) across the server/client boundary — doing so crashes the page render.
@@ -87,9 +90,9 @@ export function PostEditorForm({
 
   // Everything the autosave timer needs, read through a ref so the interval always sees the latest
   // draft/version without being torn down and rebuilt on every keystroke.
-  const latest = useRef({ draft, expectedVersion, submitting, onVersionChange });
+  const latest = useRef({ draft, submitting });
   useEffect(() => {
-    latest.current = { draft, expectedVersion, submitting, onVersionChange };
+    latest.current = { draft, submitting };
   });
   // Serialised snapshot of the last persisted draft; a mismatch means "dirty, worth autosaving".
   const savedSnapshotRef = useRef(JSON.stringify(initialDraft ?? emptyDraft()));
@@ -97,19 +100,36 @@ export function PostEditorForm({
   const stoppedRef = useRef(false);
 
   const runAutosave = useCallback(async () => {
-    if (mode !== "edit" || !postId || stoppedRef.current) return;
-    const { draft: current, expectedVersion: version, submitting: busy, onVersionChange: report } =
-      latest.current;
+    if (
+      mode !== "edit"
+      || !postId
+      || stoppedRef.current
+      || !beginMutation
+      || !finishMutation
+    ) return;
+    const { draft: current, submitting: busy } = latest.current;
     // Never autosave over an in-flight manual submit, and skip when nothing changed.
     if (busy) return;
     const snapshot = JSON.stringify(current);
     if (snapshot === savedSnapshotRef.current) return;
 
-    const parsed = buildAutosavePayload(current, postId, version ?? 0, carried ?? CREATE_CARRIED);
+    const lease = beginMutation();
+    if (!lease) return;
+
+    const parsed = buildAutosavePayload(
+      current,
+      postId,
+      lease.version,
+      carried ?? CREATE_CARRIED,
+    );
     // An invalid draft is not an autosave error; the manual save surfaces the field messages.
-    if (!parsed.success) return;
+    if (!parsed.success) {
+      finishMutation(lease.token);
+      return;
+    }
 
     setAutosave({ status: "saving" });
+    let released = false;
     try {
       const response = await fetch("/api/admin/posts", {
         method: "POST",
@@ -126,7 +146,11 @@ export function PostEditorForm({
       ) {
         savedSnapshotRef.current = snapshot;
         const nextVersion = (result as { version?: unknown }).version;
-        if (typeof nextVersion === "number") report?.(nextVersion);
+        finishMutation(
+          lease.token,
+          typeof nextVersion === "number" ? nextVersion : undefined,
+        );
+        released = true;
         setAutosave({ status: "saved", at: Date.now() });
         return;
       }
@@ -141,8 +165,10 @@ export function PostEditorForm({
       }
     } catch {
       setAutosave({ status: "error" });
+    } finally {
+      if (!released) finishMutation(lease.token);
     }
-  }, [mode, postId, carried]);
+  }, [mode, postId, carried, beginMutation, finishMutation]);
 
   useEffect(() => {
     if (mode !== "edit") return;
@@ -166,21 +192,26 @@ export function PostEditorForm({
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (submitting) return;
+    if (submitting || mutationBusy) return;
     setFieldErrors({});
     setFormError(null);
 
+    const lease = mode === "edit" && beginMutation ? beginMutation() : null;
+    if (mode === "edit" && beginMutation && !lease) return;
+    const mutationVersion = lease?.version ?? expectedVersion ?? 0;
     const parsed = mode === "create"
       ? buildCreatePayload(draft)
-      : buildUpdatePayload(draft, postId ?? "", expectedVersion ?? 0, carried ?? CREATE_CARRIED);
+      : buildUpdatePayload(draft, postId ?? "", mutationVersion, carried ?? CREATE_CARRIED);
 
     if (!parsed.success) {
+      if (lease && finishMutation) finishMutation(lease.token);
       setFieldErrors(collectFieldErrors(parsed.error.issues));
       setFormError(t("error.VALIDATION_FAILED"));
       return;
     }
 
     setSubmitting(true);
+    let released = false;
     try {
       const response = await fetch("/api/admin/posts", {
         method: "POST",
@@ -200,6 +231,14 @@ export function PostEditorForm({
         && result !== null
         && (result as { ok?: unknown }).ok === true
       ) {
+        const nextVersion = (result as { version?: unknown }).version;
+        if (lease && finishMutation) {
+          finishMutation(
+            lease.token,
+            typeof nextVersion === "number" ? nextVersion : undefined,
+          );
+          released = true;
+        }
         router.push(listHref);
         router.refresh();
         return;
@@ -220,6 +259,7 @@ export function PostEditorForm({
       // Network/parse failure must read like the generic unavailable state, never a stack.
       setFormError(t("error.UNAVAILABLE"));
     } finally {
+      if (lease && finishMutation && !released) finishMutation(lease.token);
       setSubmitting(false);
     }
   }
@@ -340,7 +380,7 @@ export function PostEditorForm({
       })}
 
       <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" disabled={submitting}>
+        <Button type="submit" disabled={submitting || mutationBusy}>
           {submitting ? <Spinner data-icon /> : null}
           {submitting
             ? t("submitting")
