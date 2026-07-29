@@ -67,17 +67,7 @@ active_leases:
       - tests/m3/ui/admin-post-autosave.test.tsx
       - tests/m3/ui/admin-post-editor.test.tsx
       - e2e/m3/admin-post-editor.spec.ts
-  - task: M3-DEEPSEEK-BUILD-TRACING-REVIEW
-    owner: deepseek
+  - task: M3-GPT-CLAUDE-GOVERNANCE-RECONCILIATION
+    owner: gpt
     paths:
-      - coordination/reviews/M3-GPT-BUILD-TRACING-WARNING-deepseek.md
-  - task: M3-DEEPSEEK-AUTOSAVE-SERIALIZATION-REVIEW
-    owner: deepseek
-    paths:
-      - coordination/reviews/M3-GPT-AUTOSAVE-MUTATION-SERIALIZATION-deepseek.md
-      - coordination/handoffs/M3-DEEPSEEK-AUTOSAVE-SERIALIZATION-REVIEW-deepseek.md
-  - task: M3-DEEPSEEK-MEDIA-FOCUS-ORDER-REVIEW
-    owner: deepseek
-    paths:
-      - coordination/reviews/M3-GPT-MEDIA-FOCUS-ORDER-CORRECTION-deepseek.md
-      - coordination/handoffs/M3-DEEPSEEK-MEDIA-FOCUS-ORDER-REVIEW-deepseek.md
+      - coordination/reviews/M3-CLAUDE-GOVERNANCE-RECONCILIATION-gpt.md
