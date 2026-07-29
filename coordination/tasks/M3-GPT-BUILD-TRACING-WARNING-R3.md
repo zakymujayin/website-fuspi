@@ -4,7 +4,7 @@ milestone: M3
 owner: gpt
 reviewer: deepseek
 tester: gpt
-base_sha: a8408b17a581862d6cc92c493939e58549f56a77
+base_sha: f46c314ee0c9ce34f654a8304d5339b8ddbd71e0
 supersedes_candidate: 5535c1c44f4b758f27b318b8d501482507bdc06f
 allowed_paths:
   - "src/lib/storage/staged-file.ts"
@@ -45,7 +45,7 @@ acceptance_commands:
   - npm run test:integration
   - npm run build
   - git diff --check
-  - "TASK_MANIFEST=coordination/tasks/M3-GPT-BUILD-TRACING-WARNING-R3.md TASK_BASE=a8408b17a581862d6cc92c493939e58549f56a77 npm run check:scope"
+  - "TASK_MANIFEST=coordination/tasks/M3-GPT-BUILD-TRACING-WARNING-R3.md TASK_BASE=f46c314ee0c9ce34f654a8304d5339b8ddbd71e0 npm run check:scope"
 risk: high
 token_class: M
 status: active
