@@ -47,11 +47,6 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
-  - task: M3-GPT-BUILD-TRACING-WARNING-R3
-    owner: gpt
-    paths:
-      - src/lib/storage/staged-file.ts
-      - coordination/handoffs/M3-GPT-BUILD-TRACING-WARNING-R3-gpt.md
   - task: M3-GPT-PROCESS-RECONCILIATION-AND-EXIT
     owner: gpt
     paths:

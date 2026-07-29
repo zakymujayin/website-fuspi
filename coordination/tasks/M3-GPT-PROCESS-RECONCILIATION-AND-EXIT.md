@@ -63,7 +63,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M3-GPT-PROCESS-RECONCILIATION-AND-EXIT.md TASK_BASE=a8408b17a581862d6cc92c493939e58549f56a77 npm run check:scope"
 risk: high
 token_class: L
-status: assigned
+status: active
 ---
 
 # M3 process reconciliation and exit
@@ -87,4 +87,3 @@ and issue the M3 exit contract only if the final integration head is green.
 7. Update the evidence map from draft to final only at the tested remote integration head.
 8. Tag `m3-accepted` only after the exit contract and handoff are committed on the green integration
    head. Do not merge to `main`, open M4, deploy, or perform any production action.
-

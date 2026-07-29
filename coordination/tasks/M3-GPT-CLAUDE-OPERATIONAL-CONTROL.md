@@ -36,7 +36,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M3-GPT-CLAUDE-OPERATIONAL-CONTROL.md TASK_BASE=origin/coordination/m3-claude-control-assignment npm run check:scope"
 risk: high
 token_class: S
-status: assigned
+status: merged
 ---
 
 # Temporary Claude operational-control handoff

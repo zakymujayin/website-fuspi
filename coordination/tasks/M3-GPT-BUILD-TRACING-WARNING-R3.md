@@ -48,7 +48,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M3-GPT-BUILD-TRACING-WARNING-R3.md TASK_BASE=origin/coordination/m3-build-r3-assignment npm run check:scope"
 risk: high
 token_class: M
-status: active
+status: merged
 ---
 
 # M3 build-tracing warning R3 — process-correct reimplementation
