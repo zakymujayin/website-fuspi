@@ -132,3 +132,14 @@ unknown dirty state, lease conflict, failed mandatory gate, or unresolved High/C
 
 The exact handback and emergency-revocation procedures are in ADR-0004. A date, usage renewal, or
 new chat does not implicitly transfer control.
+
+## Completed handback — 2026-07-29
+
+The human owner subsequently named the returning Codex/GPT controller by directing it to repair M3
+autonomously and obtain acceptance. GPT performed a read-only queue freeze and recorded the exact
+remote integration, main, candidate, review, local-worktree, and gate state in ADR-0004.
+
+This handback changes only the durable controller and closes the temporary-control lease. It does
+not approve M3, validate the historical R2 review workflow retroactively, merge anything to
+`main`, or authorize production. GPT must create a new M3 reconciliation task and active lease
+before changing queue metadata or acceptance artifacts.

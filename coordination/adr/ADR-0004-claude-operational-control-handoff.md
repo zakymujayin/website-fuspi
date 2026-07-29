@@ -1,7 +1,6 @@
 # ADR-0004: Temporary Claude operational control
 
-- Status: accepted; activates at the first `integration/m3-reference-slice` head containing
-  delegation payload commit `45fd76d449fdd2c066e4f3ff67c9ddd2df38d556`
+- Status: superseded by the human-owner handback recorded below
 - Date: 2026-07-28
 - Authorizing principal: human owner
 - Delegated controller: Claude Sonnet 5
@@ -168,3 +167,31 @@ freeze and evidence report.
 Claude uses distinct commit identities for coordinator/integrator work and implementation work.
 Every control action must be reconstructible from a manifest, lease, branch, commit, review,
 acceptance evidence, merge commit, and handoff. Chat is never the only durable state.
+
+## Handback record — 2026-07-29
+
+The human owner explicitly directed the returning Codex/GPT controller to repair M3 autonomously
+and obtain a process-correct acceptance. This names GPT as the replacement controller under the
+handback rule above.
+
+The queue was frozen for read-only reconciliation before this record was written. At that point:
+
+- authoritative remote integration head:
+  `9f1e02dfc51feb8d98e57b8ee1a94533a8ff9e1f`;
+- `origin/main` remained at `df7fbfc460866ffb0a20dc6c81f00318fb096af9` and contained no M3
+  candidate or integration commit;
+- the local integration worktree was clean but had unpushed head
+  `01e0ee4a1125be8462a119fac6b2a490ed8a9af5`; it is retained as audit evidence and is not
+  authoritative;
+- candidate heads were Media focus `8b8b35d5ed3206fe01fa2c198376554746044010`,
+  autosave serialization `f2ad281eb8885fe5df839fc2e16cf079a8a68524`, and build tracing
+  `5535c1c44f4b758f27b318b8d501482507bdc06f`;
+- remote R2 review heads were `bf0275527e36a1032f6a96a62ade7c47f5aa0ed2`,
+  `7853ba2d00d2a06d7c3932527d837bac340fe44e`, and
+  `eada22e75138184ef6cae5d3c173a13b41989c9b`; and
+- M3 had not been accepted, tagged, or merged to `main`.
+
+Control returns to GPT when this record and `coordinator: gpt` become part of the authoritative
+integration branch. Claude must no longer mutate the queue after that head. Existing implementation
+and review history remains immutable; GPT must reconcile it through new, prospectively leased
+tasks and fresh final evidence rather than retroactively treating missing leases as valid.
