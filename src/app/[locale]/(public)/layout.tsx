@@ -47,7 +47,9 @@ export default async function PublicLayout({
     <div className={`${FONT_VARIABLES} public-shell flex min-h-screen flex-col`}>
       <SkipLink />
       <SiteHeader />
-      <main id="main" tabIndex={-1} className="flex-1 outline-none">
+      {/* The header is sticky, so the skip link and any in-page anchor must clear
+          its full 148px expanded height instead of landing underneath it. */}
+      <main id="main" tabIndex={-1} className="flex-1 scroll-mt-[148px] outline-none">
         {children}
       </main>
       <SiteFooter />

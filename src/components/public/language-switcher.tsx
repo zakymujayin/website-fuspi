@@ -20,6 +20,10 @@ const LOCALE_NAMES: Record<AppLocale, string> = {
 
 type LanguageSwitcherProps = {
   tone?: "light" | "dark";
+  /** `lg` meets the 44px drawer target floor (docs/26-C). */
+  size?: "sm" | "lg";
+  /** Id of a visible heading that names this group, used instead of aria-label. */
+  labelledBy?: string;
   className?: string;
 };
 
@@ -27,13 +31,22 @@ type LanguageSwitcherProps = {
  * Switching locale keeps the current path (docs/12-F). Rendered as links so it
  * works without JavaScript and stays operable with the keyboard.
  */
-export function LanguageSwitcher({ tone = "dark", className }: LanguageSwitcherProps) {
+export function LanguageSwitcher({
+  tone = "dark",
+  size = "sm",
+  labelledBy,
+  className,
+}: LanguageSwitcherProps) {
   const pathname = usePathname();
   const activeLocale = useLocale();
   const t = useTranslations("Nav");
 
   return (
-    <nav aria-label={t("languageLabel")} className={cn("flex items-center gap-1", className)}>
+    <nav
+      aria-label={labelledBy ? undefined : t("languageLabel")}
+      aria-labelledby={labelledBy}
+      className={cn("flex items-center gap-1", className)}
+    >
       {routing.locales.map((locale) => {
         const isActive = locale === activeLocale;
 
@@ -46,7 +59,10 @@ export function LanguageSwitcher({ tone = "dark", className }: LanguageSwitcherP
             lang={locale}
             aria-current={isActive ? "true" : undefined}
             className={cn(
-              "grid min-h-9 min-w-9 place-items-center rounded-md px-2 text-xs font-medium transition-colors",
+              "grid place-items-center rounded-md px-2 font-medium transition-colors",
+              size === "lg"
+                ? "min-h-11 min-w-11 text-sm"
+                : "min-h-9 min-w-9 text-xs",
               tone === "dark"
                 ? "text-slate-300 hover:bg-white/10 hover:text-white"
                 : "text-slate-600 hover:bg-slate-100 hover:text-royal-700",

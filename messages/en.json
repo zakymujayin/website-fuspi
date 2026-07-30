@@ -62,6 +62,7 @@
     "primaryLabel": "Main menu",
     "contentLabel": "Content channels",
     "utilityLabel": "Campus systems",
+    "externalLinkHint": "(external site, opens in a new tab)",
     "profile": "Profile",
     "studyPrograms": "Study Programs",
     "academics": "Academics",
