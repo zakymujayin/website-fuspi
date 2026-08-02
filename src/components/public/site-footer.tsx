@@ -16,7 +16,16 @@ function ColumnTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-const LINK_CLASS = "text-sm text-slate-400 transition-colors hover:text-white";
+/** `py-1` lifts each footer link past the WCAG 2.5.8 minimum target height. */
+const LINK_CLASS =
+  "inline-flex py-1 text-sm text-slate-400 transition-colors hover:text-white";
+
+/**
+ * `slate-400` not `slate-500`: at 13px on navy-900 the darker step lands at
+ * 3.29:1 and fails WCAG AA (axe color-contrast).
+ */
+const LEGAL_LINK_CLASS =
+  "inline-flex min-h-11 items-center text-[13px] text-slate-400 transition-colors hover:text-white";
 
 export async function SiteFooter() {
   const t = await getTranslations("Footer");
@@ -70,20 +79,17 @@ export async function SiteFooter() {
         </div>
 
         <div className="flex flex-col gap-3 border-t border-navy-800 py-5 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[13px] text-slate-500">
+          <p className="text-[13px] text-slate-400">
             © {CURRENT_YEAR} {institution.name}
           </p>
-          <nav aria-label={t("legalLabel")} className="flex flex-wrap gap-4">
-            <Link href="/privasi" className="text-[13px] text-slate-500 hover:text-white">
+          <nav aria-label={t("legalLabel")} className="flex flex-wrap items-center gap-4">
+            <Link href="/privasi" className={LEGAL_LINK_CLASS}>
               {t("privacy")}
             </Link>
-            <Link
-              href="/aksesibilitas"
-              className="text-[13px] text-slate-500 hover:text-white"
-            >
+            <Link href="/aksesibilitas" className={LEGAL_LINK_CLASS}>
               {t("accessibility")}
             </Link>
-            <Link href="/sitemap" className="text-[13px] text-slate-500 hover:text-white">
+            <Link href="/sitemap" className={LEGAL_LINK_CLASS}>
               {t("sitemap")}
             </Link>
           </nav>

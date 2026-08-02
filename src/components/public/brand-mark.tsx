@@ -15,7 +15,7 @@ export function BrandMark({ tone = "light", className }: BrandMarkProps) {
   return (
     <Link
       href="/"
-      className={cn("flex items-center gap-3 text-start", className)}
+      className={cn("flex min-w-0 items-center gap-3 text-start", className)}
       dir="ltr"
     >
       <span
@@ -29,7 +29,9 @@ export function BrandMark({ tone = "light", className }: BrandMarkProps) {
       >
         {institution.shortName.slice(0, 2)}
       </span>
-      <span className="flex flex-col leading-tight">
+      {/* The wordmark yields width before the primary menu does: at 1024px in EN
+          the menu must stay fully readable, so the subtitle truncates instead. */}
+      <span className="flex min-w-0 flex-col leading-tight">
         <span
           className={cn(
             "font-display text-base font-bold",
@@ -40,7 +42,7 @@ export function BrandMark({ tone = "light", className }: BrandMarkProps) {
         </span>
         <span
           className={cn(
-            "text-[11px] tracking-wide",
+            "truncate text-[11px] tracking-wide",
             tone === "light" ? "text-slate-500" : "text-slate-400",
           )}
         >

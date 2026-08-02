@@ -7,8 +7,12 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { NavGroup } from "@/components/public/nav-items";
 
+/**
+ * `whitespace-nowrap` keeps a long EN or AR label on one line: the main header
+ * row is a fixed 76px, so a wrapped label would spill out of it.
+ */
 const ITEM_CLASS =
-  "flex min-h-11 items-center rounded-lg px-3 text-[15px] font-medium text-slate-700 transition-colors hover:text-royal-600";
+  "flex min-h-11 shrink-0 items-center rounded-lg px-2.5 text-[15px] font-medium whitespace-nowrap text-slate-700 transition-colors hover:text-royal-600 xl:px-3";
 
 /** Dropdowns open on hover (pointer) and on click/keyboard; Esc closes them. */
 export function DesktopNav({ primary }: { primary: readonly NavGroup[] }) {
@@ -17,7 +21,10 @@ export function DesktopNav({ primary }: { primary: readonly NavGroup[] }) {
   return (
     // Below lg the longest locale (EN) overflows a 768px line, so the drawer
     // stays in charge up to lg rather than md.
-    <nav aria-label={t("primaryLabel")} className="hidden items-center gap-4 lg:flex">
+    <nav
+      aria-label={t("primaryLabel")}
+      className="hidden shrink-0 items-center gap-0.5 lg:flex xl:gap-2"
+    >
       {primary.map((item) =>
         item.children ? (
           <Menu.Root key={item.key} modal={false}>
@@ -25,7 +32,7 @@ export function DesktopNav({ primary }: { primary: readonly NavGroup[] }) {
               {t(item.key)}
               <ChevronDown
                 aria-hidden
-                className="size-4 transition-transform data-[popup-open]:rotate-180"
+                className="size-4 shrink-0 transition-transform data-[popup-open]:rotate-180 motion-reduce:transition-none"
                 strokeWidth={1.5}
               />
             </Menu.Trigger>
@@ -36,7 +43,7 @@ export function DesktopNav({ primary }: { primary: readonly NavGroup[] }) {
                     <Menu.LinkItem
                       key={child.key}
                       render={<Link href={child.href} />}
-                      className="flex cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-slate-700 outline-none data-[highlighted]:bg-royal-50 data-[highlighted]:text-royal-700"
+                      className="flex min-h-11 cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-slate-700 outline-none data-[highlighted]:bg-royal-50 data-[highlighted]:text-royal-700"
                     >
                       {t(child.key)}
                     </Menu.LinkItem>

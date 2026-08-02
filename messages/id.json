@@ -62,6 +62,7 @@
     "primaryLabel": "Menu utama",
     "contentLabel": "Kanal konten",
     "utilityLabel": "Layanan sistem",
+    "externalLinkHint": "(situs eksternal, terbuka di tab baru)",
     "profile": "Profil",
     "studyPrograms": "Program Studi",
     "academics": "Akademik",
