@@ -577,9 +577,16 @@ export async function mutatePagePublication(
 
       await recordActivity(transaction, {
         actorId: actor.userId,
-        action: nextState.status === "PUBLISHED" ? "PUBLISH" : "ARCHIVE",
+        action: nextState.status === "PUBLISHED"
+          ? "PUBLISH"
+          : parsed.data.intent === "ARCHIVE"
+            ? "ARCHIVE"
+            : "UPDATE",
         resourceType: "Page",
         resourceId: existing.id,
+        ...(parsed.data.intent === "RETURN_TO_DRAFT"
+          ? {metadata: {operation: "RETURN_TO_DRAFT", version: claim.nextVersion}}
+          : {}),
       });
 
       const page = await transaction.page.findUniqueOrThrow({

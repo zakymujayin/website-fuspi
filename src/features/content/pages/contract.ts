@@ -50,15 +50,7 @@ export const PageInitialPublicationSchema = z.discriminatedUnion("intent", [
 export const PageCreateInputSchema = z.object({
   ...PageMutableFieldsShape,
   publication: PageInitialPublicationSchema,
-}).strict().superRefine((value, ctx) => {
-  if (value.parentId && value.parentId === value.slug) {
-    ctx.addIssue({
-      code: "custom",
-      path: ["parentId"],
-      message: "A page cannot be its own parent.",
-    });
-  }
-});
+}).strict();
 
 export const PageUpdateInputSchema = z.object({
   pageId: PageIdSchema,

@@ -7,6 +7,7 @@ import {
   mutatePagePublication,
   updatePage,
 } from "@/features/content/pages/mutations";
+import {getPageDetail, listPages} from "@/features/content/pages/queries";
 import {createPrismaClient} from "@/lib/db/client";
 
 const runDatabaseTests = process.env.RUN_PLATFORM_DB_TESTS === "true";
@@ -325,7 +326,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
     expect(stored).toMatchObject({version: 1, slug: `${marker}-idor-target`});
   });
 
-  it("enforces legal publication transitions", async () => {
+  it("enforces legal publication transitions and records accurate audit actions", async () => {
     const created = await createPage(
       prisma,
       actor(adminId, "ADMIN"),
@@ -388,6 +389,17 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
     expect(await prisma.contentRevision.count({
       where: {resourceType: "Page", resourceId: stored.id},
     })).toBe(8);
+
+    const activities = await prisma.activityLog.findMany({
+      where: {resourceType: "Page", resourceId: stored.id},
+      orderBy: {createdAt: "asc"},
+    });
+    expect(activities).toHaveLength(4);
+    expect(activities[0].action).toBe("CREATE");
+    expect(activities[1].action).toBe("PUBLISH");
+    expect(activities[2].action).toBe("ARCHIVE");
+    expect(activities[3].action).toBe("UPDATE");
+    expect((activities[3].metadata as Record<string, unknown>)?.operation).toBe("RETURN_TO_DRAFT");
   });
 
   it("rolls back optimistic claims and content changes on a slug conflict", async () => {
@@ -554,5 +566,198 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       action: "UPDATE",
       metadata: {operation: "DELETE", version: 2},
     });
+  });
+
+  it("allows create with slug equal to a valid parentId reference", async () => {
+    const parent = await createPage(
+      prisma,
+      actor(adminId, "ADMIN"),
+      input(`${marker}-parent-ref`, {
+        heroMediaId: null,
+        translations: {id: translation("Referensi Parent")},
+      }),
+      clock,
+    );
+    if (!parent.ok) throw new Error("Expected parent.");
+
+    const result = await createPage(
+      prisma,
+      actor(adminId, "ADMIN"),
+      input(`${marker}-child-ref`, {
+        slug: parent.pageId,
+        parentId: parent.pageId,
+        heroMediaId: null,
+        translations: {id: translation("Child with parentId as slug")},
+      }),
+      clock,
+    );
+    expect(result).toMatchObject({ok: true});
+
+    if (!result.ok) throw new Error("Expected ok");
+    const stored = await prisma.page.findUniqueOrThrow({
+      where: {id: result.pageId},
+    });
+    expect(stored.parentId).toBe(parent.pageId);
+    expect(stored.slug).toBe(parent.pageId);
+  });
+
+  it("sorts by TITLE_ASC with deterministic tiebreak and correct pagination", async () => {
+    const created = await Promise.all([
+      createPage(prisma, actor(adminId, "ADMIN"), input(`${marker}-sort-z`, {
+        order: 0,
+        heroMediaId: null,
+        translations: {id: translation("Zebra Sort")},
+      }), clock),
+      createPage(prisma, actor(adminId, "ADMIN"), input(`${marker}-sort-a`, {
+        order: 99,
+        heroMediaId: null,
+        translations: {id: translation("Alpha Sort")},
+      }), clock),
+      createPage(prisma, actor(adminId, "ADMIN"), input(`${marker}-sort-m`, {
+        order: 50,
+        heroMediaId: null,
+        translations: {id: translation("Mango Sort")},
+      }), clock),
+      createPage(prisma, actor(adminId, "ADMIN"), input(`${marker}-sort-alpha2`, {
+        order: 1,
+        heroMediaId: null,
+        translations: {id: translation("Alpha Sort")},
+      }), clock),
+    ]);
+    if (created.some((c) => !c.ok)) throw new Error("Expected all pages created.");
+
+    const result = await listPages(prisma, actor(adminId, "ADMIN"), {
+      page: 1,
+      pageSize: 20,
+      status: "ALL",
+      search: "Sort",
+      sort: "TITLE_ASC",
+    }, clock);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error("Expected list.");
+    // "Sort" search matches exactly the 4 test pages
+    const matching = result.data.items.filter((i: {slug: string}) => i.slug.startsWith(marker));
+    expect(matching).toHaveLength(4);
+    const titles = matching.map((i: {title: string; order: number}) => ({title: i.title, order: i.order}));
+
+    // Should be sorted by title ASC (Alpha Sort, Alpha Sort, Mango Sort, Zebra Sort) not by order
+    expect(titles.map((t) => t.title)).toEqual(["Alpha Sort", "Alpha Sort", "Mango Sort", "Zebra Sort"]);
+    // The two "Alpha Sort" entries: deterministic tiebreak by id ASC (created order)
+    expect(titles[0].order).toBe(99);
+    expect(titles[1].order).toBe(1);
+  });
+
+  it("supports status filtering and search in list queries", async () => {
+    const result = await listPages(prisma, actor(adminId, "ADMIN"), {
+      page: 1,
+      pageSize: 20,
+      status: "PUBLISHED",
+      search: "Sort",
+      sort: "TITLE_ASC",
+    }, clock);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error("Expected list.");
+    const matching = result.data.items.filter((i: {slug: string}) => i.slug.startsWith(marker));
+    // None of the Sort pages are PUBLISHED
+    expect(matching).toHaveLength(0);
+
+    const searchResult = await listPages(prisma, actor(adminId, "ADMIN"), {
+      page: 1,
+      pageSize: 20,
+      status: "ALL",
+      search: "Zebra",
+      sort: "TITLE_ASC",
+    }, clock);
+
+    expect(searchResult.ok).toBe(true);
+    if (!searchResult.ok) throw new Error("Expected list.");
+    const searchMatching = searchResult.data.items.filter((i: {slug: string}) => i.slug.startsWith(marker));
+    expect(searchMatching).toHaveLength(1);
+    expect(searchMatching[0].title).toBe("Zebra Sort");
+  });
+
+  it("returns parent summary, locale list, and hasChildren in list results", async () => {
+    const parent = await createPage(
+      prisma,
+      actor(adminId, "ADMIN"),
+      input(`${marker}-list-parent`, {
+        heroMediaId: null,
+        translations: {id: translation("Parent Page")},
+      }),
+      clock,
+    );
+    if (!parent.ok) throw new Error("Expected parent.");
+
+    const child = await createPage(
+      prisma,
+      actor(adminId, "ADMIN"),
+      input(`${marker}-list-child`, {
+        parentId: parent.pageId,
+        heroMediaId: null,
+        translations: {id: translation("Child Page"), en: translation("Child EN")},
+      }),
+      clock,
+    );
+    if (!child.ok) throw new Error("Expected child.");
+
+    const result = await listPages(prisma, actor(adminId, "ADMIN"), {
+      page: 1,
+      pageSize: 20,
+      status: "ALL",
+      search: "",
+      sort: "TITLE_ASC",
+    }, clock);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error("Expected list.");
+
+    const childItem = result.data.items.find((i: {id: string}) => i.id === child.pageId);
+    expect(childItem).toBeDefined();
+    if (!childItem) throw new Error("Missing child item");
+    expect(childItem.parentId).toBe(parent.pageId);
+    expect(childItem.parentTitle).toBe("Parent Page");
+    expect(childItem.hasChildren).toBe(false);
+    expect(childItem.availableLocales).toEqual(["id", "en"]);
+
+    const parentItem = result.data.items.find((i: {id: string}) => i.id === parent.pageId);
+    expect(parentItem).toBeDefined();
+    if (!parentItem) throw new Error("Missing parent item");
+    expect(parentItem.hasChildren).toBe(true);
+    expect(parentItem.parentTitle).toBeNull();
+    expect(parentItem.title).toBe("Parent Page");
+    expect(parentItem.titleLocale).toBe("id");
+  });
+
+  it("rejects non-ADMIN query sessions and returns detail for admin", async () => {
+    const page = await createPage(
+      prisma,
+      actor(adminId, "ADMIN"),
+      input(`${marker}-query-detail`, {
+        heroMediaId: null,
+        translations: {
+          id: translation("Query Detail"),
+          en: translation("Query Detail EN"),
+        },
+      }),
+      clock,
+    );
+    if (!page.ok) throw new Error("Expected page.");
+
+    const editorResult = await getPageDetail(prisma, actor(editorId, "EDITOR"), page.pageId, clock);
+    expect(editorResult).toEqual({ok: false, code: "SESSION_INVALID"});
+
+    const missingResult = await getPageDetail(prisma, actor(adminId, "ADMIN"), `${marker}-nonexist`, clock);
+    expect(missingResult).toEqual({ok: false, code: "REQUEST_INVALID"});
+
+    const detail = await getPageDetail(prisma, actor(adminId, "ADMIN"), page.pageId, clock);
+    if (!detail.ok) throw new Error("Expected detail");
+    expect(detail.data.id).toBe(page.pageId);
+    expect(detail.data.status).toBe("DRAFT");
+    expect(detail.data.translations.id.title).toBe("Query Detail");
+    expect(detail.data.translations.en).toBeDefined();
+    expect(detail.data.translations.en!.title).toBe("Query Detail EN");
+    expect(detail.data.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
   });
 });

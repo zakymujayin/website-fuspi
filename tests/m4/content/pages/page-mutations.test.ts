@@ -8,6 +8,8 @@ import {
   mutatePagePublication,
   updatePage,
 } from "@/features/content/pages/mutations";
+import {listPages, getPageDetail} from "@/features/content/pages/queries";
+import type {PageQueryDatabase} from "@/features/content/pages/queries";
 
 const NOW = new Date("2026-07-16T08:00:00.000Z");
 const clock = () => NOW;
@@ -278,25 +280,40 @@ describe("M4 Page mutation trust boundary", () => {
     expect(missing).toEqual({ok: false, code: "NOT_FOUND"});
   });
 
-  it("rejects self-parenting in create input", async () => {
-    const transaction = vi.fn();
-    const database = {$transaction: transaction} as unknown as PageMutationDatabase;
+  it("allows create with slug equal to a valid parentId reference", async () => {
+    const transaction = createTransaction({
+      media: {findUnique: vi.fn().mockResolvedValue(null)},
+      page: {
+        create: vi.fn().mockResolvedValue({
+          id: "page-1",
+          version: 1,
+          status: "DRAFT",
+          updatedAt: NOW,
+        }),
+        findUnique: vi.fn().mockResolvedValue({id: "parent-page"}),
+      },
+    });
+    const database = databaseWithTransaction(transaction);
 
-    await expect(createPage(database, session(), createInput({
-      parentId: "halaman-fuspi",
-    }), clock)).resolves.toEqual({ok: false, code: "VALIDATION_FAILED"});
-    expect(transaction).not.toHaveBeenCalled();
+    const result = await createPage(database, session(), createInput({
+      slug: "parent-page",
+      parentId: "parent-page",
+      heroMediaId: null,
+    }), clock);
+
+    expect(result).toMatchObject({ok: true});
   });
 
   it("rejects self-parenting in update input", async () => {
     const transaction = vi.fn();
     const database = {$transaction: transaction} as unknown as PageMutationDatabase;
 
-    await expect(updatePage(database, session("EDITOR"), {
+    await expect(updatePage(database, session(), {
       pageId: "page-1",
       expectedVersion: 1,
-      ...createInput({slug: "updated-slug"}),
-    }, clock)).resolves.toEqual({ok: false, code: "FORBIDDEN"});
+      ...createInput({slug: "updated-slug", parentId: "page-1"}),
+    }, clock)).resolves.toEqual({ok: false, code: "VALIDATION_FAILED"});
+    expect(transaction).not.toHaveBeenCalled();
   });
 
   it("rejects invalid publication transitions before claiming a version", async () => {
@@ -488,5 +505,146 @@ describe("M4 Page mutation trust boundary", () => {
     if (!result.ok) {
       expect(result.code).toBe("HIERARCHY_CYCLE");
     }
+  });
+});
+
+describe("M4 Page query trust boundary", () => {
+  const idRow = (id: string, title: string, order = 0) => ({
+    id,
+    slug: id,
+    status: "DRAFT" as const,
+    order,
+    version: 1,
+    parentId: null,
+    heroMediaId: null,
+    createdAt: NOW,
+    updatedAt: NOW,
+    parent: {translations: []},
+    children: [],
+    translations: [{
+      locale: "id" as const,
+      title,
+      content: "<p>Content</p>",
+      metaTitle: null,
+      metaDesc: null,
+    }],
+  });
+
+  it("rejects non-ADMIN, expired, or must-change-password sessions for list", async () => {
+    const database = {$transaction: vi.fn(), $queryRaw: vi.fn(), page: {findMany: vi.fn(), count: vi.fn()}} as unknown as PageQueryDatabase;
+
+    await expect(listPages(database, session("EDITOR"), {page: 1, pageSize: 10, status: "ALL", search: "", sort: "UPDATED_DESC"}, clock))
+      .resolves.toEqual({ok: false, code: "SESSION_INVALID"});
+    await expect(listPages(database, {...session(), expiresAt: NOW}, {page: 1, pageSize: 10, status: "ALL", search: "", sort: "UPDATED_DESC"}, clock))
+      .resolves.toEqual({ok: false, code: "SESSION_INVALID"});
+    await expect(listPages(database, {...session(), mustChangePassword: true}, {page: 1, pageSize: 10, status: "ALL", search: "", sort: "UPDATED_DESC"}, clock))
+      .resolves.toEqual({ok: false, code: "SESSION_INVALID"});
+  });
+
+  it("rejects non-ADMIN sessions for detail", async () => {
+    const database = {page: {findUnique: vi.fn()}} as unknown as PageQueryDatabase;
+
+    await expect(getPageDetail(database, session("EDITOR"), "page-1", clock))
+      .resolves.toEqual({ok: false, code: "SESSION_INVALID"});
+  });
+
+  it("returns valid list with parent titles, locale list, and hasChildren", async () => {
+    const database = {
+      page: {
+        findMany: vi.fn().mockResolvedValue([
+          idRow("p-a", "Alpha", 0),
+          idRow("p-b", "Beta", 0),
+        ]),
+        count: vi.fn().mockResolvedValue(2),
+      },
+      $queryRaw: vi.fn(),
+      $transaction: vi.fn(async (args: unknown) => {
+        if (Array.isArray(args)) return Promise.all(args);
+        return args;
+      }),
+    } as unknown as PageQueryDatabase;
+
+    const result = await listPages(database, session(), {page: 1, pageSize: 10, status: "ALL", search: "", sort: "UPDATED_DESC"}, clock);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error("Expected ok");
+    expect(result.data.items).toHaveLength(2);
+    expect(result.data.total).toBe(2);
+    expect(result.data.items[0].title).toBe("Alpha");
+    expect(result.data.items[0].titleLocale).toBe("id");
+    expect(result.data.items[0].availableLocales).toEqual(["id"]);
+    expect(result.data.items[0].hasChildren).toBe(false);
+    expect(result.data.items[0].parentTitle).toBeNull();
+  });
+
+  it("returns detail with all translations and ISO timestamps", async () => {
+    const database = {
+      page: {
+        findUnique: vi.fn().mockResolvedValue({
+          id: "page-1",
+          slug: "page-1",
+          status: "DRAFT" as const,
+          order: 0,
+          version: 1,
+          parentId: null,
+          heroMediaId: null,
+          createdAt: NOW,
+          updatedAt: NOW,
+          parent: {translations: []},
+          children: [],
+          translations: [
+            {locale: "id" as const, title: "Profil", content: "<p>Isi</p>", metaTitle: null, metaDesc: null},
+            {locale: "en" as const, title: "Profile", content: "<p>Content</p>", metaTitle: null, metaDesc: null},
+          ],
+        }),
+      },
+    } as unknown as PageQueryDatabase;
+
+    const result = await getPageDetail(database, session(), "page-1", clock);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) throw new Error("Expected ok");
+    expect(result.data.id).toBe("page-1");
+    expect(result.data.translations.id.title).toBe("Profil");
+    expect(result.data.translations.en?.title).toBe("Profile");
+    expect(result.data.createdAt).toBe(NOW.toISOString());
+  });
+
+  it("returns REQUEST_INVALID for missing page detail", async () => {
+    const database = {
+      page: {findUnique: vi.fn().mockResolvedValue(null)},
+    } as unknown as PageQueryDatabase;
+
+    await expect(getPageDetail(database, session(), "page-missing", clock))
+      .resolves.toEqual({ok: false, code: "REQUEST_INVALID"});
+  });
+
+  it("rejects malformed, oversize, and control-character Page IDs", async () => {
+    const database = {page: {findUnique: vi.fn()}} as unknown as PageQueryDatabase;
+
+    await expect(getPageDetail(database, session(), "", clock))
+      .resolves.toEqual({ok: false, code: "REQUEST_INVALID"});
+    await expect(getPageDetail(database, session(), "a".repeat(192), clock))
+      .resolves.toEqual({ok: false, code: "REQUEST_INVALID"});
+    await expect(getPageDetail(database, session(), "\x00bad", clock))
+      .resolves.toEqual({ok: false, code: "REQUEST_INVALID"});
+    await expect(getPageDetail(database, session(), "!invalid", clock))
+      .resolves.toEqual({ok: false, code: "REQUEST_INVALID"});
+
+    expect(vi.mocked(database.page.findUnique)).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid list query without touching database", async () => {
+    const database = {$transaction: vi.fn(), $queryRaw: vi.fn(), page: {findMany: vi.fn(), count: vi.fn()}} as unknown as PageQueryDatabase;
+
+    await expect(listPages(database, session(), {page: 0, pageSize: 10, status: "ALL", search: "", sort: "UPDATED_DESC"}, clock))
+      .resolves.toEqual({ok: false, code: "REQUEST_INVALID"});
+    await expect(listPages(database, session(), {page: 1, pageSize: 100, status: "ALL", search: "", sort: "UPDATED_DESC"}, clock))
+      .resolves.toEqual({ok: false, code: "REQUEST_INVALID"});
+    await expect(listPages(database, session(), {page: 1, pageSize: 10, status: "ALL", search: "\x00bad", sort: "UPDATED_DESC"}, clock))
+      .resolves.toEqual({ok: false, code: "REQUEST_INVALID"});
+
+    expect(vi.mocked(database.$queryRaw)).not.toHaveBeenCalled();
+    expect(vi.mocked(database.page.findMany)).not.toHaveBeenCalled();
   });
 });

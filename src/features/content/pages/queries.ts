@@ -8,6 +8,7 @@ import {authorize} from "@/lib/auth/runtime/authorization";
 import {createPrismaClient} from "@/lib/db/client";
 import {
   PageDetailViewSchema,
+  PageIdSchema,
   PageListQuerySchema,
   PageListResultSchema,
   type PageDetailView,
@@ -102,46 +103,25 @@ export async function listPages(
     };
   }
 
-  const orderBy: Prisma.PageOrderByWithRelationInput[] =
-    query.data.sort === "TITLE_ASC"
-      ? [{order: "asc"}, {id: "asc"}]
-      : [{updatedAt: "desc"}, {id: "asc"}];
-
   const skip = (query.data.page - 1) * query.data.pageSize;
 
   try {
     let rows;
     let total;
 
-    if (query.data.sort === "TITLE_ASC" && query.data.search) {
+    if (query.data.sort === "TITLE_ASC") {
       const identifiers = await database.$queryRaw<Array<{id: string}>>(Prisma.sql`
         SELECT p."id"
         FROM "Page" p
         INNER JOIN "PageTranslation" t
           ON t."pageId" = p."id" AND t."locale"::text = 'id'
         WHERE ${query.data.status === "ALL" ? Prisma.sql`TRUE` : Prisma.sql`p."status"::text = ${query.data.status}`}
-          AND t."title" ILIKE ${`%${query.data.search}%`}
-        ORDER BY p."order" ASC, p."id" ASC
-        LIMIT ${query.data.pageSize} OFFSET ${skip}
-      `);
-      const unordered = await database.page.findMany({
-        where: {id: {in: identifiers.map(({id}) => id)}},
-        select: PAGE_SELECT,
-      });
-      const byId = new Map(unordered.map((row) => [row.id, row]));
-      rows = identifiers.flatMap(({id}) => {
-        const row = byId.get(id);
-        return row ? [row] : [];
-      });
-      total = await database.page.count({where});
-    } else if (query.data.sort === "TITLE_ASC") {
-      const identifiers = await database.$queryRaw<Array<{id: string}>>(Prisma.sql`
-        SELECT p."id"
-        FROM "Page" p
-        INNER JOIN "PageTranslation" t
-          ON t."pageId" = p."id" AND t."locale"::text = 'id'
-        WHERE ${query.data.status === "ALL" ? Prisma.sql`TRUE` : Prisma.sql`p."status"::text = ${query.data.status}`}
-        ORDER BY p."order" ASC, p."id" ASC
+        ${
+          query.data.search
+            ? Prisma.sql`AND t."title" ILIKE ${`%${query.data.search}%`}`
+            : Prisma.empty
+        }
+        ORDER BY t."title" ASC, p."id" ASC
         LIMIT ${query.data.pageSize} OFFSET ${skip}
       `);
       const unordered = await database.page.findMany({
@@ -155,6 +135,7 @@ export async function listPages(
       });
       total = await database.page.count({where});
     } else {
+      const orderBy: Prisma.PageOrderByWithRelationInput[] = [{updatedAt: "desc"}, {id: "asc"}];
       [rows, total] = await database.$transaction([
         database.page.findMany({
           where,
@@ -209,11 +190,12 @@ export async function getPageDetail(
   if (!actor) return {ok: false, code: "SESSION_INVALID"};
   if (!isAuthorized(actor)) return {ok: false, code: "SESSION_INVALID"};
 
-  if (typeof pageId !== "string") return {ok: false, code: "REQUEST_INVALID"};
+  const parsedId = PageIdSchema.safeParse(pageId);
+  if (!parsedId.success) return {ok: false, code: "REQUEST_INVALID"};
 
   try {
     const row = await database.page.findUnique({
-      where: {id: pageId},
+      where: {id: parsedId.data},
       select: PAGE_SELECT,
     });
 
