@@ -6,7 +6,6 @@ import type {Role} from "@/generated/prisma/enums";
 
 import {createTicketQueryBoundary} from "@/features/tickets/query-isolation";
 import {createPrismaClient} from "@/lib/db/client";
-import {validateDatabaseSession} from "@/lib/auth/runtime/session";
 import {
   createTrackingTokenDigest,
 } from "@/lib/security/tracking-token";
@@ -24,6 +23,7 @@ suite("M4 PPKS query isolation on PostgreSQL", () => {
   const expires = new Date("2026-07-30T14:00:00.000Z");
   const key = Buffer.alloc(32, 23);
   const trackingHmacSecret = "m4-ticket-query-isolation-test-secret-000000000000";
+  const expiredSessionToken = `${marker}-expired-session`;
   const sequence = String(Date.now()).slice(-7);
   const ticketNumbers = {
     generalA: `FUSPI-2026-${sequence}1`,
@@ -53,7 +53,7 @@ suite("M4 PPKS query isolation on PostgreSQL", () => {
   };
 
   let prisma: ReturnType<typeof createPrismaClient>;
-  const sessions = new Map<Role, Awaited<ReturnType<typeof validateDatabaseSession>>>();
+  const sessions = new Map<Role, {sessionToken: string}>();
   const userIds = new Map<Role, string>();
   let boundary: ReturnType<typeof createTicketQueryBoundary>;
   let resolverCalls = 0;
@@ -98,8 +98,16 @@ suite("M4 PPKS query isolation on PostgreSQL", () => {
         data: {sessionToken: token, userId: user.id, expires},
       });
       userIds.set(role, user.id);
-      sessions.set(role, await validateDatabaseSession(prisma, token, now));
+      sessions.set(role, {sessionToken: token});
     }
+
+    await prisma.session.create({
+      data: {
+        sessionToken: expiredSessionToken,
+        userId: userIds.get("SATGAS_PPKS")!,
+        expires: new Date(now.getTime() - 1),
+      },
+    });
 
     await prisma.ticket.createMany({
       data: [
@@ -202,6 +210,7 @@ suite("M4 PPKS query isolation on PostgreSQL", () => {
         authorId: userIds.get("SATGAS_PPKS"),
         bodyCiphertext: sealPpksReplyBody(
           secrets.reply,
+          ids.ppksA,
           ids.reply,
           {key, keyVersion: 1},
         ),
@@ -235,6 +244,12 @@ suite("M4 PPKS query isolation on PostgreSQL", () => {
   });
 
   afterAll(async () => {
+    await prisma.activityLog.deleteMany({
+      where: {
+        actorId: {in: [...userIds.values()]},
+        resourceType: "PPKS_TICKET_COLLECTION",
+      },
+    });
     await prisma.ticketAccessLog.deleteMany({
       where: {ticketId: {in: Object.values(ids)}},
     });
@@ -466,7 +481,7 @@ suite("M4 PPKS query isolation on PostgreSQL", () => {
     )).toBe(true);
     expect(satgasLogs.every(({allowed}) => allowed)).toBe(true);
 
-    const aggregateLogs = await prisma.ticketAccessLog.count({
+    const falseAggregateCaseLogs = await prisma.ticketAccessLog.count({
       where: {
         ticketId: {in: [ids.ppksA, ids.ppksB]},
         userId: userIds.get("ADMIN"),
@@ -474,7 +489,33 @@ suite("M4 PPKS query isolation on PostgreSQL", () => {
         action: "VIEW",
       },
     });
-    expect(aggregateLogs).toBe(2);
+    expect(falseAggregateCaseLogs).toBe(0);
+
+    const collectionLogs = await prisma.activityLog.findMany({
+      where: {
+        actorId: {
+          in: [
+            userIds.get("ADMIN")!,
+            userIds.get("SATGAS_PPKS")!,
+          ],
+        },
+        action: "VIEW_SENSITIVE",
+        resourceType: "PPKS_TICKET_COLLECTION",
+      },
+      select: {actorId: true, resourceId: true, metadata: true},
+    });
+    expect(collectionLogs).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        actorId: userIds.get("ADMIN"),
+        resourceId: null,
+        metadata: expect.objectContaining({operation: "AGGREGATE"}),
+      }),
+      expect.objectContaining({
+        actorId: userIds.get("SATGAS_PPKS"),
+        resourceId: null,
+        metadata: expect.objectContaining({operation: "COUNT"}),
+      }),
+    ]));
   });
 
   it("never resolves a key before authorization and fails closed on tamper", async () => {
@@ -517,28 +558,37 @@ suite("M4 PPKS query isolation on PostgreSQL", () => {
     }
   });
 
-  it("rejects expired, inactive, and malformed sessions with the same safe shape", async () => {
-    const expired = {
-      ok: true,
-      session: {
-        userId: userIds.get("SATGAS_PPKS"),
-        role: "SATGAS_PPKS",
-        isActive: true,
-        mustChangePassword: false,
-        expiresAt: new Date(now.getTime() - 1),
-      },
-    };
-    const malformed = {
-      ok: true,
-      session: {
-        userId: userIds.get("SATGAS_PPKS"),
-        role: "ADMIN",
-        isActive: false,
-        mustChangePassword: false,
-        expiresAt: expires,
-      },
-    };
-    const missing = {ok: false, code: "SESSION_INVALID"};
+  it("fails closed if a protected envelope is stored on a general ticket", async () => {
+    const general = await prisma.ticket.findUniqueOrThrow({
+      where: {id: ids.generalA},
+      select: {descriptionCiphertext: true},
+    });
+    const protectedRow = await prisma.ticket.findUniqueOrThrow({
+      where: {id: ids.ppksA},
+      select: {descriptionCiphertext: true},
+    });
+    await prisma.ticket.update({
+      where: {id: ids.generalA},
+      data: {descriptionCiphertext: protectedRow.descriptionCiphertext},
+    });
+
+    try {
+      const result = await boundary.detail(session("ADMIN"), {id: ids.generalA});
+      expect(result).toEqual({ok: false, code: "UNAVAILABLE"});
+      expect(JSON.stringify(result)).not.toContain("ciphertext");
+      expect(JSON.stringify(result)).not.toContain(protectedRow.descriptionCiphertext);
+    } finally {
+      await prisma.ticket.update({
+        where: {id: ids.generalA},
+        data: {descriptionCiphertext: general.descriptionCiphertext},
+      });
+    }
+  });
+
+  it("rejects expired, inactive, revoked, and malformed sessions with the same safe shape", async () => {
+    const expired = {sessionToken: expiredSessionToken};
+    const malformed = {sessionToken: 42};
+    const missing = {sessionToken: `${marker}-missing-session`};
 
     for (const invalid of [expired, malformed, missing]) {
       expect(await boundary.detail(invalid, {id: ids.ppksA})).toEqual({
@@ -566,5 +616,10 @@ suite("M4 PPKS query isolation on PostgreSQL", () => {
         data: {isActive: true},
       });
     }
+
+    expect(await boundary.detail(
+      session("SATGAS_PPKS"),
+      {id: ids.ppksA},
+    )).toEqual({ok: false, code: "NOT_FOUND"});
   });
 });

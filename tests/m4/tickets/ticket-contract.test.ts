@@ -1,6 +1,8 @@
 import {describe, expect, it} from "vitest";
 
 import {
+  GeneralTicketStoredTextSchema,
+  PpksStoredFieldEnvelopeJsonSchema,
   PpksTicketDetailSchema,
   TicketCollectionQuerySchema,
   TicketDetailResultSchema,
@@ -92,11 +94,14 @@ describe("M4 ticket query contracts", () => {
     );
     const reply = sealPpksReplyBody(
       "Balasan sintetis",
+      ticketId,
       replyId,
       {key, keyVersion: 4},
     );
 
     expect(subject).not.toBe(description);
+    expect(PpksStoredFieldEnvelopeJsonSchema.safeParse(subject).success).toBe(true);
+    expect(GeneralTicketStoredTextSchema.safeParse(subject).success).toBe(false);
     expect(openPpksTicketField(
       subject,
       ticketId,
@@ -109,7 +114,18 @@ describe("M4 ticket query contracts", () => {
       "description",
       resolveKey,
     )).toBe("Uraian sintetis");
-    expect(openPpksReplyBody(reply, replyId, resolveKey)).toBe("Balasan sintetis");
+    expect(openPpksReplyBody(
+      reply,
+      ticketId,
+      replyId,
+      resolveKey,
+    )).toBe("Balasan sintetis");
+    expect(() => openPpksReplyBody(
+      reply,
+      "different-ticket",
+      replyId,
+      resolveKey,
+    )).toThrow("Unable to process protected data.");
     expect(() => openPpksTicketField(
       subject,
       ticketId,

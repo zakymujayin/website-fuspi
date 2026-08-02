@@ -5,23 +5,48 @@ import {
   TicketPriority,
   TicketStatus,
 } from "@/generated/prisma/enums";
-import {
-  ActiveDatabaseSessionSchema,
-  SessionInvalidResultSchema,
-} from "@/contracts/auth";
+import {AesGcmEnvelopeSchema} from "@/contracts/security";
 
 const TICKET_NUMBER_PATTERN = /^FUSPI-\d{4}-\d{4,}$/u;
 const TRACKING_TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/u;
 
-export const TicketQuerySessionSchema = z.discriminatedUnion("ok", [
-  z
-    .object({
-      ok: z.literal(true),
-      session: ActiveDatabaseSessionSchema,
-    })
-    .strict(),
-  SessionInvalidResultSchema,
-]);
+/**
+ * Frozen M4 storage convention for protected ticket text. Each PPKS text
+ * column stores its own serialized AES-GCM envelope. The legacy row-level
+ * nonce, tag, and key-version columns are not part of this convention.
+ */
+export const PpksStoredFieldEnvelopeSchema = AesGcmEnvelopeSchema;
+
+export const PpksStoredFieldEnvelopeJsonSchema = z.string().transform(
+  (value, context) => {
+    try {
+      const envelope = PpksStoredFieldEnvelopeSchema.safeParse(JSON.parse(value));
+      if (envelope.success) return envelope.data;
+    } catch {
+      // The common issue below intentionally hides JSON/parser details.
+    }
+    context.addIssue({
+      code: "custom",
+      message: "Invalid protected ticket field.",
+    });
+    return z.NEVER;
+  },
+);
+
+/** Fail closed if a non-PPKS row contains a protected envelope by mistake. */
+export const GeneralTicketStoredTextSchema = z.string().refine((value) => {
+  try {
+    return !PpksStoredFieldEnvelopeSchema.safeParse(JSON.parse(value)).success;
+  } catch {
+    return true;
+  }
+}, "Invalid general ticket field.");
+
+export const TicketQuerySessionSchema = z
+  .object({
+    sessionToken: z.string().min(1).max(191),
+  })
+  .strict();
 
 export const TicketIdQuerySchema = z
   .object({
@@ -94,7 +119,7 @@ export const PpksReplyViewSchema = z
   .object({
     id: z.string().min(1).max(191),
     authorId: z.string().min(1).max(191).nullable(),
-    body: z.string().min(1).max(100_000),
+    body: z.string().min(1).max(1_048_576),
     createdAt: z.date(),
   })
   .strict();
@@ -104,7 +129,7 @@ export const PpksAttachmentViewSchema = z
     id: z.string().min(1).max(191),
     originalName: z.string().min(1).max(255),
     mimeType: z.string().min(1).max(191),
-    size: z.number().int().min(1).max(5_242_880),
+    size: z.number().int().min(0).max(2_147_483_647),
     createdAt: z.date(),
   })
   .strict();
@@ -112,11 +137,11 @@ export const PpksAttachmentViewSchema = z
 export const PpksTicketDetailSchema = TicketSummarySchema.extend({
   category: z.literal("PELECEHAN_SEKSUAL"),
   subject: z.string().max(500).nullable(),
-  description: z.string().min(1).max(100_000),
+  description: z.string().min(1).max(1_048_576),
   reporterIdentity: z.string().max(16_000).nullable(),
-  resolution: z.string().max(100_000).nullable(),
-  replies: z.array(PpksReplyViewSchema).max(10_000),
-  attachments: z.array(PpksAttachmentViewSchema).max(3),
+  resolution: z.string().max(1_048_576).nullable(),
+  replies: z.array(PpksReplyViewSchema),
+  attachments: z.array(PpksAttachmentViewSchema),
 }).strict();
 
 export const TicketListResultSchema = z.discriminatedUnion("ok", [

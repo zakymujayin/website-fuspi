@@ -1,8 +1,10 @@
 import {randomUUID} from "node:crypto";
 
+import type {ActiveDatabaseSession} from "@/contracts/auth";
 import type {Prisma} from "@/generated/prisma/client";
 
 import {
+  GeneralTicketStoredTextSchema,
   GeneralTicketDetailSchema,
   PpksAggregateResultSchema,
   PpksTicketDetailSchema,
@@ -25,11 +27,12 @@ import {
   type TicketDetailResult,
   type TicketExportResult,
   type TicketListResult,
-  type TicketQuerySession,
   type TicketSummary,
   type TicketTrackingResult,
 } from "@/contracts/ticket";
+import {recordActivity} from "@/lib/audit/activity-log";
 import {authorize} from "@/lib/auth/runtime/authorization";
+import {validateDatabaseSession} from "@/lib/auth/runtime/session";
 import {createPrismaClient} from "@/lib/db/client";
 import type {EncryptionKeyResolver} from "@/lib/security/encryption";
 import {verifyTrackingTokenDigest} from "@/lib/security/tracking-token";
@@ -41,7 +44,8 @@ import {
 export type TicketQueryDatabase = ReturnType<typeof createPrismaClient>;
 
 type TicketQueryScope = "GENERAL" | "PPKS";
-type ActiveActor = Extract<TicketQuerySession, {ok: true}>["session"];
+type TicketQueryAction = "VIEW" | "EXPORT";
+type ActiveActor = ActiveDatabaseSession;
 
 const SYSTEM_CLOCK = () => new Date();
 const PPKS_CATEGORY = "PELECEHAN_SEKSUAL" as const;
@@ -100,31 +104,20 @@ function failure(
   return {ok: false as const, code};
 }
 
-function activeActor(
-  rawSession: unknown,
-  now: Date,
-): ActiveActor | null {
-  const parsed = TicketQuerySessionSchema.safeParse(rawSession);
-  if (
-    !parsed.success
-    || !parsed.data.ok
-    || parsed.data.session.expiresAt <= now
-    || parsed.data.session.mustChangePassword
-  ) return null;
-  return parsed.data.session;
-}
-
-function queryScope(actor: ActiveActor): TicketQueryScope | null {
+function queryScope(
+  actor: ActiveActor,
+  action: TicketQueryAction,
+): TicketQueryScope | null {
   const ppks = authorize(
     {actor, ticketScope: "PPKS_DETAIL"},
-    "VIEW",
+    action,
     "PPKS_TICKET",
   );
   if (ppks.allowed) return "PPKS";
 
   const general = authorize(
     {actor, ticketScope: "NON_PPKS"},
-    "VIEW",
+    action,
     "TICKET",
   );
   return general.allowed ? "GENERAL" : null;
@@ -162,12 +155,16 @@ function projectSummary(row: Prisma.TicketGetPayload<{select: typeof SUMMARY_SEL
 }
 
 function projectGeneralDetail(row: GeneralDetailRow): GeneralTicketDetail {
+  const parseStoredText = (value: string | null) => value === null
+    ? null
+    : GeneralTicketStoredTextSchema.parse(value);
+
   return GeneralTicketDetailSchema.parse({
     ...projectSummary(row),
-    subject: row.subjectCiphertext,
-    description: row.descriptionCiphertext,
-    reporterIdentity: row.reporterIdentityCiphertext,
-    resolution: row.resolutionCiphertext,
+    subject: parseStoredText(row.subjectCiphertext),
+    description: parseStoredText(row.descriptionCiphertext),
+    reporterIdentity: parseStoredText(row.reporterIdentityCiphertext),
+    resolution: parseStoredText(row.resolutionCiphertext),
   });
 }
 
@@ -215,7 +212,12 @@ function projectPpksDetail(
     replies: row.replies.map((reply) => ({
       id: reply.id,
       authorId: reply.authorId,
-      body: openPpksReplyBody(reply.bodyCiphertext, reply.id, resolveKey),
+      body: openPpksReplyBody(
+        reply.bodyCiphertext,
+        row.id,
+        reply.id,
+        resolveKey,
+      ),
       createdAt: reply.createdAt,
     })),
     attachments: row.attachments,
@@ -236,6 +238,24 @@ async function auditAllowedPpksAccess(
       action,
       allowed: true,
     })),
+  });
+}
+
+async function auditAllowedPpksCollectionAccess(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  operation: "COUNT" | "AGGREGATE",
+  resultCount: number,
+) {
+  await recordActivity(tx, {
+    actorId: userId,
+    action: "VIEW_SENSITIVE",
+    resourceType: "PPKS_TICKET_COLLECTION",
+    metadata: {
+      operation,
+      scope: "PPKS_AGGREGATE",
+      resultCount,
+    },
   });
 }
 
@@ -305,18 +325,17 @@ export function createTicketQueryBoundary(options: Readonly<{
   } = options;
 
   async function validatedActor(rawSession: unknown) {
-    const actor = activeActor(rawSession, clock());
-    if (!actor) return null;
+    const parsed = TicketQuerySessionSchema.safeParse(rawSession);
+    if (!parsed.success) return null;
     try {
-      const currentUser = await database.user.findFirst({
-        where: {
-          id: actor.userId,
-          role: actor.role,
-          isActive: true,
-        },
-        select: {id: true},
-      });
-      return currentUser ? actor : null;
+      const validation = await validateDatabaseSession(
+        database,
+        parsed.data.sessionToken,
+        clock(),
+      );
+      return validation.ok && !validation.session.mustChangePassword
+        ? validation.session
+        : null;
     } catch {
       return null;
     }
@@ -330,7 +349,7 @@ export function createTicketQueryBoundary(options: Readonly<{
     if (!query.success) return TicketListResultSchema.parse(failure("INVALID_REQUEST"));
     const actor = await validatedActor(rawSession);
     if (!actor) return TicketListResultSchema.parse(failure("NOT_FOUND"));
-    const scope = queryScope(actor);
+    const scope = queryScope(actor, "VIEW");
     if (!scope) return TicketListResultSchema.parse(failure("NOT_FOUND"));
 
     try {
@@ -363,7 +382,7 @@ export function createTicketQueryBoundary(options: Readonly<{
     if (!query.success) return TicketDetailResultSchema.parse(failure("INVALID_REQUEST"));
     const actor = await validatedActor(rawSession);
     if (!actor) return TicketDetailResultSchema.parse(failure("NOT_FOUND"));
-    const scope = queryScope(actor);
+    const scope = queryScope(actor, "VIEW");
 
     try {
       if (scope === "PPKS") {
@@ -416,7 +435,7 @@ export function createTicketQueryBoundary(options: Readonly<{
     if (!query.success) return TicketCountResultSchema.parse(failure("INVALID_REQUEST"));
     const actor = await validatedActor(rawSession);
     if (!actor) return TicketCountResultSchema.parse(failure("NOT_FOUND"));
-    const scope = queryScope(actor);
+    const scope = queryScope(actor, "VIEW");
     if (!scope) return TicketCountResultSchema.parse(failure("NOT_FOUND"));
     const where = ticketWhere(scope, query.data);
 
@@ -424,14 +443,14 @@ export function createTicketQueryBoundary(options: Readonly<{
       const value = scope === "GENERAL"
         ? await database.ticket.count({where})
         : await database.$transaction(async (tx) => {
-            const rows = await tx.ticket.findMany({where, select: {id: true}});
-            await auditAllowedPpksAccess(
+            const resultCount = await tx.ticket.count({where});
+            await auditAllowedPpksCollectionAccess(
               tx,
-              rows.map(({id}) => id),
               actor.userId,
-              "VIEW",
+              "COUNT",
+              resultCount,
             );
-            return rows.length;
+            return resultCount;
           });
       return TicketCountResultSchema.parse({ok: true, data: {count: value}});
     } catch {
@@ -447,7 +466,7 @@ export function createTicketQueryBoundary(options: Readonly<{
     if (!query.success) return TicketListResultSchema.parse(failure("INVALID_REQUEST"));
     const actor = await validatedActor(rawSession);
     if (!actor) return TicketListResultSchema.parse(failure("NOT_FOUND"));
-    const scope = queryScope(actor);
+    const scope = queryScope(actor, "VIEW");
     if (!scope) return TicketListResultSchema.parse(failure("NOT_FOUND"));
     const where: Prisma.TicketWhereInput = {
       ...ticketWhere(scope, {}),
@@ -487,7 +506,7 @@ export function createTicketQueryBoundary(options: Readonly<{
     if (!query.success) return TicketExportResultSchema.parse(failure("INVALID_REQUEST"));
     const actor = await validatedActor(rawSession);
     if (!actor) return TicketExportResultSchema.parse(failure("NOT_FOUND"));
-    const scope = queryScope(actor);
+    const scope = queryScope(actor, "EXPORT");
     if (!scope) return TicketExportResultSchema.parse(failure("NOT_FOUND"));
     const where = ticketWhere(scope, query.data);
 
@@ -545,15 +564,20 @@ export function createTicketQueryBoundary(options: Readonly<{
 
     try {
       const rows = await database.$transaction(async (tx) => {
-        const found = await tx.ticket.findMany({
+        const found = await tx.ticket.groupBy({
+          by: ["status"],
           where: {category: PPKS_CATEGORY},
-          select: {id: true, status: true},
+          _count: {_all: true},
         });
-        await auditAllowedPpksAccess(
+        const resultCount = found.reduce(
+          (total, row) => total + row._count._all,
+          0,
+        );
+        await auditAllowedPpksCollectionAccess(
           tx,
-          found.map(({id}) => id),
           actor.userId,
-          "VIEW",
+          "AGGREGATE",
+          resultCount,
         );
         return found;
       });
@@ -565,14 +589,16 @@ export function createTicketQueryBoundary(options: Readonly<{
         SELESAI: 0,
         DITOLAK: 0,
       };
-      for (const row of rows) byStatus[row.status] += 1;
+      for (const row of rows) byStatus[row.status] = row._count._all;
+      const total = Object.values(byStatus).reduce(
+        (sum, statusCount) => sum + statusCount,
+        0,
+      );
       return PpksAggregateResultSchema.parse({
         ok: true,
         data: {
-          total: rows.length,
-          active: rows.filter(({status}) =>
-            status !== "SELESAI" && status !== "DITOLAK"
-          ).length,
+          total,
+          active: total - byStatus.SELESAI - byStatus.DITOLAK,
           byStatus,
         },
       });

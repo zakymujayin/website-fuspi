@@ -1,6 +1,8 @@
+import {createHash} from "node:crypto";
+
 import {z} from "zod";
 
-import {AesGcmEnvelopeSchema} from "@/contracts/security";
+import {PpksStoredFieldEnvelopeJsonSchema} from "@/contracts/ticket";
 import {
   decryptProtectedData,
   encryptProtectedData,
@@ -15,6 +17,15 @@ const ProtectedTicketFieldSchema = z.enum([
 ]);
 
 type ProtectedTicketField = z.infer<typeof ProtectedTicketFieldSchema>;
+
+function ppksReplyContextId(ticketId: string, replyId: string) {
+  return createHash("sha256")
+    .update("FUSPI:PPKS_REPLY\0", "utf8")
+    .update(ticketId, "utf8")
+    .update("\0", "utf8")
+    .update(replyId, "utf8")
+    .digest("hex");
+}
 
 export function sealPpksTicketField(
   plaintext: string,
@@ -45,7 +56,7 @@ export function openPpksTicketField(
   resolveKey: EncryptionKeyResolver,
 ) {
   const parsedField = ProtectedTicketFieldSchema.parse(field);
-  const envelope = AesGcmEnvelopeSchema.parse(JSON.parse(storedEnvelope));
+  const envelope = PpksStoredFieldEnvelopeJsonSchema.parse(storedEnvelope);
   return decryptProtectedData(
     envelope,
     {
@@ -59,6 +70,7 @@ export function openPpksTicketField(
 
 export function sealPpksReplyBody(
   plaintext: string,
+  ticketId: string,
   replyId: string,
   options: Readonly<{
     key: Uint8Array;
@@ -69,7 +81,7 @@ export function sealPpksReplyBody(
     plaintext,
     {
       purpose: "PPKS_REPLY",
-      resourceId: replyId,
+      resourceId: ppksReplyContextId(ticketId, replyId),
       field: "body",
     },
     options,
@@ -79,15 +91,16 @@ export function sealPpksReplyBody(
 
 export function openPpksReplyBody(
   storedEnvelope: string,
+  ticketId: string,
   replyId: string,
   resolveKey: EncryptionKeyResolver,
 ) {
-  const envelope = AesGcmEnvelopeSchema.parse(JSON.parse(storedEnvelope));
+  const envelope = PpksStoredFieldEnvelopeJsonSchema.parse(storedEnvelope);
   return decryptProtectedData(
     envelope,
     {
       purpose: "PPKS_REPLY",
-      resourceId: replyId,
+      resourceId: ppksReplyContextId(ticketId, replyId),
       field: "body",
     },
     {resolveKey},
