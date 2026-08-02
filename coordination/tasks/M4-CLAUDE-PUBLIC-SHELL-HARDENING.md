@@ -74,7 +74,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-CLAUDE-PUBLIC-SHELL-HARDENING.md TASK_BASE=origin/integration/m4-features npm run check:scope"
 risk: medium
 token_class: L
-status: queued
+status: merged
 ---
 
 # M4 Claude public shell hardening

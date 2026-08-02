@@ -81,7 +81,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-GPT-CLAUDE-PUBLIC-SHELL-INTEGRATION.md TASK_BASE=184c64c9ad5eac262de9417edcdc447eab82b824 npm run check:scope"
 risk: medium
 token_class: M
-status: active
+status: merged
 ---
 
 # M4 Claude public-shell integration
@@ -91,4 +91,3 @@ transfer its lease to the serial merge queue, integrate it into
 `integration/m4-features`, run post-merge acceptance, publish durable evidence,
 and release the lease. This task must not merge M4 to `main` or modify the
 concurrent DeepSeek Page-domain lease.
-

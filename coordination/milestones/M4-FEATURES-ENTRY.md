@@ -62,7 +62,7 @@ entry, is not merged, and is preserved unchanged for audit.
 | Lane | Task | State | Lease boundary |
 | --- | --- | --- | --- |
 | GPT | `M4-GPT-PPKS-QUERY-ISOLATION` | merged | ticket contract/domain/tests only |
-| Claude | `M4-CLAUDE-PUBLIC-SHELL-HARDENING` | queued | accepted head transferred to the serial GPT merge queue |
+| Claude | `M4-CLAUDE-PUBLIC-SHELL-HARDENING` | merged | accepted public shell integrated with full post-merge evidence |
 | DeepSeek | `M4-DEEPSEEK-PAGE-DOMAIN-CRUD` | ready | Page domain implementation/tests only |
 
 These leases do not overlap. Claude may read but not change the frozen
@@ -84,6 +84,19 @@ hold any public-shell or Page-domain path.
   tests passed; production build generated 34/34 pages; diff check passed.
 - The GPT lease is released. The integration candidate remains isolated from
   `main`; the human owner retains the M4-to-main decision.
+
+### M4-CLAUDE-PUBLIC-SHELL-HARDENING
+
+- Accepted feature head: `6944dee5a3d7944481bb6895b89612c90a4e08c3`.
+- Integration merge: `c8c1fa6` (`Merge M4 Claude public shell hardening`).
+- GPT first review requested reduced-motion backdrop coverage, locale-safe GKM
+  routing, and utility-link drawer closure; all three were corrected and
+  independently re-reviewed **ACCEPTED**.
+- Coordinator post-merge evidence: lint, typecheck, Prisma validation, 52 files
+  / 789 unit tests, 21 files / 89 PostgreSQL integration tests, a 34/34-page
+  production build, and 104/104 focused Playwright cases passed.
+- The public-shell lease is released. The integration candidate remains
+  isolated from `main`; the human owner retains the M4-to-main decision.
 
 ## Merge and dependency policy
 
