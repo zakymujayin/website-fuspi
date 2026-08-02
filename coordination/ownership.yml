@@ -47,6 +47,15 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
+  - task: M4-GPT-M0-M2-ACCEPTANCE-RECONCILIATION
+    owner: gpt
+    paths:
+      - coordination/ownership.yml
+      - coordination/tasks/M4-GPT-M0-M2-ACCEPTANCE-RECONCILIATION.md
+      - coordination/milestones/M0-FOUNDATION-EXIT.md
+      - coordination/milestones/M1-PLATFORM-EXIT.md
+      - coordination/reviews/M0-M2-ACCEPTANCE-RECONCILIATION-gpt.md
+      - coordination/handoffs/M4-GPT-M0-M2-ACCEPTANCE-RECONCILIATION-gpt.md
   - task: M4-DEEPSEEK-PAGE-DOMAIN-CRUD
     owner: deepseek
     paths:
