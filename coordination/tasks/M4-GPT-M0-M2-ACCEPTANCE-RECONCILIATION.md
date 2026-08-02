@@ -54,7 +54,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-GPT-M0-M2-ACCEPTANCE-RECONCILIATION.md TASK_BASE=81a95d6a8e8cd4698353d7f083e53dd0dda0ec5e npm run check:scope"
 risk: medium
 token_class: M
-status: active
+status: merged
 ---
 
 # M0–M2 acceptance reconciliation
