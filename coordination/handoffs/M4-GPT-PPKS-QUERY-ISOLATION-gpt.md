@@ -6,7 +6,7 @@
 - Task branch base: `b6e7bbd081daf79f7f57c094d1c9daaab62c601f`
 - Frozen M3 source base: `a8f06ffddbcdebfaa84913fd05692b4f06aa3ce0`
 - Head SHA tested: `49152751e9135bc119ec86353cecb81b8f424377`
-- Verdict: **READY FOR INDEPENDENT RE-REVIEW**
+- Verdict: **INDEPENDENT REVIEW PASSED — READY FOR COORDINATOR QUEUE**
 
 ## Summary
 
@@ -138,7 +138,35 @@ PostgreSQL-backed coverage includes:
 - General-ticket legacy content fields remain plaintext under their historical
   column names. Later writers must preserve the non-envelope convention and
   the SQL category guard.
-- Independent Claude re-review and DeepSeek adversarial retest must target
-  head `49152751e9135bc119ec86353cecb81b8f424377` (or the immediately following
-  docs-only handoff commit) before coordinator integration. This branch has
-  not been merged into `integration/m4-features` or `main`.
+- Independent review is complete as recorded below. This branch has not been
+  merged into `integration/m4-features` or `main`.
+
+## Independent review closure
+
+Both independent reviews targeted exact review head
+`2db6d67bfe260f0be7ac440b24afa8bdc70599d3`; no source commit followed it.
+
+- Claude security/process re-review: **APPROVED**. Claude explicitly confirmed
+  that the prior false per-case aggregate `VIEW allowed=true` defect is
+  resolved, reproduced every acceptance command including 21/21 integration
+  files and 89/89 tests, and ran five additional PostgreSQL probes covering
+  collection audit semantics, password-change sessions, forged legacy session
+  snapshots, and denied direct-ID equivalence.
+- DeepSeek adversarial retest: **PASS**. The focused contract tests passed 4/4,
+  focused PostgreSQL tests passed 6/6, and an independently written 12-case
+  adversarial suite passed 12/12.
+- DeepSeek's first full integration report recorded 86/89 because the review
+  shell omitted two unrelated auth test secrets. A coordinator rerun initially
+  exposed one synthetic PPKS fixture and associated audit rows left by the
+  temporary adversarial suite. Only the exact synthetic marker was removed
+  from the isolated `fuspi_dev_deepseek_ppks_review` database; no source or
+  shared environment was changed. With the review worktree's database
+  credentials and complete test secrets, the exact same review head then
+  passed 21/21 integration files and 89/89 tests.
+- The review build generated an uncommitted `next-env.d.ts` path change in the
+  detached review worktree. It is not part of this branch or integration
+  candidate.
+
+The task therefore satisfies technical acceptance and is queueable by the
+coordinator. Worker policy still forbids merging this branch into
+`integration/m4-features` or `main` from this task worktree.
