@@ -62,7 +62,7 @@ entry, is not merged, and is preserved unchanged for audit.
 | Lane | Task | State | Lease boundary |
 | --- | --- | --- | --- |
 | GPT | `M4-GPT-PPKS-QUERY-ISOLATION` | merged | ticket contract/domain/tests only |
-| Claude | `M4-CLAUDE-PUBLIC-SHELL-HARDENING` | ready | existing public shell presentation/messages/tests only |
+| Claude | `M4-CLAUDE-PUBLIC-SHELL-HARDENING` | queued | accepted head transferred to the serial GPT merge queue |
 | DeepSeek | `M4-DEEPSEEK-PAGE-DOMAIN-CRUD` | ready | Page domain implementation/tests only |
 
 These leases do not overlap. Claude may read but not change the frozen
