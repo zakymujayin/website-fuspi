@@ -601,7 +601,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
     expect(stored.slug).toBe(parent.pageId);
   });
 
-  it("sorts by TITLE_ASC with deterministic tiebreak and correct pagination", async () => {
+  it("sorts by TITLE_ASC with deterministic tiebreak by pageId", async () => {
     const created = await Promise.all([
       createPage(prisma, actor(adminId, "ADMIN"), input(`${marker}-sort-z`, {
         order: 0,
@@ -636,16 +636,81 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
 
     expect(result.ok).toBe(true);
     if (!result.ok) throw new Error("Expected list.");
-    // "Sort" search matches exactly the 4 test pages
     const matching = result.data.items.filter((i: {slug: string}) => i.slug.startsWith(marker));
     expect(matching).toHaveLength(4);
-    const titles = matching.map((i: {title: string; order: number}) => ({title: i.title, order: i.order}));
 
-    // Should be sorted by title ASC (Alpha Sort, Alpha Sort, Mango Sort, Zebra Sort) not by order
-    expect(titles.map((t) => t.title)).toEqual(["Alpha Sort", "Alpha Sort", "Mango Sort", "Zebra Sort"]);
-    // The two "Alpha Sort" entries: deterministic tiebreak by id ASC (created order)
-    expect(titles[0].order).toBe(99);
-    expect(titles[1].order).toBe(1);
+    // Title ASC: Alpha Sort, Alpha Sort, Mango Sort, Zebra Sort
+    expect(matching.map((i: {title: string}) => i.title)).toEqual([
+      "Alpha Sort", "Alpha Sort", "Mango Sort", "Zebra Sort",
+    ]);
+
+    // For identical titles, tiebreak is p.id ASC (not creation order)
+    const alphaPageIds = [created[1], created[3]]
+      .map((c) => (c.ok ? c.pageId : ""))
+      .filter(Boolean)
+      .sort();
+    const alphaResults = matching.filter((i: {title: string}) => i.title === "Alpha Sort");
+    expect(alphaResults.map((i: {id: string}) => i.id)).toEqual(alphaPageIds);
+  });
+
+  it("paginates TITLE_ASC with pageSize 10, 11+ items, no overlaps, correct hasNextPage", async () => {
+    const prefix = `${marker}-pag`;
+    const titles = [
+      "Pagination 01", "Pagination 02", "Pagination 03", "Pagination 04",
+      "Pagination 05", "Pagination 06", "Pagination 07", "Pagination 08",
+      "Pagination 09", "Pagination 10", "Pagination 11",
+    ];
+    const created = await Promise.all(
+      titles.map((title, i) =>
+        createPage(prisma, actor(adminId, "ADMIN"), input(`${prefix}-${i}`, {
+          heroMediaId: null,
+          order: 10 - i,
+          translations: {id: translation(title)},
+        }), clock),
+      ),
+    );
+    if (created.some((c) => !c.ok)) throw new Error("Expected all pages created.");
+
+    const page1 = await listPages(prisma, actor(adminId, "ADMIN"), {
+      page: 1,
+      pageSize: 10,
+      status: "ALL",
+      search: "Pagination",
+      sort: "TITLE_ASC",
+    }, clock);
+
+    expect(page1.ok).toBe(true);
+    if (!page1.ok) throw new Error("Expected page 1 list.");
+    const p1Items = page1.data.items.filter((i: {slug: string}) => i.slug.startsWith(prefix));
+    expect(p1Items).toHaveLength(10);
+    expect(page1.data.page).toBe(1);
+    expect(page1.data.pageSize).toBe(10);
+    expect(page1.data.hasNextPage).toBe(true);
+    expect(page1.data.total).toBe(11);
+    expect(p1Items.map((i: {title: string}) => i.title)).toEqual([
+      "Pagination 01", "Pagination 02", "Pagination 03", "Pagination 04",
+      "Pagination 05", "Pagination 06", "Pagination 07", "Pagination 08",
+      "Pagination 09", "Pagination 10",
+    ]);
+
+    const page2 = await listPages(prisma, actor(adminId, "ADMIN"), {
+      page: 2,
+      pageSize: 10,
+      status: "ALL",
+      search: "Pagination",
+      sort: "TITLE_ASC",
+    }, clock);
+
+    expect(page2.ok).toBe(true);
+    if (!page2.ok) throw new Error("Expected page 2 list.");
+    const p2Items = page2.data.items.filter((i: {slug: string}) => i.slug.startsWith(prefix));
+    expect(p2Items).toHaveLength(1);
+    expect(page2.data.page).toBe(2);
+    expect(page2.data.hasNextPage).toBe(false);
+    expect(p2Items[0].title).toBe("Pagination 11");
+
+    const allIds = [...p1Items, ...p2Items].map((i: {id: string}) => i.id);
+    expect(new Set(allIds).size).toBe(allIds.length);
   });
 
   it("supports status filtering and search in list queries", async () => {
@@ -704,9 +769,9 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
 
     const result = await listPages(prisma, actor(adminId, "ADMIN"), {
       page: 1,
-      pageSize: 20,
+      pageSize: 50,
       status: "ALL",
-      search: "",
+      search: "Page",
       sort: "TITLE_ASC",
     }, clock);
 
