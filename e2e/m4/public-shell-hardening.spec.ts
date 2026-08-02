@@ -27,6 +27,20 @@ const EXTERNAL_HINT = {
   ar: "(موقع خارجي، يُفتح في تبويب جديد)",
 } as const;
 
+/**
+ * The one site-relative entry in the frozen utility contract (`/gkm`). It is
+ * matched by its translated accessible name, and its href is asserted as an
+ * exact locale-prefixed path — `href$="/gkm"` would pass even if the locale
+ * segment were missing, which is the bug this covers.
+ */
+const GKM_LABEL = {
+  id: "GKM",
+  en: "Quality Assurance",
+  ar: "ضمان الجودة",
+} as const;
+
+const UTILITY_NAV = /Layanan sistem|Campus systems|أنظمة الجامعة/;
+
 const horizontalOverflow = (page: Page) =>
   page.evaluate(
     () =>
@@ -111,6 +125,30 @@ const openDrawer = async (page: Page, locale: keyof typeof OPEN_MENU) => {
 
   return drawer;
 };
+
+/**
+ * Computed transition duration of both drawer elements, in seconds, one entry
+ * per animated property.
+ */
+const drawerDurations = (page: Page) =>
+  page.evaluate(() => {
+    const read = (selector: string) => {
+      const element = document.querySelector(selector);
+      if (!element) throw new Error(`drawer is missing ${selector}`);
+
+      return getComputedStyle(element)
+        .transitionDuration.split(",")
+        .map((value) => {
+          const trimmed = value.trim();
+          return Number.parseFloat(trimmed) * (trimmed.endsWith("ms") ? 0.001 : 1);
+        });
+    };
+
+    return {
+      backdrop: read('[data-slot="drawer-backdrop"]'),
+      panel: read('[data-slot="drawer-panel"]'),
+    };
+  });
 
 const gotoScrollable = async (page: Page, locale: string) => {
   await page.setViewportSize({ width: 1280, height: 640 });
@@ -199,6 +237,46 @@ test.describe("public shell hardening — compact sticky header", () => {
 
     await scrollTo(page, 300);
     await expectPinnedBar(page, COMPACT_BAR_HEIGHT);
+  });
+
+  test("drawer backdrop and panel animate by default", async ({ page }) => {
+    // The baseline half of the pair below. Without it, "every duration is under
+    // 0.05s" would also hold for elements that simply never animate, and the
+    // reduced-motion assertion would prove nothing about the media query.
+    await page.setViewportSize({ width: 390, height: 780 });
+    await page.goto(`/id${SHELL_PATH}`);
+    await openDrawer(page, "id");
+
+    const durations = await drawerDurations(page);
+
+    for (const [element, values] of Object.entries(durations)) {
+      expect(values.length, `${element} declares no transition`).toBeGreaterThan(0);
+      for (const value of values) {
+        expect(value, `${element} default duration`).toBeGreaterThan(0.05);
+      }
+    }
+  });
+
+  test("drawer backdrop and panel both stop animating under prefers-reduced-motion", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.setViewportSize({ width: 390, height: 780 });
+    await page.goto(`/id${SHELL_PATH}`);
+
+    const drawer = await openDrawer(page, "id");
+    await expect(drawer).toBeVisible();
+
+    const durations = await drawerDurations(page);
+
+    expect(durations.backdrop.length).toBeGreaterThan(0);
+    expect(durations.panel.length).toBeGreaterThan(0);
+
+    for (const [element, values] of Object.entries(durations)) {
+      for (const value of values) {
+        expect(value, `${element} reduced-motion duration`).toBeLessThan(0.05);
+      }
+    }
   });
 });
 
@@ -412,7 +490,7 @@ test.describe("public shell hardening — external destinations", () => {
       await page.setViewportSize({ width: 1440, height: 900 });
       await page.goto(`/${locale}${SHELL_PATH}`);
 
-      const utility = page.getByRole("navigation", { name: /Layanan sistem|Campus systems|أنظمة الجامعة/ });
+      const utility = page.getByRole("navigation", { name: UTILITY_NAV });
       const external = utility.locator('a[target="_blank"]');
 
       await expect(external).toHaveCount(3);
@@ -431,12 +509,87 @@ test.describe("public shell hardening — external destinations", () => {
       }
 
       // The one site-relative entry stays a plain same-tab link.
-      const internal = utility.locator('a[href$="/gkm"]');
+      const internal = utility.getByRole("link", { name: GKM_LABEL[locale], exact: true });
       await expect(internal).toHaveCount(1);
       expect(await internal.getAttribute("target")).toBeNull();
       expect(await internal.textContent()).not.toContain(EXTERNAL_HINT[locale]);
     });
+
+    test(`${locale}: the site-relative utility entry carries the active locale prefix`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.goto(`/${locale}${SHELL_PATH}`);
+
+      const gkm = page
+        .getByRole("navigation", { name: UTILITY_NAV })
+        .getByRole("link", { name: GKM_LABEL[locale], exact: true });
+
+      // Exact, not a suffix match: `/gkm` alone would satisfy href$="/gkm"
+      // while silently dropping the locale that `localePrefix: "always"` owes.
+      await expect(gkm).toHaveAttribute("href", `/${locale}/gkm`);
+    });
   }
+
+  for (const locale of LOCALES) {
+    test(`${locale}: the drawer's site-relative utility entry is locale-prefixed too`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width: 390, height: 780 });
+      await page.goto(`/${locale}${SHELL_PATH}`);
+      const drawer = await openDrawer(page, locale);
+
+      const gkm = drawer.getByRole("link", { name: GKM_LABEL[locale], exact: true });
+
+      await expect(gkm).toHaveCount(1);
+      await expect(gkm).toHaveAttribute("href", `/${locale}/gkm`);
+    });
+  }
+
+  test("activating an external utility entry closes the drawer", async ({ page, context }) => {
+    await page.setViewportSize({ width: 390, height: 780 });
+    await page.goto(`/id${SHELL_PATH}`);
+    const drawer = await openDrawer(page, "id");
+
+    const external = drawer.locator('a[target="_blank"]').first();
+    await expect(external).toBeVisible();
+
+    // target="_blank" hands the destination to a new tab, so this page stays
+    // put — which is exactly what makes the close observable here.
+    const [opened] = await Promise.all([
+      context.waitForEvent("page"),
+      external.click(),
+    ]);
+
+    await expect(drawer).toBeHidden();
+    expect(page.url()).toContain(`/id${SHELL_PATH}`);
+    await opened.close();
+  });
+
+  test("activating the internal utility entry navigates locale-correctly and leaves no drawer open", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 780 });
+    await page.goto(`/id${SHELL_PATH}`);
+    const drawer = await openDrawer(page, "id");
+
+    // A locale-less /gkm still lands on /id/gkm because the proxy redirects it,
+    // so the final URL alone cannot tell the two apart. Recording redirects is
+    // what distinguishes "linked correctly" from "rescued by the proxy".
+    const redirects: string[] = [];
+    page.on("response", (response) => {
+      if (response.status() >= 300 && response.status() < 400) {
+        redirects.push(new URL(response.url()).pathname);
+      }
+    });
+
+    await drawer.getByRole("link", { name: GKM_LABEL.id, exact: true }).click();
+
+    await page.waitForURL("**/id/gkm");
+    expect(new URL(page.url()).pathname).toBe("/id/gkm");
+    expect(redirects, "the link must not need a locale redirect").not.toContain("/gkm");
+    await expect(page.getByRole("dialog")).toBeHidden();
+  });
 
   test("no shell surface links to a guessed integration domain", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });

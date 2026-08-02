@@ -1,6 +1,7 @@
 import { ArrowUpRight } from "lucide-react";
 
 import { classifyNavUrl } from "@/components/public/shell/nav-url";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 type UtilityLinkProps = {
@@ -10,6 +11,12 @@ type UtilityLinkProps = {
   /** Announced after the label when the destination leaves this site. */
   externalHint: string;
   className?: string;
+  /**
+   * Optional: the drawer passes its close handler so activating any utility
+   * destination dismisses the panel. Omitted by the server-rendered topbar,
+   * which has no open/closed state to reconcile.
+   */
+  onClick?: React.MouseEventHandler<HTMLAnchorElement>;
 };
 
 /**
@@ -17,7 +24,13 @@ type UtilityLinkProps = {
  * purpose so the same component serves the server-rendered utility topbar and
  * the client-rendered mobile drawer.
  */
-export function UtilityLink({ url, label, externalHint, className }: UtilityLinkProps) {
+export function UtilityLink({
+  url,
+  label,
+  externalHint,
+  className,
+  onClick,
+}: UtilityLinkProps) {
   const kind = classifyNavUrl(url);
   const shared = cn("inline-flex items-center gap-1.5", className);
 
@@ -28,16 +41,26 @@ export function UtilityLink({ url, label, externalHint, className }: UtilityLink
     return <span className={shared}>{label}</span>;
   }
 
+  // Site-relative destinations go through the localized Link so `localePrefix:
+  // "always"` emits /id, /en, or /ar. A bare <a href="/gkm"> would drop the
+  // prefix and lean on a proxy redirect. The destination itself is passed
+  // through untouched; only the locale segment routing adds is applied.
   if (kind === "internal") {
     return (
-      <a href={url} className={shared}>
+      <Link href={url} onClick={onClick} className={shared}>
         {label}
-      </a>
+      </Link>
     );
   }
 
   return (
-    <a href={url} target="_blank" rel="noopener noreferrer" className={shared}>
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      onClick={onClick}
+      className={shared}
+    >
       {label}
       {/* Directional glyph: mirrored in RTL so it keeps pointing away from the text. */}
       <ArrowUpRight

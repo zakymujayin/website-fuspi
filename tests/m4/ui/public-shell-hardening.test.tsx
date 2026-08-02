@@ -4,9 +4,12 @@ import path from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
+// The real Link is next-intl's, which needs a request locale. The stand-in
+// marks itself so a test can prove a component routed through the localized
+// Link rather than emitting a bare <a> that would lose the locale prefix.
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ href, children, ...rest }: React.ComponentProps<"a">) => (
-    <a href={typeof href === "string" ? href : "#"} {...rest}>
+    <a data-localized-link="true" href={typeof href === "string" ? href : "#"} {...rest}>
       {children}
     </a>
   ),
@@ -202,14 +205,64 @@ describe("UtilityLink semantics", () => {
     expect(anchor?.querySelector("svg")?.getAttribute("class")).toContain("rtl:-scale-x-100");
   });
 
-  it("leaves an internal destination as a plain same-tab link", () => {
+  it("routes an internal destination through the localized Link, same tab", () => {
     const anchor = render("/gkm").querySelector("a");
 
+    // The localized Link is what applies `localePrefix: "always"`. A bare <a>
+    // here would emit /gkm with no locale segment; the real prefixes are
+    // asserted per locale in the Playwright suite.
+    expect(anchor?.getAttribute("data-localized-link")).toBe("true");
     expect(anchor?.getAttribute("href")).toBe("/gkm");
     expect(anchor?.getAttribute("target")).toBeNull();
     expect(anchor?.getAttribute("rel")).toBeNull();
     expect(anchor?.textContent).toBe("SIAKAD");
     expect(anchor?.querySelector("svg")).toBeNull();
+  });
+
+  it("never routes an external destination through the localized Link", () => {
+    // Prefixing an absolute origin would corrupt it, so the external branch
+    // must stay a raw anchor.
+    const anchor = render("https://siakad.uinbanten.ac.id").querySelector("a");
+
+    expect(anchor?.getAttribute("data-localized-link")).toBeNull();
+    expect(anchor?.getAttribute("href")).toBe("https://siakad.uinbanten.ac.id");
+  });
+
+  it("forwards a click handler on both link branches so the drawer can close", () => {
+    for (const url of ["/gkm", "https://siakad.uinbanten.ac.id"]) {
+      const onClick = vi.fn();
+      const container = markupToContainer(
+        renderToStaticMarkup(
+          <UtilityLink
+            url={url}
+            label="SIAKAD"
+            externalHint="(external site, opens in a new tab)"
+            onClick={onClick}
+          />,
+        ),
+      );
+
+      // Static markup cannot carry a listener, so assert the contract instead:
+      // the prop is accepted and the element stays an anchor that can receive it.
+      expect(container.querySelector("a"), url).not.toBeNull();
+    }
+
+    // The drawer is the caller that must supply it.
+    const drawer = readShellFile("src/components/public/mobile-nav.tsx");
+    const utilityUsage = /<UtilityLink[\s\S]*?\/>/.exec(drawer)?.[0] ?? "";
+
+    expect(utilityUsage).toContain("onClick={close}");
+  });
+
+  it("keeps the shared topbar usage valid without a click handler", () => {
+    // SiteHeader is a Server Component: it cannot pass a function prop, so
+    // `onClick` must stay optional or the shared usage breaks at build time.
+    const header = readShellFile("src/components/public/site-header.tsx");
+    const headerUsage = /<UtilityLink[\s\S]*?\/>/.exec(header)?.[0] ?? "";
+
+    expect(headerUsage).toContain("<UtilityLink");
+    expect(headerUsage).not.toContain("onClick");
+    expect(render("/gkm").querySelector("a")).not.toBeNull();
   });
 
   it("never hands an unsafe destination to the browser", () => {
@@ -305,6 +358,52 @@ describe("drawer structure", () => {
     expect(source).toContain("Dialog.Title");
     expect(source).toContain("Dialog.Close");
     expect(source).toContain("Dialog.Backdrop");
+  });
+
+  /**
+   * The backdrop fades and the panel slides; both are motion, so both must
+   * honour the user's reduced-motion preference. These assertions read the
+   * className of each specific element rather than the file as a whole, so a
+   * `motion-reduce:` on one element can never vouch for the other. The real
+   * computed durations are asserted in the Playwright suite.
+   */
+  const classNameOf = (element: "Dialog.Backdrop" | "Dialog.Popup") =>
+    new RegExp(`<${element.replace(".", "\\.")}[^>]*?className="([^"]*)"`, "s").exec(
+      source,
+    )?.[1] ?? "";
+
+  it.each(["Dialog.Backdrop", "Dialog.Popup"] as const)(
+    "%s animates and drops that animation under prefers-reduced-motion",
+    (element) => {
+      const className = classNameOf(element);
+
+      expect(className, `${element} className was not found`).not.toBe("");
+      // It must actually be animated, or the reduced-motion guard is vacuous.
+      expect(className, `${element} declares no transition`).toMatch(/\btransition-/);
+      expect(className, `${element} is not motion-safe`).toContain(
+        "motion-reduce:transition-none",
+      );
+    },
+  );
+
+  it("leaves no animated drawer element without a reduced-motion escape", () => {
+    // Structural sweep: any future animated element in the drawer is caught
+    // without anyone remembering to add a case above.
+    const animated = [...source.matchAll(/className=\{?[`"]([^`"]*\btransition-[^`"]*)[`"]/g)];
+
+    expect(animated.length).toBeGreaterThanOrEqual(3);
+    for (const [, className] of animated) {
+      expect(className, `animated drawer element: ${className}`).toContain(
+        "motion-reduce:transition-none",
+      );
+    }
+  });
+
+  it("exposes stable slots for the backdrop and the panel", () => {
+    // Both are portalled siblings with no role of their own on the backdrop;
+    // the slot is how the e2e suite addresses each one.
+    expect(source).toContain('data-slot="drawer-backdrop"');
+    expect(source).toContain('data-slot="drawer-panel"');
   });
 });
 

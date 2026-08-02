@@ -52,10 +52,16 @@ export function MobileNav({ primary, content, utility, externalHint }: MobileNav
       </Dialog.Trigger>
 
       <Dialog.Portal>
-        <Dialog.Backdrop className="fixed inset-0 z-40 bg-black/40 transition-opacity data-[ending-style]:opacity-0 data-[starting-style]:opacity-0" />
+        <Dialog.Backdrop
+          data-slot="drawer-backdrop"
+          className="fixed inset-0 z-40 bg-black/40 transition-opacity data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 motion-reduce:transition-none"
+        />
         {/* `end-0` places the panel logically; the slide transform has no logical
             equivalent, so the RTL variant flips its direction explicitly. */}
-        <Dialog.Popup className="fixed inset-y-0 end-0 z-50 flex w-[85vw] max-w-[360px] flex-col overflow-y-auto overscroll-contain bg-white shadow-lg transition-transform data-[ending-style]:translate-x-full data-[starting-style]:translate-x-full motion-reduce:transition-none rtl:data-[ending-style]:-translate-x-full rtl:data-[starting-style]:-translate-x-full">
+        <Dialog.Popup
+          data-slot="drawer-panel"
+          className="fixed inset-y-0 end-0 z-50 flex w-[85vw] max-w-[360px] flex-col overflow-y-auto overscroll-contain bg-white shadow-lg transition-transform data-[ending-style]:translate-x-full data-[starting-style]:translate-x-full motion-reduce:transition-none rtl:data-[ending-style]:-translate-x-full rtl:data-[starting-style]:-translate-x-full"
+        >
           <div className="flex items-center justify-between gap-2 border-b border-slate-200 p-4">
             <Dialog.Title className="font-display text-base font-bold text-royal-900">
               {t("menu")}
@@ -142,6 +148,7 @@ export function MobileNav({ primary, content, utility, externalHint }: MobileNav
                 url={item.url}
                 label={t(item.key)}
                 externalHint={externalHint}
+                onClick={close}
                 className={`${TARGET_CLASS} text-slate-600 hover:bg-royal-50 hover:text-royal-700`}
               />
             ))}
