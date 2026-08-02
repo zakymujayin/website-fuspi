@@ -2,16 +2,19 @@
 
 - **Task ID:** M4-DEEPSEEK-PAGE-DOMAIN-CRUD
 - **Branch:** `ai/deepseek/m4-page-domain-crud`
-- **Base SHA:** `a8f06ffddbcdebfaa84913fd05692b4f06aa3ce0`
-- **Implementation Head SHA:** (see commit)
+- **Base SHA:** `81a95d6a8e8cd4698353d7f083e53dd0dda0ec5e` (origin/integration/m4-features)
+- **Implementation Head SHA:** `677dfd7feat(m4): implement Page domain CRUD layer with tests`
+- **Database:** `fuspi_dev_deepseek` (PostgreSQL 16.14, isolated local)
 
 ## Summary
 
 Implemented the non-sensitive Page domain service/query/mutation layer following
 the accepted M3 Post behavioral pattern, using the frozen Prisma Page/PageTranslation
-schema as the data contract.
+schema as the data contract. Rebased cleanly onto `origin/integration/m4-features`
+at `81a95d6`. The public-shell integration (`ai/claude/m4-public-shell-hardening`)
+was not modified.
 
-## Files Changed
+## Files Changed (6 files, +2289 lines)
 
 ### Created
 - `src/features/content/pages/contract.ts` — Zod schemas for Page domain
@@ -29,15 +32,16 @@ None. No schema, migration, shared contract, root config, dependency, auth, or p
 
 | Command | Result |
 |---------|--------|
-| `npx vitest run tests/m4/content/pages --exclude '**/*.integration.test.ts'` | 16 passed |
-| `npm run lint` | 0 errors, 0 warnings |
-| `npm run typecheck` | clean |
-| `npm run prisma:validate` | valid |
-| `npm test` | 754 passed (738 existing + 16 new) |
-| `npm run test:integration` | All M4 Page tests skipped (no database); pre-existing tests show same behavior |
-| `npm run build` | successful |
-| `git diff --check` | clean |
-| `TASK_MANIFEST=... TASK_BASE=... npm run check:scope` | 0 changed file(s) are within lease (new files, scope check for untracked) |
+| `npx vitest run tests/m4/content/pages --exclude '**/*.integration.test.ts'` | **16 passed, 0 skipped** |
+| `npm run lint` | PASS — 0 errors, 0 warnings |
+| `npm run typecheck` | PASS — clean |
+| `npm run prisma:validate` | PASS — schema valid |
+| `RUN_PLATFORM_DB_TESTS=true npx vitest run --config vitest.integration.config.ts tests/m4/content/pages` | **10 passed, 0 skipped** |
+| `npm test` | **53 files, 805 tests — ALL PASS** |
+| `npm run test:integration` | **21/22 files, 96/99 tests PASS** (3 failures in `credentials-route.integration.test.ts` are pre-existing M2 auth HMAC-secret issue unrelated to Page domain; all Page and other domain tests pass) |
+| `npm run build` | PASS — 34/34 static pages |
+| `git diff --check` | PASS — clean |
+| `TASK_MANIFEST=... TASK_BASE=... npm run check:scope` | PASS — 6 changed files within lease |
 
 ## Domain Implementation Details
 
@@ -52,7 +56,7 @@ None. No schema, migration, shared contract, root config, dependency, auth, or p
 - **Non-technical results:** Never expose Prisma errors, storage keys, private fields, session data
 - **UTC storage:** Server clock injectable for test determinism
 
-## Test Coverage (Unit — 16 tests)
+## Test Coverage (Unit — 16 tests, 0 skipped)
 
 - Session validation (null, expired, non-ADMIN roles)
 - Caller-owned field rejection
@@ -72,7 +76,7 @@ None. No schema, migration, shared contract, root config, dependency, auth, or p
 - Stale version update rejection
 - Hierarchy cycle detection in update
 
-## Integration Test Coverage (10 tests, skipped without DB)
+## Integration Test Coverage (10 tests, 0 skipped, PostgreSQL)
 
 - Atomic creation with sanitized locales, revisions, and activity
 - Non-ADMIN role rejection
@@ -83,11 +87,10 @@ None. No schema, migration, shared contract, root config, dependency, auth, or p
 - Rollback on slug conflict
 - Hierarchy cycle rejection in real data
 - Child-page deletion prevention
-- Safe orphan deletion with audit
+- Safe orphan deletion with audit (CREATE + DELETE audit records)
 
 ## Untested Areas / Risks
 
-- Integration tests not run against PostgreSQL (no DATABASE_URL configured)
 - Playwright/E2E tests not in scope for this domain task
 - List/sort by parent title not supported (parentTitle is null-safe)
 - No autosave mechanism for Pages (different contract from Post)

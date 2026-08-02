@@ -136,12 +136,18 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
     });
     const pageIds = pages.map(({id}) => id);
     if (pageIds.length > 0) {
+      await prisma.activityLog.deleteMany({
+        where: {resourceType: "Page", resourceId: {in: pageIds}},
+      });
       await prisma.contentRevision.deleteMany({
         where: {resourceType: "Page", resourceId: {in: pageIds}},
       });
       await prisma.page.deleteMany({where: {id: {in: pageIds}}});
     }
     await prisma.media.deleteMany({where: {originalName: {startsWith: marker}}});
+    await prisma.activityLog.deleteMany({
+      where: {actorId: {in: [adminId, editorId]}},
+    });
     await prisma.user.deleteMany({where: {email: {startsWith: marker}}});
     await prisma.$disconnect();
   });
@@ -234,7 +240,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       {
         suffix: "missing-parent",
         expected: "PARENT_NOT_FOUND",
-        override: {heroMediaId: adminMediaId, parentId: `${marker}-missing-parent`},
+        override: {heroMediaId: adminMediaId, parentId: `${marker}-non-existent-parent`},
       },
     ] as const;
 
@@ -539,8 +545,12 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
     const activities = await prisma.activityLog.findMany({
       where: {resourceType: "Page", resourceId: orphan.pageId},
     });
-    expect(activities).toHaveLength(1);
-    expect(activities[0]).toMatchObject({
+    expect(activities).toHaveLength(2);
+    const deleteActivity = activities.find((a) =>
+      a.action === "UPDATE" && (a.metadata as Record<string, unknown>)?.operation === "DELETE"
+    );
+    expect(deleteActivity).toBeDefined();
+    expect(deleteActivity).toMatchObject({
       action: "UPDATE",
       metadata: {operation: "DELETE", version: 2},
     });
