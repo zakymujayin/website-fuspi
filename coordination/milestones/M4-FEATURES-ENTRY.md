@@ -61,7 +61,7 @@ entry, is not merged, and is preserved unchanged for audit.
 
 | Lane | Task | State | Lease boundary |
 | --- | --- | --- | --- |
-| GPT | `M4-GPT-PPKS-QUERY-ISOLATION` | ready | ticket contract/domain/tests only |
+| GPT | `M4-GPT-PPKS-QUERY-ISOLATION` | merged | ticket contract/domain/tests only |
 | Claude | `M4-CLAUDE-PUBLIC-SHELL-HARDENING` | ready | existing public shell presentation/messages/tests only |
 | DeepSeek | `M4-DEEPSEEK-PAGE-DOMAIN-CRUD` | ready | Page domain implementation/tests only |
 
@@ -69,6 +69,21 @@ These leases do not overlap. Claude may read but not change the frozen
 component-local navigation data. DeepSeek may read but not change schema,
 shared contracts, auth, audit, security, or database primitives. GPT does not
 hold any public-shell or Page-domain path.
+
+## Integrated wave evidence
+
+### M4-GPT-PPKS-QUERY-ISOLATION
+
+- Accepted feature head: `e285a2e09d5b709d8028c68e7582b3dfc012b6ee`.
+- Integration merge: `4877d60` (`Merge M4 GPT PPKS query isolation`).
+- Independent verdicts on source-equivalent head `2db6d67`: Claude
+  **APPROVED** and DeepSeek **PASS**; the prior false per-case aggregate
+  `VIEW allowed=true` defect is resolved.
+- Coordinator post-merge evidence: lint, typecheck, and Prisma validation
+  passed; 51 files / 742 tests passed; 21 files / 89 PostgreSQL integration
+  tests passed; production build generated 34/34 pages; diff check passed.
+- The GPT lease is released. The integration candidate remains isolated from
+  `main`; the human owner retains the M4-to-main decision.
 
 ## Merge and dependency policy
 

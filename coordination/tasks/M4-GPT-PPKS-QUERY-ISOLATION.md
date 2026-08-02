@@ -56,7 +56,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-GPT-PPKS-QUERY-ISOLATION.md TASK_BASE=origin/integration/m4-features npm run check:scope"
 risk: critical
 token_class: L
-status: ready
+status: merged
 ---
 
 # M4 GPT PPKS query isolation

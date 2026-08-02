@@ -47,14 +47,6 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
-  - task: M4-GPT-PPKS-QUERY-ISOLATION
-    owner: gpt
-    paths:
-      - src/contracts/ticket.ts
-      - src/features/tickets/**
-      - src/lib/tickets/**
-      - tests/m4/tickets/**
-      - coordination/handoffs/M4-GPT-PPKS-QUERY-ISOLATION-gpt.md
   - task: M4-CLAUDE-PUBLIC-SHELL-HARDENING
     owner: claude
     paths:
