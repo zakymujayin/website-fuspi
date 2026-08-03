@@ -145,9 +145,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       await prisma.contentRevision.deleteMany({
         where: {resourceType: "Page", resourceId: {in: allIds}},
       });
-    }
-    if (pageIds.length > 0) {
-      await prisma.page.deleteMany({where: {id: {in: pageIds}}});
+      await prisma.page.deleteMany({where: {id: {in: allIds}}});
     }
     await prisma.media.deleteMany({where: {originalName: {startsWith: marker}}});
     await prisma.activityLog.deleteMany({

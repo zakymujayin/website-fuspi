@@ -506,39 +506,6 @@ describe("M4 Page mutation trust boundary", () => {
       expect(result.code).toBe("HIERARCHY_CYCLE");
     }
   });
-});
-
-
-  it("rejects content that exceeds schema limits after sanitization", async () => {
-    const transaction = vi.fn();
-    const database = {$transaction: transaction} as unknown as PageMutationDatabase;
-    const oversized = "<p>" + "x".repeat(1_000_010) + "</p>";
-
-    await expect(createPage(database, session(), createInput({
-      translations: {
-        id: {title: "Oversized", content: oversized, metaTitle: null, metaDesc: null},
-      },
-    }), clock)).resolves.toEqual({ok: false, code: "VALIDATION_FAILED"});
-    expect(transaction).not.toHaveBeenCalled();
-
-    // Update should also reject before transaction
-    const updateTrans = vi.fn();
-    const updateDb = {$transaction: updateTrans} as unknown as PageMutationDatabase;
-
-    await expect(updatePage(updateDb, session(), {
-      pageId: "page-1",
-      expectedVersion: 5,
-      slug: "updated-slug",
-      parentId: null,
-      heroMediaId: null,
-      order: 0,
-      translations: {
-        id: {title: "Oversized", content: oversized, metaTitle: null, metaDesc: null},
-      },
-    }, clock)).resolves.toEqual({ok: false, code: "VALIDATION_FAILED"});
-    expect(updateTrans).not.toHaveBeenCalled();
-  });
-
   it("rejects pathological 205,000 ampersand characters that expand beyond schema limit after sanitization", async () => {
     const transaction = vi.fn();
     const database = {$transaction: transaction} as unknown as PageMutationDatabase;
@@ -552,6 +519,26 @@ describe("M4 Page mutation trust boundary", () => {
     }), clock)).resolves.toEqual({ok: false, code: "VALIDATION_FAILED"});
     expect(transaction).not.toHaveBeenCalled();
   });
+
+  it("rejects pathological 205,000 ampersand characters in updatePage after sanitization", async () => {
+    const updateTrans = vi.fn();
+    const updateDb = {$transaction: updateTrans} as unknown as PageMutationDatabase;
+    const ampersands = "<p>" + "&".repeat(205_000) + "</p>";
+
+    await expect(updatePage(updateDb, session(), {
+      pageId: "page-1",
+      expectedVersion: 5,
+      slug: "updated-slug",
+      parentId: null,
+      heroMediaId: null,
+      order: 0,
+      translations: {
+        id: {title: "Ampersands", content: ampersands, metaTitle: null, metaDesc: null},
+      },
+    }, clock)).resolves.toEqual({ok: false, code: "VALIDATION_FAILED"});
+    expect(updateTrans).not.toHaveBeenCalled();
+  });
+});
 
 describe("M4 Page query trust boundary", () => {
   const idRow = (id: string, title: string, order = 0) => ({
