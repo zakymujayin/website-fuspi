@@ -15,6 +15,7 @@ const suite = runDatabaseTests ? describe : describe.skip;
 
 suite("M4 Page mutation runtime on PostgreSQL", () => {
   const marker = `m4-page-${Date.now()}`;
+  const createdPageIds = new Set<string>();
   const now = new Date("2026-07-16T08:00:00.000Z");
   const clock = () => now;
   let prisma: ReturnType<typeof createPrismaClient>;
@@ -176,6 +177,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       status: "PUBLISHED",
     });
     if (!result.ok) throw new Error("Expected Page creation.");
+    createdPageIds.add(result.pageId);
     const stored = await prisma.page.findUniqueOrThrow({
       where: {id: result.pageId},
       include: {translations: {orderBy: {locale: "asc"}}},
@@ -266,6 +268,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       clock,
     );
     if (!created.ok) throw new Error("Expected draft Page.");
+    createdPageIds.add(created.pageId);
 
     const updated = await updatePage(
       prisma,
@@ -311,6 +314,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       clock,
     );
     if (!created.ok) throw new Error("Expected owner Page.");
+    createdPageIds.add(created.pageId);
 
     const missing = await updatePage(
       prisma,
@@ -336,6 +340,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       clock,
     );
     if (!created.ok) throw new Error("Expected draft.");
+    createdPageIds.add(created.pageId);
 
     const published = await mutatePagePublication(
       prisma,
@@ -416,6 +421,8 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       clock,
     );
     if (!first.ok || !second.ok) throw new Error("Expected draft Pages.");
+    createdPageIds.add(first.pageId);
+    createdPageIds.add(second.pageId);
 
     const result = await updatePage(
       prisma,
@@ -449,6 +456,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       clock,
     );
     if (!grandparent.ok) throw new Error("Expected grandparent.");
+    createdPageIds.add(grandparent.pageId);
 
     const parent = await createPage(
       prisma,
@@ -461,6 +469,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       clock,
     );
     if (!parent.ok) throw new Error("Expected parent.");
+    createdPageIds.add(parent.pageId);
 
     const child = await createPage(
       prisma,
@@ -473,6 +482,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       clock,
     );
     if (!child.ok) throw new Error("Expected child.");
+    createdPageIds.add(child.pageId);
 
     const cycle = await updatePage(
       prisma,
@@ -503,6 +513,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       clock,
     );
     if (!parent.ok) throw new Error("Expected parent.");
+    createdPageIds.add(parent.pageId);
 
     const child = await createPage(
       prisma,
@@ -515,6 +526,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       clock,
     );
     if (!child.ok) throw new Error("Expected child.");
+    createdPageIds.add(child.pageId);
 
     const delResult = await deletePage(
       prisma,
@@ -541,6 +553,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       clock,
     );
     if (!orphan.ok) throw new Error("Expected orphan Page.");
+    createdPageIds.add(orphan.pageId);
 
     const result = await deletePage(
       prisma,
@@ -579,6 +592,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       clock,
     );
     if (!parent.ok) throw new Error("Expected parent.");
+    createdPageIds.add(parent.pageId);
 
     const result = await createPage(
       prisma,
@@ -594,6 +608,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
     expect(result).toMatchObject({ok: true});
 
     if (!result.ok) throw new Error("Expected ok");
+    createdPageIds.add(result.pageId);
     const stored = await prisma.page.findUniqueOrThrow({
       where: {id: result.pageId},
     });
@@ -625,6 +640,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       }), clock),
     ]);
     if (created.some((c) => !c.ok)) throw new Error("Expected all pages created.");
+    created.forEach((c) => { if (c.ok) createdPageIds.add(c.pageId); });
 
     const result = await listPages(prisma, actor(adminId, "ADMIN"), {
       page: 1,
@@ -656,9 +672,9 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
   it("paginates TITLE_ASC with pageSize 10, 11+ items, no overlaps, correct hasNextPage", async () => {
     const prefix = `${marker}-pag`;
     const titles = [
-      "Pagination 01", "Pagination 02", "Pagination 03", "Pagination 04",
-      "Pagination 05", "Pagination 06", "Pagination 07", "Pagination 08",
-      "Pagination 09", "Pagination 10", "Pagination 11",
+      `${marker} Page 01`, `${marker} Page 02`, `${marker} Page 03`, `${marker} Page 04`,
+      `${marker} Page 05`, `${marker} Page 06`, `${marker} Page 07`, `${marker} Page 08`,
+      `${marker} Page 09`, `${marker} Page 10`, `${marker} Page 11`,
     ];
     const created = await Promise.all(
       titles.map((title, i) =>
@@ -670,12 +686,13 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       ),
     );
     if (created.some((c) => !c.ok)) throw new Error("Expected all pages created.");
+    created.forEach((c) => { if (c.ok) createdPageIds.add(c.pageId); });
 
     const page1 = await listPages(prisma, actor(adminId, "ADMIN"), {
       page: 1,
       pageSize: 10,
       status: "ALL",
-      search: "Pagination",
+      search: marker,
       sort: "TITLE_ASC",
     }, clock);
 
@@ -686,18 +703,14 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
     expect(page1.data.page).toBe(1);
     expect(page1.data.pageSize).toBe(10);
     expect(page1.data.hasNextPage).toBe(true);
-    expect(page1.data.total).toBe(11);
-    expect(p1Items.map((i: {title: string}) => i.title)).toEqual([
-      "Pagination 01", "Pagination 02", "Pagination 03", "Pagination 04",
-      "Pagination 05", "Pagination 06", "Pagination 07", "Pagination 08",
-      "Pagination 09", "Pagination 10",
-    ]);
+    expect(page1.data.total).toBeGreaterThanOrEqual(titles.length);
+    expect(p1Items.map((i: {title: string}) => i.title)).toEqual(titles.slice(0, 10));
 
     const page2 = await listPages(prisma, actor(adminId, "ADMIN"), {
       page: 2,
       pageSize: 10,
       status: "ALL",
-      search: "Pagination",
+      search: marker,
       sort: "TITLE_ASC",
     }, clock);
 
@@ -707,7 +720,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
     expect(p2Items).toHaveLength(1);
     expect(page2.data.page).toBe(2);
     expect(page2.data.hasNextPage).toBe(false);
-    expect(p2Items[0].title).toBe("Pagination 11");
+    expect(p2Items[0].title).toBe(titles[10]);
 
     const allIds = [...p1Items, ...p2Items].map((i: {id: string}) => i.id);
     expect(new Set(allIds).size).toBe(allIds.length);
@@ -754,6 +767,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       clock,
     );
     if (!parent.ok) throw new Error("Expected parent.");
+    createdPageIds.add(parent.pageId);
 
     const child = await createPage(
       prisma,
@@ -766,6 +780,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       clock,
     );
     if (!child.ok) throw new Error("Expected child.");
+    createdPageIds.add(child.pageId);
 
     const result = await listPages(prisma, actor(adminId, "ADMIN"), {
       page: 1,
@@ -809,6 +824,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       clock,
     );
     if (!page.ok) throw new Error("Expected page.");
+    createdPageIds.add(page.pageId);
 
     const editorResult = await getPageDetail(prisma, actor(editorId, "EDITOR"), page.pageId, clock);
     expect(editorResult).toEqual({ok: false, code: "SESSION_INVALID"});
@@ -824,5 +840,105 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
     expect(detail.data.translations.en).toBeDefined();
     expect(detail.data.translations.en!.title).toBe("Query Detail EN");
     expect(detail.data.createdAt).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+  });
+  it("returns FORBIDDEN for EDITOR, PETUGAS, and SATGAS_PPKS on existing and missing Pages before any mutation", async () => {
+    const slug = `${marker}-nondisclosure`;
+    const page = await createPage(
+      prisma,
+      actor(adminId, "ADMIN"),
+      input(slug, {heroMediaId: null, translations: {id: translation("Test Nondisclosure")}}),
+      clock,
+    );
+    if (!page.ok) throw new Error("Expected draft.");
+    createdPageIds.add(page.pageId);
+
+    const roles: ActiveDatabaseSession["role"][] = ["EDITOR", "PETUGAS", "SATGAS_PPKS"];
+    const existingId = page.pageId;
+    const missingId = `${marker}-nonexistent-page`;
+
+    for (const role of roles) {
+      // Update — existing page
+      await expect(updatePage(
+        prisma,
+        actor(editorId, role),
+        updateInput(existingId, 1, `${slug}-renamed`, {
+          translations: {id: translation("Disclosure probe")},
+        }),
+        clock,
+      )).resolves.toEqual({ok: false, code: "FORBIDDEN"});
+
+      // Update — missing page
+      await expect(updatePage(
+        prisma,
+        actor(editorId, role),
+        updateInput(missingId, 1, `${slug}-missing`, {
+          translations: {id: translation("Disclosure probe missing")},
+        }),
+        clock,
+      )).resolves.toEqual({ok: false, code: "FORBIDDEN"});
+
+      // Delete — existing page
+      await expect(deletePage(
+        prisma,
+        actor(editorId, role),
+        {pageId: existingId, expectedVersion: 1},
+        clock,
+      )).resolves.toEqual({ok: false, code: "FORBIDDEN"});
+
+      // Delete — missing page
+      await expect(deletePage(
+        prisma,
+        actor(editorId, role),
+        {pageId: missingId, expectedVersion: 1},
+        clock,
+      )).resolves.toEqual({ok: false, code: "FORBIDDEN"});
+
+      // Mutate publication — existing page
+      await expect(mutatePagePublication(
+        prisma,
+        actor(editorId, role),
+        {intent: "PUBLISH_NOW", pageId: existingId, expectedVersion: 1},
+        clock,
+      )).resolves.toEqual({ok: false, code: "FORBIDDEN"});
+
+      // Mutate publication — missing page
+      await expect(mutatePagePublication(
+        prisma,
+        actor(editorId, role),
+        {intent: "PUBLISH_NOW", pageId: missingId, expectedVersion: 1},
+        clock,
+      )).resolves.toEqual({ok: false, code: "FORBIDDEN"});
+    }
+  });
+
+  it("rejects creation with content exceeding schema limits after sanitization and stores nothing", async () => {
+    const slug = `${marker}-oversize`;
+    const oversized = "<p>" + "x".repeat(1_000_010) + "</p>";
+
+    const pageCountBefore = await prisma.page.count();
+    const revisionCountBefore = await prisma.contentRevision.count();
+    const activityCountBefore = await prisma.activityLog.count();
+
+    const result = await createPage(
+      prisma,
+      actor(adminId, "ADMIN"),
+      input(slug, {
+        heroMediaId: null,
+        translations: {
+          id: {title: "Oversize", content: oversized, metaTitle: null, metaDesc: null},
+        },
+      }),
+      clock,
+    );
+
+    expect(result).toEqual({ok: false, code: "VALIDATION_FAILED"});
+
+    // Prove nothing persisted
+    expect(await prisma.page.count()).toBe(pageCountBefore);
+    expect(await prisma.contentRevision.count()).toBe(revisionCountBefore);
+    expect(await prisma.activityLog.count()).toBe(activityCountBefore);
+
+    // Verify the slug is not taken
+    expect(await prisma.page.findUnique({where: {slug}})).toBeNull();
   });
 });

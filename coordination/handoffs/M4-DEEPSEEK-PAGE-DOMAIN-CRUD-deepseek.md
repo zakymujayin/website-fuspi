@@ -3,83 +3,81 @@
 - **Task ID:** M4-DEEPSEEK-PAGE-DOMAIN-CRUD
 - **Branch:** `ai/deepseek/m4-page-domain-crud`
 - **Base SHA:** `049cb759beb393b44f6fe91217d357761cffffb5` (origin/integration/m4-features)
-- **Implementation Head SHA:** `db5e7d2cc1a622e7b8bd8b79dbf6297904fb0b26`
-- **Database:** `fuspi_dev_deepseek` (PostgreSQL 16.14, isolated local)
+- **Previous Implementation Head SHA:** `019bb19fa830152f304f5fb497ccbaf4eb44c9c4`
+- **Correction Head SHA:** `100bfcddbbfd43fb5081f23c9cf39cc80f2ce9ab`
+- **Database:** `fuspi_dev_deepseek` (PostgreSQL 16, isolated local)
 
-## Summary
+## Correction Pass Summary
 
-Implemented the non-sensitive Page domain service/query/mutation layer following
-the accepted M3 Post behavioral pattern, using the frozen Prisma Page/PageTranslation
-schema as the data contract.
+Final correction pass — all 5 mandatory items addressed.
 
-### Corrections applied
+### 1. Post-sanitization validation
+- `sanitizeTranslations` now re-validates every sanitized locale through `PageTranslationInputSchema.safeParse()`.
+- Any sanitized content exceeding schema limits (e.g., `content > 1,000,000` chars after entity expansion) throws `ContentSanitizationError`, caught as `VALIDATION_FAILED` *before* the database transaction opens.
+- Unit test: 205,000 `&` chars expand to `&amp;` × 205,000 = 1,025,000 chars during DOM serialization → rejected as `VALIDATION_FAILED`; `$transaction` never called.
+- Unit test: oversize safe text (1,000,010 `x` chars in `<p>`) → exceeds `max(1_000_000)` after sanitization → `VALIDATION_FAILED` before transaction.
+- Integration test: 1,000,010-char safe text → `VALIDATION_FAILED`; verified `page.count`, `contentRevision.count`, and `activityLog.count` unchanged; slug remains free.
 
-- **TITLE_ASC**: Sorts by `t."title" ASC, p."id" ASC` (alphabetical Indonesian title, ID as deterministic tiebreaker) on both search and non-search paths. Previously sorted by `p.order ASC`.
-- **getPageDetail**: Parses `pageId` via `PageIdSchema.safeParse` instead of a bare `typeof` check, rejecting malformed/oversize/control-character IDs before any DB query.
-- **Create self-parenting**: Removed the `parentId === slug` check in `PageCreateInputSchema`. Page IDs are server-generated CUIDs; slug equality with a valid parent ID is a legitimate reference. Update-time `pageId === parentId` and ancestor-cycle detection remain intact.
-- **RETURN_TO_DRAFT audit**: Records `action: "UPDATE"` with `metadata: {operation: "RETURN_TO_DRAFT", version}` instead of incorrectly using `"ARCHIVE"`. Only `ARCHIVE` intent uses `action: "ARCHIVE"`.
-- **Integration runner**: All tests pass with `.env.local` sourced; earlier auth failures were a runner-configuration issue.
+### 2. Integration-test cleanup
+- **storageKey**: Made unique per run using `${marker}-public-${...}` and `${marker}-private-${...}` patterns instead of fixed `"c".repeat(64)` / `"d".repeat(64)`.
+- **ContentRevision for deleted pages**: Added `createdPageIds` Set tracking all page IDs created during the suite. The `afterAll` hook now cleans `activityLog` and `contentRevision` for both existing and deleted pages (already-deleted pages' orphaned revisions are matched by `remainingIds` computed from `createdPageIds` minus surviving `pageIds`).
 
-## Files Changed (6 files, within lease)
+### 3. Pagination-test isolation
+- Page titles use `${marker}` prefix instead of plain `"Pagination 01"` — no global keyword collision with other fixtures.
+- Search filter uses `marker` variable instead of hardcoded `"Pagination"`.
+- Total assertion changed from `toBe(11)` to `toBeGreaterThanOrEqual(titles.length)` — no database-wide assertion that other fixtures can break.
+- Title assertions use dynamic `titles` array instead of hardcoded strings.
 
-- `src/features/content/pages/contract.ts` — Zod schemas
-- `src/features/content/pages/mutations.ts` — CRUD operations
-- `src/features/content/pages/queries.ts` — Read layer
-- `tests/m4/content/pages/page-mutations.test.ts` — 23 unit tests
-- `tests/m4/content/pages/page-mutations.integration.test.ts` — 16 integration tests
+### 4. Non-disclosure coverage
+- New integration test: for each of `EDITOR`, `PETUGAS`, `SATGAS_PPKS`, `updatePage`, `deletePage`, and `mutatePagePublication` all return `FORBIDDEN` identically for both an existing Page ID and a nonexistent Page ID — no information disclosure before reaching the DB mutation layer.
+
+### 5. Handoff notes
+
+#### Next-transport requirement
+The Page transport (Next.js route handler) **must reject sessions with `mustChangePassword` before delegating** to this domain layer. The current `listPages`/`getPageDetail` queries already reject `mustChangePassword` sessions in their actor guard; mutations currently allow password-change-required actors through if they're ADMIN. Transport-layer enforcement is the correct place for this check.
+
+#### Low residual findings (Claude review, NOT addressed in this pass)
+These were noted by Claude's review but are NOT fixed:
+
+1. **TITLE_ASC multi-query snapshot may fail-closed during concurrent writes** — `listPages` issues a raw SQL query followed by a `findMany`; another client could insert/update between the two, causing silently dropped rows. The `id` tiebreak helps but this remains a snapshot-isolation gap.
+2. **`children` select loads all child IDs** — `PAGE_SELECT` includes `children: {select: {id: true}}` which fetches every child row ID into the list result even though only `hasChildren: boolean` is needed.
+3. **P2002 non-slug mapping may return `SLUG_CONFLICT`** — `isUniqueConstraintError` maps ALL P2002 errors to `SLUG_CONFLICT`. A unique constraint violation on any other column (e.g., a future unique index) would be incorrectly reported.
+
+## Files Changed (5 files, within lease)
+
+- `src/features/content/pages/mutations.ts` — post-sanitization re-validation, `PageTranslationInputSchema` import
+- `tests/m4/content/pages/page-mutations.test.ts` — 2 new unit tests (total: 25)
+- `tests/m4/content/pages/page-mutations.integration.test.ts` — cleanup isolation, pagination isolation, non-disclosure, pathological DB-proof test (total: 18)
 - `coordination/handoffs/M4-DEEPSEEK-PAGE-DOMAIN-CRUD-deepseek.md` — this handoff
+- `next-env.d.ts` — auto-generated by `npm run build` (dev→production types)
 
 ## API/Schema/Migration Impact
 
-None. No schema, migration, shared contract, root config, dependency, auth, or proxy changes.
+None.
 
 ## Exact Command Results
 
 | Command | Result |
 |---------|--------|
-| `npx vitest run tests/m4/content/pages --exclude '**/*.integration.test.ts'` | **23 passed, 0 skipped** |
 | `npm run lint` | PASS |
 | `npm run typecheck` | PASS |
 | `npm run prisma:validate` | PASS |
-| `RUN_PLATFORM_DB_TESTS=true npx vitest run --config vitest.integration.config.ts tests/m4/content/pages` | **16 passed, 0 skipped** |
-| `npm test` | **53 files, 812 tests** |
-| `npm run test:integration` (with .env.local sourced) | **22 files, 105 tests** |
+| `npx vitest run tests/m4/content/pages --exclude '**/*.integration.test.ts'` | **25 passed** |
+| `npm run test` | **53 files, 814 tests** |
+| `RUN_PLATFORM_DB_TESTS=true npx vitest run --config vitest.integration.config.ts` | **22 files, 107 tests** |
 | `npm run build` | PASS — 34/34 static pages |
 | `git diff --check` | PASS |
-| `TASK_MANIFEST=... TASK_BASE=... npm run check:scope` | PASS — 6 files within lease |
 
-## Domain Implementation Details
+## Worktree Status
 
-- **Authorization:** ADMIN-only at every entry point
-- **Validation:** Strict Zod schemas; ID translation mandatory, EN/AR optional
-- **XSS sanitization:** Rich text sanitized at trust boundary
-- **Hero media:** Only PUBLIC storage class accepted
-- **Hierarchy cycles:** Self-parenting at update level; ancestor-cycle detection
-- **Deletion safety:** Children block enforced
-- **Optimistic locking:** Shared `claimOptimisticVersion` with `resource: "Page"`
-- **Transactions:** Parent+translations in one transaction
+```
+ai/deepseek/m4-page-domain-crud...origin/integration/m4-features [ahead 5]
+Modified: src/features/content/pages/mutations.ts
+Modified: tests/m4/content/pages/page-mutations.integration.test.ts
+Modified: tests/m4/content/pages/page-mutations.test.ts
+```
 
-## Test Coverage
-
-### Unit — 23 tests
-Session/role rejection, field rejection, ownership derivation, locale sanitization,
-hero media enforcement, parent validation, error mapping, self-parent (update),
-publication transitions, delete with lock, child-page protection, stale version,
-hierarchy cycles, list with parent/hasChildren/locale, detail success/missing,
-malformed/oversize/control-char ID rejection, invalid query without DB touch.
-
-### Integration — 16 tests (PostgreSQL)
-Atomic creation, role rejection, missing references, translation replacement,
-non-disclosing results, publication transitions with audit assertions, slug
-conflict rollback, hierarchy cycle, child-page deletion prevention, safe
-orphan delete, slug-equals-parentID regression, TITLE_ASC sort with pageId
-tiebreak, TITLE_ASC pagination (11+ items, pageSize 10, page 1/2, no overlaps),
-status/search filtering, parent summary/locale/hasChildren, query auth/detail.
-
-## Untested Areas / Risks
-
-- Playwright/E2E tests not in scope
-- No autosave mechanism for Pages
+23 local task branches. No conflict with GPT lanes (`integration/m4-features`, `ai/gpt/m4-entry-and-assignment`, `ai/gpt/m4-ppks-query-isolation`) or Claude lanes (`ai/claude/m4-public-shell-hardening`).
 
 ## Contract Requests
 
@@ -87,7 +85,7 @@ None.
 
 ## Follow-ups
 
-- Admin route handlers that use this domain layer
-- Admin UI for Page CRUD
+- Admin route handlers (`/api/admin/pages`) that wire in this domain layer
+- Transport-level `mustChangePassword` rejection for Page mutations
 - Public Page rendering
-- Menu-item → Page linking integration
+- Menu-item → Page linking

@@ -508,6 +508,51 @@ describe("M4 Page mutation trust boundary", () => {
   });
 });
 
+
+  it("rejects content that exceeds schema limits after sanitization", async () => {
+    const transaction = vi.fn();
+    const database = {$transaction: transaction} as unknown as PageMutationDatabase;
+    const oversized = "<p>" + "x".repeat(1_000_010) + "</p>";
+
+    await expect(createPage(database, session(), createInput({
+      translations: {
+        id: {title: "Oversized", content: oversized, metaTitle: null, metaDesc: null},
+      },
+    }), clock)).resolves.toEqual({ok: false, code: "VALIDATION_FAILED"});
+    expect(transaction).not.toHaveBeenCalled();
+
+    // Update should also reject before transaction
+    const updateTrans = vi.fn();
+    const updateDb = {$transaction: updateTrans} as unknown as PageMutationDatabase;
+
+    await expect(updatePage(updateDb, session(), {
+      pageId: "page-1",
+      expectedVersion: 5,
+      slug: "updated-slug",
+      parentId: null,
+      heroMediaId: null,
+      order: 0,
+      translations: {
+        id: {title: "Oversized", content: oversized, metaTitle: null, metaDesc: null},
+      },
+    }, clock)).resolves.toEqual({ok: false, code: "VALIDATION_FAILED"});
+    expect(updateTrans).not.toHaveBeenCalled();
+  });
+
+  it("rejects pathological 205,000 ampersand characters that expand beyond schema limit after sanitization", async () => {
+    const transaction = vi.fn();
+    const database = {$transaction: transaction} as unknown as PageMutationDatabase;
+    // DOMPurify serializes each & as &amp; (5 chars), so 205,000 × 5 = 1,025,000 > max(1_000_000)
+    const ampersands = "<p>" + "&".repeat(205_000) + "</p>";
+
+    await expect(createPage(database, session(), createInput({
+      translations: {
+        id: {title: "Ampersands", content: ampersands, metaTitle: null, metaDesc: null},
+      },
+    }), clock)).resolves.toEqual({ok: false, code: "VALIDATION_FAILED"});
+    expect(transaction).not.toHaveBeenCalled();
+  });
+
 describe("M4 Page query trust boundary", () => {
   const idRow = (id: string, title: string, order = 0) => ({
     id,

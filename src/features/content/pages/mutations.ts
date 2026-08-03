@@ -10,9 +10,10 @@ import {recordActivity} from "@/lib/audit/activity-log";
 import {createPrismaClient} from "@/lib/db/client";
 import {claimOptimisticVersion} from "@/lib/db/optimistic-lock";
 import {createContentRevision} from "@/lib/db/revision";
-import {sanitizeRichTextHtml} from "@/lib/security/sanitize";
+import {ContentSanitizationError, sanitizeRichTextHtml} from "@/lib/security/sanitize";
 import {
   PageCreateInputSchema,
+  PageTranslationInputSchema,
   PageDeleteInputSchema,
   PageMutationResultSchema,
   PagePublicationMutationInputSchema,
@@ -64,14 +65,21 @@ function isAuthorized(actor: Actor, action: "CREATE" | "UPDATE" | "DELETE" | "PU
 }
 
 function sanitizeTranslations(translations: PageTranslationsInput): SanitizedTranslations {
-  const sanitize = (translation: PageTranslationInput): SanitizedTranslation => ({
-    ...translation,
-    content: sanitizeRichTextHtml(translation.content),
-  });
+  const validate = (translation: PageTranslationInput): SanitizedTranslation => {
+    const sanitized = {
+      ...translation,
+      content: sanitizeRichTextHtml(translation.content),
+    };
+    const revalidated = PageTranslationInputSchema.safeParse(sanitized);
+    if (!revalidated.success) {
+      throw new ContentSanitizationError();
+    }
+    return sanitized;
+  };
   return {
-    id: sanitize(translations.id),
-    ...(translations.en ? {en: sanitize(translations.en)} : {}),
-    ...(translations.ar ? {ar: sanitize(translations.ar)} : {}),
+    id: validate(translations.id),
+    ...(translations.en ? {en: validate(translations.en)} : {}),
+    ...(translations.ar ? {ar: validate(translations.ar)} : {}),
   };
 }
 
