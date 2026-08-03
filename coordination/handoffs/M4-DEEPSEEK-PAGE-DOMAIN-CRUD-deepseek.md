@@ -3,6 +3,7 @@
 - **Task ID:** M4-DEEPSEEK-PAGE-DOMAIN-CRUD
 - **Branch:** `ai/deepseek/m4-page-domain-crud`
 - **Base SHA:** `049cb759beb393b44f6fe91217d357761cffffb5` (origin/integration/m4-features)
+- **Implementation Head SHA:** `db5e7d2cc1a622e7b8bd8b79dbf6297904fb0b26`
 - **Database:** `fuspi_dev_deepseek` (PostgreSQL 16.14, isolated local)
 
 ## Summary
