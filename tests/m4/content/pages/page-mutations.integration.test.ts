@@ -101,7 +101,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
     const media = await Promise.all([
       prisma.media.create({
         data: {
-          storageKey: `2026/07/${"c".repeat(64)}.webp`,
+          storageKey: `${marker}-public-${"c".repeat(32)}.webp`,
           storageClass: "PUBLIC",
           checksumSha256: "c".repeat(64),
           originalName: `${marker}-public.webp`,
@@ -115,7 +115,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       }),
       prisma.media.create({
         data: {
-          storageKey: `2026/07/${"d".repeat(64)}.webp`,
+          storageKey: `${marker}-private-${"d".repeat(32)}.webp`,
           storageClass: "PRIVATE",
           checksumSha256: "d".repeat(64),
           originalName: `${marker}-private.webp`,
@@ -137,13 +137,16 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       select: {id: true},
     });
     const pageIds = pages.map(({id}) => id);
-    if (pageIds.length > 0) {
+    const allIds = [...new Set([...pageIds, ...createdPageIds])];
+    if (allIds.length > 0) {
       await prisma.activityLog.deleteMany({
-        where: {resourceType: "Page", resourceId: {in: pageIds}},
+        where: {resourceType: "Page", resourceId: {in: allIds}},
       });
       await prisma.contentRevision.deleteMany({
-        where: {resourceType: "Page", resourceId: {in: pageIds}},
+        where: {resourceType: "Page", resourceId: {in: allIds}},
       });
+    }
+    if (pageIds.length > 0) {
       await prisma.page.deleteMany({where: {id: {in: pageIds}}});
     }
     await prisma.media.deleteMany({where: {originalName: {startsWith: marker}}});
@@ -703,7 +706,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
     expect(page1.data.page).toBe(1);
     expect(page1.data.pageSize).toBe(10);
     expect(page1.data.hasNextPage).toBe(true);
-    expect(page1.data.total).toBeGreaterThanOrEqual(titles.length);
+    expect(page1.data.total).toBe(11);
     expect(p1Items.map((i: {title: string}) => i.title)).toEqual(titles.slice(0, 10));
 
     const page2 = await listPages(prisma, actor(adminId, "ADMIN"), {
@@ -911,9 +914,10 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
     }
   });
 
-  it("rejects creation with content exceeding schema limits after sanitization and stores nothing", async () => {
+  it("rejects content that exceeds schema limits after sanitization (entity expansion) and stores nothing", async () => {
     const slug = `${marker}-oversize`;
-    const oversized = "<p>" + "x".repeat(1_000_010) + "</p>";
+    // 205,000 ampersands × 5 chars (&amp;) = 1,025,000 > max(1_000_000) post-sanitization
+    const ampersands = "<p>" + "&".repeat(205_000) + "</p>";
 
     const pageCountBefore = await prisma.page.count();
     const revisionCountBefore = await prisma.contentRevision.count();
@@ -925,7 +929,7 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
       input(slug, {
         heroMediaId: null,
         translations: {
-          id: {title: "Oversize", content: oversized, metaTitle: null, metaDesc: null},
+          id: {title: "Entity Expansion", content: ampersands, metaTitle: null, metaDesc: null},
         },
       }),
       clock,
@@ -933,12 +937,10 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
 
     expect(result).toEqual({ok: false, code: "VALIDATION_FAILED"});
 
-    // Prove nothing persisted
     expect(await prisma.page.count()).toBe(pageCountBefore);
     expect(await prisma.contentRevision.count()).toBe(revisionCountBefore);
     expect(await prisma.activityLog.count()).toBe(activityCountBefore);
 
-    // Verify the slug is not taken
     expect(await prisma.page.findUnique({where: {slug}})).toBeNull();
   });
 });
