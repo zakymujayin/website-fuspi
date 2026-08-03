@@ -70,7 +70,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-GPT-DEEPSEEK-PAGE-DOMAIN-INTEGRATION.md TASK_BASE=049cb759beb393b44f6fe91217d357761cffffb5 npm run check:scope"
 risk: high
 token_class: M
-status: active
+status: merged
 ---
 
 # M4 GPT Page-domain integration

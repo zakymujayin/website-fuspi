@@ -63,7 +63,7 @@ entry, is not merged, and is preserved unchanged for audit.
 | --- | --- | --- | --- |
 | GPT | `M4-GPT-PPKS-QUERY-ISOLATION` | merged | ticket contract/domain/tests only |
 | Claude | `M4-CLAUDE-PUBLIC-SHELL-HARDENING` | merged | accepted public shell integrated with full post-merge evidence |
-| DeepSeek | `M4-DEEPSEEK-PAGE-DOMAIN-CRUD` | ready | Page domain implementation/tests only |
+| DeepSeek | `M4-DEEPSEEK-PAGE-DOMAIN-CRUD` | merged | Page domain implementation/tests accepted on M4 integration |
 
 These leases do not overlap. Claude may read but not change the frozen
 component-local navigation data. DeepSeek may read but not change schema,
@@ -97,6 +97,21 @@ hold any public-shell or Page-domain path.
   production build, and 104/104 focused Playwright cases passed.
 - The public-shell lease is released. The integration candidate remains
   isolated from `main`; the human owner retains the M4-to-main decision.
+
+### M4-DEEPSEEK-PAGE-DOMAIN-CRUD
+
+- Accepted implementation head: `e09cf6eef84fbb4b5ce8020eedc1c4cb669b09a0`;
+  accepted handoff tip: `2b320598188effe4cc89be1872418d24bbb8b946`.
+- Claude independently reviewed the final correction delta **APPROVE** with no
+  Critical, High, or Medium finding. GPT independently repeated the focused,
+  full-unit, full-integration, build, scope, and cleanup evidence.
+- Integration merge: `49f8cf0cc164e0a2940c25bbd3deb28cce8900fe`.
+- Post-merge evidence on a fresh `fuspi_dev_m4_integration` PostgreSQL database:
+  two migrations applied cleanly; 25/25 focused unit, 18/18 focused integration,
+  814/814 full unit, 107/107 full integration, lint, typecheck, Prisma validation,
+  and a 34/34-page production build passed.
+- The Page-domain lease is released. Page admin transport/UI and public Page
+  rendering remain later bounded tasks; `main` remains unchanged.
 
 ## Merge and dependency policy
 

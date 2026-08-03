@@ -46,10 +46,4 @@ ui_hotspots:
     - src/app/globals.css
     - src/components/ui/**
     - messages/**
-active_leases:
-  - task: M4-GPT-DEEPSEEK-PAGE-DOMAIN-INTEGRATION
-    owner: gpt
-    paths:
-      - src/features/content/pages/**
-      - tests/m4/content/pages/**
-      - coordination/handoffs/M4-DEEPSEEK-PAGE-DOMAIN-CRUD-deepseek.md
+active_leases: []
