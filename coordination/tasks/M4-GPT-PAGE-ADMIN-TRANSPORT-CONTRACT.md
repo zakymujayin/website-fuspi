@@ -67,7 +67,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-GPT-PAGE-ADMIN-TRANSPORT-CONTRACT.md TASK_BASE=origin/integration/m4-features npm run check:scope"
 risk: high
 token_class: M
-status: active
+status: review
 ---
 
 # M4 GPT Page admin transport contract
