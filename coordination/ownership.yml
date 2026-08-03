@@ -47,8 +47,8 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
-  - task: M4-DEEPSEEK-PAGE-DOMAIN-CRUD
-    owner: deepseek
+  - task: M4-GPT-DEEPSEEK-PAGE-DOMAIN-INTEGRATION
+    owner: gpt
     paths:
       - src/features/content/pages/**
       - tests/m4/content/pages/**
