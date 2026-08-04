@@ -52,11 +52,24 @@ describe("B2 public content contracts", () => {
 
   it("rejects arbitrary selectors, duplicate parameters, and unsafe links", () => {
     expect(PublicContentAdminCommandSchema.safeParse({
-      action: "DELETE", resource: "SERVICE", id: "service-1", where: {id: {not: "service-1"}},
+      action: "DELETE", resource: "SERVICE", id: "service-1", expectedVersion: 2,
+      where: {id: {not: "service-1"}},
     }).success).toBe(false);
     expect(PublicContentAdminListQuerySchema.safeParse({resource: "SERVICE", where: {isActive: true}}).success).toBe(false);
     expect(ServiceInputSchema.safeParse({...serviceInput, link: {kind: "EXTERNAL", href: "https://127.0.0.1/admin"}}).success).toBe(false);
     expect(PublicContentDetailQuerySchema.safeParse({resource: "SERVICE", slug: "../secret", locale: "id"}).success).toBe(false);
+  });
+
+  it("requires an explicit optimistic-version intent on every delete", () => {
+    expect(PublicContentAdminCommandSchema.safeParse({
+      action: "DELETE", resource: "SERVICE", id: "service-1", expectedVersion: 2,
+    }).success).toBe(true);
+    expect(PublicContentAdminCommandSchema.safeParse({
+      action: "DELETE", resource: "PARTNERSHIP", id: "partnership-1", expectedVersion: null,
+    }).success).toBe(true);
+    expect(PublicContentAdminCommandSchema.safeParse({
+      action: "DELETE", resource: "SERVICE", id: "service-1",
+    }).success).toBe(false);
   });
 
   it("enforces chronology, one evidence source, and contiguous media order", () => {
