@@ -47,16 +47,6 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
-  - task: M4-GPT-PAGE-BACKEND
-    owner: gpt
-    paths:
-      - src/features/content/pages/admin-transport.ts
-      - src/app/api/admin/pages/route.ts
-      - src/app/api/admin/pages/[pageId]/route.ts
-      - tests/m4/runtime/page-admin-transport.test.ts
-      - tests/m4/runtime/page-admin-transport.integration.test.ts
-      - tests/security/admin-page-transport-adversarial.integration.test.ts
-      - coordination/handoffs/M4-GPT-PAGE-BACKEND-gpt.md
   - task: M4-CLAUDE-PAGE-ADMIN-UI
     owner: claude
     paths:
