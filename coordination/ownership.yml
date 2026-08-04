@@ -47,6 +47,12 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
+  - task: M4-GPT-BACKEND-V1-INVENTORY
+    owner: gpt
+    paths:
+      - coordination/reviews/M4-BACKEND-V1-INVENTORY-gpt.md
+      - coordination/milestones/M4-BACKEND-FIRST-ROADMAP.md
+      - coordination/handoffs/M4-GPT-BACKEND-V1-INVENTORY-gpt.md
   - task: M4-CLAUDE-PAGE-ADMIN-UI
     owner: claude
     paths:
