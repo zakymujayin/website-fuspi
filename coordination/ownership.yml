@@ -47,12 +47,6 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
-  - task: M4-GPT-ADMIN-USERS-TAXONOMY-CONTRACTS
-    owner: gpt
-    paths:
-      - src/contracts/admin-foundation.ts
-      - tests/m4/contracts/admin-foundation-contracts.test.ts
-      - coordination/handoffs/M4-GPT-ADMIN-USERS-TAXONOMY-CONTRACTS-gpt.md
   - task: M4-CLAUDE-PAGE-ADMIN-UI
     owner: claude
     paths:

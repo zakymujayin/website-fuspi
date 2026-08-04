@@ -53,7 +53,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-GPT-ADMIN-USERS-TAXONOMY-CONTRACTS.md TASK_BASE=origin/integration/m4-features npm run check:scope"
 risk: high
 token_class: M
-status: active
+status: merged
 ---
 
 # M4 GPT ADMIN user and taxonomy contracts
