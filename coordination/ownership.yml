@@ -47,15 +47,14 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
-  - task: M4-GPT-ACTIVITY-CAPTION-SCHEMA-CORRECTION
+  - task: M4-GPT-PUBLIC-CONTENT-DOMAINS
     owner: gpt
     paths:
-      - prisma/schema.prisma
-      - prisma/migrations/20260804201000_add_activity_image_caption/**
-      - src/generated/prisma/**
-      - tests/m4/schema/activity-caption-schema.test.ts
-      - tests/m4/schema/activity-caption-schema.integration.test.ts
-      - coordination/handoffs/M4-GPT-ACTIVITY-CAPTION-SCHEMA-CORRECTION-gpt.md
+      - src/features/public-content/**
+      - tests/m4/runtime/public-content*.test.ts
+      - tests/m4/runtime/public-content*.integration.test.ts
+      - tests/security/public-content*.integration.test.ts
+      - coordination/handoffs/M4-GPT-PUBLIC-CONTENT-DOMAINS-gpt.md
   - task: M4-CLAUDE-PAGE-ADMIN-UI
     owner: claude
     paths:

@@ -50,7 +50,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-GPT-ACTIVITY-CAPTION-SCHEMA-CORRECTION.md TASK_BASE=origin/integration/m4-features npm run check:scope"
 risk: medium
 token_class: S
-status: active
+status: merged
 ---
 
 # Activity image caption schema correction
