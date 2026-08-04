@@ -48,6 +48,7 @@ readonly_paths:
   - "src/features/academic/people.ts"
 depends_on:
   - M4-GPT-PUBLIC-CONTENT-CONTRACTS
+  - M4-GPT-PUBLIC-CONTENT-CONTRACT-CORRECTION
 contracts:
   - src/contracts/public-content.ts
 acceptance_commands:
@@ -63,7 +64,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-GPT-PUBLIC-CONTENT-DOMAINS.md TASK_BASE=origin/integration/m4-features npm run check:scope"
 risk: high
 token_class: L
-status: active
+status: ready
 ---
 
 # Public content domains
