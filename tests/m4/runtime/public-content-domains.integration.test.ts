@@ -155,6 +155,15 @@ suite("public content domains PostgreSQL runtime", () => {
     expect((await prisma.partnership.findUniqueOrThrow({where: {id: ids.get("PARTNERSHIP")}})).partnerName).toBe(`${marker} Mitra Ubah`);
   });
 
+  it("reorders versioned resources with version invalidation, revision, and audit in one transaction", async () => {
+    const serviceId = ids.get("SERVICE")!;
+    expect(await executePublicContentCommand(prisma, actor(), {action: "REORDER", resource: "SERVICE",
+      payload: {items: [{id: serviceId, position: 0}]}}, now)).toEqual({ok: true, id: serviceId, resource: "SERVICE", version: 3});
+    expect((await prisma.service.findUniqueOrThrow({where: {id: serviceId}})).version).toBe(3);
+    expect(await prisma.contentRevision.count({where: {resourceType: "Service", resourceId: serviceId}})).toBe(3);
+    expect(await prisma.activityLog.count({where: {resourceId: serviceId, metadata: {path: ["operation"], equals: "REORDER"}}})).toBe(1);
+  });
+
   it("enforces optimistic locking and rejects private images without a write", async () => {
     const serviceId = ids.get("SERVICE")!;
     const payload = {slug: `${marker}-service`, category: "UMUM", link: null, icon: null, isActive: true, order: 0,
@@ -162,7 +171,7 @@ suite("public content domains PostgreSQL runtime", () => {
     expect(await executePublicContentCommand(prisma, actor(), {action: "UPDATE", resource: "SERVICE",
       mutation: {id: serviceId, expectedVersion: 99}, payload}, now)).toEqual({ok: false, code: "VERSION_CONFLICT"});
     expect(await executePublicContentCommand(prisma, actor(), {action: "UPDATE", resource: "SERVICE",
-      mutation: {id: serviceId, expectedVersion: 2}, payload}, now)).toEqual({ok: true, id: serviceId, resource: "SERVICE", version: 3});
+      mutation: {id: serviceId, expectedVersion: 3}, payload}, now)).toEqual({ok: true, id: serviceId, resource: "SERVICE", version: 4});
     const before = await prisma.achievement.count({where: {slug: `${marker}-private-image`}});
     expect(await executePublicContentCommand(prisma, actor(), {action: "CREATE", resource: "ACHIEVEMENT", payload: {
       slug: `${marker}-private-image`, studentName: "Mahasiswa", level: "LOKAL", achievedAt: null, imageMediaId: privateMediaId,
@@ -172,7 +181,7 @@ suite("public content domains PostgreSQL runtime", () => {
   });
 
   it("deletes all ten resources with version intent and durable audit metadata", async () => {
-    const versions: Record<string, number | null> = {SERVICE: 3, PARTNERSHIP: null, SCHOLARSHIP: null, ACHIEVEMENT: null,
+    const versions: Record<string, number | null> = {SERVICE: 4, PARTNERSHIP: null, SCHOLARSHIP: null, ACHIEVEMENT: null,
       STUDENT_ACTIVITY: null, DOCUMENT: 2, ALBUM: null, EVENT: 2, FAQ: 2, TESTIMONIAL: null};
     for (const [resource, id] of ids) {
       const result = await executePublicContentCommand(prisma, actor(), {action: "DELETE", resource, id, expectedVersion: versions[resource]}, now);
