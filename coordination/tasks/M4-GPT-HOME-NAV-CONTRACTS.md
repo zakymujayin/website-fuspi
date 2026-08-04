@@ -5,7 +5,7 @@ owner: gpt
 reviewer: backend-wave-review
 tester: gpt
 base_branch: integration/m4-features
-base_sha: 675d5057e6b7e3a31fe2b7034f5052f028579e8d
+base_sha: 675d50578589ab5794ba0c05f9c29b834457932d
 allowed_paths:
   - "src/contracts/home-nav.ts"
   - "tests/m4/contracts/home-nav-contracts.test.ts"
