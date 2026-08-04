@@ -47,16 +47,6 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
-  - task: M4-GPT-ADMIN-USERS-TAXONOMY-RUNTIME
-    owner: gpt
-    paths:
-      - src/features/admin/foundation.ts
-      - src/app/api/admin/users/route.ts
-      - src/app/api/admin/taxonomies/route.ts
-      - tests/m4/runtime/admin-foundation-transport.test.ts
-      - tests/m4/runtime/admin-foundation-transport.integration.test.ts
-      - tests/security/admin-foundation-adversarial.integration.test.ts
-      - coordination/handoffs/M4-GPT-ADMIN-USERS-TAXONOMY-RUNTIME-gpt.md
   - task: M4-CLAUDE-PAGE-ADMIN-UI
     owner: claude
     paths:
