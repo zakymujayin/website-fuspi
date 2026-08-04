@@ -103,8 +103,10 @@ enum HomeSectionKey {
   QUICKLINK
   DEAN
   STATS
+  INTRO
   NEWS
   ANNOUNCEMENT
+  SERVICE
   PRODI
   PARTNERSHIP
   VIDEO
@@ -489,6 +491,7 @@ model Page {
   children         Page[]            @relation("PageTree")
   heroMedia        Media?            @relation("PageHero", fields: [heroMediaId], references: [id], onDelete: Restrict)
   translations     PageTranslation[]
+  menuItems        MenuItem[]        @relation("MenuPage")
 
   @@index([contentOwnerId, reviewDueAt])
 }
@@ -544,6 +547,7 @@ model Media {
   testimonialPhotos  Testimonial[]   @relation("TestimonialPhoto")
   activityImages     ActivityImage[] @relation("ActivityImageMedia")
   deanPhotos         SiteSetting[]   @relation("DeanPhoto")
+  siteVideoPosters   SiteSetting[]   @relation("SiteVideoPoster")
 }
 
 model StudyProgram {
@@ -1097,9 +1101,11 @@ model MenuItem {
   isVisible    Boolean               @default(true)
   parent       MenuItem?             @relation("MenuTree", fields: [parentId], references: [id], onDelete: Cascade)
   children     MenuItem[]            @relation("MenuTree")
+  page         Page?                 @relation("MenuPage", fields: [pageId], references: [id], onDelete: Restrict)
   translations MenuItemTranslation[]
 
   @@index([location, order])
+  @@index([pageId])
 }
 
 model MenuItemTranslation {
@@ -1179,6 +1185,7 @@ model HomeSectionTranslation {
 model Statistic {
   id           String                 @id @default(cuid())
   value        String
+  suffix       String?
   icon         String?
   order        Int                    @default(0)
   isVisible    Boolean                @default(true)
@@ -1256,6 +1263,7 @@ model SiteSetting {
   deanName         String?
   deanPhotoId      String?
   videoUrl         String?
+  videoPosterMediaId String?
   email            String?
   phone            String?
   facebookUrl      String?
@@ -1272,9 +1280,11 @@ model SiteSetting {
   createdAt        DateTime                 @default(now())
   updatedAt        DateTime                 @updatedAt
   deanPhoto        Media?                   @relation("DeanPhoto", fields: [deanPhotoId], references: [id], onDelete: Restrict)
+  videoPoster      Media?                   @relation("SiteVideoPoster", fields: [videoPosterMediaId], references: [id], onDelete: Restrict)
   translations     SiteSettingTranslation[]
 
   @@index([contentOwnerId, reviewDueAt])
+  @@index([videoPosterMediaId])
 }
 
 model SiteSettingTranslation {
