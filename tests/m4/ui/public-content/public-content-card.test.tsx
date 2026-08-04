@@ -11,7 +11,7 @@ vi.mock("@/i18n/navigation", () => ({
 }));
 
 vi.mock("next/image", () => ({
-  default: (props: any) => <img {...props} data-next-image="true" />,
+  default: ({ alt = "", ...props }: React.ComponentProps<"img"> & { alt?: string }) => <img alt={alt} {...props} data-next-image="true" />,
 }));
 
 import { PublicContentCard, type PublicContentCardData } from "@/components/public/public-content-card";

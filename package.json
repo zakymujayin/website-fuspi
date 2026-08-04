@@ -73,6 +73,7 @@
     "@axe-core/playwright": "4.12.1",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4.2.1",
+    "@testing-library/react": "^16.3.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^24.10.0",
     "@types/nodemailer": "7.0.12",

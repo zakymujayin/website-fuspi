@@ -35,7 +35,7 @@ describe("normalizePublicContentAdminQuery", () => {
 
   it("collapses to canonical when unknown keys are present", () => {
     expect(
-      normalizePublicContentAdminQuery({ unknownKey: "value" } as any, RESOURCE),
+      normalizePublicContentAdminQuery({ unknownKey: "value" } as Record<string, unknown> as Parameters<typeof normalizePublicContentAdminQuery>[0], RESOURCE),
     ).toEqual({
       resource: RESOURCE,
       page: 1,
@@ -51,7 +51,7 @@ describe("normalizePublicContentAdminQuery", () => {
 
   it("collapses to canonical when array values are present", () => {
     expect(
-      normalizePublicContentAdminQuery({ page: ["2", "3"] } as any, RESOURCE),
+      normalizePublicContentAdminQuery({ page: ["2", "3"] } as Record<string, unknown> as Parameters<typeof normalizePublicContentAdminQuery>[0], RESOURCE),
     ).toEqual({
       resource: RESOURCE,
       page: 1,
