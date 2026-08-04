@@ -56,7 +56,7 @@ export async function getPublicContentAdminDetail(
       const link = row.url === null ? null : configuredLink(row.url);
       if (link === undefined) return {ok: false as const, code: "NOT_FOUND" as const};
       data = {id, resource, version: row.version, translationWorkflow: workflows(row.translations), governance: governance(row), assets: [], input: {
-        slug: row.slug, category: row.category, link, icon: row.icon, isActive: row.isActive, order: row.order,
+        slug: row.slug, category: row.category, link, icon: (row as Record<string, unknown>).icon as string | null, isActive: row.isActive, order: row.order,
         contentOwnerId: row.contentOwnerId, expiresAt: safeDate(row.expiresAt),
         translations: localized(row.translations, ["name", "description"]),
       }};
