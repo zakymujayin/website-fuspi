@@ -191,7 +191,7 @@ export function PageEditorForm({
             aria-invalid={fieldErrors.slug ? true : undefined}
             aria-describedby={`${formId}-slug-description`}
             autoComplete="off"
-           
+
           />
           <FieldDescription id={`${formId}-slug-description`}>
             {t("slugDescription")}

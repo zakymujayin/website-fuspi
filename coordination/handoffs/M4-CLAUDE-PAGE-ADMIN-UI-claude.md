@@ -69,12 +69,12 @@ Implemented the production ADMIN Page CMS UI under `/[locale]/admin/pages`, foll
 | `npm test` | PASS — 80 files, 1035 tests |
 | `npm run build` | PASS |
 | `npx playwright test e2e/m4/page-admin.spec.ts` | PASS — 12 tests |
-| `git diff --check` | PASS — no whitespace errors |
-| `TASK_MANIFEST=coordination/tasks/M4-CLAUDE-PAGE-ADMIN-UI.md TASK_BASE=origin/integration/m4-features npm run check:scope` | PASS — 39 changed files within lease |
+| `git diff --check origin/integration/m4-features..HEAD` | PASS — no whitespace errors |
+| `TASK_MANIFEST=coordination/tasks/M4-CLAUDE-PAGE-ADMIN-UI.md TASK_BASE=origin/integration/m4-features npm run check:scope` | PASS — 40 changed files within lease |
 
 ## Untested areas
 
-- Authenticated create/edit/delete flows in Playwright are skipped on this branch because the shared E2E session fixture helper is not part of the task lease and the original test plan assumes backend/session fixtures from DeepSeek/GPT lanes.
+- Authenticated create/edit/delete flows in Playwright are explicitly skipped (`test.skip`) in `e2e/m4/page-admin.spec.ts` on this branch. They are not covered by E2E evidence. The shared E2E session fixture helper is not part of the task lease, so full authenticated flows remain a follow-up once fixtures land.
 - Hero media picker upload flow is covered by unit tests only; end-to-end media selection would require a session fixture and seeded media.
 - Parent ID autocomplete/selector is implemented as a validated text input; a searchable parent picker was deferred to keep within contract and scope.
 
