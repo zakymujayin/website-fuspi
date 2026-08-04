@@ -1,3 +1,4 @@
+import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {Container} from "@/components/ui/container";
@@ -8,6 +9,26 @@ import {institution} from "@/config/institution";
 import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
 import {createPrismaClient} from "@/lib/db/client";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fuspi.uinbanten.ac.id";
+
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
+  const {locale} = await params;
+  const t = await getTranslations({locale, namespace: "Home"});
+  return {
+    title: {absolute: `${institution.name} — ${institution.university}`},
+    description: t("heroSubtitle"),
+    openGraph: {
+      type: "website",
+      siteName: institution.name,
+      url: SITE_URL,
+      description: t("heroSubtitle"),
+    },
+    alternates: {
+      languages: {id: `${SITE_URL}/id`, en: `${SITE_URL}/en`, ar: `${SITE_URL}/ar`},
+    },
+  };
+}
 import {
   ArrowRight,
   BookOpen,

@@ -4,6 +4,7 @@ import { setRequestLocale } from "next-intl/server";
 import { SiteFooter } from "@/components/public/site-footer";
 import { SiteHeader } from "@/components/public/site-header";
 import { SkipLink } from "@/components/public/skip-link";
+import { OrganizationJsonLd } from "@/components/public/json-ld";
 
 const display = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -46,6 +47,7 @@ export default async function PublicLayout({
   return (
     <div className={`${FONT_VARIABLES} public-shell flex min-h-screen flex-col`}>
       <SkipLink />
+      <OrganizationJsonLd />
       <SiteHeader />
       {/* The header is sticky, so the skip link and any in-page anchor must clear
           its full 148px expanded height instead of landing underneath it. */}
