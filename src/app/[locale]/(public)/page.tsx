@@ -16,6 +16,7 @@ import {
   GraduationCap,
   Handshake,
 } from "lucide-react";
+import NextImage from "next/image";
 
 /* ── Type-safe select shapes ──────────────────────── */
 
@@ -353,9 +354,12 @@ export default async function HomePage({params}: {params: Promise<{locale: AppLo
                   className="flex items-center justify-center rounded-xl border border-slate-100 p-4 transition-shadow duration-200 hover:shadow-sm"
                 >
                   {p.logoMedia ? (
-                    <img
+                    <NextImage
                       src={`/uploads/${p.logoMedia.storageKey}`}
                       alt={p.logoMedia.alt ?? p.partnerName ?? ""}
+                      width={200}
+                      height={80}
+                      unoptimized
                       className="max-h-10 max-w-full object-contain opacity-70 grayscale transition-opacity duration-200 hover:opacity-100"
                     />
                   ) : (

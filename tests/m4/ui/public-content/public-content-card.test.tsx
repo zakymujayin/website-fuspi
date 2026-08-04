@@ -11,6 +11,7 @@ vi.mock("@/i18n/navigation", () => ({
 }));
 
 vi.mock("next/image", () => ({
+  // eslint-disable-next-line @next/next/no-img-element
   default: ({ alt = "", ...props }: React.ComponentProps<"img"> & { alt?: string }) => <img alt={alt} {...props} data-next-image="true" />,
 }));
 
