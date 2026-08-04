@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/public/section-heading";
@@ -96,7 +97,7 @@ export default async function AlbumDetailPage({
 
         {album.cover ? (
           <figure className="mt-8">
-            <img
+            <Image
               src={album.cover.url}
               alt={album.cover.isDecorative ? "" : album.cover.alt}
               width={album.cover.width ?? 640}
@@ -116,7 +117,7 @@ export default async function AlbumDetailPage({
               {album.photos.map((photo) => (
                 <figure key={`${photo.media.id}-${photo.order}`} className="group overflow-hidden rounded-lg border border-slate-200 bg-white">
                   <div className="aspect-[4/3] overflow-hidden">
-                    <img
+                    <Image
                       src={photo.media.url}
                       alt={photo.media.isDecorative ? "" : photo.media.alt}
                       width={photo.media.width ?? 480}

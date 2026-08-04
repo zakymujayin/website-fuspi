@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/public/section-heading";
@@ -87,7 +88,7 @@ export default async function StudentActivityDetailPage({ params }: PageProps) {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {studentActivity.images.map((item) => (
                 <figure key={item.media.id}>
-                  <img
+                  <Image
                     src={item.media.url}
                     alt={item.media.isDecorative ? "" : item.media.alt}
                     width={item.media.width ?? undefined}

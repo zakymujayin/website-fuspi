@@ -3,7 +3,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import React from "react";
 
 import {SectionHeading} from "@/components/public/section-heading";
-import {PublicContentCard, type PublicContentCardData, PublicContentCardSkeleton} from "@/components/public/public-content-card";
+import {PublicContentCard, type PublicContentCardData} from "@/components/public/public-content-card";
 import {PublicContentStateNotice} from "@/components/admin/public-content/public-content-state-notice";
 import {Container} from "@/components/ui/container";
 import type {PublicContentResource} from "@/contracts/public-content";

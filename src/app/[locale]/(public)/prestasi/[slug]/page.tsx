@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/public/section-heading";
@@ -90,7 +91,7 @@ export default async function AchievementDetailPage({ params }: PageProps) {
 
         {achievement.image ? (
           <figure className="mb-8">
-            <img
+            <Image
               src={achievement.image.url}
               alt={achievement.image.isDecorative ? "" : achievement.image.alt}
               width={achievement.image.width ?? undefined}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import Image from "next/image";
 
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/public/section-heading";
@@ -120,7 +121,7 @@ export default async function TestimonialPage({
                 className="flex flex-col rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
               >
                 {tm.photo ? (
-                  <img
+                  <Image
                     src={tm.photo.url}
                     alt={tm.photo.isDecorative ? "" : tm.photo.alt}
                     width={tm.photo.width ?? 80}

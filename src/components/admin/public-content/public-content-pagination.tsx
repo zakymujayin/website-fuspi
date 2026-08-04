@@ -3,7 +3,6 @@
 import {ChevronLeftIcon, ChevronRightIcon} from "lucide-react";
 
 import {Link} from "@/i18n/navigation";
-import {type AppLocale} from "@/i18n/routing";
 
 import {buildPaginationItems} from "./public-content-query";
 
@@ -11,7 +10,6 @@ type PublicContentPaginationProps = {
   current: number;
   totalPages: number;
   buildHref: (page: number) => string;
-  locale: AppLocale;
   ariaLabel: string;
   previousLabel: string;
   nextLabel: string;
@@ -23,7 +21,6 @@ export function PublicContentPagination({
   current,
   totalPages,
   buildHref,
-  locale,
   ariaLabel,
   previousLabel,
   nextLabel,

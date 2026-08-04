@@ -6,9 +6,8 @@ import { redirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 
 import { listPublicContentAdminAction } from "@/components/admin/public-content/public-content-server-actions";
-import { normalizePublicContentAdminQuery, toPublicContentAdminTransportQuery, totalPagesFor, PUBLIC_CONTENT_SLUG_MAP } from "@/components/admin/public-content/public-content-query";
+import { normalizePublicContentAdminQuery, toPublicContentAdminTransportQuery } from "@/components/admin/public-content/public-content-query";
 import { PublicContentStateNotice } from "@/components/admin/public-content/public-content-state-notice";
-import { PublicContentListSkeleton } from "@/components/admin/public-content/public-content-list-skeleton";
 import { PublicContentPagination } from "@/components/admin/public-content/public-content-pagination";
 import { PublicContentStatusBadge } from "@/components/admin/public-content/public-content-status-badge";
 import type { PublicContentResource } from "@/contracts/public-content";
@@ -16,7 +15,6 @@ import { decideProtectedRoute, getRequestSession } from "@/lib/auth/runtime/requ
 import { parseAppLocale } from "@/lib/auth/runtime/redirect";
 
 const RESOURCE: PublicContentResource = "ALBUM";
-const ADMIN_PATH = "album";
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -154,7 +152,6 @@ export default async function AdminPublicContentPage({ params, searchParams }: P
               const qs = params.toString();
               return `/admin/album${qs ? `?${qs}` : ""}`;
             }}
-            locale={appLocale}
             ariaLabel={t("pagination.ariaLabel")}
             previousLabel={t("pagination.previous")}
             nextLabel={t("pagination.next")}

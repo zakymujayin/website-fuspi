@@ -1,10 +1,9 @@
 "use client";
 
 import {ArrowRightIcon} from "lucide-react";
+import Image from "next/image";
 
 import {Link} from "@/i18n/navigation";
-
-import {PublicContentCardSkeleton} from "./public-content-card-skeleton";
 
 export type PublicContentCardData = {
   id: string;
@@ -47,7 +46,7 @@ export function PublicContentCard({
     <article className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
       {item.media ? (
         <div className="aspect-video overflow-hidden">
-          <img
+          <Image
             src={item.media.url}
             alt={item.media.isDecorative ? "" : item.media.alt}
             width={item.media.width ?? 640}

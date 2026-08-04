@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/public/section-heading";
@@ -73,7 +74,7 @@ export default async function PartnershipDetailPage({ params }: PageProps) {
         <header className="mb-10">
           <div className="flex flex-wrap items-start gap-6 sm:flex-nowrap">
             {partnership.logo ? (
-              <img
+              <Image
                 src={partnership.logo.url}
                 alt={partnership.logo.isDecorative ? "" : partnership.logo.alt}
                 width={partnership.logo.width ?? undefined}

@@ -10,7 +10,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -64,17 +63,6 @@ function emptyDraft(): ServiceDraft {
 
 function hasTranslationContent(t: ServiceTranslationDraft): boolean {
   return t.name.trim().length > 0 || t.description.trim().length > 0;
-}
-
-function collectFieldErrors(
-  issues: readonly { path: PropertyKey[]; message: string }[],
-): Record<string, string> {
-  const errors: Record<string, string> = {};
-  for (const issue of issues) {
-    const key = issue.path.map(String).join(".");
-    if (key && !(key in errors)) errors[key] = issue.message;
-  }
-  return errors;
 }
 
 type EditorFormProps = {
