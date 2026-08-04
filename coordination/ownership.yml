@@ -47,15 +47,14 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
-  - task: M4-GPT-HOME-NAV-SCHEMA-CORRECTION
+  - task: M4-GPT-HOME-NAV-DOMAINS
     owner: gpt
     paths:
-      - prisma/schema.prisma
-      - prisma/migrations/20260804214500_home_nav_schema_correction/**
-      - src/generated/prisma/**
-      - tests/m4/schema/home-nav-schema-correction.test.ts
-      - tests/m4/schema/home-nav-schema-correction.integration.test.ts
-      - coordination/handoffs/M4-GPT-HOME-NAV-SCHEMA-CORRECTION-gpt.md
+      - src/features/home-nav/**
+      - tests/m4/runtime/home-nav*.test.ts
+      - tests/m4/runtime/home-nav*.integration.test.ts
+      - tests/security/home-nav*.integration.test.ts
+      - coordination/handoffs/M4-GPT-HOME-NAV-DOMAINS-gpt.md
   - task: M4-CLAUDE-PAGE-ADMIN-UI
     owner: claude
     paths:
