@@ -10,7 +10,10 @@
 | Candidate SHA | `5396c762fa73b49c07d69606dc6f1fb8200846a4` |
 | Implementation SHA | `35595759ca8738b174ec4f6c6c003c7ba2f4b2ff` |
 | Assignment SHA | `799d9d60b3614190ef9c6c3a1752b9443174e9c9` |
+| Initial review head | `a3eb98429465256da627eb516f1c0606157a7839` |
+| Corrected review head | `eefc52e36e7ebdb9005afebed38a39bf75e63087` |
 | Review branch | `review/ai/deepseek/m4-page-admin-transport-contract-review` |
+| Environment | Node.js 22, `npm ci` from package-lock, prisma reset, no runtime/UI opened |
 
 ## Executive Summary
 
@@ -111,14 +114,14 @@ Only 3 files changed from the assignment base, matching the `allowed_paths` leas
 
 | Command | Result |
 |---|---|
-| `npx vitest run tests/m4/contracts/page-admin-transport-contract.test.ts` | PASS — 10/10 |
-| `npm run lint` | PASS — no issues |
-| `npm run typecheck` | FAIL — 40+ errors, ALL pre-existing (tickets SLA, outbox, auth adapter, seed, E2E missing deps). ZERO errors in `src/contracts/page-admin.ts` or `tests/m4/contracts/page-admin-transport-contract.test.ts`. |
-| `npm test` | 54 files, 764/770 passed. 6 pre-existing failures (ticket SLA/contract enum mismatches). 3 files fail to import missing `@prisma/adapter-pg` (pre-existing). Contract tests: 10/10 PASS. |
-| `npm run prisma:validate` | PASS — schema valid |
-| `npm run build` | FAIL — pre-existing missing dependencies (`@auth/prisma-adapter`, `@prisma/adapter-pg`, `next-auth`). Not contract-related. |
-| `git diff --check` | PASS — no whitespace issues |
-| `npm run check:scope` | PASS — 0 changed files within lease |
+| `npx vitest run tests/m4/contracts/page-admin-transport-contract.test.ts` | **PASS** — 10/10 |
+| `npm run lint` | **PASS** — no issues |
+| `npm run typecheck` | FAIL — ~50 pre-existing errors in `prisma/seed.ts`, `src/features/content/pages/mutations.ts`, `src/features/content/pages/queries.ts`, `src/lib/sla/ticket.ts`, `src/lib/outbox/`, `src/features/tickets/`, `src/lib/content/post-admin-transport.ts`, `src/lib/content/post-mutations.ts`, `tests/m3/runtime/`, `tests/m4/content/pages/`, `tests/m4/tickets/`, `tests/platform/`. Zero errors in `src/contracts/page-admin.ts` or `tests/m4/contracts/page-admin-transport-contract.test.ts`. |
+| `npm test` | 54 files, 818/824 passed. 6 pre-existing failures in `tests/platform/ticket-enum-contract.test.ts` (3) and `tests/platform/ticket-sla.test.ts` (3). All Enum mismatches between generated Prisma client and test expectations. Contract tests: 10/10 PASS. |
+| `npm run prisma:validate` | **PASS** — schema valid |
+| `npm run build` | FAIL — Turbopack compilation succeeded, TypeScript check failed on pre-existing `prisma/seed.ts` `contentOwnerId` error. `next-env.d.ts` was mutated by build and restored to original. |
+| `git diff --check` | **PASS** — no whitespace issues |
+| `npm run check:scope` | **PASS** — 2 changed files within lease |
 
 ## Findings
 
@@ -146,8 +149,8 @@ Only 3 files changed from the assignment base, matching the `allowed_paths` leas
 
 2. **`mustChangePassword` asymmetry**: Domain `mutations.ts` `actorFromSession` does not check `mustChangePassword`, while `queries.ts` does. This means a password-expired session could still perform mutations. This is a domain-level risk, not a contract defect — the transport contract correctly maps whatever domain codes are returned.
 
-3. **Build environment missing dependencies**: `@prisma/adapter-pg`, `@auth/prisma-adapter`, and `next-auth` packages were not installed in this review environment, causing build and some test import failures. These are all pre-existing and not caused by the contract.
+3. **Build TypeScript check fails on `prisma/seed.ts`**: `contentOwnerId` exists in the Page model but the generated Prisma client for SiteSetting and StudyProgram does not include it. Pre-existing; not caused by this contract.
 
 ## Verdict
 
-**APPROVE** — No reproducible Critical or High boundary defect. The contract correctly composes frozen domain schemas, fails closed on all injection vectors, exhaustively maps domain failures, and produces JSON-safe output. All contract-specific tests pass. All command failures are pre-existing and unrelated.
+**APPROVE** — No reproducible Critical or High boundary defect. The contract correctly composes frozen domain schemas, fails closed on all injection vectors, exhaustively maps domain failures, and produces JSON-safe output. All contract-specific tests pass. All command failures are pre-existing and unrelated to the candidate.
