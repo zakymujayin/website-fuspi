@@ -59,7 +59,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-GPT-ACADEMIC-PEOPLE-RUNTIME.md TASK_BASE=origin/integration/m4-features npm run check:scope"
 risk: high
 token_class: L
-status: active
+status: closed
 ---
 
 # M4 GPT academic people runtime
