@@ -384,5 +384,347 @@
       "blockquote": "Kutipan",
       "code": "Kode"
     }
+  },
+  "AdminPageList": {
+    "metaTitle": "Halaman",
+    "title": "Halaman",
+    "description": "Kelola halaman statis situs. Saring, urutkan, dan telusuri halaman untuk menemukan yang Anda cari.",
+    "filterAriaLabel": "Saring halaman berdasarkan status",
+    "sortAriaLabel": "Urutkan",
+    "listAriaLabel": "Daftar halaman",
+    "totalCount": "{count} halaman",
+    "status": {
+      "all": "Semua",
+      "draft": "Draf",
+      "published": "Terbit",
+      "archived": "Arsip"
+    },
+    "state": {
+      "DRAFT": "Draf",
+      "PUBLISHED": "Terbit",
+      "ARCHIVED": "Arsip"
+    },
+    "sort": {
+      "updatedDesc": "Terbaru",
+      "titleAsc": "Judul A–Z"
+    },
+    "localesLabel": "Bahasa: {locales}",
+    "parentLabel": "Induk: {title}",
+    "childIndicator": "Memiliki sub-halaman",
+    "orderLabel": "Urutan {order}",
+    "updatedAtLabel": "Diperbarui {instant}",
+    "searchPlaceholder": "Cari judul atau slug…",
+    "searchAriaLabel": "Cari halaman",
+    "searchAction": "Cari",
+    "searchClear": "Hapus",
+    "pagination": {
+      "ariaLabel": "Navigasi halaman daftar halaman",
+      "previous": "Halaman sebelumnya",
+      "next": "Halaman berikutnya",
+      "pageStatus": "Hal {page} dari {totalPages}",
+      "goToPage": "Ke halaman {page}"
+    },
+    "empty": {
+      "title": "Belum ada halaman",
+      "description": "Halaman akan tampil di sini setelah dibuat."
+    },
+    "unavailable": {
+      "title": "Daftar halaman sedang tidak dapat dimuat",
+      "description": "Silakan muat ulang halaman ini beberapa saat lagi."
+    },
+    "createAction": "Tambah halaman",
+    "edit": "Sunting",
+    "editLabelFor": "Sunting halaman: {title}"
+  },
+  "AdminPageEditor": {
+    "createMetaTitle": "Tambah Halaman",
+    "createTitle": "Tambah Halaman",
+    "createDescription": "Isi konten halaman dalam Bahasa Indonesia. Terjemahan Inggris dan Arab bersifat opsional. Halaman disimpan sebagai draf.",
+    "editMetaTitle": "Sunting Halaman",
+    "editTitle": "Sunting Halaman",
+    "editDescription": "Perbarui isi halaman. Status penerbitan tidak berubah dari halaman ini.",
+    "slug": "Slug",
+    "slugDescription": "Penggal URL halaman, contoh: profil-fuspi. Gunakan huruf kecil dan tanda hubung.",
+    "parentId": "Induk",
+    "parentIdPlaceholder": "Kosongkan bila tidak ada induk",
+    "parentIdDescription": "ID halaman induk untuk menyusun hierarki menu.",
+    "order": "Urutan",
+    "translationsTitle": "Konten per bahasa",
+    "localeOptional": "(opsional)",
+    "title": "Judul",
+    "content": "Isi",
+    "contentDescription": "Isi halaman. Gunakan bilah alat untuk pemformatan dasar.",
+    "metaTitle": "Judul meta",
+    "metaDesc": "Deskripsi meta",
+    "submitCreate": "Simpan draf",
+    "submitUpdate": "Simpan perubahan",
+    "submitting": "Menyimpan…",
+    "cancel": "Batal",
+    "locale": {
+      "id": "Bahasa Indonesia",
+      "en": "Bahasa Inggris",
+      "ar": "Bahasa Arab"
+    },
+    "unavailable": {
+      "title": "Halaman tidak dapat dimuat",
+      "description": "Halaman tidak ditemukan atau sedang tidak dapat diakses."
+    },
+    "error": {
+      "SESSION_INVALID": "Sesi Anda telah berakhir. Silakan masuk kembali lalu coba lagi.",
+      "CSRF_INVALID": "Permintaan tidak dapat diverifikasi. Muat ulang halaman lalu coba lagi.",
+      "REQUEST_INVALID": "Permintaan tidak dapat diproses. Periksa isian Anda lalu coba lagi.",
+      "VALIDATION_FAILED": "Ada isian yang belum sesuai. Periksa bagian yang ditandai.",
+      "NOT_FOUND": "Halaman tidak ditemukan atau sedang tidak dapat diakses.",
+      "VERSION_CONFLICT": "Halaman ini telah diubah orang lain. Muat ulang halaman untuk melihat versi terbaru sebelum menyimpan.",
+      "INVALID_STATE": "Tindakan ini tidak dapat dilakukan pada status halaman saat ini.",
+      "SLUG_CONFLICT": "Slug ini sudah dipakai halaman lain. Gunakan slug yang berbeda.",
+      "HIERARCHY_CYCLE": "Induk yang dipilih membentuk siklus hierarki. Pilih induk lain.",
+      "MEDIA_INVALID": "Media yang tertaut tidak valid.",
+      "PARENT_INVALID": "Induk yang dipilih tidak valid atau tidak ditemukan.",
+      "UNAVAILABLE": "Perubahan tidak dapat disimpan saat ini. Coba lagi beberapa saat lagi."
+    }
+  },
+  "AdminPagePublication": {
+    "title": "Status penerbitan",
+    "currentLabel": "Saat ini:",
+    "state": {
+      "DRAFT": "Draf",
+      "PUBLISHED": "Terbit",
+      "ARCHIVED": "Arsip"
+    },
+    "action": {
+      "PUBLISH_NOW": "Terbitkan sekarang",
+      "RETURN_TO_DRAFT": "Kembalikan ke draf",
+      "ARCHIVE": "Arsipkan"
+    },
+    "error": {
+      "SESSION_INVALID": "Sesi Anda telah berakhir. Silakan masuk kembali lalu coba lagi.",
+      "CSRF_INVALID": "Permintaan tidak dapat diverifikasi. Muat ulang halaman lalu coba lagi.",
+      "REQUEST_INVALID": "Permintaan tidak dapat diproses. Periksa isian Anda lalu coba lagi.",
+      "VALIDATION_FAILED": "Ada isian yang belum sesuai. Periksa bagian yang ditandai.",
+      "NOT_FOUND": "Halaman tidak ditemukan atau sedang tidak dapat diakses.",
+      "VERSION_CONFLICT": "Halaman ini telah diubah orang lain. Muat ulang halaman untuk melihat versi terbaru sebelum menyimpan.",
+      "INVALID_STATE": "Tindakan ini tidak dapat dilakukan pada status halaman saat ini.",
+      "SLUG_CONFLICT": "Slug ini sudah dipakai halaman lain. Gunakan slug yang berbeda.",
+      "HIERARCHY_CYCLE": "Induk yang dipilih membentuk siklus hierarki. Pilih induk lain.",
+      "MEDIA_INVALID": "Media yang tertaut tidak valid.",
+      "PARENT_INVALID": "Induk yang dipilih tidak valid atau tidak ditemukan.",
+      "UNAVAILABLE": "Perubahan tidak dapat disimpan saat ini. Coba lagi beberapa saat lagi."
+    }
+  },
+  "AdminPageDelete": {
+    "title": "Hapus halaman",
+    "description": "Menghapus halaman bersifat permanen dan tidak dapat dibatalkan.",
+    "action": "Hapus halaman",
+    "confirmTitle": "Hapus halaman ini?",
+    "confirmDescription": "Tindakan ini permanen. Halaman dan seluruh terjemahannya akan dihapus.",
+    "cancel": "Batal",
+    "confirmAction": "Ya, hapus",
+    "error": {
+      "SESSION_INVALID": "Sesi Anda telah berakhir. Silakan masuk kembali lalu coba lagi.",
+      "CSRF_INVALID": "Permintaan tidak dapat diverifikasi. Muat ulang halaman lalu coba lagi.",
+      "REQUEST_INVALID": "Permintaan tidak dapat diproses. Periksa isian Anda lalu coba lagi.",
+      "VALIDATION_FAILED": "Ada isian yang belum sesuai. Periksa bagian yang ditandai.",
+      "NOT_FOUND": "Halaman tidak ditemukan atau sedang tidak dapat diakses.",
+      "VERSION_CONFLICT": "Halaman ini telah diubah orang lain. Muat ulang halaman untuk melihat versi terbaru sebelum menyimpan.",
+      "INVALID_STATE": "Tindakan ini tidak dapat dilakukan pada status halaman saat ini.",
+      "SLUG_CONFLICT": "Slug ini sudah dipakai halaman lain. Gunakan slug yang berbeda.",
+      "HIERARCHY_CYCLE": "Induk yang dipilih membentuk siklus hierarki. Pilih induk lain.",
+      "MEDIA_INVALID": "Media yang tertaut tidak valid.",
+      "PARENT_INVALID": "Induk yang dipilih tidak valid atau tidak ditemukan.",
+      "UNAVAILABLE": "Perubahan tidak dapat disimpan saat ini. Coba lagi beberapa saat lagi."
+    }
+  },
+  "AdminPageHeroPicker": {
+    "label": "Gambar hero",
+    "description": "Pilih gambar hero dari Pustaka Media untuk halaman ini.",
+    "none": "Belum ada gambar hero",
+    "selected": "Gambar hero terpilih",
+    "choose": "Pilih gambar hero",
+    "change": "Ganti gambar hero",
+    "clear": "Hapus gambar hero",
+    "listLabel": "Daftar gambar untuk hero",
+    "selectLabel": "Pilih {name} sebagai gambar hero",
+    "loading": "Memuat gambar…",
+    "loadError": "Gagal memuat gambar. Coba lagi.",
+    "empty": "Belum ada gambar di Pustaka Media."
+  },
+  "AdminPageRichText": {
+    "toolbarLabel": "Alat pemformatan",
+    "tool": {
+      "bold": "Tebal",
+      "italic": "Miring",
+      "h2": "Judul tingkat 2",
+      "h3": "Judul tingkat 3",
+      "bulletList": "Daftar berbutir",
+      "orderedList": "Daftar bernomor",
+      "blockquote": "Kutipan",
+      "code": "Kode"
+    }
+  },
+  "AdminPageNavigation": {
+    "label": "Navigasi admin",
+    "pages": "Halaman"
+  },
+  "AdminPublicContent": {
+    "SERVICE": {
+      "metaTitle": "Layanan",
+      "title": "Layanan",
+      "description": "Kelola layanan publik. Saring, telusuri, dan perbarui layanan yang ditampilkan di situs."
+    },
+    "PARTNERSHIP": {
+      "metaTitle": "Kerjasama",
+      "title": "Kerjasama",
+      "description": "Kelola data kerjasama. Saring, telusuri, dan perbarui mitra kerjasama."
+    },
+    "SCHOLARSHIP": {
+      "metaTitle": "Beasiswa",
+      "title": "Beasiswa",
+      "description": "Kelola informasi beasiswa. Saring, telusuri, dan perbarui data beasiswa."
+    },
+    "ACHIEVEMENT": {
+      "metaTitle": "Prestasi",
+      "title": "Prestasi",
+      "description": "Kelola data prestasi mahasiswa. Saring, telusuri, dan perbarui pencapaian."
+    },
+    "STUDENT_ACTIVITY": {
+      "metaTitle": "Kegiatan",
+      "title": "Kegiatan Mahasiswa",
+      "description": "Kelola kegiatan mahasiswa. Saring, telusuri, dan perbarui aktivitas."
+    },
+    "DOCUMENT": {
+      "metaTitle": "Dokumen",
+      "title": "Dokumen",
+      "description": "Kelola dokumen publik. Saring, telusuri, dan perbarui dokumen yang tersedia."
+    },
+    "ALBUM": {
+      "metaTitle": "Album",
+      "title": "Album",
+      "description": "Kelola album foto. Saring, telusuri, dan perbarui galeri."
+    },
+    "EVENT": {
+      "metaTitle": "Agenda",
+      "title": "Agenda",
+      "description": "Kelola agenda acara. Saring, telusuri, dan perbarui jadwal kegiatan."
+    },
+    "FAQ": {
+      "metaTitle": "FAQ",
+      "title": "Pertanyaan Umum",
+      "description": "Kelola pertanyaan umum (FAQ). Saring, telusuri, dan perbarui jawaban."
+    },
+    "TESTIMONIAL": {
+      "metaTitle": "Testimoni",
+      "title": "Testimoni",
+      "description": "Kelola testimoni alumni. Saring, telusuri, dan perbarui kesan alumni."
+    },
+    "createAction": "Tambah",
+    "filterAriaLabel": "Saring berdasarkan status tampil",
+    "listAriaLabel": "Daftar konten",
+    "searchPlaceholder": "Cari judul atau slug…",
+    "searchAriaLabel": "Cari konten",
+    "searchAction": "Cari",
+    "totalCount": "{count} konten",
+    "visibility": {
+      "ALL": "Semua",
+      "PUBLIC": "Publik",
+      "HIDDEN": "Tersembunyi",
+      "EXPIRED": "Kedaluwarsa"
+    },
+    "locale": {
+      "id": "ID",
+      "en": "EN",
+      "ar": "AR"
+    },
+    "empty": {
+      "title": "Belum ada konten",
+      "description": "Konten akan tampil di sini setelah dibuat."
+    },
+    "unavailable": {
+      "title": "Daftar konten sedang tidak dapat dimuat",
+      "description": "Silakan muat ulang halaman ini beberapa saat lagi."
+    },
+    "pagination": {
+      "ariaLabel": "Navigasi halaman daftar",
+      "previous": "Halaman sebelumnya",
+      "next": "Halaman berikutnya",
+      "pageStatus": "Hal {page} dari {totalPages}",
+      "goToPage": "Ke halaman {page}"
+    },
+    "edit": "Sunting",
+    "editLabelFor": "Sunting: {title}"
+  },
+  "AdminNavigation": {
+    "label": "Navigasi Admin",
+    "pages": "Halaman",
+    "services": "Layanan",
+    "partnerships": "Kerjasama",
+    "scholarships": "Beasiswa",
+    "achievements": "Prestasi",
+    "activities": "Kegiatan",
+    "documents": "Dokumen",
+    "albums": "Album",
+    "events": "Agenda",
+    "faq": "FAQ",
+    "testimonials": "Testimoni"
+  },
+  "PublicContent": {
+    "readMore": "Selengkapnya",
+    "empty": {
+      "title": "Belum ada konten",
+      "layanan": "Belum ada layanan yang tersedia.",
+      "kerjasama": "Belum ada kerjasama yang tersedia.",
+      "beasiswa": "Belum ada informasi beasiswa yang tersedia.",
+      "prestasi": "Belum ada data prestasi yang tersedia.",
+      "kegiatan": "Belum ada kegiatan mahasiswa yang tersedia.",
+      "dokumen": "Belum ada dokumen yang tersedia.",
+      "album": "Belum ada album foto yang tersedia.",
+      "agenda": "Belum ada agenda yang tersedia.",
+      "faq": "Belum ada pertanyaan umum yang tersedia.",
+      "testimoni": "Belum ada testimoni yang tersedia."
+    },
+    "unavailable": {
+      "title": "Konten sedang tidak dapat dimuat",
+      "description": "Silakan muat ulang halaman ini beberapa saat lagi."
+    },
+    "service": {
+      "listTitle": "Layanan",
+      "listDescription": "Layanan yang tersedia di Fakultas Ushuluddin dan Pemikiran Islam."
+    },
+    "partnership": {
+      "listTitle": "Kerja Sama",
+      "listDescription": "Mitra kerjasama Fakultas Ushuluddin dan Pemikiran Islam."
+    },
+    "scholarship": {
+      "listTitle": "Beasiswa",
+      "listDescription": "Informasi beasiswa untuk mahasiswa FUSPI."
+    },
+    "achievement": {
+      "listTitle": "Prestasi",
+      "listDescription": "Prestasi mahasiswa Fakultas Ushuluddin dan Pemikiran Islam."
+    },
+    "studentActivity": {
+      "listTitle": "Kegiatan Mahasiswa",
+      "listDescription": "Kegiatan kemahasiswaan di FUSPI."
+    },
+    "document": {
+      "listTitle": "Dokumen",
+      "listDescription": "Dokumen dan unduhan tersedia."
+    },
+    "album": {
+      "listTitle": "Album",
+      "listDescription": "Galeri foto kegiatan FUSPI."
+    },
+    "event": {
+      "listTitle": "Agenda",
+      "listDescription": "Agenda dan acara mendatang."
+    },
+    "faq": {
+      "listTitle": "Pertanyaan Umum",
+      "listDescription": "Pertanyaan yang sering diajukan."
+    },
+    "testimonial": {
+      "listTitle": "Testimoni",
+      "listDescription": "Testimoni dari alumni dan mahasiswa."
+    }
   }
 }

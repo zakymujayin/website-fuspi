@@ -384,5 +384,347 @@
       "blockquote": "Quote",
       "code": "Code"
     }
+  },
+  "AdminPageList": {
+    "metaTitle": "Pages",
+    "title": "Pages",
+    "description": "Manage static pages for the site. Filter, sort, and search to find the page you need.",
+    "filterAriaLabel": "Filter pages by status",
+    "sortAriaLabel": "Sort",
+    "listAriaLabel": "Page list",
+    "totalCount": "{count} pages",
+    "status": {
+      "all": "All",
+      "draft": "Draft",
+      "published": "Published",
+      "archived": "Archived"
+    },
+    "state": {
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published",
+      "ARCHIVED": "Archived"
+    },
+    "sort": {
+      "updatedDesc": "Newest",
+      "titleAsc": "Title A–Z"
+    },
+    "localesLabel": "Languages: {locales}",
+    "parentLabel": "Parent: {title}",
+    "childIndicator": "Has sub-pages",
+    "orderLabel": "Order {order}",
+    "updatedAtLabel": "Updated {instant}",
+    "searchPlaceholder": "Search title or slug…",
+    "searchAriaLabel": "Search pages",
+    "searchAction": "Search",
+    "searchClear": "Clear",
+    "pagination": {
+      "ariaLabel": "Page list pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "pageStatus": "Page {page} of {totalPages}",
+      "goToPage": "Go to page {page}"
+    },
+    "empty": {
+      "title": "No pages yet",
+      "description": "Pages will appear here once created."
+    },
+    "unavailable": {
+      "title": "The page list cannot be loaded right now",
+      "description": "Please reload this page again shortly."
+    },
+    "createAction": "Add page",
+    "edit": "Edit",
+    "editLabelFor": "Edit page: {title}"
+  },
+  "AdminPageEditor": {
+    "createMetaTitle": "Add Page",
+    "createTitle": "Add Page",
+    "createDescription": "Enter the page content in Indonesian. English and Arabic translations are optional. The page is saved as a draft.",
+    "editMetaTitle": "Edit Page",
+    "editTitle": "Edit Page",
+    "editDescription": "Update the page content. Publication status is not changed from this page.",
+    "slug": "Slug",
+    "slugDescription": "The URL segment, for example profil-fuspi. Use lowercase letters and hyphens.",
+    "parentId": "Parent",
+    "parentIdPlaceholder": "Leave blank if no parent",
+    "parentIdDescription": "Parent page ID for structuring the menu hierarchy.",
+    "order": "Order",
+    "translationsTitle": "Content per language",
+    "localeOptional": "(optional)",
+    "title": "Title",
+    "content": "Body",
+    "contentDescription": "The page body. Use the toolbar for basic formatting.",
+    "metaTitle": "Meta title",
+    "metaDesc": "Meta description",
+    "submitCreate": "Save draft",
+    "submitUpdate": "Save changes",
+    "submitting": "Saving…",
+    "cancel": "Cancel",
+    "locale": {
+      "id": "Indonesian",
+      "en": "English",
+      "ar": "Arabic"
+    },
+    "unavailable": {
+      "title": "This page cannot be loaded",
+      "description": "It was not found or is temporarily unavailable."
+    },
+    "error": {
+      "SESSION_INVALID": "Your session has ended. Please sign in again and retry.",
+      "CSRF_INVALID": "The request could not be verified. Reload the page and try again.",
+      "REQUEST_INVALID": "The request could not be processed. Check your entries and try again.",
+      "VALIDATION_FAILED": "Some entries need attention. Check the highlighted fields.",
+      "NOT_FOUND": "This page was not found or is temporarily unavailable.",
+      "VERSION_CONFLICT": "Someone else changed this page. Reload the page to see the latest version before saving.",
+      "INVALID_STATE": "This action is not allowed for the page's current status.",
+      "SLUG_CONFLICT": "That slug is already used by another page. Choose a different one.",
+      "HIERARCHY_CYCLE": "The selected parent creates a hierarchy cycle. Choose another parent.",
+      "MEDIA_INVALID": "The linked media is not valid.",
+      "PARENT_INVALID": "The selected parent is invalid or not found.",
+      "UNAVAILABLE": "Your changes could not be saved right now. Please try again shortly."
+    }
+  },
+  "AdminPagePublication": {
+    "title": "Publication status",
+    "currentLabel": "Current:",
+    "state": {
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published",
+      "ARCHIVED": "Archived"
+    },
+    "action": {
+      "PUBLISH_NOW": "Publish now",
+      "RETURN_TO_DRAFT": "Return to draft",
+      "ARCHIVE": "Archive"
+    },
+    "error": {
+      "SESSION_INVALID": "Your session has ended. Please sign in again and retry.",
+      "CSRF_INVALID": "The request could not be verified. Reload the page and try again.",
+      "REQUEST_INVALID": "The request could not be processed. Check your entries and try again.",
+      "VALIDATION_FAILED": "Some entries need attention. Check the highlighted fields.",
+      "NOT_FOUND": "This page was not found or is temporarily unavailable.",
+      "VERSION_CONFLICT": "Someone else changed this page. Reload the page to see the latest version before saving.",
+      "INVALID_STATE": "This action is not allowed for the page's current status.",
+      "SLUG_CONFLICT": "That slug is already used by another page. Choose a different one.",
+      "HIERARCHY_CYCLE": "The selected parent creates a hierarchy cycle. Choose another parent.",
+      "MEDIA_INVALID": "The linked media is not valid.",
+      "PARENT_INVALID": "The selected parent is invalid or not found.",
+      "UNAVAILABLE": "Your changes could not be saved right now. Please try again shortly."
+    }
+  },
+  "AdminPageDelete": {
+    "title": "Delete page",
+    "description": "Deleting a page is permanent and cannot be undone.",
+    "action": "Delete page",
+    "confirmTitle": "Delete this page?",
+    "confirmDescription": "This action is permanent. The page and all its translations will be deleted.",
+    "cancel": "Cancel",
+    "confirmAction": "Yes, delete",
+    "error": {
+      "SESSION_INVALID": "Your session has ended. Please sign in again and retry.",
+      "CSRF_INVALID": "The request could not be verified. Reload the page and try again.",
+      "REQUEST_INVALID": "The request could not be processed. Check your entries and try again.",
+      "VALIDATION_FAILED": "Some entries need attention. Check the highlighted fields.",
+      "NOT_FOUND": "This page was not found or is temporarily unavailable.",
+      "VERSION_CONFLICT": "Someone else changed this page. Reload the page to see the latest version before saving.",
+      "INVALID_STATE": "This action is not allowed for the page's current status.",
+      "SLUG_CONFLICT": "That slug is already used by another page. Choose a different one.",
+      "HIERARCHY_CYCLE": "The selected parent creates a hierarchy cycle. Choose another parent.",
+      "MEDIA_INVALID": "The linked media is not valid.",
+      "PARENT_INVALID": "The selected parent is invalid or not found.",
+      "UNAVAILABLE": "Your changes could not be saved right now. Please try again shortly."
+    }
+  },
+  "AdminPageHeroPicker": {
+    "label": "Hero image",
+    "description": "Pick a hero image from the Media Library for this page.",
+    "none": "No hero image",
+    "selected": "Hero image selected",
+    "choose": "Pick hero image",
+    "change": "Change hero image",
+    "clear": "Remove hero image",
+    "listLabel": "Images for hero",
+    "selectLabel": "Pick {name} as hero image",
+    "loading": "Loading images…",
+    "loadError": "Failed to load images. Please try again.",
+    "empty": "No images in the Media Library yet."
+  },
+  "AdminPageRichText": {
+    "toolbarLabel": "Formatting tools",
+    "tool": {
+      "bold": "Bold",
+      "italic": "Italic",
+      "h2": "Heading 2",
+      "h3": "Heading 3",
+      "bulletList": "Bulleted list",
+      "orderedList": "Numbered list",
+      "blockquote": "Quote",
+      "code": "Code"
+    }
+  },
+  "AdminPageNavigation": {
+    "label": "Admin navigation",
+    "pages": "Pages"
+  },
+  "AdminPublicContent": {
+    "SERVICE": {
+      "metaTitle": "Services",
+      "title": "Services",
+      "description": "Manage public services. Filter, search, and update services displayed on the site."
+    },
+    "PARTNERSHIP": {
+      "metaTitle": "Partnerships",
+      "title": "Partnerships",
+      "description": "Manage partnership data. Filter, search, and update partnership records."
+    },
+    "SCHOLARSHIP": {
+      "metaTitle": "Scholarships",
+      "title": "Scholarships",
+      "description": "Manage scholarship information. Filter, search, and update scholarship data."
+    },
+    "ACHIEVEMENT": {
+      "metaTitle": "Achievements",
+      "title": "Achievements",
+      "description": "Manage student achievements. Filter, search, and update accomplishments."
+    },
+    "STUDENT_ACTIVITY": {
+      "metaTitle": "Student Activities",
+      "title": "Student Activities",
+      "description": "Manage student activities. Filter, search, and update activity records."
+    },
+    "DOCUMENT": {
+      "metaTitle": "Documents",
+      "title": "Documents",
+      "description": "Manage public documents. Filter, search, and update available documents."
+    },
+    "ALBUM": {
+      "metaTitle": "Albums",
+      "title": "Albums",
+      "description": "Manage photo albums. Filter, search, and update galleries."
+    },
+    "EVENT": {
+      "metaTitle": "Events",
+      "title": "Events",
+      "description": "Manage events. Filter, search, and update event schedules."
+    },
+    "FAQ": {
+      "metaTitle": "FAQ",
+      "title": "FAQ",
+      "description": "Manage frequently asked questions. Filter, search, and update answers."
+    },
+    "TESTIMONIAL": {
+      "metaTitle": "Testimonials",
+      "title": "Testimonials",
+      "description": "Manage alumni testimonials. Filter, search, and update testimonials."
+    },
+    "createAction": "Create",
+    "filterAriaLabel": "Filter by visibility",
+    "listAriaLabel": "Content list",
+    "searchPlaceholder": "Search title or slug…",
+    "searchAriaLabel": "Search content",
+    "searchAction": "Search",
+    "totalCount": "{count} items",
+    "visibility": {
+      "ALL": "All",
+      "PUBLIC": "Public",
+      "HIDDEN": "Hidden",
+      "EXPIRED": "Expired"
+    },
+    "locale": {
+      "id": "ID",
+      "en": "EN",
+      "ar": "AR"
+    },
+    "empty": {
+      "title": "No content yet",
+      "description": "Content will appear here once created."
+    },
+    "unavailable": {
+      "title": "Content list is unavailable",
+      "description": "Please reload this page in a moment."
+    },
+    "pagination": {
+      "ariaLabel": "Content list pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "pageStatus": "Page {page} of {totalPages}",
+      "goToPage": "Go to page {page}"
+    },
+    "edit": "Edit",
+    "editLabelFor": "Edit: {title}"
+  },
+  "AdminNavigation": {
+    "label": "Admin Navigation",
+    "pages": "Pages",
+    "services": "Services",
+    "partnerships": "Partnerships",
+    "scholarships": "Scholarships",
+    "achievements": "Achievements",
+    "activities": "Activities",
+    "documents": "Documents",
+    "albums": "Albums",
+    "events": "Events",
+    "faq": "FAQ",
+    "testimonials": "Testimonials"
+  },
+  "PublicContent": {
+    "readMore": "Read More",
+    "empty": {
+      "title": "No content available",
+      "layanan": "No services available yet.",
+      "kerjasama": "No partnerships available yet.",
+      "beasiswa": "No scholarship information available yet.",
+      "prestasi": "No achievement data available yet.",
+      "kegiatan": "No student activities available yet.",
+      "dokumen": "No documents available yet.",
+      "album": "No photo albums available yet.",
+      "agenda": "No events available yet.",
+      "faq": "No frequently asked questions available yet.",
+      "testimoni": "No testimonials available yet."
+    },
+    "unavailable": {
+      "title": "Content is currently unavailable",
+      "description": "Please reload this page in a moment."
+    },
+    "service": {
+      "listTitle": "Services",
+      "listDescription": "Services available at the Faculty of Ushuluddin and Islamic Thought."
+    },
+    "partnership": {
+      "listTitle": "Partnerships",
+      "listDescription": "FUSPI's partnership network."
+    },
+    "scholarship": {
+      "listTitle": "Scholarships",
+      "listDescription": "Scholarship information for FUSPI students."
+    },
+    "achievement": {
+      "listTitle": "Achievements",
+      "listDescription": "Student achievements at FUSPI."
+    },
+    "studentActivity": {
+      "listTitle": "Student Activities",
+      "listDescription": "Student activities at FUSPI."
+    },
+    "document": {
+      "listTitle": "Documents",
+      "listDescription": "Available documents and downloads."
+    },
+    "album": {
+      "listTitle": "Albums",
+      "listDescription": "FUSPI photo gallery."
+    },
+    "event": {
+      "listTitle": "Events",
+      "listDescription": "Upcoming events and schedules."
+    },
+    "faq": {
+      "listTitle": "FAQ",
+      "listDescription": "Frequently asked questions."
+    },
+    "testimonial": {
+      "listTitle": "Testimonials",
+      "listDescription": "Testimonials from alumni and students."
+    }
   }
 }

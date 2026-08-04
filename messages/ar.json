@@ -384,5 +384,347 @@
       "blockquote": "اقتباس",
       "code": "شفرة"
     }
+  },
+  "AdminPageList": {
+    "metaTitle": "الصفحات",
+    "title": "الصفحات",
+    "description": "إدارة الصفحات الثابتة للموقع. رتّب وصنّف وابحث للعثور على الصفحة المطلوبة.",
+    "filterAriaLabel": "تصفية الصفحات بحسب الحالة",
+    "sortAriaLabel": "الترتيب",
+    "listAriaLabel": "قائمة الصفحات",
+    "totalCount": "{count} صفحة",
+    "status": {
+      "all": "الكل",
+      "draft": "مسودة",
+      "published": "منشور",
+      "archived": "مؤرشف"
+    },
+    "state": {
+      "DRAFT": "مسودة",
+      "PUBLISHED": "منشور",
+      "ARCHIVED": "مؤرشف"
+    },
+    "sort": {
+      "updatedDesc": "الأحدث",
+      "titleAsc": "العنوان أ-ي"
+    },
+    "localesLabel": "اللغات: {locales}",
+    "parentLabel": "الأصل: {title}",
+    "childIndicator": "لها صفحات فرعية",
+    "orderLabel": "الترتيب {order}",
+    "updatedAtLabel": "حُدِّث في {instant}",
+    "searchPlaceholder": "ابحث بالعنوان أو المعرّف…",
+    "searchAriaLabel": "البحث في الصفحات",
+    "searchAction": "بحث",
+    "searchClear": "مسح",
+    "pagination": {
+      "ariaLabel": "تنقّل صفحات قائمة الصفحات",
+      "previous": "الصفحة السابقة",
+      "next": "الصفحة التالية",
+      "pageStatus": "صفحة {page} من {totalPages}",
+      "goToPage": "الانتقال إلى الصفحة {page}"
+    },
+    "empty": {
+      "title": "لا توجد صفحات بعد",
+      "description": "ستظهر الصفحات هنا بعد إنشائها."
+    },
+    "unavailable": {
+      "title": "تعذّر تحميل قائمة الصفحات الآن",
+      "description": "يرجى إعادة تحميل الصفحة بعد قليل."
+    },
+    "createAction": "إضافة صفحة",
+    "edit": "تحرير",
+    "editLabelFor": "تحرير الصفحة: {title}"
+  },
+  "AdminPageEditor": {
+    "createMetaTitle": "إضافة صفحة",
+    "createTitle": "إضافة صفحة",
+    "createDescription": "أدخل محتوى الصفحة بالإندونيسية. الترجمتان الإنجليزية والعربية اختياريتان. تُحفظ الصفحة كمسودة.",
+    "editMetaTitle": "تحرير الصفحة",
+    "editTitle": "تحرير الصفحة",
+    "editDescription": "حدّث محتوى الصفحة. لا تتغيّر حالة النشر من هذه الصفحة.",
+    "slug": "المعرّف",
+    "slugDescription": "مقطع الرابط، مثل profil-fuspi. استخدم حروفًا صغيرة وشرطات.",
+    "parentId": "الأصل",
+    "parentIdPlaceholder": "اتركه فارغًا إذا لم يكن هناك أصل",
+    "parentIdDescription": "معرّف الصفحة الأصل لبناء هيكل القائمة.",
+    "order": "الترتيب",
+    "translationsTitle": "المحتوى حسب اللغة",
+    "localeOptional": "(اختياري)",
+    "title": "العنوان",
+    "content": "المحتوى",
+    "contentDescription": "نص الصفحة. استخدم شريط الأدوات للتنسيق الأساسي.",
+    "metaTitle": "عنوان الميتا",
+    "metaDesc": "وصف الميتا",
+    "submitCreate": "حفظ المسودة",
+    "submitUpdate": "حفظ التغييرات",
+    "submitting": "جارٍ الحفظ…",
+    "cancel": "إلغاء",
+    "locale": {
+      "id": "الإندونيسية",
+      "en": "الإنجليزية",
+      "ar": "العربية"
+    },
+    "unavailable": {
+      "title": "تعذّر تحميل هذه الصفحة",
+      "description": "لم يُعثر عليها أو أنها غير متاحة مؤقتًا."
+    },
+    "error": {
+      "SESSION_INVALID": "انتهت جلستك. يرجى تسجيل الدخول مجددًا ثم المحاولة.",
+      "CSRF_INVALID": "تعذّر التحقق من الطلب. أعد تحميل الصفحة ثم حاول مرة أخرى.",
+      "REQUEST_INVALID": "تعذّرت معالجة الطلب. تحقّق من مدخلاتك ثم حاول مجددًا.",
+      "VALIDATION_FAILED": "بعض الحقول تحتاج إلى مراجعة. تحقّق من الحقول المُعلَّمة.",
+      "NOT_FOUND": "لم يتم العثور على هذه الصفحة أو أنها غير متاحة مؤقتًا.",
+      "VERSION_CONFLICT": "عدّل شخص آخر هذه الصفحة. أعد تحميل الصفحة للاطلاع على أحدث نسخة قبل الحفظ.",
+      "INVALID_STATE": "هذا الإجراء غير متاح لحالة الصفحة الحالية.",
+      "SLUG_CONFLICT": "هذا المعرّف مستخدم في صفحة أخرى. اختر معرّفًا مختلفًا.",
+      "HIERARCHY_CYCLE": "الأصل المختار يشكّل دورة في الهيكل. اختر أصلًا آخر.",
+      "MEDIA_INVALID": "الوسائط المرتبطة غير صالحة.",
+      "PARENT_INVALID": "الأصل المختار غير صالح أو غير موجود.",
+      "UNAVAILABLE": "تعذّر حفظ التغييرات الآن. يرجى المحاولة بعد قليل."
+    }
+  },
+  "AdminPagePublication": {
+    "title": "حالة النشر",
+    "currentLabel": "الحالية:",
+    "state": {
+      "DRAFT": "مسودة",
+      "PUBLISHED": "منشور",
+      "ARCHIVED": "مؤرشف"
+    },
+    "action": {
+      "PUBLISH_NOW": "النشر الآن",
+      "RETURN_TO_DRAFT": "إعادة إلى المسودة",
+      "ARCHIVE": "أرشفة"
+    },
+    "error": {
+      "SESSION_INVALID": "انتهت جلستك. يرجى تسجيل الدخول مجددًا ثم المحاولة.",
+      "CSRF_INVALID": "تعذّر التحقق من الطلب. أعد تحميل الصفحة ثم حاول مرة أخرى.",
+      "REQUEST_INVALID": "تعذّرت معالجة الطلب. تحقّق من مدخلاتك ثم حاول مجددًا.",
+      "VALIDATION_FAILED": "بعض الحقول تحتاج إلى مراجعة. تحقّق من الحقول المُعلَّمة.",
+      "NOT_FOUND": "لم يتم العثور على هذه الصفحة أو أنها غير متاحة مؤقتًا.",
+      "VERSION_CONFLICT": "عدّل شخص آخر هذه الصفحة. أعد تحميل الصفحة للاطلاع على أحدث نسخة قبل الحفظ.",
+      "INVALID_STATE": "هذا الإجراء غير متاح لحالة الصفحة الحالية.",
+      "SLUG_CONFLICT": "هذا المعرّف مستخدم في صفحة أخرى. اختر معرّفًا مختلفًا.",
+      "HIERARCHY_CYCLE": "الأصل المختار يشكّل دورة في الهيكل. اختر أصلًا آخر.",
+      "MEDIA_INVALID": "الوسائط المرتبطة غير صالحة.",
+      "PARENT_INVALID": "الأصل المختار غير صالح أو غير موجود.",
+      "UNAVAILABLE": "تعذّر حفظ التغييرات الآن. يرجى المحاولة بعد قليل."
+    }
+  },
+  "AdminPageDelete": {
+    "title": "حذف الصفحة",
+    "description": "حذف الصفحة نهائي ولا يمكن التراجع عنه.",
+    "action": "حذف الصفحة",
+    "confirmTitle": "حذف هذه الصفحة؟",
+    "confirmDescription": "هذا الإجراء نهائي. ستحذف الصفحة وجميع ترجماتها.",
+    "cancel": "إلغاء",
+    "confirmAction": "نعم، احذف",
+    "error": {
+      "SESSION_INVALID": "انتهت جلستك. يرجى تسجيل الدخول مجددًا ثم المحاولة.",
+      "CSRF_INVALID": "تعذّر التحقق من الطلب. أعد تحميل الصفحة ثم حاول مرة أخرى.",
+      "REQUEST_INVALID": "تعذّرت معالجة الطلب. تحقّق من مدخلاتك ثم حاول مجددًا.",
+      "VALIDATION_FAILED": "بعض الحقول تحتاج إلى مراجعة. تحقّق من الحقول المُعلَّمة.",
+      "NOT_FOUND": "لم يتم العثور على هذه الصفحة أو أنها غير متاحة مؤقتًا.",
+      "VERSION_CONFLICT": "عدّل شخص آخر هذه الصفحة. أعد تحميل الصفحة للاطلاع على أحدث نسخة قبل الحفظ.",
+      "INVALID_STATE": "هذا الإجراء غير متاح لحالة الصفحة الحالية.",
+      "SLUG_CONFLICT": "هذا المعرّف مستخدم في صفحة أخرى. اختر معرّفًا مختلفًا.",
+      "HIERARCHY_CYCLE": "الأصل المختار يشكّل دورة في الهيكل. اختر أصلًا آخر.",
+      "MEDIA_INVALID": "الوسائط المرتبطة غير صالحة.",
+      "PARENT_INVALID": "الأصل المختار غير صالح أو غير موجود.",
+      "UNAVAILABLE": "تعذّر حفظ التغييرات الآن. يرجى المحاولة بعد قليل."
+    }
+  },
+  "AdminPageHeroPicker": {
+    "label": "صورة Hero",
+    "description": "اختر صورة Hero من مكتبة الوسائط لهذه الصفحة.",
+    "none": "لا توجد صورة Hero",
+    "selected": "تم اختيار صورة Hero",
+    "choose": "اختر صورة Hero",
+    "change": "غيّر صورة Hero",
+    "clear": "أزل صورة Hero",
+    "listLabel": "صور لـ Hero",
+    "selectLabel": "اختر {name} كصورة Hero",
+    "loading": "جارٍ تحميل الصور…",
+    "loadError": "فشل تحميل الصور. حاول مجددًا.",
+    "empty": "لا توجد صور في مكتبة الوسائط بعد."
+  },
+  "AdminPageRichText": {
+    "toolbarLabel": "أدوات التنسيق",
+    "tool": {
+      "bold": "غليظ",
+      "italic": "مائل",
+      "h2": "عنوان المستوى 2",
+      "h3": "عنوان المستوى 3",
+      "bulletList": "قائمة نقطية",
+      "orderedList": "قائمة مرقمة",
+      "blockquote": "اقتباس",
+      "code": "كود"
+    }
+  },
+  "AdminPageNavigation": {
+    "label": "تنقل الإدارة",
+    "pages": "الصفحات"
+  },
+  "AdminPublicContent": {
+    "SERVICE": {
+      "metaTitle": "الخدمات",
+      "title": "الخدمات",
+      "description": "إدارة الخدمات العامة. تصفية وبحث وتحديث الخدمات المعروضة على الموقع."
+    },
+    "PARTNERSHIP": {
+      "metaTitle": "التعاون",
+      "title": "التعاون",
+      "description": "إدارة بيانات التعاون. تصفية وبحث وتحديث سجلات التعاون."
+    },
+    "SCHOLARSHIP": {
+      "metaTitle": "المنح الدراسية",
+      "title": "المنح الدراسية",
+      "description": "إدارة معلومات المنح الدراسية. تصفية وبحث وتحديث بيانات المنح."
+    },
+    "ACHIEVEMENT": {
+      "metaTitle": "الإنجازات",
+      "title": "الإنجازات",
+      "description": "إدارة إنجازات الطلاب. تصفية وبحث وتحديث الإنجازات."
+    },
+    "STUDENT_ACTIVITY": {
+      "metaTitle": "أنشطة الطلاب",
+      "title": "أنشطة الطلاب",
+      "description": "إدارة أنشطة الطلاب. تصفية وبحث وتحديث سجلات الأنشطة."
+    },
+    "DOCUMENT": {
+      "metaTitle": "المستندات",
+      "title": "المستندات",
+      "description": "إدارة المستندات العامة. تصفية وبحث وتحديث المستندات المتاحة."
+    },
+    "ALBUM": {
+      "metaTitle": "الألبومات",
+      "title": "الألبومات",
+      "description": "إدارة ألبومات الصور. تصفية وبحث وتحديث المعارض."
+    },
+    "EVENT": {
+      "metaTitle": "الأحداث",
+      "title": "الأحداث",
+      "description": "إدارة الأحداث. تصفية وبحث وتحديث جداول الفعاليات."
+    },
+    "FAQ": {
+      "metaTitle": "الأسئلة الشائعة",
+      "title": "الأسئلة الشائعة",
+      "description": "إدارة الأسئلة الشائعة. تصفية وبحث وتحديث الإجابات."
+    },
+    "TESTIMONIAL": {
+      "metaTitle": "الشهادات",
+      "title": "الشهادات",
+      "description": "إدارة شهادات الخريجين. تصفية وبحث وتحديث الشهادات."
+    },
+    "createAction": "إضافة",
+    "filterAriaLabel": "تصفية حسب حالة الظهور",
+    "listAriaLabel": "قائمة المحتوى",
+    "searchPlaceholder": "بحث عن عنوان أو slug…",
+    "searchAriaLabel": "بحث عن محتوى",
+    "searchAction": "بحث",
+    "totalCount": "{count} عنصر",
+    "visibility": {
+      "ALL": "الكل",
+      "PUBLIC": "عام",
+      "HIDDEN": "مخفي",
+      "EXPIRED": "منتهي"
+    },
+    "locale": {
+      "id": "ID",
+      "en": "EN",
+      "ar": "AR"
+    },
+    "empty": {
+      "title": "لا يوجد محتوى بعد",
+      "description": "سيظهر المحتوى هنا بعد إنشائه."
+    },
+    "unavailable": {
+      "title": "قائمة المحتوى غير متاحة",
+      "description": "يرجى إعادة تحميل هذه الصفحة بعد قليل."
+    },
+    "pagination": {
+      "ariaLabel": "التنقل بين صفحات القائمة",
+      "previous": "الصفحة السابقة",
+      "next": "الصفحة التالية",
+      "pageStatus": "صفحة {page} من {totalPages}",
+      "goToPage": "الانتقال إلى صفحة {page}"
+    },
+    "edit": "تعديل",
+    "editLabelFor": "تعديل: {title}"
+  },
+  "AdminNavigation": {
+    "label": "قائمة الإدارة",
+    "pages": "الصفحات",
+    "services": "الخدمات",
+    "partnerships": "التعاون",
+    "scholarships": "المنح",
+    "achievements": "الإنجازات",
+    "activities": "الأنشطة",
+    "documents": "المستندات",
+    "albums": "الألبومات",
+    "events": "الفعاليات",
+    "faq": "الأسئلة",
+    "testimonials": "الشهادات"
+  },
+  "PublicContent": {
+    "readMore": "اقرأ المزيد",
+    "empty": {
+      "title": "لا يوجد محتوى",
+      "layanan": "لا توجد خدمات متاحة بعد.",
+      "kerjasama": "لا يوجد تعاون متاح بعد.",
+      "beasiswa": "لا توجد معلومات منح متاحة بعد.",
+      "prestasi": "لا توجد بيانات إنجازات متاحة بعد.",
+      "kegiatan": "لا توجد أنشطة طلابية متاحة بعد.",
+      "dokumen": "لا توجد مستندات متاحة بعد.",
+      "album": "لا توجد ألبومات صور متاحة بعد.",
+      "agenda": "لا توجد فعاليات متاحة بعد.",
+      "faq": "لا توجد أسئلة متاحة بعد.",
+      "testimoni": "لا توجد شهادات متاحة بعد."
+    },
+    "unavailable": {
+      "title": "المحتوى غير متاح حالياً",
+      "description": "يرجى إعادة تحميل هذه الصفحة بعد قليل."
+    },
+    "service": {
+      "listTitle": "الخدمات",
+      "listDescription": "الخدمات المتاحة في كلية أصول الدين والفكر الإسلامي."
+    },
+    "partnership": {
+      "listTitle": "التعاون",
+      "listDescription": "شبكة تعاون كلية أصول الدين والفكر الإسلامي."
+    },
+    "scholarship": {
+      "listTitle": "المنح الدراسية",
+      "listDescription": "معلومات المنح لطلاب الكلية."
+    },
+    "achievement": {
+      "listTitle": "الإنجازات",
+      "listDescription": "إنجازات طلاب الكلية."
+    },
+    "studentActivity": {
+      "listTitle": "الأنشطة الطلابية",
+      "listDescription": "الأنشطة الطلابية في الكلية."
+    },
+    "document": {
+      "listTitle": "المستندات",
+      "listDescription": "المستندات والتحميلات المتاحة."
+    },
+    "album": {
+      "listTitle": "الألبومات",
+      "listDescription": "معرض صور الكلية."
+    },
+    "event": {
+      "listTitle": "الفعاليات",
+      "listDescription": "الفعاليات والمواعيد القادمة."
+    },
+    "faq": {
+      "listTitle": "الأسئلة الشائعة",
+      "listDescription": "الأسئلة المتكررة."
+    },
+    "testimonial": {
+      "listTitle": "الشهادات",
+      "listDescription": "شهادات من الخريجين والطلاب."
+    }
   }
 }

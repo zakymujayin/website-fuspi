@@ -2,6 +2,7 @@ import { Amiri, IBM_Plex_Sans_Arabic, Inter, Plus_Jakarta_Sans } from "next/font
 import { setRequestLocale } from "next-intl/server";
 
 import { SkipLink } from "@/components/public/skip-link";
+import { AdminNav } from "@/components/admin/admin-nav";
 
 const display = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -37,6 +38,7 @@ export default async function AdminLayout({
     <div className={`${FONT_VARIABLES} public-shell min-h-screen bg-background`}>
       <SkipLink />
       <main id="main" tabIndex={-1} className="mx-auto w-full max-w-5xl px-4 py-12 outline-none sm:px-6">
+        <AdminNav locale={locale} />
         {children}
       </main>
     </div>
