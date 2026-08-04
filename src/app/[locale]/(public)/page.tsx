@@ -1,4 +1,4 @@
-import {getFormatter, getTranslations, setRequestLocale} from "next-intl/server";
+import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {Container} from "@/components/ui/container";
 import {SectionHeading} from "@/components/public/section-heading";
