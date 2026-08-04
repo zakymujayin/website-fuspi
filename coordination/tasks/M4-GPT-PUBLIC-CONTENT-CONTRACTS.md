@@ -5,7 +5,7 @@ owner: gpt
 reviewer: backend-wave-review
 tester: gpt
 base_branch: integration/m4-features
-base_sha: 16ecd01adafca8b4bcab1bd4f638a5eebf7b04fd
+base_sha: e9cc83c2728457b043d0b42bb8c2040fbe945809
 allowed_paths:
   - "src/contracts/public-content.ts"
   - "tests/m4/contracts/public-content-contracts.test.ts"
@@ -53,7 +53,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-GPT-PUBLIC-CONTENT-CONTRACTS.md TASK_BASE=origin/integration/m4-features npm run check:scope"
 risk: high
 token_class: L
-status: ready
+status: active
 ---
 
 # Public content contracts
