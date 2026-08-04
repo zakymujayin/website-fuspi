@@ -725,6 +725,13 @@
     "testimonial": {
       "listTitle": "Testimonials",
       "listDescription": "Testimonials from alumni and students."
+    },
+    "pagination": {
+      "ariaLabel": "Page navigation",
+      "previous": "Previous",
+      "next": "Next",
+      "pageStatus": "Page {page} of {totalPages}",
+      "goToPage": "Go to page {page}"
     }
   }
 }

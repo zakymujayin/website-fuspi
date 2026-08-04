@@ -4,6 +4,8 @@ import React from "react";
 
 import {SectionHeading} from "@/components/public/section-heading";
 import {PublicContentCard, type PublicContentCardData} from "@/components/public/public-content-card";
+import {PublicContentPagination} from "@/components/admin/public-content/public-content-pagination";
+import {totalPagesFor} from "@/components/admin/public-content/public-content-query";
 import {PublicContentStateNotice} from "@/components/admin/public-content/public-content-state-notice";
 import {Container} from "@/components/ui/container";
 import type {PublicContentResource} from "@/contracts/public-content";
@@ -105,6 +107,25 @@ export async function PublicContentListPage({config, params, searchParams}: Publ
           </div>
         )}
       </div>
+
+      {result.ok && result.items.length > 0 ? (
+        <PublicContentPagination
+          current={page}
+          totalPages={totalPagesFor(result.page.total, PAGE_SIZE)}
+          buildHref={(targetPage) => {
+            const s = PUBLIC_CONTENT_SLUG_MAP[config.resource];
+            return targetPage > 1 ? `/${s}?page=${targetPage}` : `/${s}`;
+          }}
+          ariaLabel={t("pagination.ariaLabel")}
+          previousLabel={t("pagination.previous")}
+          nextLabel={t("pagination.next")}
+          pageStatusLabel={t("pagination.pageStatus", {
+            page: result.page.page,
+            totalPages: totalPagesFor(result.page.total, PAGE_SIZE),
+          })}
+          goToPageLabel={(targetPage) => t("pagination.goToPage", {page: targetPage})}
+        />
+      ) : null}
     </Container>
   );
 }

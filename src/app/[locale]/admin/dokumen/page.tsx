@@ -5,7 +5,8 @@ import { redirect } from "next/navigation";
 
 import { Link } from "@/i18n/navigation";
 
-import { listPublicContentAdminAction } from "@/components/admin/public-content/public-content-server-actions";
+import { listPublicContentAdmin } from "@/features/public-content/admin-query";
+import { getPrismaClient } from "@/lib/db/client";
 import { normalizePublicContentAdminQuery, toPublicContentAdminTransportQuery } from "@/components/admin/public-content/public-content-query";
 import { PublicContentStateNotice } from "@/components/admin/public-content/public-content-state-notice";
 import { PublicContentPagination } from "@/components/admin/public-content/public-content-pagination";
@@ -41,7 +42,7 @@ export default async function AdminPublicContentPage({ params, searchParams }: P
 
   const t = await getTranslations("AdminPublicContent");
 
-  const result = await listPublicContentAdminAction(toPublicContentAdminTransportQuery(query));
+  const result = await listPublicContentAdmin(getPrismaClient(), session.ok ? session.session : null, toPublicContentAdminTransportQuery(query));
 
   const visibilityOptions = ["ALL", "PUBLIC", "HIDDEN", "EXPIRED"] as const;
 

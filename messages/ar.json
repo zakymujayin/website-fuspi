@@ -725,6 +725,13 @@
     "testimonial": {
       "listTitle": "الشهادات",
       "listDescription": "شهادات من الخريجين والطلاب."
+    },
+    "pagination": {
+      "ariaLabel": "تصفح الصفحات",
+      "previous": "السابق",
+      "next": "التالي",
+      "pageStatus": "صفحة {page} من {totalPages}",
+      "goToPage": "انتقل إلى صفحة {page}"
     }
   }
 }

@@ -725,6 +725,13 @@
     "testimonial": {
       "listTitle": "Testimoni",
       "listDescription": "Testimoni dari alumni dan mahasiswa."
+    },
+    "pagination": {
+      "ariaLabel": "Navigasi halaman",
+      "previous": "Sebelumnya",
+      "next": "Berikutnya",
+      "pageStatus": "Halaman {page} dari {totalPages}",
+      "goToPage": "Ke halaman {page}"
     }
   }
 }
