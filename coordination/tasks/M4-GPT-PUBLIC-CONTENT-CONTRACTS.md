@@ -39,6 +39,7 @@ readonly_paths:
   - "src/contracts/media.ts"
 depends_on:
   - M4-GPT-ACADEMIC-PUBLIC-DETAIL-RUNTIME
+  - M4-GPT-PUBLIC-CONTENT-SCHEMA-CORRECTION
 contracts:
   - src/contracts/cms.ts
   - src/contracts/media.ts
@@ -52,7 +53,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-GPT-PUBLIC-CONTENT-CONTRACTS.md TASK_BASE=origin/integration/m4-features npm run check:scope"
 risk: high
 token_class: L
-status: active
+status: ready
 ---
 
 # Public content contracts
