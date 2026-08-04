@@ -113,6 +113,44 @@ hold any public-shell or Page-domain path.
 - The Page-domain lease is released. Page admin transport/UI and public Page
   rendering remain later bounded tasks; `main` remains unchanged.
 
+### M4-GPT-PAGE-ADMIN-TRANSPORT-CONTRACT
+
+- Accepted implementation head: `35595759ca8738b174ec4f6c6c003c7ba2f4b2ff`;
+  handoff tip: `5396c762fa73b49c07d69606dc6f1fb8200846a4`.
+- DeepSeek independently reviewed the contract and returned **APPROVE** with no
+  Critical, High, or Medium finding. Review branch tip:
+  `ff0b7a5f9719264262226d8135ff6091a3690649`.
+- DeepSeek's synchronized worktree still reported global generated-client
+  failures outside the candidate diff. The coordinator adjudicated those as
+  environment-only because a fresh run on the exact candidate passed focused
+  10/10, full unit 824/824, lint, typecheck, Prisma validation, and production
+  build 34/34. No further review cycle is required for this candidate.
+- Integration merge: `7d839dc` (`Merge M4 GPT Page admin transport contract`).
+- The contract and review leases are released. Page runtime/API may now depend
+  on this boundary; `main` remains unchanged.
+
+## Delivery-mode amendment — 2026-08-04
+
+At the human owner's direction, M4 now uses two primary delivery lanes to
+prioritize a demonstrable product over per-microtask review overhead:
+
+- GPT owns backend contracts, domain/runtime integration, APIs, security,
+  database work, CI, and deployment preparation.
+- Claude owns admin/public UI, responsive behavior, ID/EN/AR and RTL,
+  accessibility, and visual delivery against frozen backend boundaries.
+- DeepSeek is no longer on the critical delivery path and is used only for
+  optional regression or milestone review.
+- Cross-model review is batched at a feature-wave or milestone boundary rather
+  than required for every small commit. Automated lint, typecheck, unit,
+  integration, build, scope, and relevant security tests remain continuous.
+- Auth, PPKS/privacy, private storage, and booking concurrency retain immediate
+  adversarial verification and cannot defer their safety evidence to the final
+  review.
+
+Task manifests, non-overlapping leases, model-specific worktrees, the serial
+integration branch, and human-only authorization for merging M4 to `main`
+remain mandatory.
+
 ## Merge and dependency policy
 
 1. Every writer starts from `origin/integration/m4-features`, verifies the

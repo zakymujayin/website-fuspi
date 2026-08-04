@@ -55,7 +55,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-DEEPSEEK-PAGE-ADMIN-TRANSPORT-CONTRACT-REVIEW.md TASK_BASE=origin/coordination/m4-deepseek-page-admin-transport-contract-review-assignment npm run check:scope"
 risk: high
 token_class: M
-status: assigned
+status: merged
 ---
 
 # M4 DeepSeek independent Page admin transport contract review

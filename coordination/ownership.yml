@@ -46,15 +46,4 @@ ui_hotspots:
     - src/app/globals.css
     - src/components/ui/**
     - messages/**
-active_leases:
-  - task: M4-GPT-PAGE-ADMIN-TRANSPORT-CONTRACT
-    owner: gpt
-    paths:
-      - src/contracts/page-admin.ts
-      - tests/m4/contracts/page-admin-transport-contract.test.ts
-      - coordination/handoffs/M4-GPT-PAGE-ADMIN-TRANSPORT-CONTRACT-gpt.md
-  - task: M4-DEEPSEEK-PAGE-ADMIN-TRANSPORT-CONTRACT-REVIEW
-    owner: deepseek
-    paths:
-      - coordination/reviews/M4-GPT-PAGE-ADMIN-TRANSPORT-CONTRACT-deepseek.md
-      - coordination/handoffs/M4-DEEPSEEK-PAGE-ADMIN-TRANSPORT-CONTRACT-REVIEW-deepseek.md
+active_leases: []
