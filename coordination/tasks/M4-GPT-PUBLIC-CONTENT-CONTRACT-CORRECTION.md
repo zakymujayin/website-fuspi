@@ -41,7 +41,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-GPT-PUBLIC-CONTENT-CONTRACT-CORRECTION.md TASK_BASE=origin/integration/m4-features npm run check:scope"
 risk: medium
 token_class: S
-status: active
+status: merged
 ---
 
 # Public content delete version correction
