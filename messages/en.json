@@ -95,7 +95,8 @@
       "complaints": "Complaints",
       "pmb": "Admission",
       "agenda": "Events"
-    }
+    },
+    "home": "Home"
   },
   "Footer": {
     "quickLinks": "Quick Links",
@@ -109,7 +110,19 @@
   "StudyPrograms": {
     "title": "Study Programs",
     "description": "Five undergraduate programs at the Faculty of Ushuluddin and Islamic Thought, from Qur’an and hadith studies to Sufism and psychotherapy.",
-    "readMore": "Read more"
+    "readMore": "Read more",
+    "breadcrumbLabel": "Breadcrumb",
+    "aboutProgram": "About the Program",
+    "vision": "Vision",
+    "mission": "Mission",
+    "graduateProfile": "Graduate Profile",
+    "noContent": "Program detail content is not yet available. Please check back later.",
+    "quickFacts": "Quick Facts",
+    "programCode": "Program Code",
+    "degree": "Degree",
+    "moreInfo": "More Information",
+    "externalSite": "Official Program Website",
+    "accreditation": "Accreditation"
   },
   "Post": {
     "breadcrumbHome": "Home",

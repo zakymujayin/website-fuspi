@@ -95,7 +95,8 @@
       "complaints": "Pengaduan",
       "pmb": "PMB",
       "agenda": "Agenda"
-    }
+    },
+    "home": "Beranda"
   },
   "Footer": {
     "quickLinks": "Tautan Cepat",
@@ -109,7 +110,19 @@
   "StudyPrograms": {
     "title": "Program Studi",
     "description": "Lima program studi sarjana di Fakultas Ushuluddin dan Pemikiran Islam, dari kajian Al-Qur’an dan hadis hingga tasawuf dan psikoterapi.",
-    "readMore": "Selengkapnya"
+    "readMore": "Selengkapnya",
+    "breadcrumbLabel": "Breadcrumb",
+    "aboutProgram": "Tentang Program Studi",
+    "vision": "Visi",
+    "mission": "Misi",
+    "graduateProfile": "Profil Lulusan",
+    "noContent": "Konten detail program studi belum tersedia. Silakan kunjungi kembali nanti.",
+    "quickFacts": "Informasi Singkat",
+    "programCode": "Kode Prodi",
+    "degree": "Gelar",
+    "moreInfo": "Informasi Lanjut",
+    "externalSite": "Website Resmi Prodi",
+    "accreditation": "Akreditasi"
   },
   "Post": {
     "breadcrumbHome": "Beranda",
