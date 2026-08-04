@@ -68,7 +68,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-GPT-BACKEND-V1-INVENTORY.md TASK_BASE=origin/integration/m4-features npm run check:scope"
 risk: medium
 token_class: L
-status: active
+status: merged
 ---
 
 # M4 GPT backend v1 inventory
