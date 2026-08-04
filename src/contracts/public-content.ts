@@ -231,7 +231,10 @@ const updateCommands = inputByResource.map(([resource, payload]) => z.object({
 export const PublicContentAdminCommandSchema = z.union([
   ...createCommands,
   ...updateCommands,
-  z.object({action: z.literal("DELETE"), resource: PublicContentResourceSchema, id: CmsIdentifierSchema}).strict(),
+  z.object({
+    action: z.literal("DELETE"), resource: PublicContentResourceSchema, id: CmsIdentifierSchema,
+    expectedVersion: z.number().int().positive().nullable(),
+  }).strict(),
   z.object({
     action: z.literal("REORDER"),
     resource: z.enum(["SERVICE", "PARTNERSHIP", "FAQ", "TESTIMONIAL"]),
