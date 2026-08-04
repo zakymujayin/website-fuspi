@@ -985,6 +985,7 @@ model ActivityImage {
   id                String          @id @default(cuid())
   studentActivityId String
   mediaId           String
+  caption           String?
   order             Int             @default(0)
   activity          StudentActivity @relation(fields: [studentActivityId], references: [id], onDelete: Cascade)
   media             Media           @relation("ActivityImageMedia", fields: [mediaId], references: [id], onDelete: Restrict)
