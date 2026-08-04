@@ -89,6 +89,12 @@
       "AFI": "Islamic Theology and Philosophy",
       "SAA": "Religious Studies",
       "TASPI": "Sufism and Psychotherapy"
+    },
+    "quick": {
+      "services": "Services",
+      "complaints": "Complaints",
+      "pmb": "Admission",
+      "agenda": "Events"
     }
   },
   "Footer": {
@@ -733,5 +739,21 @@
       "pageStatus": "Page {page} of {totalPages}",
       "goToPage": "Go to page {page}"
     }
+  },
+  "Home": {
+    "heroTitle": "Faculty of Ushuluddin and Islamic Thought",
+    "heroSubtitle": "Developing Quranic studies, hadith, aqidah, Islamic philosophy, religious studies, and Sufism & psychotherapy in a credible and authoritative academic environment.",
+    "heroCtaPrimary": "Faculty Profile",
+    "heroCtaSecondary": "Study Programs",
+    "quickLinksLabel": "Quick access",
+    "newsTitle": "Latest News",
+    "viewAll": "View all",
+    "readMore": "Read more",
+    "servicesTitle": "Services",
+    "servicesDescription": "Academic, general, laboratory, and complaint services information for the academic community.",
+    "partnersTitle": "Partnerships",
+    "footerCtaTitle": "Ready to join us?",
+    "footerCtaDescription": "Get to know FUSPI better and find a study program that matches your interests and talents.",
+    "footerCtaButton": "Contact Us"
   }
 }

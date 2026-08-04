@@ -89,6 +89,12 @@
       "AFI": "Aqidah dan Filsafat Islam",
       "SAA": "Studi Agama-Agama",
       "TASPI": "Tasawuf dan Psikoterapi"
+    },
+    "quick": {
+      "services": "Layanan",
+      "complaints": "Pengaduan",
+      "pmb": "PMB",
+      "agenda": "Agenda"
     }
   },
   "Footer": {
@@ -733,5 +739,21 @@
       "pageStatus": "Halaman {page} dari {totalPages}",
       "goToPage": "Ke halaman {page}"
     }
+  },
+  "Home": {
+    "heroTitle": "Fakultas Ushuluddin dan Pemikiran Islam",
+    "heroSubtitle": "Mengembangkan kajian Al-Qur'an, hadis, aqidah, filsafat Islam, studi agama-agama, serta tasawuf dan psikoterapi dalam lingkungan akademik yang kredibel dan berwibawa.",
+    "heroCtaPrimary": "Profil Fakultas",
+    "heroCtaSecondary": "Program Studi",
+    "quickLinksLabel": "Akses cepat",
+    "newsTitle": "Berita Terbaru",
+    "viewAll": "Lihat semuanya",
+    "readMore": "Selengkapnya",
+    "servicesTitle": "Layanan",
+    "servicesDescription": "Informasi layanan akademik, umum, laboratorium, dan pengaduan untuk sivitas akademika.",
+    "partnersTitle": "Kerja Sama",
+    "footerCtaTitle": "Siap bergabung bersama kami?",
+    "footerCtaDescription": "Kenali lebih dekat FUSPI dan temukan program studi yang sesuai dengan minat dan bakat Anda.",
+    "footerCtaButton": "Hubungi Kami"
   }
 }
