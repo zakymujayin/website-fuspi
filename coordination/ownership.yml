@@ -47,15 +47,6 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
-  - task: M4-GPT-ACADEMIC-CONTENT-RUNTIME
-    owner: gpt
-    paths:
-      - src/features/academic/content.ts
-      - src/app/api/admin/academic/content/route.ts
-      - tests/m4/runtime/academic-content.test.ts
-      - tests/m4/runtime/academic-content.integration.test.ts
-      - tests/security/academic-content-adversarial.integration.test.ts
-      - coordination/handoffs/M4-GPT-ACADEMIC-CONTENT-RUNTIME-gpt.md
   - task: M4-CLAUDE-PAGE-ADMIN-UI
     owner: claude
     paths:
