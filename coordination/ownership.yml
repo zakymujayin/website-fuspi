@@ -47,6 +47,12 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
+  - task: M4-GPT-ACADEMIC-EDITOR-IMPORT-CONTRACTS
+    owner: gpt
+    paths:
+      - src/contracts/academic-editor.ts
+      - tests/m4/contracts/academic-editor-contracts.test.ts
+      - coordination/handoffs/M4-GPT-ACADEMIC-EDITOR-IMPORT-CONTRACTS-gpt.md
   - task: M4-CLAUDE-PAGE-ADMIN-UI
     owner: claude
     paths:
