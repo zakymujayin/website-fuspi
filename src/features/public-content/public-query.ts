@@ -53,15 +53,17 @@ export async function getPublicContentDetail(
       const websiteUrl = row.websiteUrl === null ? null : configuredLink(row.websiteUrl);
       const legacy = row.documentUrl === null ? null : configuredLink(row.documentUrl);
       const document = documentView(row.document, locale, uploadBase);
+      const logo = mediaView(row.logoMedia, uploadBase);
       if (
         !translation || websiteUrl === undefined || legacy === undefined || (row.document && !document)
+        || (row.logoMedia && !logo)
         || (row.websiteUrl !== null && websiteUrl?.kind !== "EXTERNAL")
         || (row.documentUrl !== null && legacy?.kind !== "EXTERNAL")
       ) return {ok: false, code: "NOT_FOUND"};
       detail = {id: row.id, resource: "PARTNERSHIP", slug: row.slug, partnerName: row.partnerName,
         level: row.level, country: row.country, startDate: safeDate(row.startDate), endDate: safeDate(row.endDate),
         websiteUrl: websiteUrl?.kind === "EXTERNAL" ? websiteUrl.href : null,
-        logo: mediaView(row.logoMedia, uploadBase), evidence: document ? {kind: "DOCUMENT", document}
+        logo, evidence: document ? {kind: "DOCUMENT", document}
           : legacy?.kind === "EXTERNAL" ? {kind: "EXTERNAL", url: legacy.href} : null, order: row.order,
         translation: {...resolution(locale, translation.locale), category: translation.category, description: rich(translation.description)}};
     } else if (query.resource === "SCHOLARSHIP") {
@@ -82,9 +84,10 @@ export async function getPublicContentDetail(
         translations: {where: localeFilter}, imageMedia: {select: MEDIA_SELECT},
       }});
       if (!row) return {ok: false, code: "NOT_FOUND"}; const translation = resolve(row.translations, locale);
-      if (!translation) return {ok: false, code: "NOT_FOUND"};
+      const image = mediaView(row.imageMedia, uploadBase);
+      if (!translation || (row.imageMedia && !image)) return {ok: false, code: "NOT_FOUND"};
       detail = {id: row.id, resource: "ACHIEVEMENT", slug: row.slug, studentName: row.studentName,
-        level: row.level, achievedAt: safeDate(row.achievedAt), image: mediaView(row.imageMedia, uploadBase),
+        level: row.level, achievedAt: safeDate(row.achievedAt), image,
         translation: {...resolution(locale, translation.locale), title: translation.title, description: rich(translation.description)}};
     } else if (query.resource === "STUDENT_ACTIVITY") {
       const row = await prisma.studentActivity.findFirst({where: {slug: query.slug, translations: {some: localeFilter}}, include: {
@@ -92,7 +95,8 @@ export async function getPublicContentDetail(
       }});
       if (!row) return {ok: false, code: "NOT_FOUND"}; const translation = resolve(row.translations, locale);
       if (!translation) return {ok: false, code: "NOT_FOUND"};
-      const images = row.images.flatMap(({media, caption, order}) => {const view = mediaView(media, uploadBase); return view ? [{media: view, caption, order}] : [];});
+      const images = row.images.map(({media, caption, order}) => {const view = mediaView(media, uploadBase); return view ? {media: view, caption, order} : null;});
+      if (images.some((image) => !image)) return {ok: false, code: "NOT_FOUND"};
       detail = {id: row.id, resource: "STUDENT_ACTIVITY", slug: row.slug, date: safeDate(row.date), images,
         translation: {...resolution(locale, translation.locale), title: translation.title, description: rich(translation.description)}};
     } else if (query.resource === "DOCUMENT") {
@@ -108,9 +112,11 @@ export async function getPublicContentDetail(
       }});
       if (!row) return {ok: false, code: "NOT_FOUND"}; const translation = resolve(row.translations, locale);
       if (!translation) return {ok: false, code: "NOT_FOUND"};
-      const photos = row.photos.flatMap(({media, caption, order}) => {const view = mediaView(media, uploadBase); return view ? [{media: view, caption, order}] : [];});
+      const cover = mediaView(row.coverMedia, uploadBase);
+      const photos = row.photos.map(({media, caption, order}) => {const view = mediaView(media, uploadBase); return view ? {media: view, caption, order} : null;});
+      if ((row.coverMedia && !cover) || photos.some((photo) => !photo)) return {ok: false, code: "NOT_FOUND"};
       detail = {id: row.id, resource: "ALBUM", slug: row.slug, eventDate: safeDate(row.eventDate),
-        cover: mediaView(row.coverMedia, uploadBase), photos,
+        cover, photos,
         translation: {...resolution(locale, translation.locale), title: translation.title, description: rich(translation.description)}};
     } else if (query.resource === "EVENT") {
       const row = await prisma.event.findFirst({where: {
@@ -137,9 +143,10 @@ export async function getPublicContentDetail(
         id: query.id, isVisible: true, publicationConsentAt: {lte: now}, translations: {some: localeFilter},
       }, include: {translations: {where: localeFilter}, photoMedia: {select: MEDIA_SELECT}}});
       if (!row) return {ok: false, code: "NOT_FOUND"}; const translation = resolve(row.translations, locale);
-      if (!translation) return {ok: false, code: "NOT_FOUND"};
+      const photo = mediaView(row.photoMedia, uploadBase);
+      if (!translation || (row.photoMedia && !photo)) return {ok: false, code: "NOT_FOUND"};
       detail = {id: row.id, resource: "TESTIMONIAL", name: row.name, graduationYear: row.graduationYear,
-        photo: mediaView(row.photoMedia, uploadBase), order: row.order,
+        photo, order: row.order,
         translation: {...resolution(locale, translation.locale), currentRole: translation.currentRole, quote: rich(translation.quote)}};
     }
     const result = PublicContentDetailResultSchema.safeParse({ok: true, data: detail});

@@ -32,7 +32,7 @@ function summary(value: {
 
 function governanceFilter(query: {visibility: string}, now: Date) {
   return query.visibility === "EXPIRED" ? {expiresAt: {lte: now}}
-    : query.visibility === "PUBLIC" ? {OR: [{expiresAt: null}, {expiresAt: {gt: now}}]}
+    : query.visibility === "PUBLIC" || query.visibility === "HIDDEN" ? {OR: [{expiresAt: null}, {expiresAt: {gt: now}}]}
     : {};
 }
 
@@ -76,7 +76,9 @@ export async function listPublicContentAdmin(
         isPublic: row.isActive, expired: false, order: row.order, version: null, translations: row.translations, governance: null}));
     } else if (query.resource === "SCHOLARSHIP") {
       const where: Prisma.ScholarshipWhereInput = {...status,
-        ...(query.visibility === "PUBLIC" ? {isActive: true, OR: [{endDate: null}, {endDate: {gte: now}}]} : query.visibility === "HIDDEN" ? {isActive: false} : query.visibility === "EXPIRED" ? {endDate: {lt: now}} : {}),
+        ...(query.visibility === "PUBLIC" ? {isActive: true, OR: [{endDate: null}, {endDate: {gte: now}}]}
+          : query.visibility === "HIDDEN" ? {isActive: false, OR: [{endDate: null}, {endDate: {gte: now}}]}
+          : query.visibility === "EXPIRED" ? {endDate: {lt: now}} : {}),
         ...(query.year ? {endDate: {gte: new Date(`${query.year}-01-01T00:00:00.000Z`), lt: new Date(`${query.year + 1}-01-01T00:00:00.000Z`)}} : {}),
         ...(query.search ? {translations: {some: {title: {contains: query.search, mode: "insensitive"}}}} : {})};
       const result = await prisma.$transaction([prisma.scholarship.findMany({where, ...pagination, orderBy: [{endDate: direction}, {id: "asc"}], include: {translations: true}}), prisma.scholarship.count({where})]);
@@ -136,7 +138,9 @@ export async function listPublicContentAdmin(
         expired: isExpired(row.expiresAt, now), order: row.order, version: row.version, translations: row.translations, governance: governance(row)}));
     } else {
       const where: Prisma.TestimonialWhereInput = {...status,
-        ...(query.visibility === "PUBLIC" ? {isVisible: true, publicationConsentAt: {lte: now}} : query.visibility === "HIDDEN" ? {isVisible: false} : query.visibility === "EXPIRED" ? {id: "__no_match__"} : {}),
+        ...(query.visibility === "PUBLIC" ? {isVisible: true, publicationConsentAt: {lte: now}}
+          : query.visibility === "HIDDEN" ? {OR: [{isVisible: false}, {publicationConsentAt: null}, {publicationConsentAt: {gt: now}}]}
+          : query.visibility === "EXPIRED" ? {id: "__no_match__"} : {}),
         ...(query.year ? {graduationYear: query.year} : {}),
         ...(query.search ? {OR: [{name: {contains: query.search, mode: "insensitive"}}, {translations: {some: {currentRole: {contains: query.search, mode: "insensitive"}}}}]} : {})};
       const result = await prisma.$transaction([prisma.testimonial.findMany({where, ...pagination, orderBy: [{order: direction}, {id: "asc"}], include: {translations: true}}), prisma.testimonial.count({where})]);

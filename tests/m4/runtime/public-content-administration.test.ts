@@ -77,4 +77,25 @@ describe("public content ADMIN command boundary", () => {
     expect(result).toEqual({ok: false, code: "UNAVAILABLE"});
     expect(JSON.stringify(result)).not.toContain("postgresql");
   });
+
+  it("reports only actual slug uniqueness errors as SLUG_CONFLICT", async () => {
+    const command = {action: "CREATE", resource: "SERVICE", payload: serviceInput};
+    const slugDatabase = {$transaction: vi.fn().mockRejectedValue({code: "P2002", meta: {target: ["slug"]}})} as unknown as PublicContentDatabase;
+    const translationDatabase = {$transaction: vi.fn().mockRejectedValue({code: "P2002", meta: {target: ["serviceId", "locale"]}})} as unknown as PublicContentDatabase;
+    expect(await executePublicContentCommand(slugDatabase, actor, command, now)).toEqual({ok: false, code: "SLUG_CONFLICT"});
+    expect(await executePublicContentCommand(translationDatabase, actor, command, now)).toEqual({ok: false, code: "UNAVAILABLE"});
+  });
+
+  it("preflights every reorder ID before changing any row", async () => {
+    const tx = {service: {
+      count: vi.fn().mockResolvedValue(1), update: vi.fn(),
+    }};
+    const database = {$transaction: vi.fn(async (callback: (value: typeof tx) => unknown) => callback(tx))} as unknown as PublicContentDatabase;
+    expect(await executePublicContentCommand(database, actor, {
+      action: "REORDER", resource: "SERVICE", payload: {items: [
+        {id: "service-1", position: 0}, {id: "service-missing", position: 1},
+      ]},
+    }, now)).toEqual({ok: false, code: "NOT_FOUND"});
+    expect(tx.service.update).not.toHaveBeenCalled();
+  });
 });

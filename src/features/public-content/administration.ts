@@ -53,6 +53,12 @@ const RICH_FIELDS: Record<PublicContentResource, string[]> = {
   ALBUM: ["description"], EVENT: ["description"], FAQ: ["answer"], TESTIMONIAL: ["quote"],
 };
 
+function isSlugConflict(error: unknown) {
+  if (!isPrismaCode(error, "P2002") || typeof error !== "object" || error === null || !("meta" in error)) return false;
+  const target = (error as {meta?: {target?: unknown}}).meta?.target;
+  return (Array.isArray(target) ? target : [target]).some((value) => typeof value === "string" && value.toLowerCase().includes("slug"));
+}
+
 function sanitizePayload(resource: PublicContentResource, payload: unknown) {
   const schema = {
     SERVICE: ServiceInputSchema, PARTNERSHIP: PartnershipInputSchema, SCHOLARSHIP: ScholarshipInputSchema,
@@ -129,9 +135,11 @@ async function audit(
   resourceType: string,
   resourceId: string,
   operation?: string,
+  version?: number,
 ) {
   await tx.activityLog.create({data: {
-    actorId, action, resourceType, resourceId, ...(operation ? {metadata: {operation}} : {}),
+    actorId, action, resourceType, resourceId,
+    ...(operation ? {metadata: {operation, ...(version ? {version} : {})}} : {}),
   }});
 }
 
@@ -309,9 +317,11 @@ async function remove(tx: Prisma.TransactionClient, resource: PublicContentResou
     : resource === "FAQ" ? await tx.faq.findUnique({where: {id}, select: {id: true}})
     : await tx.testimonial.findUnique({where: {id}, select: {id: true}});
   if (!exists) return {ok: false, code: "NOT_FOUND"} as const;
+  let version: number | null = null;
   if (VERSIONED.has(resource)) {
     const claimed = await claimVersion(tx, resource as "SERVICE" | "DOCUMENT" | "EVENT" | "FAQ", {id, expectedVersion});
     if (!claimed) return {ok: false, code: "VERSION_CONFLICT"} as const;
+    version = claimed;
   }
   if (resource === "SERVICE") await tx.service.delete({where: {id}});
   else if (resource === "PARTNERSHIP") await tx.partnership.delete({where: {id}});
@@ -324,19 +334,25 @@ async function remove(tx: Prisma.TransactionClient, resource: PublicContentResou
   else if (resource === "FAQ") await tx.faq.delete({where: {id}});
   else await tx.testimonial.delete({where: {id}});
   const resourceType = resource.split("_").map((part) => part[0] + part.slice(1).toLowerCase()).join("");
-  await audit(tx, actorId, "UPDATE", resourceType, id, "DELETE");
-  return PublicContentMutationResultSchema.parse({ok: true, id, resource, version: null});
+  await audit(tx, actorId, "UPDATE", resourceType, id, "DELETE", version ?? undefined);
+  return PublicContentMutationResultSchema.parse({ok: true, id, resource, version});
 }
 
 async function reorder(tx: Prisma.TransactionClient, command: Extract<PublicContentAdminCommand, {action: "REORDER"}>, actorId: string) {
+  const ids = command.payload.items.map(({id}) => id);
+  const count = command.resource === "SERVICE" ? await tx.service.count({where: {id: {in: ids}}})
+    : command.resource === "PARTNERSHIP" ? await tx.partnership.count({where: {id: {in: ids}}})
+    : command.resource === "FAQ" ? await tx.faq.count({where: {id: {in: ids}}})
+    : await tx.testimonial.count({where: {id: {in: ids}}});
+  if (count !== ids.length) return {ok: false, code: "NOT_FOUND"} as const;
   for (const {id, position} of command.payload.items) {
-    const result = command.resource === "SERVICE" ? await tx.service.updateMany({where: {id}, data: {order: position}})
-      : command.resource === "PARTNERSHIP" ? await tx.partnership.updateMany({where: {id}, data: {order: position}})
-      : command.resource === "FAQ" ? await tx.faq.updateMany({where: {id}, data: {order: position}})
-      : await tx.testimonial.updateMany({where: {id}, data: {order: position}});
-    if (result.count !== 1) return {ok: false, code: "NOT_FOUND"} as const;
+    if (command.resource === "SERVICE") await tx.service.update({where: {id}, data: {order: position}});
+    else if (command.resource === "PARTNERSHIP") await tx.partnership.update({where: {id}, data: {order: position}});
+    else if (command.resource === "FAQ") await tx.faq.update({where: {id}, data: {order: position}});
+    else await tx.testimonial.update({where: {id}, data: {order: position}});
   }
-  for (const {id} of command.payload.items) await audit(tx, actorId, "UPDATE", command.resource, id, "REORDER");
+  const resourceType = command.resource[0] + command.resource.slice(1).toLowerCase();
+  for (const {id} of command.payload.items) await audit(tx, actorId, "UPDATE", resourceType, id, "REORDER");
   return PublicContentMutationResultSchema.parse({ok: true, id: command.payload.items[0]!.id, resource: command.resource, version: null});
 }
 
@@ -367,7 +383,7 @@ export async function executePublicContentCommand(
       return mutateTestimonial(tx, command.action, input as TestimonialInput, mutation, actor.userId, now);
     }, {isolationLevel: PrismaNamespace.TransactionIsolationLevel.Serializable});
   } catch (error) {
-    if (isPrismaCode(error, "P2002")) return {ok: false, code: "SLUG_CONFLICT"};
+    if (isSlugConflict(error)) return {ok: false, code: "SLUG_CONFLICT"};
     if (isPrismaCode(error, "P2003")) return {ok: false, code: "IN_USE"};
     if (error instanceof z.ZodError) return {ok: false, code: "VALIDATION_FAILED"};
     return {ok: false, code: "UNAVAILABLE"};
