@@ -345,15 +345,23 @@ async function reorder(tx: Prisma.TransactionClient, command: Extract<PublicCont
     : command.resource === "FAQ" ? await tx.faq.count({where: {id: {in: ids}}})
     : await tx.testimonial.count({where: {id: {in: ids}}});
   if (count !== ids.length) return {ok: false, code: "NOT_FOUND"} as const;
+  const versions = new Map<string, number>();
   for (const {id, position} of command.payload.items) {
-    if (command.resource === "SERVICE") await tx.service.update({where: {id}, data: {order: position}});
+    if (command.resource === "SERVICE") {
+      const row = await tx.service.update({where: {id}, data: {order: position, version: {increment: 1}}, select: {version: true}});
+      versions.set(id, row.version); await revision(tx, "Service", id, row.version, actorId, {order: position}, "REORDER");
+    }
     else if (command.resource === "PARTNERSHIP") await tx.partnership.update({where: {id}, data: {order: position}});
-    else if (command.resource === "FAQ") await tx.faq.update({where: {id}, data: {order: position}});
+    else if (command.resource === "FAQ") {
+      const row = await tx.faq.update({where: {id}, data: {order: position, version: {increment: 1}}, select: {version: true}});
+      versions.set(id, row.version); await revision(tx, "Faq", id, row.version, actorId, {order: position}, "REORDER");
+    }
     else await tx.testimonial.update({where: {id}, data: {order: position}});
   }
   const resourceType = command.resource[0] + command.resource.slice(1).toLowerCase();
-  for (const {id} of command.payload.items) await audit(tx, actorId, "UPDATE", resourceType, id, "REORDER");
-  return PublicContentMutationResultSchema.parse({ok: true, id: command.payload.items[0]!.id, resource: command.resource, version: null});
+  for (const {id} of command.payload.items) await audit(tx, actorId, "UPDATE", resourceType, id, "REORDER", versions.get(id));
+  const firstId = command.payload.items[0]!.id;
+  return PublicContentMutationResultSchema.parse({ok: true, id: firstId, resource: command.resource, version: versions.get(firstId) ?? null});
 }
 
 export async function executePublicContentCommand(

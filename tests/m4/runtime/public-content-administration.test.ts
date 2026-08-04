@@ -98,4 +98,19 @@ describe("public content ADMIN command boundary", () => {
     }, now)).toEqual({ok: false, code: "NOT_FOUND"});
     expect(tx.service.update).not.toHaveBeenCalled();
   });
+
+  it("increments versions and records revisions before completing a versioned reorder", async () => {
+    const tx = {service: {
+      count: vi.fn().mockResolvedValue(1), update: vi.fn().mockResolvedValue({version: 2}),
+    }, contentRevision: {create: vi.fn().mockResolvedValue({id: "revision-1"})},
+    activityLog: {create: vi.fn().mockResolvedValue({id: "audit-1"})}};
+    const database = {$transaction: vi.fn(async (callback: (value: typeof tx) => unknown) => callback(tx))} as unknown as PublicContentDatabase;
+    expect(await executePublicContentCommand(database, actor, {
+      action: "REORDER", resource: "SERVICE", payload: {items: [{id: "service-1", position: 0}]},
+    }, now)).toEqual({ok: true, id: "service-1", resource: "SERVICE", version: 2});
+    expect(tx.service.update).toHaveBeenCalledWith({where: {id: "service-1"},
+      data: {order: 0, version: {increment: 1}}, select: {version: true}});
+    expect(tx.contentRevision.create).toHaveBeenCalledOnce();
+    expect(tx.activityLog.create).toHaveBeenCalledWith({data: expect.objectContaining({metadata: {operation: "REORDER", version: 2}})});
+  });
 });
