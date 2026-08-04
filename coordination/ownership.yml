@@ -47,7 +47,7 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
-  - task: M4-GPT-PAGE-BACKEND-DEMO-WAVE
+  - task: M4-GPT-PAGE-BACKEND
     owner: gpt
     paths:
       - src/features/content/pages/admin-transport.ts
@@ -56,8 +56,8 @@ active_leases:
       - tests/m4/runtime/page-admin-transport.test.ts
       - tests/m4/runtime/page-admin-transport.integration.test.ts
       - tests/security/admin-page-transport-adversarial.integration.test.ts
-      - coordination/handoffs/M4-GPT-PAGE-BACKEND-DEMO-WAVE-gpt.md
-  - task: M4-CLAUDE-PAGE-ADMIN-UI-DEMO-WAVE
+      - coordination/handoffs/M4-GPT-PAGE-BACKEND-gpt.md
+  - task: M4-CLAUDE-PAGE-ADMIN-UI
     owner: claude
     paths:
       - src/app/[locale]/admin/layout.tsx
@@ -68,4 +68,4 @@ active_leases:
       - messages/ar.json
       - tests/m4/ui/page-admin/**
       - e2e/m4/page-admin.spec.ts
-      - coordination/handoffs/M4-CLAUDE-PAGE-ADMIN-UI-DEMO-WAVE-claude.md
+      - coordination/handoffs/M4-CLAUDE-PAGE-ADMIN-UI-claude.md

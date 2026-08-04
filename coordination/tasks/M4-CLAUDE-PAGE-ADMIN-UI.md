@@ -1,5 +1,5 @@
 ---
-id: M4-CLAUDE-PAGE-ADMIN-UI-DEMO-WAVE
+id: M4-CLAUDE-PAGE-ADMIN-UI
 milestone: M4
 owner: claude
 reviewer: wave-review
@@ -15,7 +15,7 @@ allowed_paths:
   - "messages/ar.json"
   - "tests/m4/ui/page-admin/**"
   - "e2e/m4/page-admin.spec.ts"
-  - "coordination/handoffs/M4-CLAUDE-PAGE-ADMIN-UI-DEMO-WAVE-claude.md"
+  - "coordination/handoffs/M4-CLAUDE-PAGE-ADMIN-UI-claude.md"
 forbidden_paths:
   - ".env*"
   - "package.json"
@@ -61,15 +61,15 @@ acceptance_commands:
   - npm run build
   - "npx playwright test e2e/m4/page-admin.spec.ts"
   - git diff --check
-  - "TASK_MANIFEST=coordination/tasks/M4-CLAUDE-PAGE-ADMIN-UI-DEMO-WAVE.md TASK_BASE=origin/integration/m4-features npm run check:scope"
+  - "TASK_MANIFEST=coordination/tasks/M4-CLAUDE-PAGE-ADMIN-UI.md TASK_BASE=origin/integration/m4-features npm run check:scope"
 risk: medium
 token_class: L
 status: assigned
 ---
 
-# M4 Claude Page admin UI demo wave
+# M4 Claude Page admin UI
 
-Build the visible ADMIN Page CMS in parallel with GPT's runtime. Deliver a Page
+Build the production ADMIN Page CMS in parallel with GPT's runtime. Deliver a Page
 list plus create/edit flows under `/[locale]/admin/pages`, using only the frozen
 `page-admin` contract and `/api/admin/pages` endpoints. Production UI must not
 contain mock content; synthetic objects are allowed only in tests.
@@ -92,4 +92,4 @@ conflict/non-disclosure surfaces, keyboard interaction, and mobile layout.
 
 Commit a complete handoff and push the Claude task branch. Do not edit backend,
 contract, schema, dependencies, proxy, global styles, or shared UI primitives.
-Review is batched when the Page backend and UI are integrated as one demo wave.
+Review is performed once after the complete Page backend and UI are integrated.

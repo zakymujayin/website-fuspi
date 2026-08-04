@@ -1,5 +1,5 @@
 ---
-id: M4-GPT-PAGE-BACKEND-DEMO-WAVE
+id: M4-GPT-PAGE-BACKEND
 milestone: M4
 owner: gpt
 reviewer: wave-review
@@ -13,7 +13,7 @@ allowed_paths:
   - "tests/m4/runtime/page-admin-transport.test.ts"
   - "tests/m4/runtime/page-admin-transport.integration.test.ts"
   - "tests/security/admin-page-transport-adversarial.integration.test.ts"
-  - "coordination/handoffs/M4-GPT-PAGE-BACKEND-DEMO-WAVE-gpt.md"
+  - "coordination/handoffs/M4-GPT-PAGE-BACKEND-gpt.md"
 forbidden_paths:
   - ".env*"
   - "package.json"
@@ -63,15 +63,15 @@ acceptance_commands:
   - npm run prisma:validate
   - npm run build
   - git diff --check
-  - "TASK_MANIFEST=coordination/tasks/M4-GPT-PAGE-BACKEND-DEMO-WAVE.md TASK_BASE=origin/integration/m4-features npm run check:scope"
+  - "TASK_MANIFEST=coordination/tasks/M4-GPT-PAGE-BACKEND.md TASK_BASE=origin/integration/m4-features npm run check:scope"
 risk: high
 token_class: L
 status: active
 ---
 
-# M4 GPT Page backend demo wave
+# M4 GPT Page backend
 
-Deliver the complete ADMIN-only Page transport/runtime boundary needed by the
+Deliver the production ADMIN-only Page transport/runtime boundary needed by the
 parallel Claude UI. Implement `GET/POST /api/admin/pages` and
 `GET /api/admin/pages/[pageId]` following the accepted Post reference slice and
 the frozen Page admin contract.
@@ -89,5 +89,5 @@ non-disclosure, hostile query/body rejection before database mutation, every
 command and failure mapping, safe hero projection, optimistic conflict,
 transaction behavior, no-store, and no revalidation on failure. Do not change
 the frozen contracts/domain, schema, dependencies, UI, messages, or public
-routes. Commit the handoff and push the GPT task branch; review is batched with
-the Page demo wave rather than opened as another micro-review.
+routes. Commit the handoff and push the GPT task branch. Backend and UI are
+reviewed together after the complete Page implementation is integrated.

@@ -1,6 +1,6 @@
-# Prompt — M4 Claude Page admin UI demo wave
+# Prompt — M4 Claude Page admin UI
 
-Work autonomously on `M4-CLAUDE-PAGE-ADMIN-UI-DEMO-WAVE` from the assigned
+Work autonomously on `M4-CLAUDE-PAGE-ADMIN-UI` from the assigned
 integration SHA. Read `AGENTS.md`, the complete task manifest, and only its
 listed feature documents/context. Work solely in the Claude worktree and task
 branch. Preserve unknown user changes and stop if the worktree is dirty.
@@ -15,4 +15,4 @@ Run every acceptance command that is executable in the current environment.
 Record exact results and any environment-only limitation without weakening
 focused UI evidence. Create the required handoff, commit all allowed work, push
 the Claude branch, and stop. Do not merge, change task/lease state, or open a
-new review task.
+new review task. This is the production implementation, not a demo or prototype.
