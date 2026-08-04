@@ -5,7 +5,6 @@ import {SectionHeading} from "@/components/public/section-heading";
 import {Container} from "@/components/ui/container";
 import {Link} from "@/i18n/navigation";
 import {ArrowRight} from "lucide-react";
-import {institution} from "@/config/institution";
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;

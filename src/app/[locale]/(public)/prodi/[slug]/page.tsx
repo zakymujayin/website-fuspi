@@ -1,4 +1,4 @@
-import {ArrowRight, BookOpen, Globe, Mail, MapPin, Users} from "lucide-react";
+import {ArrowRight, BookOpen, Globe, Mail, Users} from "lucide-react";
 import type {Metadata} from "next";
 import {notFound} from "next/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
