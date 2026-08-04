@@ -2,8 +2,8 @@
 
 - Task: `M4-GPT-ACADEMIC-PEOPLE-RUNTIME`
 - Branch: `ai/gpt/m4-academic-people-runtime`
-- Base: `53511af7f259d37b23f21f36f8e1aed670a9b91b`
-- Implementation head: `c13dd9d01a38bf93d0b0c8d74aa8e8ac9927f868`
+- Base: `53511af2d1a02b5bb231e89765acabe3e8b8badf`
+- Implementation head: `c13dd9dcf091a367fc838403f9c5571a2fe12df8`
 - Owner: GPT
 
 ## Summary
