@@ -785,13 +785,25 @@
     "servicesTitle": "الخدمات",
     "servicesDescription": "معلومات الخدمات الأكاديمية والعامة والمختبرية والشكاوى للمجتمع الأكاديمي.",
     "partnersTitle": "الشراكات",
+    "partnersDescription": "شبكة شراكات الكلية مع الجامعات والمؤسسات الإسلامية الوطنية.",
     "footerCtaTitle": "هل أنت مستعد للانضمام إلينا؟",
     "footerCtaDescription": "تعرف على الكلية بشكل أفضل وابحث عن برنامج دراسي يتناسب مع اهتماماتك ومواهبك.",
     "footerCtaButton": "اتصل بنا",
     "deanWelcome": "كلمة العميد",
+    "deanCta": "ملف القيادة",
     "deanFallbackName": "عميد كلية أصول الدين",
     "deanFallbackPosition": "عميد كلية أصول الدين والفكر الإسلامي",
     "deanFallbackMessage": "أهلاً وسهلاً بكم في موقع كلية أصول الدين والفكر الإسلامي. نحن ملتزمون بتطوير الدراسات الإسلامية الموثوقة والسياقية والقادرة على المنافسة عالمياً من خلال التعليم والبحث وخدمة المجتمع.",
+    "statsTitle": "الكلية في أرقام",
+    "statsDescription": "نظرة عامة موجزة على التكوين الأكاديمي وشراكات الكلية.",
+    "stat": {
+      "programs": "برامج دراسية",
+      "lecturers": "محاضرون",
+      "staff": "موظفون",
+      "students": "طلاب",
+      "partners": "شركاء",
+      "publications": "منشورات"
+    },
     "statsLecturers": "محاضرون",
     "statsStaff": "موظفون",
     "statsPrograms": "برامج دراسية",
@@ -810,7 +822,21 @@
     "introCardContact": "اتصل بنا",
     "introCardContactDesc": "تواصل معنا",
     "announcementsTitle": "الإعلانات",
-    "eventsTitle": "الفعاليات"
+    "eventsTitle": "الفعاليات",
+    "visionLabel": "الرؤية",
+    "missionLabel": "المهام",
+    "facilitiesEyebrow": "المرافق",
+    "facilitiesTitle": "المرافق والبنية التحتية",
+    "programsEyebrow": "البرامج الأكاديمية",
+    "ctaEyebrow": "انضم",
+    "advantage": {
+      "quran": {"title": "دراسات القرآن والتفسير", "description": "التعلم النصي والسياقي"},
+      "hadith": {"title": "دراسات الحديث", "description": "السند ومنهجية الحديث"},
+      "aqidah": {"title": "العقيدة والفلسفة الإسلامية", "description": "الدراسات العقلانية-اللاهوتية"},
+      "religions": {"title": "دراسات الأديان", "description": "الحوار والفهم بين الأديان"},
+      "sufism": {"title": "التصوف والعلاج النفسي", "description": "الروحانية والرفاهية"},
+      "integrated": {"title": "التعليم التكاملي", "description": "المعرفة الإسلامية ومهارات العصر"}
+    }
   },
   "Pages": {
     "profileTitle": "ملف الكلية",

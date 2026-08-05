@@ -785,13 +785,25 @@
     "servicesTitle": "Layanan",
     "servicesDescription": "Informasi layanan akademik, umum, laboratorium, dan pengaduan untuk sivitas akademika.",
     "partnersTitle": "Kerja Sama",
+    "partnersDescription": "Jaringan kemitraan FUSPI dengan perguruan tinggi dan lembaga keislaman nasional.",
     "footerCtaTitle": "Siap bergabung bersama kami?",
     "footerCtaDescription": "Kenali lebih dekat FUSPI dan temukan program studi yang sesuai dengan minat dan bakat Anda.",
     "footerCtaButton": "Hubungi Kami",
     "deanWelcome": "Sambutan Dekan",
+    "deanCta": "Profil Pimpinan",
     "deanFallbackName": "Dekan FUSPI",
     "deanFallbackPosition": "Dekan Fakultas Ushuluddin dan Pemikiran Islam",
     "deanFallbackMessage": "Selamat datang di situs Fakultas Ushuluddin dan Pemikiran Islam. Kami berkomitmen mengembangkan kajian keislaman yang kredibel, kontekstual, dan berdaya saing global melalui pendidikan, penelitian, dan pengabdian kepada masyarakat.",
+    "statsTitle": "FUSPI dalam Angka",
+    "statsDescription": "Gambaran singkap komposisi akademik dan kemitraan FUSPI.",
+    "stat": {
+      "programs": "Program Studi",
+      "lecturers": "Dosen",
+      "staff": "Tenaga Kependidikan",
+      "students": "Mahasiswa",
+      "partners": "Mitra Kerja Sama",
+      "publications": "Publikasi"
+    },
     "statsLecturers": "Dosen",
     "statsStaff": "Tenaga Kependidikan",
     "statsPrograms": "Program Studi",
@@ -810,7 +822,21 @@
     "introCardContact": "Kontak",
     "introCardContactDesc": "Hubungi kami",
     "announcementsTitle": "Pengumuman",
-    "eventsTitle": "Agenda"
+    "eventsTitle": "Agenda",
+    "visionLabel": "Visi",
+    "missionLabel": "Misi",
+    "facilitiesEyebrow": "Fasilitas",
+    "facilitiesTitle": "Sarana dan Prasarana",
+    "programsEyebrow": "Jenjang Pendidikan",
+    "ctaEyebrow": "Bergabung",
+    "advantage": {
+      "quran": {"title": "Kajian Al-Qur'an & Tafsir", "description": "Pembelajaran tekstual dan kontekstual"},
+      "hadith": {"title": "Ilmu Hadis", "description": "Sanad dan metodologi hadis"},
+      "aqidah": {"title": "Aqidah & Filsafat Islam", "description": "Kajian rasional-teologis"},
+      "religions": {"title": "Studi Agama-Agama", "description": "Dialog dan pemahaman lintas iman"},
+      "sufism": {"title": "Tasawuf & Psikoterapi", "description": "Spiritualitas dan kesejahteraan"},
+      "integrated": {"title": "Pendidikan Integratif", "description": "Ilmu keislaman dan keterampilan zaman"}
+    }
   },
   "Pages": {
     "profileTitle": "Profil Fakultas",

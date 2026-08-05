@@ -785,13 +785,25 @@
     "servicesTitle": "Services",
     "servicesDescription": "Academic, general, laboratory, and complaint services information for the academic community.",
     "partnersTitle": "Partnerships",
+    "partnersDescription": "FUSPI's partnership network with universities and national Islamic institutions.",
     "footerCtaTitle": "Ready to join us?",
     "footerCtaDescription": "Get to know FUSPI better and find a study program that matches your interests and talents.",
     "footerCtaButton": "Contact Us",
     "deanWelcome": "Dean's Welcome",
+    "deanCta": "Leadership Profile",
     "deanFallbackName": "Dean of FUSPI",
     "deanFallbackPosition": "Dean of the Faculty of Ushuluddin and Islamic Thought",
     "deanFallbackMessage": "Welcome to the website of the Faculty of Ushuluddin and Islamic Thought. We are committed to developing credible, contextual, and globally competitive Islamic studies through education, research, and community service.",
+    "statsTitle": "FUSPI in Numbers",
+    "statsDescription": "A brief overview of FUSPI's academic composition and partnerships.",
+    "stat": {
+      "programs": "Study Programs",
+      "lecturers": "Lecturers",
+      "staff": "Staff",
+      "students": "Students",
+      "partners": "Partners",
+      "publications": "Publications"
+    },
     "statsLecturers": "Lecturers",
     "statsStaff": "Staff",
     "statsPrograms": "Study Programs",
@@ -810,7 +822,21 @@
     "introCardContact": "Contact",
     "introCardContactDesc": "Get in touch",
     "announcementsTitle": "Announcements",
-    "eventsTitle": "Events"
+    "eventsTitle": "Events",
+    "visionLabel": "Vision",
+    "missionLabel": "Mission",
+    "facilitiesEyebrow": "Facilities",
+    "facilitiesTitle": "Infrastructure",
+    "programsEyebrow": "Academic Programs",
+    "ctaEyebrow": "Join",
+    "advantage": {
+      "quran": {"title": "Qur'an & Tafsir Studies", "description": "Textual and contextual learning"},
+      "hadith": {"title": "Hadith Studies", "description": "Sanad and hadith methodology"},
+      "aqidah": {"title": "Aqidah & Islamic Philosophy", "description": "Rational-theological studies"},
+      "religions": {"title": "Religious Studies", "description": "Interfaith dialogue and understanding"},
+      "sufism": {"title": "Sufism & Psychotherapy", "description": "Spirituality and wellbeing"},
+      "integrated": {"title": "Integrative Education", "description": "Islamic knowledge and contemporary skills"}
+    }
   },
   "Pages": {
     "profileTitle": "Faculty Profile",

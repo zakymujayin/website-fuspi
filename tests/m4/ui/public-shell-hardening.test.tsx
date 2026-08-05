@@ -29,6 +29,7 @@ const { utilityLinks } = await import("@/components/public/nav-items");
 const SHELL_FILES = [
   "src/app/[locale]/(public)/layout.tsx",
   "src/components/public/site-header.tsx",
+  "src/components/public/top-bar.tsx",
   "src/components/public/site-footer.tsx",
   "src/components/public/desktop-nav.tsx",
   "src/components/public/language-switcher.tsx",
@@ -68,9 +69,10 @@ describe("single header geometry", () => {
     expect(header).toContain("h-[72px]");
   });
 
-  it("places the language switcher and utility links inside the same bar", () => {
-    expect(header).toContain("<LanguageSwitcher");
-    expect(header).toContain("<UtilityLink");
+  it("places the language switcher and utility links inside the top bar", () => {
+    const topbar = readShellFile("src/components/public/top-bar.tsx");
+    expect(topbar).toContain("<LanguageSwitcher");
+    expect(topbar).toContain("<UtilityLink");
   });
 
   it("animates only shadow on scroll, never moving page content", () => {
@@ -135,7 +137,7 @@ describe("external destination classification", () => {
     const source = readShellFile("src/components/public/shell/nav-url.ts");
     const utility = readShellFile("src/components/public/shell/utility-link.tsx");
 
-    for (const file of [source, utility, readShellFile("src/components/public/site-header.tsx")]) {
+    for (const file of [source, utility, readShellFile("src/components/public/site-header.tsx"), readShellFile("src/components/public/top-bar.tsx")]) {
       expect(file).not.toMatch(/https?:\/\/[a-z]/i);
       expect(file).not.toMatch(/sila/i);
       expect(file).not.toMatch(/fuda/i);
@@ -215,13 +217,13 @@ describe("UtilityLink semantics", () => {
   });
 
   it("keeps the shared topbar usage valid without a click handler", () => {
-    // SiteHeader is a Server Component: it cannot pass a function prop, so
+    // TopBar is a Server Component: it cannot pass a function prop, so
     // `onClick` must stay optional or the shared usage breaks at build time.
-    const header = readShellFile("src/components/public/site-header.tsx");
-    const headerUsage = /<UtilityLink[\s\S]*?\/>/.exec(header)?.[0] ?? "";
+    const topbar = readShellFile("src/components/public/top-bar.tsx");
+    const topbarUsage = /<UtilityLink[\s\S]*?\/>/.exec(topbar)?.[0] ?? "";
 
-    expect(headerUsage).toContain("<UtilityLink");
-    expect(headerUsage).not.toContain("onClick");
+    expect(topbarUsage).toContain("<UtilityLink");
+    expect(topbarUsage).not.toContain("onClick");
     expect(render("/gkm").querySelector("a")).not.toBeNull();
   });
 
@@ -366,7 +368,7 @@ describe("landmarks", () => {
 
     expect(layout.indexOf("<SkipLink")).toBeLessThan(layout.indexOf("<SiteHeader"));
     expect(layout).toContain('id="main"');
-    expect(layout).toContain("scroll-mt-[72px]");
+    expect(layout).toContain("scroll-mt-[112px]");
   });
 });
 
