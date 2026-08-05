@@ -1,7 +1,7 @@
 import { getTranslations } from "next-intl/server";
 
 import { BrandMark } from "@/components/public/brand-mark";
-import { quickLinks, studyProgramLinks } from "@/components/public/nav-items";
+import { contentNav, quickLinks, studyProgramLinks } from "@/components/public/nav-items";
 import { Container } from "@/components/ui/container";
 import { institution } from "@/config/institution";
 import { Link } from "@/i18n/navigation";
@@ -34,7 +34,7 @@ export async function SiteFooter() {
   return (
     <footer className="mt-20 bg-navy-900 pt-16 text-slate-300">
       <Container>
-        <div className="grid gap-8 pb-12 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 pb-12 sm:grid-cols-2 lg:grid-cols-5">
           <div className="flex flex-col gap-4">
             <BrandMark tone="dark" />
             <address className="prose-measure text-sm text-slate-400 not-italic">
@@ -51,6 +51,21 @@ export async function SiteFooter() {
                 <li key={program.key}>
                   <Link href={program.href} className={LINK_CLASS}>
                     {tNav(program.key)}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <nav aria-labelledby="footer-content">
+            <ColumnTitle>
+              <span id="footer-content">{tNav("contentLabel")}</span>
+            </ColumnTitle>
+            <ul className="flex flex-col gap-2">
+              {contentNav.map((item) => (
+                <li key={item.key}>
+                  <Link href={item.href} className={LINK_CLASS}>
+                    {tNav(item.key)}
                   </Link>
                 </li>
               ))}

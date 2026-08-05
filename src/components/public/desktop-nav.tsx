@@ -8,11 +8,11 @@ import { Link } from "@/i18n/navigation";
 import type { NavGroup } from "@/components/public/nav-items";
 
 /**
- * `whitespace-nowrap` keeps a long EN or AR label on one line: the main header
- * row is a fixed 76px, so a wrapped label would spill out of it.
+ * `whitespace-nowrap` keeps a long EN or AR label on one line: the unified
+ * header row is fixed at 72px, so a wrapped label would spill out of it.
  */
 const ITEM_CLASS =
-  "flex min-h-11 shrink-0 items-center rounded-lg px-2.5 text-[15px] font-medium whitespace-nowrap text-slate-700 transition-colors hover:text-royal-600 xl:px-3";
+  "flex min-h-11 shrink-0 items-center rounded-lg px-1.5 text-[14px] font-medium whitespace-nowrap text-slate-700 transition-colors hover:text-royal-600 lg:px-2 xl:text-[15px]";
 
 /** Dropdowns open on hover (pointer) and on click/keyboard; Esc closes them. */
 export function DesktopNav({ primary }: { primary: readonly NavGroup[] }) {
@@ -23,7 +23,7 @@ export function DesktopNav({ primary }: { primary: readonly NavGroup[] }) {
     // stays in charge up to lg rather than md.
     <nav
       aria-label={t("primaryLabel")}
-      className="hidden shrink-0 items-center gap-0.5 lg:flex xl:gap-2"
+      className="hidden shrink-0 items-center gap-0.5 lg:flex"
     >
       {primary.map((item) =>
         item.children ? (

@@ -21,9 +21,6 @@ vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => `t:${key}`,
 }));
 
-const { HEADER_COMPACT_THRESHOLD, isHeaderCompact } = await import(
-  "@/components/public/shell/header-scroll"
-);
 const { classifyNavUrl } = await import("@/components/public/shell/nav-url");
 const { UtilityLink } = await import("@/components/public/shell/utility-link");
 const { LanguageSwitcher } = await import("@/components/public/language-switcher");
@@ -39,8 +36,6 @@ const SHELL_FILES = [
   "src/components/public/skip-link.tsx",
   "src/components/public/shell/sticky-header.tsx",
   "src/components/public/shell/utility-link.tsx",
-  // mobile-nav is checked here too: its only physical utility is the drawer
-  // slide transform, which has no logical equivalent and carries an rtl: pair.
   "src/components/public/mobile-nav.tsx",
 ] as const;
 
@@ -58,68 +53,33 @@ const LOCALES = ["id", "en", "ar"] as const;
 const readMessages = (locale: string) =>
   JSON.parse(readFileSync(path.join(process.cwd(), `messages/${locale}.json`), "utf8"));
 
-describe("compact header threshold", () => {
-  it("compacts strictly above the 100px specified in docs/17-B", () => {
-    expect(HEADER_COMPACT_THRESHOLD).toBe(100);
-    expect(isHeaderCompact(0)).toBe(false);
-    expect(isHeaderCompact(99)).toBe(false);
-    expect(isHeaderCompact(100)).toBe(false);
-    expect(isHeaderCompact(100.5)).toBe(true);
-    expect(isHeaderCompact(101)).toBe(true);
-    expect(isHeaderCompact(4_000)).toBe(true);
-  });
-
-  it("never compacts on overscroll or a non-finite offset", () => {
-    expect(isHeaderCompact(-250)).toBe(false);
-    expect(isHeaderCompact(Number.NaN)).toBe(false);
-    expect(isHeaderCompact(Number.POSITIVE_INFINITY)).toBe(false);
-    expect(isHeaderCompact(Number.NEGATIVE_INFINITY)).toBe(false);
-  });
-});
-
-describe("compact header geometry", () => {
+describe("single header geometry", () => {
   const source = readShellFile("src/components/public/shell/sticky-header.tsx");
   const header = readShellFile("src/components/public/site-header.tsx");
 
-  it("renders the expanded state on the server so hydration cannot mismatch", () => {
-    // The initial state is always "expanded"; scroll is only read after mount,
-    // so the server markup and the first client paint agree by construction.
-    expect(source).toContain("useState(false)");
-    expect(source).toContain("useEffect(");
-    expect(source.indexOf("useEffect(")).toBeLessThan(source.indexOf("window."));
-    expect(source.match(/window\./g)).toHaveLength(3);
+  it("renders a sticky single bar with no client-only state", () => {
+    expect(source).not.toContain("useState");
+    expect(source).not.toContain("useEffect");
+    expect(source).toContain("sticky");
+    expect(source).toContain("z-30");
   });
 
-  it("compacts with a transform only, so page content cannot shift", () => {
-    expect(source).toContain("data-[compact=true]:-translate-y-4");
-    expect(source).toContain("md:data-[compact=true]:-translate-y-[5.5rem]");
-    // A height/padding change on the pinned bar would move everything below it.
-    expect(source).not.toMatch(/data-\[compact=true\]:(h|min-h|max-h|py|p)-/);
+  it("keeps the unified bar at 72px", () => {
+    expect(header).toContain("h-[72px]");
   });
 
-  it("keeps the bar heights the transform is calibrated against", () => {
-    // 36 + 36 + 16 = 88px (5.5rem) on desktop, 16px on mobile: the two 36px
-    // bars slide away and the 76px main bar is trimmed to 60px.
-    expect(header).toContain("h-9");
-    expect(header).toContain("h-[76px]");
-    expect(header).toContain("group-data-[compact=true]:translate-y-2");
+  it("places the language switcher and utility links inside the same bar", () => {
+    expect(header).toContain("<LanguageSwitcher");
+    expect(header).toContain("<UtilityLink");
   });
 
-  it("animates the standalone translate property Tailwind v4 emits", () => {
-    // `transition-[transform,...]` compiles to `transition-property: transform`
-    // and silently never animates a translate utility.
-    const lists = [
-      ...source.matchAll(/transition-\[([^\]]+)\]/g),
-      ...header.matchAll(/transition-\[([^\]]+)\]/g),
-    ];
-
-    expect(lists.length).toBeGreaterThan(1);
-    for (const [, list] of lists) expect(list).toContain("translate");
+  it("animates only shadow on scroll, never moving page content", () => {
+    expect(source).not.toContain("translate-y");
+    expect(source).toContain("shadow-sm");
   });
 
   it("drops the transition under prefers-reduced-motion", () => {
     expect(source).toContain("motion-reduce:transition-none");
-    expect(header).toContain("motion-reduce:transition-none");
   });
 
   it("stacks below the drawer overlay so the drawer is never covered", () => {
@@ -275,57 +235,35 @@ describe("UtilityLink semantics", () => {
   });
 });
 
-describe("language switcher targets and naming", () => {
+describe("language switcher dropdown", () => {
   const render = (props: Parameters<typeof LanguageSwitcher>[0]) =>
     markupToContainer(renderToStaticMarkup(<LanguageSwitcher {...props} />));
 
-  it("meets the 44px drawer floor at size lg and stays compact at size sm", () => {
-    const drawer = render({ tone: "light", size: "lg", labelledBy: "drawer-language" });
+  it("renders a single trigger button with the current locale flag", () => {
     const topbar = render({ tone: "dark" });
+    const nav = topbar.querySelector("nav");
+    const trigger = topbar.querySelector("button");
 
-    for (const anchor of drawer.querySelectorAll("a")) {
-      expect(anchor.getAttribute("class")).toContain("min-h-11");
-      expect(anchor.getAttribute("class")).toContain("min-w-11");
-    }
-
-    for (const anchor of topbar.querySelectorAll("a")) {
-      expect(anchor.getAttribute("class")).toContain("min-h-9");
-      expect(anchor.getAttribute("class")).not.toContain("min-h-11");
-    }
+    expect(nav).not.toBeNull();
+    expect(trigger).not.toBeNull();
+    expect(nav?.getAttribute("aria-label")).toBe("t:languageLabel");
+    expect(trigger?.textContent).toContain("ID");
+    expect(topbar.querySelectorAll("svg").length).toBeGreaterThanOrEqual(1);
   });
 
   it("takes its accessible name from a visible heading when one is given", () => {
-    const drawer = render({ size: "lg", labelledBy: "drawer-language" }).querySelector("nav");
-    const topbar = render({}).querySelector("nav");
+    const drawer = render({ tone: "light", size: "lg", labelledBy: "drawer-language" }).querySelector("nav");
 
     expect(drawer?.getAttribute("aria-labelledby")).toBe("drawer-language");
     expect(drawer?.getAttribute("aria-label")).toBeNull();
-    expect(topbar?.getAttribute("aria-label")).toBe("t:languageLabel");
-    expect(topbar?.getAttribute("aria-labelledby")).toBeNull();
-  });
-
-  it("offers all three locales, each with a spoken language name", () => {
-    const anchors = [...render({}).querySelectorAll("a")];
-
-    expect(anchors).toHaveLength(3);
-    expect(anchors.map((a) => a.getAttribute("hreflang"))).toEqual(["id", "en", "ar"]);
-    expect(anchors.map((a) => a.querySelector(".sr-only")?.textContent)).toEqual([
-      "Bahasa Indonesia",
-      "English",
-      "العربية",
-    ]);
-    // The two-letter chip is decorative; the spoken name carries the meaning.
-    expect(anchors[0].querySelector("[aria-hidden]")?.textContent).toBe("ID");
-    expect(anchors[0].getAttribute("aria-current")).toBe("true");
-    expect(anchors[1].getAttribute("aria-current")).toBeNull();
   });
 });
 
 describe("drawer structure", () => {
   const source = readShellFile("src/components/public/mobile-nav.tsx");
 
-  it("presents the language choice before the three navigation groups", () => {
-    const order = ["drawer-language", "drawer-primary", "drawer-content", "drawer-utility"].map(
+  it("presents the language choice before the primary and utility groups", () => {
+    const order = ["drawer-language", "drawer-primary", "drawer-utility"].map(
       (id) => source.indexOf(`id="${id}"`),
     );
 
@@ -334,7 +272,7 @@ describe("drawer structure", () => {
   });
 
   it("names every group with its visible heading", () => {
-    for (const id of ["drawer-primary", "drawer-content", "drawer-utility"]) {
+    for (const id of ["drawer-primary", "drawer-utility"]) {
       expect(source).toContain(`aria-labelledby="${id}"`);
     }
     expect(source).toContain('labelledBy="drawer-language"');
@@ -428,8 +366,7 @@ describe("landmarks", () => {
 
     expect(layout.indexOf("<SkipLink")).toBeLessThan(layout.indexOf("<SiteHeader"));
     expect(layout).toContain('id="main"');
-    // 148px = the full expanded header, so the skip target never lands behind it.
-    expect(layout).toContain("scroll-mt-[148px]");
+    expect(layout).toContain("scroll-mt-[72px]");
   });
 });
 

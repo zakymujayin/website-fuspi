@@ -50,8 +50,8 @@ export default async function PublicLayout({
       <OrganizationJsonLd />
       <SiteHeader />
       {/* The header is sticky, so the skip link and any in-page anchor must clear
-          its full 148px expanded height instead of landing underneath it. */}
-      <main id="main" tabIndex={-1} className="flex-1 scroll-mt-[148px] outline-none">
+          its full 72px height instead of landing underneath it. */}
+      <main id="main" tabIndex={-1} className="flex-1 scroll-mt-[72px] outline-none">
         {children}
       </main>
       <SiteFooter />

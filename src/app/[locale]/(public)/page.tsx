@@ -122,9 +122,11 @@ export default async function HomePage({params}: {params: Promise<{locale: AppLo
 
   const featuredPost = postRows[0];
   const sidePosts = postRows.slice(1, 5);
-  const hasStats = lecturerCount > 0 || staffCount > 0;
   const deanTl = siteSetting ? resolveLocale(siteSetting.translations, locale) : null;
-  const hasDeanSection = siteSetting && (siteSetting.deanName || deanTl?.deanMessage);
+  const deanName = siteSetting?.deanName ?? t("deanFallbackName");
+  const deanPosition = deanTl?.deanPosition ?? t("deanFallbackPosition");
+  const deanMessage = deanTl?.deanMessage ?? t("deanFallbackMessage");
+  const deanPhoto = siteSetting?.deanPhoto ?? null;
 
   return (
     <>
@@ -163,82 +165,80 @@ export default async function HomePage({params}: {params: Promise<{locale: AppLo
       </section>
 
       {/* ── DEAN WELCOME ────────────────────────── */}
-      {hasDeanSection ? (
-        <section className="bg-slate-50 py-16 md:py-24">
-          <Container>
-            <div className="grid items-center gap-10 lg:grid-cols-5">
-              {siteSetting?.deanPhoto ? (
-                <div className="lg:col-span-2">
-                  <div className="mx-auto max-w-xs overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                    <NextImage
-                      src={`/uploads/${siteSetting.deanPhoto.storageKey}`}
-                      alt={siteSetting.deanPhoto.alt ?? siteSetting.deanName ?? ""}
-                      width={siteSetting.deanPhoto.width ?? 400} height={siteSetting.deanPhoto.height ?? 500}
-                      unoptimized
-                      className="aspect-[3/4] w-full object-cover"
-                    />
-                  </div>
+      <section className="bg-slate-50 py-16 md:py-24">
+        <Container>
+          <div className="grid items-center gap-10 lg:grid-cols-5">
+            {deanPhoto ? (
+              <div className="lg:col-span-2">
+                <div className="mx-auto max-w-xs overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                  <NextImage
+                    src={`/uploads/${deanPhoto.storageKey}`}
+                    alt={deanPhoto.alt ?? deanName}
+                    width={deanPhoto.width ?? 400} height={deanPhoto.height ?? 500}
+                    unoptimized
+                    className="aspect-[3/4] w-full object-cover"
+                  />
                 </div>
-              ) : null}
-              <div className={siteSetting?.deanPhoto ? "lg:col-span-3" : "lg:col-span-5"}>
-                <span className="text-[11px] font-medium tracking-wide text-royal-600 uppercase">{t("deanWelcome")}</span>
-                <div className="mt-4">
-                  {deanTl?.deanMessage ? (
-                    <blockquote className="relative border-s-0 ps-0">
-                      <Quote data-icon aria-hidden className="absolute -start-1 -top-2 size-8 text-royal-100 rtl:rotate-180" strokeWidth={1} />
-                      <div className="ps-8">
-                        <p className="text-lg leading-relaxed text-slate-600 md:text-xl md:leading-relaxed">
-                          {deanTl.deanMessage}
-                        </p>
-                      </div>
-                    </blockquote>
-                  ) : null}
-                  <div className="mt-6">
-                    <p className="font-display text-lg font-semibold text-slate-900">{siteSetting?.deanName ?? ""}</p>
-                    {deanTl?.deanPosition ? (
-                      <p className="text-sm text-slate-500">{deanTl.deanPosition}</p>
-                    ) : null}
+              </div>
+            ) : (
+              <div className="lg:col-span-2">
+                <div className="mx-auto grid size-40 place-items-center rounded-2xl border border-slate-200 bg-white shadow-sm md:size-48">
+                  <span className="font-display text-4xl font-bold text-royal-200">{institution.shortName}</span>
+                </div>
+              </div>
+            )}
+            <div className="lg:col-span-3">
+              <span className="text-[11px] font-medium tracking-wide text-royal-600 uppercase">{t("deanWelcome")}</span>
+              <div className="mt-4">
+                <blockquote className="relative border-s-0 ps-0">
+                  <Quote data-icon aria-hidden className="absolute -start-1 -top-2 size-8 text-royal-100 rtl:rotate-180" strokeWidth={1} />
+                  <div className="ps-8">
+                    <p className="text-lg leading-relaxed text-slate-600 md:text-xl md:leading-relaxed">
+                      {deanMessage}
+                    </p>
                   </div>
+                </blockquote>
+                <div className="mt-6">
+                  <p className="font-display text-lg font-semibold text-slate-900">{deanName}</p>
+                  <p className="text-sm text-slate-500">{deanPosition}</p>
                 </div>
               </div>
             </div>
-          </Container>
-        </section>
-      ) : null}
+          </div>
+        </Container>
+      </section>
 
       {/* ── STATS ────────────────────────────────── */}
-      {hasStats ? (
-        <section className="border-y border-slate-200 bg-white py-12 md:py-16">
-          <Container>
-            <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-              <div className="text-center">
-                <p className="font-display text-3xl font-bold tracking-tight text-royal-600 md:text-4xl">
-                  {lecturerCount > 0 ? lecturerCount.toLocaleString("id-ID") : "—"}
-                </p>
-                <p className="mt-1 text-sm text-slate-500">{t("statsLecturers")}</p>
-              </div>
-              <div className="text-center">
-                <p className="font-display text-3xl font-bold tracking-tight text-royal-600 md:text-4xl">
-                  {staffCount > 0 ? staffCount.toLocaleString("id-ID") : "—"}
-                </p>
-                <p className="mt-1 text-sm text-slate-500">{t("statsStaff")}</p>
-              </div>
-              <div className="text-center">
-                <p className="font-display text-3xl font-bold tracking-tight text-royal-600 md:text-4xl">
-                  {institution.studyPrograms.length}
-                </p>
-                <p className="mt-1 text-sm text-slate-500">{t("statsPrograms")}</p>
-              </div>
-              <div className="text-center">
-                <p className="font-display text-3xl font-bold tracking-tight text-royal-600 md:text-4xl">
-                  {partners.length > 0 ? partners.length.toString() : "—"}
-                </p>
-                <p className="mt-1 text-sm text-slate-500">{t("statsPartners")}</p>
-              </div>
+      <section className="border-y border-slate-200 bg-white py-12 md:py-16">
+        <Container>
+          <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
+            <div className="text-center">
+              <p className="font-display text-3xl font-bold tracking-tight text-royal-600 md:text-4xl">
+                {lecturerCount > 0 ? lecturerCount.toLocaleString("id-ID") : "—"}
+              </p>
+              <p className="mt-1 text-sm text-slate-500">{t("statsLecturers")}</p>
             </div>
-          </Container>
-        </section>
-      ) : null}
+            <div className="text-center">
+              <p className="font-display text-3xl font-bold tracking-tight text-royal-600 md:text-4xl">
+                {staffCount > 0 ? staffCount.toLocaleString("id-ID") : "—"}
+              </p>
+              <p className="mt-1 text-sm text-slate-500">{t("statsStaff")}</p>
+            </div>
+            <div className="text-center">
+              <p className="font-display text-3xl font-bold tracking-tight text-royal-600 md:text-4xl">
+                {institution.studyPrograms.length}
+              </p>
+              <p className="mt-1 text-sm text-slate-500">{t("statsPrograms")}</p>
+            </div>
+            <div className="text-center">
+              <p className="font-display text-3xl font-bold tracking-tight text-royal-600 md:text-4xl">
+                {partners.length > 0 ? partners.length.toString() : "—"}
+              </p>
+              <p className="mt-1 text-sm text-slate-500">{t("statsPartners")}</p>
+            </div>
+          </div>
+        </Container>
+      </section>
 
       {/* ── FUSPI INTRO ─────────────────────────── */}
       <section className="bg-white py-16 md:py-24">
@@ -362,13 +362,13 @@ export default async function HomePage({params}: {params: Promise<{locale: AppLo
       ) : null}
 
       {/* ── NEWS ──────────────────────────────────── */}
-      {postRows.length > 0 ? (
-        <section className="bg-slate-50 py-16 md:py-24">
-          <Container>
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <SectionHeading as="h2" id="news" title={t("newsTitle")} />
-              <Link href="/berita" className="inline-flex items-center gap-1.5 text-sm font-medium text-royal-600 transition-colors hover:text-royal-700">{t("viewAll")}<ArrowRight aria-hidden className="size-4 rtl:rotate-180" strokeWidth={1.5} /></Link>
-            </div>
+      <section className="bg-slate-50 py-16 md:py-24">
+        <Container>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <SectionHeading as="h2" id="news" title={t("newsTitle")} />
+            <Link href="/berita" className="inline-flex items-center gap-1.5 text-sm font-medium text-royal-600 transition-colors hover:text-royal-700">{t("viewAll")}<ArrowRight aria-hidden className="size-4 rtl:rotate-180" strokeWidth={1.5} /></Link>
+          </div>
+          {postRows.length > 0 ? (
             <div className="mt-10 grid gap-8 lg:grid-cols-2">
               {featuredPost ? (
                 <PostCardHorizontal href={`/berita/${featuredPost.slug}`} title={resolveLocale(featuredPost.translations, locale)?.title ?? ""}
@@ -389,9 +389,14 @@ export default async function HomePage({params}: {params: Promise<{locale: AppLo
                 ))}
               </div>
             </div>
-          </Container>
-        </section>
-      ) : null}
+          ) : (
+            <div className="mt-10 rounded-xl border border-slate-200 bg-white p-8 text-center md:p-12">
+              <p className="font-display text-lg font-semibold text-slate-900">{t("newsEmptyTitle")}</p>
+              <p className="mt-2 text-sm text-slate-500">{t("newsEmptyDescription")}</p>
+            </div>
+          )}
+        </Container>
+      </section>
 
       {/* ── SERVICES ──────────────────────────────── */}
       {services.length > 0 ? (

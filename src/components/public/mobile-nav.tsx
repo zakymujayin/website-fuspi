@@ -12,7 +12,7 @@ import type { ExternalLink, NavGroup, NavLink } from "@/components/public/nav-it
 
 type MobileNavProps = {
   primary: readonly NavGroup[];
-  content: readonly NavLink[];
+  content?: readonly NavLink[];
   utility: readonly ExternalLink[];
   externalHint: string;
 };
@@ -126,19 +126,21 @@ export function MobileNav({ primary, content, utility, externalHint }: MobileNav
             )}
           </nav>
 
-          <nav aria-labelledby="drawer-content" className="flex flex-col border-t border-slate-200 py-3">
-            <SectionTitle id="drawer-content">{t("contentLabel")}</SectionTitle>
-            {content.map((item) => (
-              <Link
-                key={item.key}
-                href={item.href}
-                onClick={close}
-                className={`${TARGET_CLASS} text-slate-600 hover:bg-royal-50 hover:text-royal-700`}
-              >
-                {t(item.key)}
-              </Link>
-            ))}
-          </nav>
+          {content?.length ? (
+            <nav aria-labelledby="drawer-content" className="flex flex-col border-t border-slate-200 py-3">
+              <SectionTitle id="drawer-content">{t("contentLabel")}</SectionTitle>
+              {content.map((item) => (
+                <Link
+                  key={item.key}
+                  href={item.href}
+                  onClick={close}
+                  className={`${TARGET_CLASS} text-slate-600 hover:bg-royal-50 hover:text-royal-700`}
+                >
+                  {t(item.key)}
+                </Link>
+              ))}
+            </nav>
+          ) : null}
 
           <nav aria-labelledby="drawer-utility" className="flex flex-col border-t border-slate-200 py-3">
             <SectionTitle id="drawer-utility">{t("utilityLabel")}</SectionTitle>

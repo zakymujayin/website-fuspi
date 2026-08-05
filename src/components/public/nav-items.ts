@@ -15,19 +15,13 @@ export type NavGroup = NavLink & {
   children?: readonly NavLink[];
 };
 
-export const primaryNav: readonly NavGroup[] = [
-  { key: "profile", href: "/profil" },
-  {
-    key: "studyPrograms",
-    href: "/prodi",
-    children: institution.studyPrograms.map((program) => ({
-      key: `program.${program.code}`,
-      href: `/prodi/${program.slug}`,
-    })),
-  },
-  { key: "academics", href: "/akademik" },
-  { key: "research", href: "/riset" },
-  { key: "services", href: "/layanan" },
+export const profileNav: readonly NavGroup[] = [
+  { key: "history", href: "/profil/sejarah" },
+  { key: "visionMission", href: "/profil/visi-misi" },
+  { key: "structure", href: "/profil/struktur" },
+  { key: "leadership", href: "/profil/pimpinan" },
+  { key: "lecturers", href: "/dosen" },
+  { key: "facilities", href: "/profil/fasilitas" },
   { key: "contact", href: "/kontak" },
 ] as const;
 
@@ -39,6 +33,29 @@ export const contentNav: readonly NavLink[] = [
   { key: "agenda", href: "/agenda" },
   { key: "albums", href: "/album" },
   { key: "documents", href: "/dokumen" },
+] as const;
+
+export const infoNav: NavGroup = {
+  key: "publication",
+  href: "/berita",
+  children: contentNav,
+} as const;
+
+export const primaryNav: readonly NavGroup[] = [
+  { key: "profile", href: "/profil", children: profileNav },
+  {
+    key: "studyPrograms",
+    href: "/prodi",
+    children: institution.studyPrograms.map((program) => ({
+      key: `program.${program.code}`,
+      href: `/prodi/${program.slug}`,
+    })),
+  },
+  { key: "academics", href: "/akademik" },
+  { key: "research", href: "/riset" },
+  { key: "services", href: "/layanan" },
+  infoNav,
+  { key: "contact", href: "/kontak" },
 ] as const;
 
 /** Utility topbar (docs/17-B layer 2). External systems, opened in a new tab. */
