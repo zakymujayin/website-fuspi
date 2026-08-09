@@ -97,6 +97,41 @@ bukan di Git maupun unit file yang dapat dibaca umum.
 Migration tidak dijalankan secara otomatis oleh request aplikasi dan tidak memakai `migrate dev`
 di staging/produksi.
 
+### Catatan deploy `main` 2026-08-10
+
+Commit produksi yang sudah dipush ke GitHub `main`:
+
+```text
+f1d533a46c38115a7e24a180f337af9caffcc30d
+```
+
+Server production cukup melakukan pull pada clone aplikasi FUSPI, yaitu folder repo
+`website-fuspi`. Folder kerja lokal agent seperti `fuspi-claude`, `fuspi-deepseek`,
+`fuspi-gpt`, `fuspi-integration`, dan `/tmp/fuspi-*` bukan bagian deploy production.
+
+Urutan minimal pada server production:
+
+```bash
+cd /path/ke/website-fuspi
+git pull origin main
+npm ci
+npx prisma generate
+npx prisma migrate deploy
+npm run build
+```
+
+Setelah build berhasil, restart process manager yang menjalankan aplikasi, misalnya service
+systemd, PM2, atau container sesuai konfigurasi server. Jangan gunakan `prisma migrate dev` di
+production. Rilis ini menambahkan migration:
+
+```text
+prisma/migrations/20260810002000_home_video_facility_site_media/migration.sql
+```
+
+Migration tersebut membuat tabel `HomeVideo`, `Facility`, translation terkait, enum
+`FacilityType`, serta kolom media pada `SiteSetting`. Karena itu `npx prisma migrate deploy`
+wajib dijalankan sebelum aplikasi production melayani traffic baru.
+
 ## 6. Reverse proxy dan process manager
 
 - Teruskan host/protocol/IP hanya dari proxy tepercaya.
