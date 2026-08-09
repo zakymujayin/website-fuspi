@@ -218,6 +218,14 @@ suite("M4 Page mutation runtime on PostgreSQL", () => {
     const slug = `${marker}-role-reject`;
     const roles: ActiveDatabaseSession["role"][] = ["EDITOR", "PETUGAS", "SATGAS_PPKS"];
 
+    await expect(createPage(
+      prisma,
+      {...actor(adminId, "ADMIN"), mustChangePassword: true},
+      input(`${slug}-password-change-required`),
+      clock,
+    )).resolves.toEqual({ok: false, code: "UNAUTHENTICATED"});
+    expect(await prisma.page.count({where: {slug: `${slug}-password-change-required`}})).toBe(0);
+
     for (const role of roles) {
       await expect(createPage(
         prisma,

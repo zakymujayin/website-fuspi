@@ -47,7 +47,11 @@ function resultFailure(code: PageMutationFailureCode): PageMutationResult {
 
 function actorFromSession(rawSession: unknown, now: Date): Actor | PageMutationResult {
   const parsed = ActiveDatabaseSessionSchema.safeParse(rawSession);
-  if (!parsed.success || parsed.data.expiresAt.getTime() <= now.getTime()) {
+  if (
+    !parsed.success
+    || parsed.data.expiresAt.getTime() <= now.getTime()
+    || parsed.data.mustChangePassword
+  ) {
     return resultFailure("UNAUTHENTICATED");
   }
   if (parsed.data.role !== "ADMIN") {
@@ -270,13 +274,28 @@ async function replaceTranslations(
   }
 }
 
-function isUniqueConstraintError(error: unknown) {
-  return Boolean(
-    error
-    && typeof error === "object"
-    && "code" in error
-    && error.code === "P2002",
-  );
+function containsSlugSignal(value: unknown): boolean {
+  if (typeof value === "string") return value.toLowerCase().includes("slug");
+  if (Array.isArray(value)) return value.some(containsSlugSignal);
+  return false;
+}
+
+function isSlugUniqueConstraintError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const candidate = error as {
+    code?: unknown;
+    meta?: {target?: unknown};
+    message?: unknown;
+    cause?: unknown;
+  };
+  const isP2002 = candidate.code === "P2002";
+  if (isP2002 && (
+    containsSlugSignal(candidate.meta?.target)
+    || containsSlugSignal(candidate.message)
+  )) {
+    return true;
+  }
+  return isSlugUniqueConstraintError(candidate.cause);
 }
 
 function successfulResult(page: {
@@ -355,7 +374,7 @@ export async function createPage(
       return successfulResult(page);
     });
   } catch (error) {
-    return resultFailure(isUniqueConstraintError(error) ? "SLUG_CONFLICT" : "INTERNAL_ERROR");
+    return resultFailure(isSlugUniqueConstraintError(error) ? "SLUG_CONFLICT" : "INTERNAL_ERROR");
   }
 }
 
@@ -512,7 +531,7 @@ export async function updatePage(
       return successfulResult(page);
     });
   } catch (error) {
-    return resultFailure(isUniqueConstraintError(error) ? "SLUG_CONFLICT" : "INTERNAL_ERROR");
+    return resultFailure(isSlugUniqueConstraintError(error) ? "SLUG_CONFLICT" : "INTERNAL_ERROR");
   }
 }
 

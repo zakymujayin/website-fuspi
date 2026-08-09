@@ -108,6 +108,13 @@ describe("M4 Page mutation trust boundary", () => {
       ok: false,
       code: "UNAUTHENTICATED",
     });
+    await expect(createPage(database, {
+      ...session(),
+      mustChangePassword: true,
+    }, createInput(), clock)).resolves.toEqual({
+      ok: false,
+      code: "UNAUTHENTICATED",
+    });
     await expect(createPage(database, session("EDITOR"), createInput(), clock)).resolves.toEqual({
       ok: false,
       code: "FORBIDDEN",
@@ -243,7 +250,15 @@ describe("M4 Page mutation trust boundary", () => {
 
   it("maps unique conflicts and unexpected failures to stable non-technical results", async () => {
     const slugDatabase = {
-      $transaction: vi.fn().mockRejectedValue({code: "P2002", detail: "slug"}),
+      $transaction: vi.fn().mockRejectedValue({code: "P2002", meta: {target: ["slug"]}}),
+    } as unknown as PageMutationDatabase;
+    const unrelatedUniqueDatabase = {
+      $transaction: vi.fn().mockRejectedValue({code: "P2002", meta: {target: ["pageId", "locale"]}}),
+    } as unknown as PageMutationDatabase;
+    const wrappedSlugDatabase = {
+      $transaction: vi.fn().mockRejectedValue(
+        new Error("Transaction failed", {cause: {code: "P2002", meta: {target: ["Page_slug_key"]}}}),
+      ),
     } as unknown as PageMutationDatabase;
     const failedDatabase = {
       $transaction: vi.fn().mockRejectedValue(
@@ -252,6 +267,25 @@ describe("M4 Page mutation trust boundary", () => {
     } as unknown as PageMutationDatabase;
 
     await expect(createPage(slugDatabase, session(), createInput(), clock)).resolves.toEqual({
+      ok: false,
+      code: "SLUG_CONFLICT",
+    });
+    await expect(createPage(unrelatedUniqueDatabase, session(), createInput(), clock)).resolves.toEqual({
+      ok: false,
+      code: "INTERNAL_ERROR",
+    });
+    const updateFields = {
+      slug: "slug-conflict",
+      parentId: null,
+      heroMediaId: null,
+      order: 0,
+      translations: createInput().translations,
+    };
+    await expect(updatePage(wrappedSlugDatabase, session(), {
+      pageId: "page-1",
+      expectedVersion: 1,
+      ...updateFields,
+    }, clock)).resolves.toEqual({
       ok: false,
       code: "SLUG_CONFLICT",
     });
@@ -552,7 +586,7 @@ describe("M4 Page query trust boundary", () => {
     createdAt: NOW,
     updatedAt: NOW,
     parent: {translations: []},
-    children: [],
+    _count: {children: 0},
     translations: [{
       locale: "id" as const,
       title,
@@ -609,6 +643,43 @@ describe("M4 Page query trust boundary", () => {
     expect(result.data.items[0].parentTitle).toBeNull();
   });
 
+  it("runs TITLE_ASC list reads inside one repeatable-read transaction", async () => {
+    const tx = {
+      $queryRaw: vi.fn().mockResolvedValue([{id: "p-a"}]),
+      page: {
+        findMany: vi.fn().mockResolvedValue([idRow("p-a", "Alpha")]),
+        count: vi.fn().mockResolvedValue(1),
+      },
+    };
+    const database = {
+      page: {
+        findMany: vi.fn(),
+        count: vi.fn(),
+      },
+      $queryRaw: vi.fn(),
+      $transaction: vi.fn(async (callback: (transaction: typeof tx) => unknown) => callback(tx)),
+    } as unknown as PageQueryDatabase;
+
+    const result = await listPages(database, session(), {
+      page: 1,
+      pageSize: 10,
+      status: "ALL",
+      search: "",
+      sort: "TITLE_ASC",
+    }, clock);
+
+    expect(result).toMatchObject({ok: true});
+    expect(database.$transaction).toHaveBeenCalledWith(expect.any(Function), {
+      isolationLevel: "RepeatableRead",
+    });
+    expect(tx.$queryRaw).toHaveBeenCalledOnce();
+    expect(tx.page.findMany).toHaveBeenCalledOnce();
+    expect(tx.page.count).toHaveBeenCalledOnce();
+    expect(database.$queryRaw).not.toHaveBeenCalled();
+    expect(database.page.findMany).not.toHaveBeenCalled();
+    expect(database.page.count).not.toHaveBeenCalled();
+  });
+
   it("returns detail with all translations and ISO timestamps", async () => {
     const database = {
       page: {
@@ -623,7 +694,7 @@ describe("M4 Page query trust boundary", () => {
           createdAt: NOW,
           updatedAt: NOW,
           parent: {translations: []},
-          children: [],
+          _count: {children: 0},
           translations: [
             {locale: "id" as const, title: "Profil", content: "<p>Isi</p>", metaTitle: null, metaDesc: null},
             {locale: "en" as const, title: "Profile", content: "<p>Content</p>", metaTitle: null, metaDesc: null},

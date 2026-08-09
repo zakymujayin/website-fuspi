@@ -128,7 +128,7 @@ describe("M4 Page admin transport", () => {
       createdAt: NOW,
       updatedAt: NOW,
       parent: null,
-      children: [],
+      _count: {children: 0},
       translations: [translation],
     }]);
     const count = vi.fn().mockResolvedValue(1);
@@ -183,7 +183,7 @@ describe("M4 Page admin transport", () => {
       createdAt: NOW,
       updatedAt: NOW,
       parent: null,
-      children: [],
+      _count: {children: 0},
       translations: [translation],
     });
     const mediaFindUnique = vi.fn().mockResolvedValue({
@@ -232,7 +232,7 @@ describe("M4 Page admin transport", () => {
         createdAt: NOW,
         updatedAt: NOW,
         parent: null,
-        children: [],
+        _count: {children: 0},
         translations: [translation],
       })},
       media: {findUnique: vi.fn().mockResolvedValue({
