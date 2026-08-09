@@ -1,19 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
+import { BarChart3, BookOpen, Briefcase, FileText, GraduationCap, Handshake, Users } from "lucide-react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { Container } from "@/components/ui/container";
 import { cn } from "@/lib/utils";
+import type { PublicStatisticItem } from "@/features/home-nav/public-query";
 
-const STATS = [
-  {key: "programs", value: 5, suffix: ""},
-  {key: "lecturers", value: 62, suffix: "+"},
-  {key: "staff", value: 18, suffix: "+"},
-  {key: "students", value: 1200, suffix: "+"},
-  {key: "partners", value: 24, suffix: "+"},
-  {key: "publications", value: 80, suffix: "+"},
-] as const;
+const iconProps = { "aria-hidden": true as const, className: "size-8", strokeWidth: 1.5 };
+
+const ICONS: Record<string, ReactNode> = {
+  "book-open": <BookOpen {...iconProps} />, users: <Users {...iconProps} />, briefcase: <Briefcase {...iconProps} />,
+  "graduation-cap": <GraduationCap {...iconProps} />, handshake: <Handshake {...iconProps} />, "file-text": <FileText {...iconProps} />,
+};
+const DEFAULT_ICON = <BarChart3 {...iconProps} />;
 
 function useAnimatedNumber(target: number, start: boolean) {
   const [value, setValue] = useState(0);
@@ -47,12 +47,13 @@ function StatItem({
   index,
   inView,
 }: {
-  item: (typeof STATS)[number];
+  item: PublicStatisticItem;
   index: number;
   inView: boolean;
 }) {
-  const t = useTranslations("Home");
-  const value = useAnimatedNumber(item.value, inView);
+  const numeric = Number.parseInt(item.value, 10);
+  const value = useAnimatedNumber(Number.isFinite(numeric) ? numeric : 0, inView);
+  const icon = (item.icon && ICONS[item.icon]) || DEFAULT_ICON;
   return (
     <div
       className={cn(
@@ -61,17 +62,21 @@ function StatItem({
       )}
       style={{transitionDelay: `${index * 80}ms`}}
     >
-      <p className="font-display text-3xl font-bold tracking-tight text-white md:text-4xl">
-        {value.toLocaleString("id-ID")}
+      <span className="mx-auto mb-2 flex items-center justify-center text-royal-300">
+        {icon}
+      </span>
+      <p className="font-display text-2xl font-bold tracking-tight text-white md:text-3xl">
+        {Number.isFinite(numeric) ? value.toLocaleString("id-ID") : item.value}
         {item.suffix}
       </p>
-      <p className="mt-1 text-sm text-slate-300">{t(`stat.${item.key}`)}</p>
+      <p className="mt-1 text-xs text-slate-300 md:text-sm">{item.label}</p>
     </div>
   );
 }
 
-export function StatsSection() {
-  const t = useTranslations("Home");
+type StatsSectionProps = { items: readonly PublicStatisticItem[] };
+
+export function StatsSection({ items }: StatsSectionProps) {
   const ref = useRef<HTMLElement>(null);
   const [inView, setInView] = useState(false);
 
@@ -91,24 +96,18 @@ export function StatsSection() {
     return () => observer.disconnect();
   }, []);
 
+  if (items.length === 0) return null;
+
   return (
     <section
       ref={ref}
-      className="relative overflow-hidden bg-navy-900 py-14 md:py-20"
+      className="relative overflow-hidden bg-navy-900 py-16 md:py-20"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(65,105,225,.12),transparent_50%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(65,105,225,.14),transparent_55%)]" />
       <Container className="relative z-10">
-        <div className="mb-10 text-center">
-          <h2 className="font-display text-xl font-bold tracking-tight text-white md:text-2xl">
-            {t("statsTitle")}
-          </h2>
-          <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-300">
-            {t("statsDescription")}
-          </p>
-        </div>
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-3 lg:grid-cols-6">
-          {STATS.map((item, index) => (
-            <StatItem key={item.key} item={item} index={index} inView={inView} />
+        <div className="grid grid-cols-2 gap-y-12 gap-x-8 md:grid-cols-3 lg:grid-cols-6">
+          {items.map((item, index) => (
+            <StatItem key={item.id} item={item} index={index} inView={inView} />
           ))}
         </div>
       </Container>

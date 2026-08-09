@@ -5,13 +5,17 @@ import { cn } from "@/lib/utils";
 type BrandMarkProps = {
   tone?: "light" | "dark";
   className?: string;
+  /** Hides the "FUSPI" wordmark and subtitle, leaving only the mark. */
+  showLabel?: boolean;
 };
 
 /**
  * Wordmark placeholder. The faculty logo is a media asset that must not be
  * mirrored in RTL; it is swapped in once the asset lands (see handoff).
+ * `showLabel: false` renders the mark alone (header/footer both use this —
+ * the full name is still announced to assistive tech via the sr-only span).
  */
-export function BrandMark({ tone = "light", className }: BrandMarkProps) {
+export function BrandMark({ tone = "light", className, showLabel = true }: BrandMarkProps) {
   return (
     <Link
       href="/"
@@ -21,7 +25,8 @@ export function BrandMark({ tone = "light", className }: BrandMarkProps) {
       <span
         aria-hidden
         className={cn(
-          "grid size-11 shrink-0 place-items-center rounded-lg font-display text-sm font-bold tracking-tight",
+          "grid shrink-0 place-items-center rounded-lg font-display font-bold tracking-tight",
+          showLabel ? "size-11 text-sm" : "size-11 text-base",
           tone === "light"
             ? "bg-royal-500 text-white"
             : "bg-white/10 text-white ring-1 ring-white/20",
@@ -29,26 +34,26 @@ export function BrandMark({ tone = "light", className }: BrandMarkProps) {
       >
         {institution.shortName.slice(0, 2)}
       </span>
-      {/* The wordmark yields width before the primary menu does: at 1024px in EN
-          the menu must stay fully readable, so the subtitle truncates instead. */}
-      <span className="flex min-w-0 flex-col leading-tight">
-        <span
-          className={cn(
-            "font-display text-base font-bold",
-            tone === "light" ? "text-royal-900" : "text-white",
-          )}
-        >
-          {institution.shortName}
+      {showLabel ? (
+        <span className="flex min-w-0 flex-col leading-tight">
+          <span
+            className={cn(
+              "font-display text-base font-bold",
+              tone === "light" ? "text-royal-900" : "text-white",
+            )}
+          >
+            {institution.shortName}
+          </span>
+          <span
+            className={cn(
+              "truncate text-[11px] tracking-wide",
+              tone === "light" ? "text-slate-500" : "text-slate-400",
+            )}
+          >
+            {institution.university}
+          </span>
         </span>
-        <span
-          className={cn(
-            "truncate text-[11px] tracking-wide",
-            tone === "light" ? "text-slate-500" : "text-slate-400",
-          )}
-        >
-          {institution.university}
-        </span>
-      </span>
+      ) : null}
       <span className="sr-only">{institution.name}</span>
     </Link>
   );

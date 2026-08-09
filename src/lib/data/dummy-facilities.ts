@@ -14,7 +14,7 @@ export const dummyFacilities: readonly DummyFacility[] = [
       en: "A collection of Islamic books and references supporting student learning and research.",
       ar: "مجموعة من الكتب والمراجع الإسلامية لدعم تعلم الطلاب وأبحاثهم.",
     },
-    image: "/images/facilities/library.jpg",
+    image: "/images/facilities/library.svg",
   },
   {
     id: "classroom",
@@ -24,7 +24,7 @@ export const dummyFacilities: readonly DummyFacility[] = [
       en: "Comfortable lecture halls with audio-visual facilities for an optimal learning experience.",
       ar: "قاعات محاضرات مريحة بمرافق سمعية وبصرية لتجربة تعلم مثلى.",
     },
-    image: "/images/hero/slide-2.jpg",
+    image: "/images/facilities/classroom.svg",
   },
   {
     id: "mosque",
@@ -34,7 +34,7 @@ export const dummyFacilities: readonly DummyFacility[] = [
       en: "A hub for Islamic activities, study sessions, and spiritual character development.",
       ar: "مركز للأنشطة الإسلامية والدروس وتنمية الشخصية الروحية للطلاب.",
     },
-    image: "/images/hero/slide-3.jpg",
+    image: "/images/facilities/mosque.svg",
   },
   {
     id: "lab",
@@ -44,6 +44,26 @@ export const dummyFacilities: readonly DummyFacility[] = [
       en: "Arabic and English language practice facilities to support student competence.",
       ar: "مرافق لممارسة اللغتين العربية والإنجليزية لدعم كفاءة الطلاب.",
     },
-    image: "/images/hero/slide-1.jpg",
+    image: "/images/facilities/lab.svg",
+  },
+  {
+    id: "auditorium",
+    title: {id: "Ruang Sidang dan Auditorium", en: "Meeting Hall and Auditorium", ar: "قاعة الاجتماعات والمدرج"},
+    description: {
+      id: "Ruang serbaguna untuk sidang munaqasyah, seminar, dan acara resmi fakultas berkapasitas besar.",
+      en: "A multipurpose hall for thesis defenses, seminars, and large official faculty events.",
+      ar: "قاعة متعددة الأغراض لمناقشات الرسائل والندوات والفعاليات الرسمية الكبرى للكلية.",
+    },
+    image: "/images/facilities/auditorium.svg",
+  },
+  {
+    id: "reading-room",
+    title: {id: "Ruang Baca Digital", en: "Digital Reading Room", ar: "قاعة القراءة الرقمية"},
+    description: {
+      id: "Area baca tenang dengan akses jurnal elektronik dan basis data keislaman internasional.",
+      en: "A quiet reading area with access to e-journals and international Islamic studies databases.",
+      ar: "منطقة قراءة هادئة مع إمكانية الوصول إلى المجلات الإلكترونية وقواعد البيانات الإسلامية الدولية.",
+    },
+    image: "/images/facilities/reading-room.svg",
   },
 ] as const;

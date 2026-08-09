@@ -65,8 +65,8 @@ describe("single header geometry", () => {
     expect(source).toContain("z-30");
   });
 
-  it("keeps the unified bar at 72px", () => {
-    expect(header).toContain("h-[72px]");
+  it("keeps the unified bar at 96px", () => {
+    expect(header).toContain("h-24");
   });
 
   it("places the language switcher and utility links inside the top bar", () => {
@@ -368,7 +368,7 @@ describe("landmarks", () => {
 
     expect(layout.indexOf("<SkipLink")).toBeLessThan(layout.indexOf("<SiteHeader"));
     expect(layout).toContain('id="main"');
-    expect(layout).toContain("scroll-mt-[112px]");
+    expect(layout).toContain("scroll-mt-[136px]");
   });
 });
 

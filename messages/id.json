@@ -73,6 +73,7 @@
     "academics": "Akademik",
     "research": "Riset & PkM",
     "services": "Layanan",
+    "servicesAcademic": "Sistem Layanan Akademik",
     "publication": "Publikasi",
     "contact": "Kontak",
     "news": "Berita",
@@ -89,6 +90,10 @@
     "booking": "Peminjaman Ruang",
     "ppid": "PPID",
     "faq": "FAQ",
+    "openSearch": "Buka pencarian",
+    "closeSearch": "Tutup pencarian",
+    "searchPlaceholder": "Cari di situs FUSPI...",
+    "searchSubmit": "Cari",
     "program": {
       "IAT": "Ilmu Al-Qur’an dan Tafsir",
       "IH": "Ilmu Hadis",
@@ -107,6 +112,7 @@
     "home": "Beranda",
     "lecturers": "Dosen",
     "staff": "Tenaga Kependidikan",
+    "studentAffairs": "Kemahasiswaan",
     "partnerships": "Kerja Sama",
     "scholarships": "Beasiswa",
     "achievements": "Prestasi",
@@ -120,6 +126,8 @@
     "quickLinks": "Tautan Cepat",
     "contact": "Kontak",
     "contactHint": "Alamat kampus, surel, dan telepon fakultas ditampilkan setelah pengaturan situs tersedia.",
+    "openMap": "Buka di Google Maps",
+    "mapTitle": "Peta lokasi kampus FUSPI",
     "legalLabel": "Tautan kebijakan",
     "privacy": "Kebijakan Privasi",
     "accessibility": "Aksesibilitas",
@@ -176,6 +184,18 @@
       "title": "Berita",
       "description": "Kabar dan kegiatan terbaru Fakultas Ushuluddin dan Pemikiran Islam.",
       "metaDescription": "Kumpulan berita dan kegiatan terbaru Fakultas Ushuluddin dan Pemikiran Islam (FUSPI)."
+    },
+    "pengumuman": {
+      "breadcrumbLabel": "Pengumuman",
+      "title": "Pengumuman",
+      "description": "Pengumuman resmi Fakultas Ushuluddin dan Pemikiran Islam.",
+      "metaDescription": "Kumpulan pengumuman resmi Fakultas Ushuluddin dan Pemikiran Islam (FUSPI)."
+    },
+    "kolom": {
+      "breadcrumbLabel": "Kolom",
+      "title": "Kolom",
+      "description": "Opini dan gagasan dari dekan, dosen, dan mahasiswa FUSPI.",
+      "metaDescription": "Kumpulan kolom opini dari sivitas akademika Fakultas Ushuluddin dan Pemikiran Islam (FUSPI)."
     }
   },
   "AdminMediaLibrary": {
@@ -702,7 +722,11 @@
     "albums": "Album",
     "events": "Agenda",
     "faq": "FAQ",
-    "testimonials": "Testimoni"
+    "testimonials": "Testimoni",
+    "homeSlider": "Slider Beranda",
+    "homeStatistic": "Statistik",
+    "homeSection": "Bagian Beranda",
+    "homeSettings": "Pengaturan Beranda"
   },
   "PublicContent": {
     "readMore": "Selengkapnya",
@@ -761,7 +785,8 @@
     },
     "testimonial": {
       "listTitle": "Testimoni",
-      "listDescription": "Testimoni dari alumni dan mahasiswa."
+      "listDescription": "Testimoni dari alumni dan mahasiswa.",
+      "graduationYear": "Lulus"
     },
     "pagination": {
       "ariaLabel": "Navigasi halaman",
@@ -782,8 +807,56 @@
     "newsEmptyDescription": "Berita dan kegiatan fakultas akan tampil di sini setelah diterbitkan.",
     "viewAll": "Lihat semuanya",
     "readMore": "Selengkapnya",
+    "servicesEyebrow": "Layanan Fakultas",
     "servicesTitle": "Layanan",
     "servicesDescription": "Informasi layanan akademik, umum, laboratorium, dan pengaduan untuk sivitas akademika.",
+    "serviceCta": "Akses Layanan",
+    "service": {
+      "sila": {
+        "title": "Sistem Informasi Akademik (SILA)",
+        "description": "Akses nilai, KRS, jadwal kuliah, dan data akademik mahasiswa secara daring."
+      },
+      "complaints": {
+        "title": "Layanan Pengaduan",
+        "description": "Sampaikan keluhan, saran, atau masukan terkait layanan akademik dan kemahasiswaan."
+      },
+      "booking": {
+        "title": "Peminjaman Ruang",
+        "description": "Ajukan peminjaman ruang kelas, aula, atau fasilitas kampus untuk kegiatan resmi."
+      },
+      "ejournal": {
+        "title": "E-Journal",
+        "description": "Akses publikasi ilmiah dan jurnal penelitian dosen serta mahasiswa FUSPI."
+      }
+    },
+    "videosEyebrow": "Galeri Video",
+    "videosTitle": "Video Fakultas",
+    "videosDescription": "Kenali suasana kuliah, kegiatan, dan lingkungan kampus FUSPI lewat video.",
+    "videoTourBadge": "Video Tour Kampus",
+    "watchVideo": "Tonton Video",
+    "video": {
+      "tour": {
+        "title": "Tur Kampus FUSPI",
+        "description": "Jelajahi ruang kuliah, perpustakaan, dan masjid kampus dalam satu video tur singkat."
+      },
+      "v2": {
+        "title": "Suasana Perkuliahan di FUSPI"
+      },
+      "v3": {
+        "title": "Wisuda Sarjana Angkatan 2026"
+      },
+      "v4": {
+        "title": "Pengabdian Masyarakat di Pesantren Ciceri"
+      }
+    },
+    "columnsEyebrow": "Kolom",
+    "columnsTitle": "Gagasan dari Sivitas Akademika",
+    "columnsDescription": "Tulisan opini dan pemikiran dari dekan, dosen, dan mahasiswa FUSPI.",
+    "columnRole": {
+      "dean": "Dekan",
+      "lecturer": "Dosen",
+      "student": "Mahasiswa"
+    },
     "partnersTitle": "Kerja Sama",
     "partnersDescription": "Jaringan kemitraan FUSPI dengan perguruan tinggi dan lembaga keislaman nasional.",
     "footerCtaTitle": "Siap bergabung bersama kami?",
@@ -830,12 +903,30 @@
     "programsEyebrow": "Jenjang Pendidikan",
     "ctaEyebrow": "Bergabung",
     "advantage": {
-      "quran": {"title": "Kajian Al-Qur'an & Tafsir", "description": "Pembelajaran tekstual dan kontekstual"},
-      "hadith": {"title": "Ilmu Hadis", "description": "Sanad dan metodologi hadis"},
-      "aqidah": {"title": "Aqidah & Filsafat Islam", "description": "Kajian rasional-teologis"},
-      "religions": {"title": "Studi Agama-Agama", "description": "Dialog dan pemahaman lintas iman"},
-      "sufism": {"title": "Tasawuf & Psikoterapi", "description": "Spiritualitas dan kesejahteraan"},
-      "integrated": {"title": "Pendidikan Integratif", "description": "Ilmu keislaman dan keterampilan zaman"}
+      "quran": {
+        "title": "Kajian Al-Qur'an & Tafsir",
+        "description": "Pembelajaran tekstual dan kontekstual"
+      },
+      "hadith": {
+        "title": "Ilmu Hadis",
+        "description": "Sanad dan metodologi hadis"
+      },
+      "aqidah": {
+        "title": "Aqidah & Filsafat Islam",
+        "description": "Kajian rasional-teologis"
+      },
+      "religions": {
+        "title": "Studi Agama-Agama",
+        "description": "Dialog dan pemahaman lintas iman"
+      },
+      "sufism": {
+        "title": "Tasawuf & Psikoterapi",
+        "description": "Spiritualitas dan kesejahteraan"
+      },
+      "integrated": {
+        "title": "Pendidikan Integratif",
+        "description": "Ilmu keislaman dan keterampilan zaman"
+      }
     }
   },
   "Pages": {
@@ -847,8 +938,11 @@
     "visionMissionDesc": "Arah dan komitmen fakultas dalam pendidikan Islam.",
     "structure": "Struktur Organisasi",
     "structureDesc": "Susunan organisasi dan tata kelola fakultas.",
+    "kaprodi": "Ketua Program Studi",
     "leadership": "Pimpinan",
     "leadershipDesc": "Dekan, wakil dekan, dan jajaran pimpinan.",
+    "dean": "Dekan",
+    "viceDeans": "Wakil Dekan",
     "lecturers": "Dosen",
     "lecturersDesc": "Direktori tenaga pengajar dan profil akademik.",
     "facilities": "Fasilitas",
@@ -857,6 +951,14 @@
     "academicDescription": "Informasi akademik, kurikulum, dan kalender akademik.",
     "researchTitle": "Penelitian & PKM",
     "researchDescription": "Penelitian dan pengabdian kepada masyarakat.",
+    "researchFocusTitle": "Fokus Riset",
+    "researchFocusDesc": "Bidang kajian unggulan yang dikembangkan oleh dosen dan peneliti fakultas.",
+    "hubResearchTitle": "Penelitian",
+    "hubResearchDesc": "Fokus riset, publikasi, dan kolaborasi ilmiah dosen serta mahasiswa.",
+    "hubCommunityServiceTitle": "Pengabdian Masyarakat",
+    "hubCommunityServiceDesc": "Program pengabdian yang menjawab kebutuhan masyarakat sekitar.",
+    "hubPartnershipsTitle": "Kerja Sama",
+    "hubPartnershipsDesc": "Kemitraan dengan lembaga dalam dan luar negeri untuk memperluas dampak Tri Dharma.",
     "contactTitle": "Kontak",
     "contactDescription": "Hubungi kami untuk informasi lebih lanjut.",
     "address": "Alamat",
@@ -908,5 +1010,105 @@
     "bookingTitle": "Peminjaman Ruangan",
     "bookingDescription": "Ajukan peminjaman ruangan untuk kegiatan akademik dan non-akademik.",
     "studyPrograms": "Program Studi"
+  },
+  "AdminHomeNav": {
+    "createAction": "Tambah",
+    "updateAction": "Simpan",
+    "cancel": "Batal",
+    "order": "Urutan",
+    "orderLabel": "Urutan {order}",
+    "isVisible": "Tampilkan di beranda",
+    "translations": "Terjemahan",
+    "localeTabs": "Pilih bahasa",
+    "locale": {
+      "id": "ID",
+      "en": "EN",
+      "ar": "AR"
+    },
+    "editLabelFor": "Sunting {title}",
+    "visibility": {
+      "VISIBLE": "Tampil",
+      "HIDDEN": "Tersembunyi"
+    },
+    "empty": {
+      "description": "Belum ada data. Klik \"Tambah\" untuk membuat yang pertama."
+    },
+    "unavailable": {
+      "description": "Gagal memuat data. Coba muat ulang halaman."
+    },
+    "picker": {
+      "choose": "Pilih gambar",
+      "change": "Ganti gambar",
+      "clear": "Hapus gambar",
+      "selected": "Gambar terpilih",
+      "none": "Belum ada gambar",
+      "loading": "Memuat gambar…",
+      "loadError": "Gagal memuat gambar. Coba lagi.",
+      "empty": "Belum ada gambar di Pustaka Media.",
+      "listLabel": "Daftar gambar"
+    },
+    "errors": {
+      "imageRequired": "Gambar wajib dipilih.",
+      "deanIncomplete": "Nama dekan dan foto dekan harus diisi bersamaan, atau dikosongkan bersamaan.",
+      "videoIncomplete": "URL video dan poster video harus diisi bersamaan, atau dikosongkan bersamaan."
+    },
+    "slider": {
+      "title": "Hero Slider",
+      "description": "Kelola slide yang tampil di bagian atas beranda.",
+      "createTitle": "Tambah Slide",
+      "editTitle": "Sunting Slide",
+      "listAriaLabel": "Daftar slide beranda",
+      "commonFields": "Pengaturan Slide",
+      "image": "Gambar slide",
+      "imageDescription": "Ukuran disarankan 1600×900px.",
+      "slideTitle": "Judul slide",
+      "subtitle": "Subjudul",
+      "ctaHref": "Tautan tombol (opsional)",
+      "ctaLabel": "Label tombol"
+    },
+    "statistic": {
+      "title": "Statistik",
+      "description": "Kelola angka statistik (jumlah program studi, dosen, mahasiswa, dll).",
+      "createTitle": "Tambah Statistik",
+      "editTitle": "Sunting Statistik",
+      "listAriaLabel": "Daftar statistik",
+      "commonFields": "Pengaturan Statistik",
+      "value": "Angka",
+      "suffix": "Akhiran (mis. +)",
+      "icon": "Ikon (nama lucide-react, opsional)",
+      "label": "Label"
+    },
+    "section": {
+      "title": "Bagian Beranda",
+      "description": "Atur visibilitas, urutan, dan judul tiap bagian beranda.",
+      "editTitle": "Sunting Bagian",
+      "listAriaLabel": "Daftar bagian beranda",
+      "itemLimit": "Jumlah item ditampilkan",
+      "background": "Gambar latar (opsional)",
+      "backgroundDescription": "Gambar latar untuk bagian ini, jika diperlukan.",
+      "sectionTitle": "Judul bagian"
+    },
+    "settings": {
+      "title": "Pengaturan Beranda",
+      "description": "Identitas fakultas, sambutan dekan, video profil, dan kontak.",
+      "contact": "Kontak & Media Sosial",
+      "email": "Email",
+      "phone": "Telepon",
+      "dean": "Sambutan Dekan",
+      "deanName": "Nama dekan",
+      "deanPhoto": "Foto dekan",
+      "deanPhotoDescription": "Ukuran disarankan 800×800px.",
+      "deanPosition": "Jabatan dekan",
+      "deanMessage": "Pesan sambutan",
+      "video": "Video Profil",
+      "videoUrl": "URL video (YouTube, dll)",
+      "videoPoster": "Gambar poster video",
+      "videoPosterDescription": "Ditampilkan sebelum video diputar.",
+      "videoTitle": "Judul video",
+      "videoDesc": "Deskripsi video",
+      "facultyName": "Nama fakultas",
+      "tagline": "Tagline",
+      "address1": "Alamat 1"
+    }
   }
 }

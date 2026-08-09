@@ -41,7 +41,7 @@ export async function VisionMissionSection({locale}: {locale: AppLocale}) {
       <Container>
         <div className="grid gap-10 lg:grid-cols-2">
           <div className="rounded-2xl border border-royal-100 bg-royal-50 p-8 md:p-10">
-            <span className="text-[11px] font-medium tracking-wide text-royal-600 uppercase">
+            <span className="text-xs font-medium tracking-wide text-royal-600 uppercase">
               {t("visionLabel")}
             </span>
             <h2 className="mt-4 font-display text-2xl font-bold leading-tight text-royal-900 md:text-3xl">
@@ -50,7 +50,7 @@ export async function VisionMissionSection({locale}: {locale: AppLocale}) {
           </div>
 
           <div>
-            <span className="text-[11px] font-medium tracking-wide text-royal-600 uppercase">
+            <span className="text-xs font-medium tracking-wide text-royal-600 uppercase">
               {t("missionLabel")}
             </span>
             <ul className="mt-6 space-y-5">

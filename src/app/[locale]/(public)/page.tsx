@@ -1,19 +1,29 @@
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
-import {AdvantagesSection} from "@/components/public/advantages-section";
+import {AnnouncementsAgendaSection} from "@/components/public/announcements-agenda-section";
+import {ColumnsSection} from "@/components/public/columns-section";
 import {DeanWelcomeSection} from "@/components/public/dean-welcome-section";
 import {FacilitiesSection} from "@/components/public/facilities-section";
 import {HeroSlider} from "@/components/public/hero-slider";
 import {HomeCtaSection} from "@/components/public/home-cta-section";
-import {NewsAnnouncementsEvents} from "@/components/public/news-announcements-events";
+import {NewsSection} from "@/components/public/news-section";
 import {PartnersSection} from "@/components/public/partners-section";
+import {ServicesSection} from "@/components/public/services-section";
 import {StatsSection} from "@/components/public/stats-section";
-import {StudyProgramsSection} from "@/components/public/study-programs-section";
-import {VisionMissionSection} from "@/components/public/vision-mission-section";
+import {VideosSection} from "@/components/public/videos-section";
 import {institution} from "@/config/institution";
 import type {AppLocale} from "@/i18n/routing";
-import {heroSlides} from "@/lib/data/dummy-hero-slides";
+import {getPrismaClient} from "@/lib/db/client";
+import {listPublicPosts} from "@/lib/content/post-public-queries";
+import {listPublicContent} from "@/features/public-content/public-list";
+import {
+  getPublicHomeSections,
+  getPublicSiteSetting,
+  listFacilityPhotos,
+  listPublicHomeSliders,
+  listPublicStatistics,
+} from "@/features/home-nav/public-query";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fuspi.uinbanten.ac.id";
 
@@ -32,17 +42,67 @@ export default async function HomePage({params}: {params: Promise<{locale: AppLo
   const {locale} = await params;
   setRequestLocale(locale);
 
+  const prisma = getPrismaClient();
+  const uploadBase = process.env.UPLOAD_PUBLIC_URL ?? "/uploads";
+
+  const [
+    sliders, siteSetting, statistics, sections, facilities,
+    newsResult, announcementResult, columnResult, partnershipResult, eventResult,
+  ] = await Promise.all([
+    listPublicHomeSliders(prisma, locale, uploadBase),
+    getPublicSiteSetting(prisma, locale, uploadBase),
+    listPublicStatistics(prisma, locale),
+    getPublicHomeSections(prisma, locale),
+    listFacilityPhotos(prisma, uploadBase),
+    listPublicPosts(prisma, {locale, type: "BERITA", pageSize: 5}, uploadBase),
+    listPublicPosts(prisma, {locale, type: "PENGUMUMAN", pageSize: 5}, uploadBase),
+    listPublicPosts(prisma, {locale, type: "KOLOM", pageSize: 4}, uploadBase),
+    listPublicContent(prisma, {resource: "PARTNERSHIP", locale, pageSize: 12}),
+    listPublicContent(prisma, {resource: "EVENT", locale, pageSize: 4}),
+  ]);
+
+  const news = newsResult.ok ? newsResult.data.items : [];
+  const announcements = announcementResult.ok ? announcementResult.data.items : [];
+  const columns = columnResult.ok ? columnResult.data.items : [];
+  const partnerships = "ok" in partnershipResult && partnershipResult.ok ? partnershipResult.items : [];
+  const events = "ok" in eventResult && eventResult.ok ? eventResult.items : [];
+
+  const isVisible = (key: Parameters<typeof sections.get>[0]) => sections.get(key)?.isVisible ?? false;
+
   return (
     <>
-      <HeroSlider slides={heroSlides} locale={locale} />
-      <AdvantagesSection />
-      <DeanWelcomeSection locale={locale} />
-      <StatsSection />
-      <VisionMissionSection locale={locale} />
-      <StudyProgramsSection />
-      <NewsAnnouncementsEvents locale={locale} />
-      <FacilitiesSection locale={locale} />
-      <PartnersSection />
+      {isVisible("HERO") && sliders.length > 0 ? <HeroSlider slides={sliders} /> : null}
+
+      {isVisible("DEAN") && siteSetting?.dean ? (
+        <DeanWelcomeSection
+          dean={siteSetting.dean}
+          title={sections.get("DEAN")?.title ?? ""}
+          ctaLabel={sections.get("DEAN")?.ctaLabel ?? ""}
+        />
+      ) : null}
+
+      {isVisible("STATS") ? <StatsSection items={statistics} /> : null}
+
+      {isVisible("SERVICE") ? <ServicesSection /> : null}
+
+      {isVisible("NEWS") ? <NewsSection items={news} locale={locale} /> : null}
+
+      {(isVisible("ANNOUNCEMENT") || isVisible("AGENDA")) ? (
+        <AnnouncementsAgendaSection
+          locale={locale}
+          announcements={isVisible("ANNOUNCEMENT") ? announcements : []}
+          events={isVisible("AGENDA") ? events : []}
+        />
+      ) : null}
+
+      {isVisible("COLUMN") ? <ColumnsSection items={columns} locale={locale} /> : null}
+
+      {facilities.length > 0 ? <FacilitiesSection items={facilities} /> : null}
+
+      {isVisible("VIDEO") && siteSetting?.video ? <VideosSection video={siteSetting.video} eyebrow={sections.get("VIDEO")?.title ?? ""} /> : null}
+
+      {isVisible("PARTNERSHIP") ? <PartnersSection partners={partnerships} /> : null}
+
       <HomeCtaSection />
     </>
   );

@@ -6,25 +6,16 @@ import { useCallback, useEffect, useState } from "react";
 
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
-import type { AppLocale } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
-import type { HeroSlide } from "@/lib/data/dummy-hero-slides";
+import type { PublicHomeSlide } from "@/features/home-nav/public-query";
 
 const AUTOPLAY_MS = 6000;
 
-function resolveSlideText<T>(
-  record: Record<AppLocale, T>,
-  locale: AppLocale,
-): T {
-  return record[locale] ?? record.id;
-}
-
 type HeroSliderProps = {
-  slides: readonly HeroSlide[];
-  locale: AppLocale;
+  slides: readonly PublicHomeSlide[];
 };
 
-export function HeroSlider({ slides, locale }: HeroSliderProps) {
+export function HeroSlider({ slides }: HeroSliderProps) {
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -62,12 +53,13 @@ export function HeroSlider({ slides, locale }: HeroSliderProps) {
           )}
         >
           <NextImage
-            src={slide.image}
-            alt=""
+            src={slide.image.url}
+            alt={slide.image.isDecorative ? "" : slide.image.alt}
             fill
             priority={index === 0}
             className="object-cover"
             sizes="100vw"
+            unoptimized
           />
           <div className="absolute inset-0 bg-gradient-to-r from-navy-900/80 via-navy-900/50 to-navy-900/30" />
         </div>
@@ -85,23 +77,19 @@ export function HeroSlider({ slides, locale }: HeroSliderProps) {
           >
             {index === active ? (
               <>
-                <span className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white">
-                  {resolveSlideText(slide.eyebrow, locale)}
-                </span>
-                <h1 className="mt-5 font-display text-3xl font-bold tracking-tight text-white md:text-5xl md:leading-tight">
-                  {resolveSlideText(slide.title, locale)}
+                <h1 className="font-display text-3xl font-bold tracking-tight text-white md:text-5xl md:leading-tight">
+                  {slide.title}
                 </h1>
-                <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-200 md:text-lg">
-                  {resolveSlideText(slide.subtitle, locale)}
-                </p>
-                <div className="mt-8 flex flex-wrap gap-3">
-                  <CTA href={slide.primaryHref} primary>
-                    {resolveSlideText(slide.primaryCta, locale)}
-                  </CTA>
-                  <CTA href={slide.secondaryHref}>
-                    {resolveSlideText(slide.secondaryCta, locale)}
-                  </CTA>
-                </div>
+                {slide.subtitle ? (
+                  <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-200 md:text-lg">
+                    {slide.subtitle}
+                  </p>
+                ) : null}
+                {slide.cta && slide.ctaLabel ? (
+                  <div className="mt-8 flex flex-wrap gap-3">
+                    <CTA href={slide.cta.href}>{slide.ctaLabel}</CTA>
+                  </div>
+                ) : null}
               </>
             ) : null}
           </div>
@@ -149,22 +137,9 @@ export function HeroSlider({ slides, locale }: HeroSliderProps) {
   );
 }
 
-function CTA({
-  href,
-  primary,
-  children,
-}: {
-  href: string;
-  primary?: boolean;
-  children: React.ReactNode;
-}) {
+function CTA({ href, children }: { href: string; children: React.ReactNode }) {
   const isExternal = href.startsWith("http");
-  const className = cn(
-    "inline-flex h-11 items-center justify-center rounded-lg px-5 text-sm font-medium transition-all duration-200 active:scale-[0.98]",
-    primary
-      ? "bg-royal-500 text-white hover:bg-royal-600"
-      : "border border-white/30 text-white hover:border-white/50 hover:bg-white/10",
-  );
+  const className = "inline-flex h-11 items-center justify-center rounded-lg bg-royal-500 px-5 text-sm font-medium text-white transition-all duration-200 hover:bg-royal-600 active:scale-[0.98]";
 
   if (isExternal) {
     return (

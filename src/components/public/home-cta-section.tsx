@@ -8,10 +8,10 @@ export async function HomeCtaSection() {
   const t = await getTranslations("Home");
 
   return (
-    <section className="bg-navy-900 py-16 md:py-24">
+    <section className="bg-navy-900 py-16 md:py-20">
       <Container>
         <div className="flex max-w-2xl flex-col items-center gap-5 text-center md:items-start md:text-start">
-          <span className="text-[11px] font-medium tracking-wide text-royal-300 uppercase">
+          <span className="text-xs font-medium tracking-wide text-royal-300 uppercase">
             {t("ctaEyebrow")}
           </span>
           <h2 className="font-display text-2xl font-bold tracking-tight text-white md:text-3xl">

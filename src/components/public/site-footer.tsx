@@ -1,3 +1,4 @@
+import { MapPin } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { BrandMark } from "@/components/public/brand-mark";
@@ -7,6 +8,13 @@ import { institution } from "@/config/institution";
 import { Link } from "@/i18n/navigation";
 
 const CURRENT_YEAR = 2026;
+const CAMPUS_ADDRESS = "Jl. Jendral Sudirman No. 30, Ciceri, Kota Serang, Banten 42118";
+const MAP_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent(
+  `${CAMPUS_ADDRESS} UIN Sultan Maulana Hasanuddin Banten`,
+)}&output=embed`;
+const MAP_LINK_HREF = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+  `${CAMPUS_ADDRESS} UIN Sultan Maulana Hasanuddin Banten`,
+)}`;
 
 function ColumnTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -32,18 +40,35 @@ export async function SiteFooter() {
   const tNav = await getTranslations("Nav");
 
   return (
-    <footer className="mt-20 bg-navy-900 pt-16 text-slate-300">
+    <footer className="border-t border-white/10 bg-navy-950 pt-16 text-slate-300">
       <Container>
         <div className="grid gap-8 pb-12 sm:grid-cols-2 lg:grid-cols-5">
           <div className="flex flex-col gap-4">
-            <BrandMark tone="dark" />
-            <address className="prose-measure text-sm text-slate-400 not-italic">
-              {institution.name}
-              <br />
-              {institution.university}
-              <br />
-              Jl. Jendral Sudirman No. 30, Ciceri, Kota Serang, Banten 42118
+            <BrandMark tone="dark" showLabel={false} />
+            <address className="text-sm leading-relaxed text-slate-400 not-italic">
+              <p className="font-medium text-slate-200">{institution.name}</p>
+              <p>{institution.university}</p>
+              <p className="mt-1">{CAMPUS_ADDRESS}</p>
             </address>
+            <div className="overflow-hidden rounded-lg border border-navy-800">
+              <iframe
+                src={MAP_EMBED_SRC}
+                title={t("mapTitle")}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="h-36 w-full grayscale-[55%] contrast-[1.1]"
+                style={{border: 0}}
+              />
+            </div>
+            <a
+              href={MAP_LINK_HREF}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 items-center gap-1.5 text-sm text-slate-400 transition-colors hover:text-white"
+            >
+              <MapPin aria-hidden className="size-4" strokeWidth={1.5} />
+              {t("openMap")}
+            </a>
           </div>
 
           <nav aria-labelledby="footer-programs">

@@ -14,8 +14,14 @@ type MobileNavProps = {
   primary: readonly NavGroup[];
   content?: readonly NavLink[];
   utility: readonly ExternalLink[];
+  /** Prominent entry points (PPID, PMB) mirrored from the desktop header buttons. */
+  actions?: ReadonlyArray<NavLink | ExternalLink>;
   externalHint: string;
 };
+
+function isExternalAction(item: NavLink | ExternalLink): item is ExternalLink {
+  return "url" in item;
+}
 
 const SECTION_TITLE_CLASS =
   "px-3 pb-1 font-display text-[11px] font-medium tracking-wide text-slate-500 uppercase";
@@ -37,7 +43,7 @@ function SectionTitle({ id, children }: { id: string; children: React.ReactNode 
  * side, so it mirrors automatically in RTL. Base UI Dialog supplies the focus
  * trap, Escape handling, and focus restore to the trigger.
  */
-export function MobileNav({ primary, content, utility, externalHint }: MobileNavProps) {
+export function MobileNav({ primary, content, utility, actions, externalHint }: MobileNavProps) {
   const t = useTranslations("Nav");
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
@@ -83,6 +89,32 @@ export function MobileNav({ primary, content, utility, externalHint }: MobileNav
               className="px-2"
             />
           </div>
+
+          {actions?.length ? (
+            <div className="flex items-center gap-2 border-b border-slate-200 p-3">
+              {actions.map((item) =>
+                isExternalAction(item) ? (
+                  <UtilityLink
+                    key={item.key}
+                    url={item.url}
+                    label={t(item.key)}
+                    externalHint={externalHint}
+                    onClick={close}
+                    className="h-11 flex-1 justify-center rounded-lg bg-royal-500 text-sm font-medium text-white hover:bg-royal-600"
+                  />
+                ) : (
+                  <Link
+                    key={item.key}
+                    href={item.href}
+                    onClick={close}
+                    className="flex h-11 flex-1 items-center justify-center rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:border-royal-300 hover:bg-royal-50 hover:text-royal-700"
+                  >
+                    {t(item.key)}
+                  </Link>
+                ),
+              )}
+            </div>
+          ) : null}
 
           <nav aria-labelledby="drawer-primary" className="flex flex-col py-3">
             <SectionTitle id="drawer-primary">{t("primaryLabel")}</SectionTitle>

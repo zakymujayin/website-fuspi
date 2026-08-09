@@ -68,8 +68,8 @@ export default async function TestimonialPage({
       <Container className="py-12 md:py-20">
         <PublicContentStateNotice
           variant="empty"
-          title={t("testimonial.empty")}
-          description={t("testimonial.emptyDescription")}
+          title={t("empty.title")}
+          description={t("empty.testimoni")}
         />
       </Container>
     );
@@ -97,7 +97,7 @@ export default async function TestimonialPage({
       <SectionHeading
         as="h1"
         title={t("testimonial.listTitle")}
-        description={t("testimonial.description")}
+        description={t("testimonial.listDescription")}
       />
 
       {testimonials.length === 0 ? (

@@ -5,6 +5,8 @@ import en from "../../../messages/en.json";
 import id from "../../../messages/id.json";
 import {
   contentNav,
+  pmbLink,
+  ppidLink,
   primaryNav,
   profileNav,
   quickLinks,
@@ -32,6 +34,8 @@ const navKeys = [
   ...contentNav.map((item) => item.key),
   ...utilityLinks.map((item) => item.key),
   ...quickLinks.map((item) => item.key),
+  pmbLink.key,
+  ppidLink.key,
 ];
 
 describe("public navigation", () => {

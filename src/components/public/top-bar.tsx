@@ -4,7 +4,6 @@ import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/public/language-switcher";
 import { utilityLinks } from "@/components/public/nav-items";
 import { UtilityLink } from "@/components/public/shell/utility-link";
-import { Container } from "@/components/ui/container";
 
 const CONTACT_EMAIL = "surat@uinbanten.ac.id";
 
@@ -14,7 +13,8 @@ export async function TopBar() {
 
   return (
     <div className="bg-navy-900 text-slate-300">
-      <Container className="flex h-10 items-center justify-between gap-4 text-xs">
+      {/* Matches the wider main-header row (see site-header.tsx) so both bars align. */}
+      <div className="mx-auto flex h-10 max-w-[1440px] items-center justify-between gap-4 px-4 text-xs sm:px-6">
         <a
           href={`mailto:${CONTACT_EMAIL}`}
           className="inline-flex items-center gap-1.5 text-slate-300 transition-colors hover:text-white"
@@ -38,7 +38,7 @@ export async function TopBar() {
           ))}
           <LanguageSwitcher tone="dark" size="sm" />
         </nav>
-      </Container>
+      </div>
     </div>
   );
 }

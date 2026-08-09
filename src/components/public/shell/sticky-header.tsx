@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * Single-bar sticky header. The full 72px bar stays pinned on scroll; the
+ * Single-bar sticky header. The full 96px bar stays pinned on scroll; the
  * previous compaction transform targeted the three-layer layout and is no
  * longer needed after the header was unified into one row.
  */

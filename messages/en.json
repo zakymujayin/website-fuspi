@@ -73,6 +73,7 @@
     "academics": "Academics",
     "research": "Research & Community Service",
     "services": "Services",
+    "servicesAcademic": "Academic Service System",
     "publication": "Publication",
     "contact": "Contact",
     "news": "News",
@@ -89,6 +90,10 @@
     "booking": "Room Booking",
     "ppid": "PPID",
     "faq": "FAQ",
+    "openSearch": "Open search",
+    "closeSearch": "Close search",
+    "searchPlaceholder": "Search the FUSPI site...",
+    "searchSubmit": "Search",
     "program": {
       "IAT": "Qur’anic Studies and Exegesis",
       "IH": "Hadith Studies",
@@ -107,6 +112,7 @@
     "home": "Home",
     "lecturers": "Lecturers",
     "staff": "Staff",
+    "studentAffairs": "Student Affairs",
     "partnerships": "Partnerships",
     "scholarships": "Scholarships",
     "achievements": "Achievements",
@@ -120,6 +126,8 @@
     "quickLinks": "Quick Links",
     "contact": "Contact",
     "contactHint": "Campus addresses, email, and phone numbers appear once site settings are available.",
+    "openMap": "Open in Google Maps",
+    "mapTitle": "FUSPI campus location map",
     "legalLabel": "Policy links",
     "privacy": "Privacy Policy",
     "accessibility": "Accessibility",
@@ -176,6 +184,18 @@
       "title": "News",
       "description": "Latest news and activities from the Faculty of Ushuluddin and Islamic Thought.",
       "metaDescription": "Latest news and activities from the Faculty of Ushuluddin and Islamic Thought (FUSPI)."
+    },
+    "pengumuman": {
+      "breadcrumbLabel": "Announcements",
+      "title": "Announcements",
+      "description": "Official announcements from the Faculty of Ushuluddin and Islamic Thought.",
+      "metaDescription": "Official announcements from the Faculty of Ushuluddin and Islamic Thought (FUSPI)."
+    },
+    "kolom": {
+      "breadcrumbLabel": "Columns",
+      "title": "Columns",
+      "description": "Opinions from FUSPI's dean, lecturers, and students.",
+      "metaDescription": "Opinion columns from the FUSPI academic community."
     }
   },
   "AdminMediaLibrary": {
@@ -702,7 +722,11 @@
     "albums": "Albums",
     "events": "Events",
     "faq": "FAQ",
-    "testimonials": "Testimonials"
+    "testimonials": "Testimonials",
+    "homeSlider": "Home Slider",
+    "homeStatistic": "Statistics",
+    "homeSection": "Home Sections",
+    "homeSettings": "Home Settings"
   },
   "PublicContent": {
     "readMore": "Read More",
@@ -761,7 +785,8 @@
     },
     "testimonial": {
       "listTitle": "Testimonials",
-      "listDescription": "Testimonials from alumni and students."
+      "listDescription": "Testimonials from alumni and students.",
+      "graduationYear": "Graduated"
     },
     "pagination": {
       "ariaLabel": "Page navigation",
@@ -782,8 +807,56 @@
     "newsEmptyDescription": "Faculty news and activities will appear here once published.",
     "viewAll": "View all",
     "readMore": "Read more",
+    "servicesEyebrow": "Faculty Services",
     "servicesTitle": "Services",
     "servicesDescription": "Academic, general, laboratory, and complaint services information for the academic community.",
+    "serviceCta": "Access Service",
+    "service": {
+      "sila": {
+        "title": "Academic Information System (SILA)",
+        "description": "Access grades, course enrollment, class schedules, and student academic records online."
+      },
+      "complaints": {
+        "title": "Complaints Service",
+        "description": "Submit complaints, suggestions, or feedback about academic and student services."
+      },
+      "booking": {
+        "title": "Room Booking",
+        "description": "Request classrooms, halls, or campus facilities for official activities."
+      },
+      "ejournal": {
+        "title": "E-Journal",
+        "description": "Access scholarly publications and research journals by FUSPI lecturers and students."
+      }
+    },
+    "videosEyebrow": "Video Gallery",
+    "videosTitle": "Faculty Videos",
+    "videosDescription": "See campus life, activities, and the FUSPI environment through video.",
+    "videoTourBadge": "Campus Video Tour",
+    "watchVideo": "Watch Video",
+    "video": {
+      "tour": {
+        "title": "FUSPI Campus Tour",
+        "description": "Explore the lecture halls, library, and campus mosque in one short tour video."
+      },
+      "v2": {
+        "title": "Lectures at FUSPI"
+      },
+      "v3": {
+        "title": "2026 Undergraduate Graduation"
+      },
+      "v4": {
+        "title": "Community Service at Ciceri Islamic Boarding School"
+      }
+    },
+    "columnsEyebrow": "Columns",
+    "columnsTitle": "Ideas from the Academic Community",
+    "columnsDescription": "Opinion pieces and reflections from FUSPI's dean, lecturers, and students.",
+    "columnRole": {
+      "dean": "Dean",
+      "lecturer": "Lecturer",
+      "student": "Student"
+    },
     "partnersTitle": "Partnerships",
     "partnersDescription": "FUSPI's partnership network with universities and national Islamic institutions.",
     "footerCtaTitle": "Ready to join us?",
@@ -830,12 +903,30 @@
     "programsEyebrow": "Academic Programs",
     "ctaEyebrow": "Join",
     "advantage": {
-      "quran": {"title": "Qur'an & Tafsir Studies", "description": "Textual and contextual learning"},
-      "hadith": {"title": "Hadith Studies", "description": "Sanad and hadith methodology"},
-      "aqidah": {"title": "Aqidah & Islamic Philosophy", "description": "Rational-theological studies"},
-      "religions": {"title": "Religious Studies", "description": "Interfaith dialogue and understanding"},
-      "sufism": {"title": "Sufism & Psychotherapy", "description": "Spirituality and wellbeing"},
-      "integrated": {"title": "Integrative Education", "description": "Islamic knowledge and contemporary skills"}
+      "quran": {
+        "title": "Qur'an & Tafsir Studies",
+        "description": "Textual and contextual learning"
+      },
+      "hadith": {
+        "title": "Hadith Studies",
+        "description": "Sanad and hadith methodology"
+      },
+      "aqidah": {
+        "title": "Aqidah & Islamic Philosophy",
+        "description": "Rational-theological studies"
+      },
+      "religions": {
+        "title": "Religious Studies",
+        "description": "Interfaith dialogue and understanding"
+      },
+      "sufism": {
+        "title": "Sufism & Psychotherapy",
+        "description": "Spirituality and wellbeing"
+      },
+      "integrated": {
+        "title": "Integrative Education",
+        "description": "Islamic knowledge and contemporary skills"
+      }
     }
   },
   "Pages": {
@@ -847,8 +938,11 @@
     "visionMissionDesc": "Direction and commitment in Islamic education.",
     "structure": "Organizational Structure",
     "structureDesc": "Organizational structure and governance.",
+    "kaprodi": "Head of Study Program",
     "leadership": "Leadership",
     "leadershipDesc": "Dean, vice deans, and leadership.",
+    "dean": "Dean",
+    "viceDeans": "Vice Deans",
     "lecturers": "Lecturers",
     "lecturersDesc": "Teaching staff directory and academic profiles.",
     "facilities": "Facilities",
@@ -857,6 +951,14 @@
     "academicDescription": "Academic information, curriculum, and calendar.",
     "researchTitle": "Research & Community Service",
     "researchDescription": "Research and community service.",
+    "researchFocusTitle": "Research Focus",
+    "researchFocusDesc": "Priority fields of study developed by faculty lecturers and researchers.",
+    "hubResearchTitle": "Research",
+    "hubResearchDesc": "Research focus areas, publications, and scholarly collaboration by faculty and students.",
+    "hubCommunityServiceTitle": "Community Service",
+    "hubCommunityServiceDesc": "Outreach programs that respond to the needs of the surrounding community.",
+    "hubPartnershipsTitle": "Partnerships",
+    "hubPartnershipsDesc": "Collaborations with domestic and international institutions to extend the Tri Dharma's impact.",
     "contactTitle": "Contact",
     "contactDescription": "Get in touch for more information.",
     "address": "Address",
@@ -908,5 +1010,105 @@
     "bookingTitle": "Room Booking",
     "bookingDescription": "Request room booking for academic and non-academic activities.",
     "studyPrograms": "Study Programs"
+  },
+  "AdminHomeNav": {
+    "createAction": "Add",
+    "updateAction": "Save",
+    "cancel": "Cancel",
+    "order": "Order",
+    "orderLabel": "Order {order}",
+    "isVisible": "Show on homepage",
+    "translations": "Translations",
+    "localeTabs": "Choose language",
+    "locale": {
+      "id": "ID",
+      "en": "EN",
+      "ar": "AR"
+    },
+    "editLabelFor": "Edit {title}",
+    "visibility": {
+      "VISIBLE": "Visible",
+      "HIDDEN": "Hidden"
+    },
+    "empty": {
+      "description": "No data yet. Click \"Add\" to create the first one."
+    },
+    "unavailable": {
+      "description": "Failed to load data. Try reloading the page."
+    },
+    "picker": {
+      "choose": "Choose image",
+      "change": "Change image",
+      "clear": "Remove image",
+      "selected": "Selected image",
+      "none": "No image yet",
+      "loading": "Loading images…",
+      "loadError": "Failed to load images. Try again.",
+      "empty": "No images in Media Library yet.",
+      "listLabel": "Image list"
+    },
+    "errors": {
+      "imageRequired": "An image is required.",
+      "deanIncomplete": "Dean name and dean photo must both be set, or both left empty.",
+      "videoIncomplete": "Video URL and video poster must both be set, or both left empty."
+    },
+    "slider": {
+      "title": "Hero Slider",
+      "description": "Manage the slides shown at the top of the homepage.",
+      "createTitle": "Add Slide",
+      "editTitle": "Edit Slide",
+      "listAriaLabel": "Homepage slide list",
+      "commonFields": "Slide Settings",
+      "image": "Slide image",
+      "imageDescription": "Recommended size 1600×900px.",
+      "slideTitle": "Slide title",
+      "subtitle": "Subtitle",
+      "ctaHref": "Button link (optional)",
+      "ctaLabel": "Button label"
+    },
+    "statistic": {
+      "title": "Statistics",
+      "description": "Manage statistic counters (study programs, lecturers, students, etc).",
+      "createTitle": "Add Statistic",
+      "editTitle": "Edit Statistic",
+      "listAriaLabel": "Statistic list",
+      "commonFields": "Statistic Settings",
+      "value": "Value",
+      "suffix": "Suffix (e.g. +)",
+      "icon": "Icon (lucide-react name, optional)",
+      "label": "Label"
+    },
+    "section": {
+      "title": "Homepage Sections",
+      "description": "Control visibility, order, and title for each homepage section.",
+      "editTitle": "Edit Section",
+      "listAriaLabel": "Homepage section list",
+      "itemLimit": "Number of items shown",
+      "background": "Background image (optional)",
+      "backgroundDescription": "Background image for this section, if needed.",
+      "sectionTitle": "Section title"
+    },
+    "settings": {
+      "title": "Homepage Settings",
+      "description": "Faculty identity, dean welcome, profile video, and contact.",
+      "contact": "Contact & Social Media",
+      "email": "Email",
+      "phone": "Phone",
+      "dean": "Dean Welcome",
+      "deanName": "Dean name",
+      "deanPhoto": "Dean photo",
+      "deanPhotoDescription": "Recommended size 800×800px.",
+      "deanPosition": "Dean position",
+      "deanMessage": "Welcome message",
+      "video": "Profile Video",
+      "videoUrl": "Video URL (YouTube, etc)",
+      "videoPoster": "Video poster image",
+      "videoPosterDescription": "Shown before the video plays.",
+      "videoTitle": "Video title",
+      "videoDesc": "Video description",
+      "facultyName": "Faculty name",
+      "tagline": "Tagline",
+      "address1": "Address 1"
+    }
   }
 }
