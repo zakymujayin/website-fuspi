@@ -15,20 +15,37 @@ export type NavGroup = NavLink & {
   children?: readonly NavLink[];
 };
 
-export const primaryNav: readonly NavGroup[] = [
-  { key: "profile", href: "/profil" },
-  {
-    key: "studyPrograms",
-    href: "/prodi",
-    children: institution.studyPrograms.map((program) => ({
-      key: `program.${program.code}`,
-      href: `/prodi/${program.slug}`,
-    })),
-  },
-  { key: "academics", href: "/akademik" },
-  { key: "research", href: "/riset" },
-  { key: "services", href: "/layanan" },
+export const profileNav: readonly NavGroup[] = [
+  { key: "history", href: "/profil/sejarah" },
+  { key: "visionMission", href: "/profil/visi-misi" },
+  { key: "structure", href: "/profil/struktur" },
+  { key: "leadership", href: "/profil/pimpinan" },
+  { key: "lecturers", href: "/dosen" },
+  { key: "staff", href: "/tenaga-kependidikan" },
+  { key: "facilities", href: "/profil/fasilitas" },
+  { key: "testimonials", href: "/testimoni" },
+  { key: "prospective", href: "/calon-mahasiswa" },
   { key: "contact", href: "/kontak" },
+] as const;
+
+/** Beasiswa, prestasi, and student-activity pages grouped under one menu (docs/26). */
+export const studentAffairsNav: readonly NavLink[] = [
+  { key: "scholarships", href: "/beasiswa" },
+  { key: "achievements", href: "/prestasi" },
+  { key: "activities", href: "/kegiatan" },
+] as const;
+
+/** Research pairs naturally with partnerships; kept as one top-level slot instead of two. */
+export const researchNav: readonly NavLink[] = [
+  { key: "research", href: "/riset" },
+  { key: "partnerships", href: "/kerjasama" },
+] as const;
+
+/** The concrete service systems the "Layanan" entry point fans out to. */
+export const servicesNav: readonly NavLink[] = [
+  { key: "servicesAcademic", href: "/layanan" },
+  { key: "complaints", href: "/pengaduan" },
+  { key: "booking", href: "/peminjaman" },
 ] as const;
 
 /** Content bar (docs/17-B layer 1). */
@@ -41,15 +58,44 @@ export const contentNav: readonly NavLink[] = [
   { key: "documents", href: "/dokumen" },
 ] as const;
 
+export const infoNav: NavGroup = {
+  key: "publication",
+  href: "/berita",
+  children: contentNav,
+} as const;
+
+export const primaryNav: readonly NavGroup[] = [
+  { key: "profile", href: "/profil", children: profileNav },
+  {
+    key: "studyPrograms",
+    href: "/prodi",
+    children: institution.studyPrograms.map((program) => ({
+      key: `program.${program.code}`,
+      href: `/prodi/${program.slug}`,
+    })),
+  },
+  { key: "academics", href: "/akademik" },
+  { key: "research", href: "/riset", children: researchNav },
+  { key: "studentAffairs", href: "/beasiswa", children: studentAffairsNav },
+  { key: "services", href: "/layanan", children: servicesNav },
+  infoNav,
+  { key: "contact", href: "/kontak" },
+] as const;
+
 /** Utility topbar (docs/17-B layer 2). External systems, opened in a new tab. */
 export type ExternalLink = { key: string; url: string };
 
 export const utilityLinks: readonly ExternalLink[] = [
-  { key: "pmb", url: "https://pmb.uinbanten.ac.id" },
   { key: "siakad", url: "https://siakad.uinbanten.ac.id" },
   { key: "elearning", url: "https://elearning.uinbanten.ac.id" },
-  { key: "gkm", url: "/gkm" },
+  { key: "gkm", url: "https://gkm.uinbanten.ac.id" },
 ] as const;
+
+/** PMB (external admissions portal). Surfaced as a prominent header button, not the topbar. */
+export const pmbLink: ExternalLink = { key: "pmb", url: "https://pmb.uinbanten.ac.id" } as const;
+
+/** PPID (internal route). Surfaced as a prominent header button, not the topbar. */
+export const ppidLink: NavLink = { key: "ppid", href: "/ppid" } as const;
 
 export const quickLinks: readonly NavLink[] = [
   { key: "services", href: "/layanan" },

@@ -17,6 +17,11 @@ type UtilityLinkProps = {
    * which has no open/closed state to reconcile.
    */
   onClick?: React.MouseEventHandler<HTMLAnchorElement>;
+  /**
+   * Hides the visual "opens in a new tab" glyph for CTA-style buttons where it
+   * reads as clutter. The sr-only external hint is still announced either way.
+   */
+  showIcon?: boolean;
 };
 
 /**
@@ -30,6 +35,7 @@ export function UtilityLink({
   externalHint,
   className,
   onClick,
+  showIcon = true,
 }: UtilityLinkProps) {
   const kind = classifyNavUrl(url);
   const shared = cn("inline-flex items-center gap-1.5", className);
@@ -62,12 +68,14 @@ export function UtilityLink({
       className={shared}
     >
       {label}
-      {/* Directional glyph: mirrored in RTL so it keeps pointing away from the text. */}
-      <ArrowUpRight
-        aria-hidden
-        className="size-3.5 shrink-0 rtl:-scale-x-100"
-        strokeWidth={1.5}
-      />
+      {showIcon ? (
+        // Directional glyph: mirrored in RTL so it keeps pointing away from the text.
+        <ArrowUpRight
+          aria-hidden
+          className="size-3.5 shrink-0 rtl:-scale-x-100"
+          strokeWidth={1.5}
+        />
+      ) : null}
       <span className="sr-only">{externalHint}</span>
     </a>
   );

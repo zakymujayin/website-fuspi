@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import NextImage from "next/image";
 import { cookies } from "next/headers";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { LoginForm } from "@/components/auth/login-form";
+import { BrandMark } from "@/components/public/brand-mark";
 import { institution } from "@/config/institution";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { getPrismaClient } from "@/lib/db/client";
 import {
   readSessionToken,
@@ -65,19 +66,34 @@ export default async function LoginPage({ params, searchParams }: LoginPageProps
   if (activeSessionDestination) redirect(activeSessionDestination);
 
   return (
-    <Card className="w-full max-w-md gap-6 px-2 py-8 shadow-md sm:px-4">
-      <CardHeader className="gap-3">
-        <p className="text-xs font-semibold tracking-[0.18em] text-royal-600 uppercase">
-          {institution.shortName}
-        </p>
-        <h1 id="login-title" className="font-display text-2xl leading-tight text-slate-900">
-          {t("title", { faculty: institution.shortName })}
-        </h1>
-        <p className="text-sm text-slate-500">{institution.name}</p>
-        <p className="text-sm leading-relaxed text-muted-foreground">{t("subtitle")}</p>
-      </CardHeader>
+    <div className="grid w-full max-w-4xl overflow-hidden rounded-xl bg-white shadow-[var(--shadow-card-lg)] ring-1 ring-foreground/10 md:grid-cols-5">
+      {/* Identity panel: an image stands in for the panel's copy — the form
+          panel's own heading (id="login-title") carries the page title, and
+          that heading stays unconditional so the form's aria-labelledby
+          never points at a display:none node. */}
+      <div className="relative min-h-48 overflow-hidden bg-navy-900 md:col-span-2 md:min-h-0">
+        <NextImage
+          src="/images/hero/slide-1.svg"
+          alt=""
+          fill
+          priority
+          className="object-cover"
+        />
+        <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-navy-950/85 via-navy-950/15 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 px-6 py-6 md:px-10 md:py-10">
+          <BrandMark tone="dark" />
+        </div>
+      </div>
 
-      <CardContent>
+      {/* Form panel */}
+      <div className="flex flex-col justify-center gap-6 px-6 py-10 sm:px-10 md:col-span-3 md:py-12">
+        <div className="flex flex-col gap-2">
+          <h1 id="login-title" className="font-display text-2xl leading-tight text-slate-900">
+            {t("title", { faculty: institution.shortName })}
+          </h1>
+          <p className="text-sm leading-relaxed text-muted-foreground">{t("subtitle")}</p>
+        </div>
+
         {/*
           `next` is attacker-controlled. It is handed to the server untouched and
           is never validated, resolved, or navigated to on the client; only the
@@ -88,7 +104,7 @@ export default async function LoginPage({ params, searchParams }: LoginPageProps
           next={destinationCandidate}
           sessionInvalid={sessionInvalid}
         />
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

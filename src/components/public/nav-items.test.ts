@@ -5,7 +5,10 @@ import en from "../../../messages/en.json";
 import id from "../../../messages/id.json";
 import {
   contentNav,
+  pmbLink,
+  ppidLink,
   primaryNav,
+  profileNav,
   quickLinks,
   studyProgramLinks,
   utilityLinks,
@@ -27,9 +30,12 @@ const resolve = (catalog: unknown, path: string) =>
 
 const navKeys = [
   ...primaryNav.flatMap((item) => [item.key, ...(item.children ?? []).map((c) => c.key)]),
+  ...profileNav.map((item) => item.key),
   ...contentNav.map((item) => item.key),
   ...utilityLinks.map((item) => item.key),
   ...quickLinks.map((item) => item.key),
+  pmbLink.key,
+  ppidLink.key,
 ];
 
 describe("public navigation", () => {

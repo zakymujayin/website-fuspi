@@ -43,7 +43,7 @@ export async function getPublicContentDetail(
       const translation = resolve(row.translations, locale); const link = configuredLink(row.url);
       if (!translation || link === undefined) return {ok: false, code: "NOT_FOUND"};
       detail = {id: row.id, resource: "SERVICE", slug: row.slug, category: row.category, link,
-        icon: row.icon, order: row.order, translation: {...resolution(locale, translation.locale), name: translation.name, description: rich(translation.description)}};
+        icon: (row as Record<string, unknown>).icon as string | null, order: row.order, translation: {...resolution(locale, translation.locale), name: translation.name, description: rich(translation.description)}};
     } else if (query.resource === "PARTNERSHIP") {
       const row = await prisma.partnership.findFirst({where: {slug: query.slug, isActive: true, translations: {some: localeFilter}}, include: {
         translations: {where: localeFilter}, logoMedia: {select: MEDIA_SELECT}, document: {include: DOCUMENT_INCLUDE},
