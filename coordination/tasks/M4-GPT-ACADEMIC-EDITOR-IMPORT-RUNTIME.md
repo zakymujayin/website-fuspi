@@ -54,7 +54,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-GPT-ACADEMIC-EDITOR-IMPORT-RUNTIME.md TASK_BASE=origin/integration/m4-features npm run check:scope"
 risk: high
 token_class: L
-status: closed
+status: merged
 ---
 
 # Academic editor detail and people import runtime

@@ -548,6 +548,9 @@ model Media {
   activityImages     ActivityImage[] @relation("ActivityImageMedia")
   deanPhotos         SiteSetting[]   @relation("DeanPhoto")
   siteVideoPosters   SiteSetting[]   @relation("SiteVideoPoster")
+  siteLogos          SiteSetting[]   @relation("SiteLogo")
+  siteFavicons       SiteSetting[]   @relation("SiteFavicon")
+  facilityCovers     Facility[]      @relation("FacilityCover")
 }
 
 model StudyProgram {
@@ -1281,6 +1284,10 @@ model SiteSetting {
   updatedAt        DateTime                 @updatedAt
   deanPhoto        Media?                   @relation("DeanPhoto", fields: [deanPhotoId], references: [id], onDelete: Restrict)
   videoPoster      Media?                   @relation("SiteVideoPoster", fields: [videoPosterMediaId], references: [id], onDelete: Restrict)
+  logoMediaId      String?
+  faviconMediaId   String?
+  logoMedia        Media?                   @relation("SiteLogo", fields: [logoMediaId], references: [id], onDelete: Restrict)
+  faviconMedia     Media?                   @relation("SiteFavicon", fields: [faviconMediaId], references: [id], onDelete: Restrict)
   translations     SiteSettingTranslation[]
 
   @@index([contentOwnerId, reviewDueAt])
@@ -2061,4 +2068,80 @@ model Subscriber {
   isActive             Boolean  @default(true)
   unsubscribeTokenHash String   @unique
   createdAt            DateTime @default(now())
+}
+
+model HomeVideo {
+  id           String                 @id @default(cuid())
+  youtubeUrl   String
+  order        Int                    @default(0)
+  isVisible    Boolean                @default(true)
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+  translations HomeVideoTranslation[]
+}
+
+model HomeVideoTranslation {
+  id          String            @id @default(cuid())
+  homeVideoId String
+  locale      Locale
+  title       String
+  status      TranslationStatus @default(DRAFT)
+  sourceVersion Int             @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  homeVideo   HomeVideo         @relation(fields: [homeVideoId], references: [id], onDelete: Cascade)
+
+  @@unique([homeVideoId, locale])
+  @@index([locale])
+}
+
+model Facility {
+  id               String               @id @default(cuid())
+  slug             String               @unique
+  type             FacilityType         @default(BANGUNAN)
+  isActive         Boolean              @default(true)
+  order            Int                  @default(0)
+  version          Int                  @default(1)
+  coverMediaId     String?
+  contentOwnerId   String?
+  governanceStatus GovernanceStatus     @default(CURRENT)
+  lastReviewedAt   DateTime?
+  lastReviewedById String?
+  reviewDueAt      DateTime?
+  expiresAt        DateTime?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  coverMedia       Media?               @relation("FacilityCover", fields: [coverMediaId], references: [id], onDelete: Restrict)
+  translations     FacilityTranslation[]
+
+  @@index([contentOwnerId, reviewDueAt])
+}
+
+model FacilityTranslation {
+  id          String            @id @default(cuid())
+  facilityId  String
+  locale      Locale
+  name        String
+  description String?           @db.Text
+  status      TranslationStatus @default(DRAFT)
+  sourceVersion Int             @default(1)
+  translatorId  String?
+  reviewerId    String?
+  reviewedAt    DateTime?
+  facility    Facility          @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+
+  @@unique([facilityId, locale])
+  @@index([locale])
+}
+
+enum FacilityType {
+  BANGUNAN
+  LABORATORIUM
+  PERPUSTAKAAN
+  MUSHOLA
+  AULA
+  PARKIR
+  KANTIN
+  LAINNYA
 }

@@ -57,7 +57,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-GPT-HOME-NAV-DOMAINS.md TASK_BASE=origin/integration/m4-features npm run check:scope"
 risk: high
 token_class: L
-status: active
+status: merged
 ---
 
 # Home and navigation domains

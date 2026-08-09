@@ -16,8 +16,8 @@ const resolution = {requestedLocale: "en", resolvedLocale: "id", isFallback: tru
 const emptySnapshot = {
   locale: "en", generatedAt: "2026-08-04T03:00:00.000Z",
   navigation: {contentBar: [], topbar: [], header: [], footer: []}, externalLinks: [], sections: [], sliders: [],
-  quickLinks: [], statistics: [], siteSetting: {facultyName: "Fakultas", tagline: null, addresses: [], dean: null,
-    video: null, email: null, phone: null, socialLinks: {facebook: null, instagram: null, youtube: null, x: null},
+  quickLinks: [], statistics: [], homeVideos: [], siteSetting: {facultyName: "Fakultas", tagline: null, addresses: [], dean: null,
+    video: null, logo: null, favicon: null, email: null, phone: null, socialLinks: {facebook: null, instagram: null, youtube: null, x: null},
     translation: resolution},
   content: {studyPrograms: [], news: [], announcements: [], columns: [], services: [], partnerships: [], events: [], testimonials: []},
 };
@@ -62,7 +62,7 @@ describe("home and navigation frozen contracts", () => {
   it("requires complete dean and video asset pairs with safe public URLs", () => {
     const setting = {deanName: null, deanPhotoMediaId: null, videoUrl: null, videoPosterMediaId: null,
       email: null, phone: null, facebookUrl: null, instagramUrl: null, youtubeUrl: null, xUrl: null,
-      contentOwnerId: null, expiresAt: null,
+      logoMediaId: null, faviconMediaId: null, contentOwnerId: null, expiresAt: null,
       translations: {id: {facultyName: "Fakultas", tagline: null, address1: null, address2: null,
         deanPosition: null, deanMessage: null, videoTitle: null, videoDesc: null}}};
     expect(SiteSettingInputSchema.safeParse(setting).success).toBe(true);

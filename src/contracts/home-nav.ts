@@ -51,7 +51,7 @@ export const HomeSectionKeySchema = z.enum([
   "NEWS", "PARTNERSHIP", "COLUMN", "VIDEO", "AGENDA", "TESTIMONIAL", "CTA",
 ]);
 export const HomeNavResourceSchema = z.enum([
-  "MENU_ITEM", "QUICK_LINK", "EXTERNAL_LINK", "HOME_SLIDER", "HOME_SECTION", "STATISTIC", "SITE_SETTING",
+  "MENU_ITEM", "QUICK_LINK", "EXTERNAL_LINK", "HOME_SLIDER", "HOME_SECTION", "STATISTIC", "SITE_SETTING", "HOME_VIDEO",
 ]);
 
 export const MenuItemInputSchema = z.object({
@@ -103,11 +103,23 @@ export const StatisticInputSchema = z.object({
 
 const ContactEmailSchema = z.email().max(320).nullable();
 const ContactPhoneSchema = z.string().trim().min(5).max(40).regex(/^\+?[0-9 ()-]+$/u).nullable();
+export const HomeVideoTranslationInputSchema = z.object({
+  title: RequiredText(500),
+}).strict();
+
+export const HomeVideoInputSchema = z.object({
+  youtubeUrl: z.string().url().regex(/youtube\.com|youtu\.be/),
+  order: OrderSchema,
+  isVisible: z.boolean(),
+  translations: localizedInput(HomeVideoTranslationInputSchema),
+}).strict();
+
 export const SiteSettingInputSchema = z.object({
   deanName: OptionalText(255), deanPhotoMediaId: CmsIdentifierSchema.nullable(), videoUrl: CmsHttpsExternalUrlSchema.nullable(),
   videoPosterMediaId: CmsIdentifierSchema.nullable(), email: ContactEmailSchema, phone: ContactPhoneSchema,
   facebookUrl: CmsHttpsExternalUrlSchema.nullable(), instagramUrl: CmsHttpsExternalUrlSchema.nullable(),
   youtubeUrl: CmsHttpsExternalUrlSchema.nullable(), xUrl: CmsHttpsExternalUrlSchema.nullable(),
+  logoMediaId: CmsIdentifierSchema.nullable(), faviconMediaId: CmsIdentifierSchema.nullable(),
   contentOwnerId: CmsIdentifierSchema.nullable(), expiresAt: DateTimeSchema.nullable(),
   translations: localizedInput(SiteSettingTranslationInputSchema),
 }).strict().superRefine((value, context) => {
@@ -123,6 +135,7 @@ const inputByResource = [
   ["MENU_ITEM", MenuItemInputSchema], ["QUICK_LINK", QuickLinkInputSchema], ["EXTERNAL_LINK", ExternalLinkInputSchema],
   ["HOME_SLIDER", HomeSliderInputSchema], ["HOME_SECTION", HomeSectionInputSchema], ["STATISTIC", StatisticInputSchema],
   ["SITE_SETTING", SiteSettingInputSchema],
+  ["HOME_VIDEO", HomeVideoInputSchema],
 ] as const;
 const creatable = inputByResource.filter(([resource]) => resource !== "HOME_SECTION" && resource !== "SITE_SETTING");
 const deletable = creatable;
@@ -139,7 +152,7 @@ const deleteCommands = deletable.map(([resource]) => z.object({
 export const HomeNavAdminCommandSchema = z.union([
   ...createCommands, ...updateCommands, ...deleteCommands,
   z.object({action: z.literal("REORDER"), resource: z.enum([
-    "MENU_ITEM", "QUICK_LINK", "EXTERNAL_LINK", "HOME_SLIDER", "HOME_SECTION", "STATISTIC",
+    "MENU_ITEM", "QUICK_LINK", "EXTERNAL_LINK", "HOME_SLIDER", "HOME_SECTION", "STATISTIC", "HOME_VIDEO",
   ]), payload: CmsReorderBatchSchema}).strict(),
 ]);
 
@@ -194,6 +207,11 @@ export const PublicQuickLinkSchema = z.object({
 export const PublicExternalLinkSchema = z.object({
   id: CmsIdentifierSchema, category: z.enum(PrismaLinkCategory), url: CmsHttpsExternalUrlSchema, order: OrderSchema, translation: ResolvedLabelSchema,
 }).strict();
+export const PublicHomeVideoSchema = z.object({
+  id: CmsIdentifierSchema, youtubeUrl: z.string().url().regex(/youtube\.com|youtu\.be/),
+  order: OrderSchema, translation: CmsTranslationResolutionSchema.extend({title: RequiredText(500)}).strict(),
+}).strict();
+
 export const PublicHomeSliderSchema = z.object({
   id: CmsIdentifierSchema, image: PublicMediaViewSchema, cta: CmsNullableConfiguredLinkSchema, order: OrderSchema,
   translation: CmsTranslationResolutionSchema.extend({title: OptionalText(500), subtitle: OptionalText(1_000), ctaLabel: OptionalText(120)}).strict(),
@@ -219,6 +237,7 @@ const PublicVideoSchema = z.object({url: CmsHttpsExternalUrlSchema, poster: Publ
 export const PublicSiteSettingSchema = z.object({
   facultyName: RequiredText(500), tagline: OptionalText(500), addresses: z.array(RequiredText(5_000)).max(2),
   dean: PublicDeanSchema.nullable(), video: PublicVideoSchema.nullable(), email: ContactEmailSchema, phone: ContactPhoneSchema,
+  logo: PublicMediaViewSchema.nullable(), favicon: PublicMediaViewSchema.nullable(),
   socialLinks: z.object({facebook: CmsHttpsExternalUrlSchema.nullable(), instagram: CmsHttpsExternalUrlSchema.nullable(),
     youtube: CmsHttpsExternalUrlSchema.nullable(), x: CmsHttpsExternalUrlSchema.nullable()}).strict(),
   translation: CmsTranslationResolutionSchema,
@@ -248,7 +267,7 @@ export const PublicHomeSnapshotQuerySchema = z.object({locale: LocaleSchema}).st
 export const PublicHomeSnapshotSchema = z.object({
   locale: LocaleSchema, generatedAt: DateTimeSchema, navigation: PublicNavigationSchema,
   externalLinks: z.array(PublicExternalLinkSchema).max(100), sections: z.array(PublicHomeSectionSchema).max(15),
-  sliders: z.array(PublicHomeSliderSchema).max(12), quickLinks: z.array(PublicQuickLinkSchema).max(12),
+  sliders: z.array(PublicHomeSliderSchema).max(12), homeVideos: z.array(PublicHomeVideoSchema).max(12), quickLinks: z.array(PublicQuickLinkSchema).max(12),
   statistics: z.array(PublicStatisticSchema).max(12), siteSetting: PublicSiteSettingSchema,
   content: z.object({
     studyPrograms: z.array(PublicHomeStudyProgramSchema).max(5), news: z.array(PublicNewsCardSchema).max(12),
@@ -260,11 +279,11 @@ export const PublicHomeSnapshotSchema = z.object({
   const sectionKeys = value.sections.map(({key}) => key);
   if (new Set(sectionKeys).size !== sectionKeys.length) context.addIssue({code: "custom", path: ["sections"], message: "Home section keys must be unique."});
   const sectionMap = new Map(value.sections.map((section) => [section.key, section]));
-  const orderedCollections = [value.sections, value.externalLinks, value.sliders, value.quickLinks, value.statistics];
+  const orderedCollections = [value.sections, value.externalLinks, value.sliders, value.quickLinks, value.statistics, value.homeVideos];
   for (const [index, collection] of orderedCollections.entries()) {
     const ids = collection.map(({id}) => id); const orders = collection.map(({order}) => order);
     if (new Set(ids).size !== ids.length || orders.some((order, itemIndex) => itemIndex > 0 && order < orders[itemIndex - 1]!)) {
-      context.addIssue({code: "custom", path: [["sections", "externalLinks", "sliders", "quickLinks", "statistics"][index]!], message: "Public collections must be unique and deterministically ordered."});
+      context.addIssue({code: "custom", path: [["sections", "externalLinks", "sliders", "quickLinks", "statistics", "homeVideos"][index]!], message: "Public collections must be unique and deterministically ordered."});
     }
   }
   const programCodes = value.content.studyPrograms.map(({code}) => code);
