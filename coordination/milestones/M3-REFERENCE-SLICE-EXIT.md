@@ -47,4 +47,3 @@ attempting milestone reconstruction.
 - M4 remains closed. It requires a separately committed entry contract, fresh assignments, and
   non-overlapping leases.
 - Integration-to-`main` remains a human-owner action and has not been performed.
-

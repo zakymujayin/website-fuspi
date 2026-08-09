@@ -98,4 +98,3 @@ source was changed in response.
 - A future Next.js upgrade must replay the zero-warning build, NFT classification, and standalone
   Media smoke before removing or changing the tracing directives.
 - The final combined M3 gate still must run after this candidate is merged.
-

@@ -56,4 +56,3 @@ serial integration, and fresh GPT-run evidence.
 - WebKit was not part of the task matrix.
 - VPS/staging/production permissions, restore, SMTP, and reverse proxy remain later gates.
 - No integration-to-main merge or deployment was performed.
-

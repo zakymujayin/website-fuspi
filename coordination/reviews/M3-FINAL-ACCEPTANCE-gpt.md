@@ -90,4 +90,3 @@ coordination, docs, tests, E2E, Prisma, or unrelated source entries.
 
 This acceptance authorizes the M3 tag only. It does not merge to `main`, open M4, deploy, change
 production, or waive human-only release decisions.
-

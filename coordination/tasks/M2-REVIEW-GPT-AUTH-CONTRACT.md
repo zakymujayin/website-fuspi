@@ -83,4 +83,3 @@ Write findings ordered by severity with exact file/line references and an explic
 The review must include commands/results, residual risks, dependency/audit observations, and
 the exact reviewed target SHAs. Create the required handoff, commit both allowed files, push
 the review branch, and stop. Do not merge.
-

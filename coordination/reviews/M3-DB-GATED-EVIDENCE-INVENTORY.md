@@ -116,4 +116,3 @@ Verified state at `RUN_PLATFORM_DB_TESTS=true npm test`: **63 files passed, 744 
   - hostile-origin request returns 403 and creates no session or rate-limit mutation
   - successful login returns 200, cookie, and expected JSON shape
   - wrong password returns 401 with sanitized public shape
-
