@@ -1,32 +1,37 @@
-# 07 — Upload Media di Storage Native Hostinger
+# 07 — Upload Media di Storage Persisten VPS
 
-Ini bagian paling rawan salah, jadi ikuti persis. Tujuannya: meniru cara WordPress (`wp-content/uploads`) — file diunggah ke **direktori persisten di luar folder build**, disajikan langsung oleh web server sebagai file statis, dan aplikasi hanya menyimpan URL-nya di database.
+> Nama file lama dipertahankan agar tautan dokumentasi tidak putus. Kontrak Hostinger sudah
+> digantikan oleh VPS melalui ADR-0003.
+
+Ini bagian paling rawan salah, jadi ikuti persis. Tujuannya: file publik diunggah ke **direktori persisten di luar folder build**, disajikan langsung oleh web server sebagai file statis, dan aplikasi hanya menyimpan URL-nya di database.
 
 ## Prinsip kunci
 
 1. **JANGAN** menulis file ke folder `public/` Next.js. Folder itu dibekukan saat build; file runtime yang ditaruh di sana tidak tersaji dengan benar dan hilang saat redeploy dari GitHub.
-2. **Tulis ke direktori persisten** milik domain di Hostinger, yaitu di dalam `public_html`, di luar path build `nodejs`. Direktori ini bertahan antar-deploy dan bisa disajikan langsung oleh web server.
+2. **Tulis ke direktori persisten VPS** di luar checkout, image container, dan artifact build. Direktori publik disajikan oleh reverse proxy; direktori privat tidak boleh berada di document root.
 3. Simpan **URL publik** file ke tabel `Media` (dan ke field seperti `coverImage`). Frontend memuatnya sebagai gambar statis biasa.
 4. File privat **tidak pernah** mendapat URL statis. Database menyimpan `storageKey`; file hanya dikirim melalui Route Handler yang mengulang pemeriksaan izin.
 5. Lampiran PPKS menggunakan direktori dan kunci enkripsi terpisah dari lampiran privat biasa.
 
-## Lokasi direktori (Hostinger Business)
+## Lokasi direktori VPS
 
-Struktur direktori Hostinger untuk aplikasi Node.js:
+Struktur direktori yang dikunci untuk produksi:
 ```
-/home/{username}/domains/fuspi.uinbanten.ac.id/
-├── nodejs/        ← build aplikasi (diganti tiap deploy)
-└── public_html/   ← disajikan web server; .htaccess dibuat otomatis
-    └── uploads/   ← BUAT folder ini; tujuan upload (persisten)
-        └── 2026/07/namafile.webp
+/srv/fuspi/
+├── releases/                 ← artifact aplikasi; dapat diganti saat deploy
+├── current -> releases/...   ← symlink release aktif
+└── shared/                   ← tidak diganti saat deploy
+    ├── public/uploads/2026/07/namafile.webp
+    ├── private/uploads/
+    └── ppks/
 ```
 
 Set di `.env` (lihat `01`):
 ```bash
-UPLOAD_DIR="/home/{username}/domains/fuspi.uinbanten.ac.id/public_html/uploads"
+UPLOAD_DIR="/srv/fuspi/shared/public/uploads"
 UPLOAD_PUBLIC_URL="https://fuspi.uinbanten.ac.id/uploads"
-UPLOAD_PRIVATE_DIR="/home/{username}/domains/fuspi.uinbanten.ac.id/private_uploads"
-PPKS_PRIVATE_DIR="/home/{username}/domains/fuspi.uinbanten.ac.id/ppks_private"
+UPLOAD_PRIVATE_DIR="/srv/fuspi/shared/private/uploads"
+PPKS_PRIVATE_DIR="/srv/fuspi/shared/ppks"
 PPKS_ENCRYPTION_KEY="base64-encoded-32-byte-key"
 ```
 
@@ -120,7 +125,7 @@ Aturan wajib:
 
 ## Storage privat & route download
 
-- `UPLOAD_PRIVATE_DIR` dan `PPKS_PRIVATE_DIR` wajib berada di luar `public_html` dan di luar standalone build.
+- `UPLOAD_PRIVATE_DIR` dan `PPKS_PRIVATE_DIR` wajib berada di luar document root reverse proxy dan di luar standalone build.
 - Database menyimpan `storageKey`, `originalName`, `mimeType`, `size`, checksum SHA-256, kelas storage, serta metadata enkripsi; jangan simpan filesystem path absolut.
 - Route `GET /api/private-files/[id]` menerima sesi internal atau token pelacakan yang sudah diverifikasi. Route memuat record induk, menjalankan `authorize()`, lalu melakukan stream dengan `Content-Disposition`, `Content-Type`, `nosniff`, dan cache `private, no-store`.
 - Untuk PDF, dukung byte range agar viewer tidak perlu memuat seluruh file. Jangan mengungkap path disk pada error/header.
@@ -134,7 +139,7 @@ Aturan wajib:
 - Backup direktori PPKS tetap terenkripsi; backup kunci disimpan terpisah dari backup data.
 - Rotasi kunci memakai `keyVersion`; file lama tetap dapat dibaca selama migrasi re-enkripsi terkontrol.
 
-Tambahkan dependency: `npm i sharp`. (Sharp tersedia di runtime Node.js Hostinger; bila build gagal karena binary, set `sharp` sebagai dependency biasa dan pastikan Node.js versi yang didukung.)
+Tambahkan dependency `sharp` sebagai dependency produksi. Build artifact pada OS/arsitektur yang sama dengan runtime VPS atau bangun image container yang identik.
 
 ## Menghapus file
 
@@ -149,24 +154,29 @@ const rel = url.replace(PUBLIC_URL, "");           // /2026/07/abc.webp
 ```
 Sebelum menghapus, pemeriksaan referensi **wajib**. File yang masih dipakai tidak boleh dihapus. File yatim dicatat dan baru dibersihkan setelah 30 hari serta setelah backup terverifikasi.
 
-## Serving & .htaccess
+## Serving melalui reverse proxy
 
-Hostinger otomatis membuat `.htaccess` di `public_html` untuk routing aplikasi Node.js. Folder `uploads/` berada di dalam `public_html`, jadi web server menyajikannya langsung **sebelum** request diteruskan ke Node.js — cepat dan tanpa membebani aplikasi. Bila perlu, tambahkan aturan agar `/uploads` di-bypass ke file statis dan diberi cache header panjang:
+Nginx/Caddy menyajikan `/uploads/` langsung dari direktori publik sebelum request diteruskan ke Node.js. Contoh Nginx:
 
-```apache
-# public_html/uploads/.htaccess (opsional, untuk cache)
-<IfModule mod_headers.c>
-  Header set Cache-Control "public, max-age=31536000, immutable"
-</IfModule>
+```nginx
+location /uploads/ {
+  alias /srv/fuspi/shared/public/uploads/;
+  add_header X-Content-Type-Options "nosniff" always;
+  add_header Cache-Control "public, max-age=31536000, immutable";
+  try_files $uri =404;
+}
 ```
+
+User service aplikasi mendapat hak tulis hanya pada tiga root storage. Nginx hanya mendapat
+hak baca pada direktori publik dan tidak memiliki location/alias untuk private atau PPKS.
 
 Verifikasi setelah deploy: unggah 1 gambar dari admin, cek muncul di `https://fuspi.uinbanten.ac.id/uploads/...`, lalu lakukan redeploy dan pastikan gambar **masih ada** (bukti persistensi).
 
 ## Fallback dev lokal (opsional)
 
-Bila mengembangkan tanpa akses struktur Hostinger, buat route `app/uploads/[...path]/route.ts` yang membaca file dari `UPLOAD_DIR` lokal dan mengembalikannya, atau cukup arahkan `UPLOAD_DIR` ke `./public/uploads` **hanya untuk dev** (dan `.gitignore`-kan). Di produksi tetap pakai path Hostinger. Perbedaan ini murni dari env, tanpa ubah kode.
+Bila mengembangkan tanpa struktur VPS, arahkan `UPLOAD_DIR` ke direktori `.uploads` yang diabaikan Git dan gunakan route dev khusus. Produksi selalu menggunakan `/srv/fuspi/shared`; perbedaan hanya melalui env.
 
 ## Batasan yang perlu diketahui
 
-- Storage terpakai kuota paket Business — kompresi ke webp sangat membantu.
-- Tidak ada CDN bawaan; untuk situs fakultas beban ini wajar. Bila trafik gambar besar kelak, adapter bisa ditukar ke S3/Supabase Storage tanpa ubah skema (hanya ganti isi `lib/upload`).
+- Kapasitas, inode, permission, disk alert, backup, dan restore menjadi tanggung jawab operator VPS.
+- CDN tidak wajib pada v1. Jika trafik bertambah, adapter storage dapat diganti tanpa memberikan akses database langsung kepada layanan penyimpanan.

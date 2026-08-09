@@ -13,7 +13,9 @@ export default async function HomePage({
   const t = await getTranslations("M0");
 
   return (
-    <main className="foundation-shell">
+    // The public layout owns the single <main> landmark and the min-h-screen
+    // shell, so this page only centres the M0 card in the space it is given.
+    <div className="grid place-items-center px-6 py-12 md:py-20">
       <section className="foundation-card" aria-labelledby="foundation-title">
         <p className="foundation-eyebrow">FUSPI · M0</p>
         <h1 id="foundation-title">{t("title")}</h1>
@@ -34,6 +36,6 @@ export default async function HomePage({
           {t("status")}
         </p>
       </section>
-    </main>
+    </div>
   );
 }

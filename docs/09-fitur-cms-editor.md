@@ -89,7 +89,7 @@ Terapkan berikut agar setara CMS profesional:
 - **Pratinjau draft** — tombol "Pratinjau" membuka `/berita/[slug]?preview=token` yang menampilkan draft hanya untuk sesi admin (cek auth di halaman preview).
 - **SEO per konten** — field `metaTitle` & `metaDesc` (sudah di skema). `generateMetadata()` memakainya, fallback ke title/excerpt.
 - **Tag** — input tag (buat-saat-ketik) pada Berita/Kolom; halaman publik `/tag/[slug]` menampilkan konten bertag.
-- **Pencarian publik** — `/cari?q=` mencari tabel translation menggunakan FULLTEXT untuk ID/EN. Arabic memakai FULLTEXT bila konfigurasi MariaDB mendukungnya, selain itu fallback prefix/`LIKE` yang dibatasi. Fallback ID dideduplikasi berdasarkan parent ID.
+- **Pencarian publik** — `/cari?q=` memakai PostgreSQL full-text search (`tsvector` + GIN) untuk ID/EN dan konfigurasi `simple` untuk Arabic. Prefix/`ILIKE` yang dibatasi menjadi fallback; hasil locale fallback ID dideduplikasi berdasarkan parent ID.
 - **Berita terkait** — di halaman detail, tampilkan 3 post satu kategori/tag terbaru.
 - **Slug otomatis + cek unik** — dari judul, editable, tolak duplikat dengan pesan jelas.
 - **Autosave draft wajib** untuk Post/Page: debounce 30 detik setelah perubahan, hanya saat DRAFT, dan menampilkan waktu simpan terakhir. Autosave mengirim `version`; konflik optimistic locking tidak boleh menimpa data.

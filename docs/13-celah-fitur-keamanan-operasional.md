@@ -6,7 +6,7 @@ Dokumen ini menutup celah yang ditemukan saat membandingkan rencana kita dengan 
 
 ## A. Formulir publik (Kontak, Pengaduan, Survei) — celah besar
 
-Situs lama hanya menautkan ke Google Form eksternal. Sekarang formulir masuk ke sistem sendiri. `FormSubmission` hanya menampung KONTAK; SURVEI memakai model survei berversi dan PENGADUAN memakai `Ticket`.
+Kontrak awal hanya menautkan formulir eksternal. Pada produk baru, formulir masuk ke sistem sendiri. `FormSubmission` hanya menampung KONTAK; SURVEI memakai model survei berversi dan PENGADUAN memakai `Ticket`.
 
 ### 1. Hubungi Kami (`/kontak`)
 - Field: Nama, Email, Nomor telepon (opsional), Subjek, Pesan.
@@ -91,7 +91,7 @@ Gunakan field terstruktur `vision`, `mission`, `objectives`, `learningOutcomes`,
 - Kotak cari di navbar → halaman `/cari?q=`.
 - **Saran saat mengetik (autocomplete)** — aktif setelah minimum 3 karakter, debounce 300ms, maksimum 5 hasil, dan rate limit 60 request/menit per HMAC IP.
 - Cari lintas: Berita, Pengumuman, Halaman, Dosen, Prodi, Dokumen, FAQ. Kelompokkan hasil per tipe.
-- **Toleransi salah ketik** — FULLTEXT pada tabel translation ID/EN. Arabic memakai FULLTEXT bila tersedia pada konfigurasi MariaDB; selain itu prefix/`LIKE` dibatasi query 3–100 karakter, maksimum 50 kandidat per tipe. Ranking: exact title → title prefix → FULLTEXT score → excerpt. Deduplikasi berdasarkan parent ID.
+- **Toleransi salah ketik** — PostgreSQL full-text search memakai `tsvector` dan GIN untuk ID/EN; Arabic memakai konfigurasi `simple`. Prefix/`ILIKE` dibatasi query 3–100 karakter dan maksimum 50 kandidat per tipe. Ranking: exact title → title prefix → full-text score → excerpt. Deduplikasi berdasarkan parent ID.
 - Hasil kosong → sarankan kata kunci lain + tautan ke halaman populer.
 - Hormati locale aktif (cari di terjemahan bahasa yang sedang dipakai, fallback ke `id`).
 
@@ -141,11 +141,11 @@ Institusi publik harus dapat diakses semua orang. Ini bukan opsional.
 ## J. Keamanan (memperluas `06`)
 
 - **Security headers** di `next.config.ts`: HSTS, `nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`, Permissions-Policy, dan CSP nonce-based tanpa `unsafe-eval`. CSP mengizinkan hanya origin sendiri, YouTube, Maps, GA4 setelah consent, serta worker pdf.js yang dibutuhkan; tidak ada wildcard umum.
-- **Rate limit persisten** memakai `RateLimitBucket` MariaDB, bukan memory proses. Login: 5 gagal/15 menit; kontak/survei: 5/jam; tiket PPKS: 10/hari dengan pesan suportif; autocomplete: 60/menit; lacak token mengikuti `14`. Kunci memakai HMAC IP dari trusted proxy chain dan `IP_HASH_SECRET`, bukan IP mentah.
+- **Rate limit persisten** memakai `RateLimitBucket` PostgreSQL, bukan memory proses. Login: 5 gagal/15 menit; kontak/survei: 5/jam; tiket PPKS: 10/hari dengan pesan suportif; autocomplete: 60/menit; lacak token mengikuti `14`. Kunci memakai HMAC IP dari trusted proxy chain dan `IP_HASH_SECRET`, bukan IP mentah.
 - **Sanitasi HTML** dari editor sebelum render (`isomorphic-dompurify`) — mencegah XSS dari konten editor.
 - **Validasi upload ketat** (tipe MIME + ekstensi + ukuran; tolak SVG dari pengguna karena bisa memuat script, atau sanitasi SVG).
 - Jangan tampilkan pesan error teknis ke publik.
-- Simpan `AUTH_SECRET` & kredensial DB hanya di env Hostinger, tidak pernah di repo.
+- Simpan `AUTH_SECRET` dan kredensial DB hanya di secret environment VPS/secret manager, tidak pernah di repo.
 
 ---
 
@@ -153,27 +153,27 @@ Institusi publik harus dapat diakses semua orang. Ini bukan opsional.
 
 Konten fakultas (berita bertahun-tahun, dokumen akreditasi) tidak boleh hilang.
 
-- **Backup database** — jadwalkan `mysqldump` berkala. Hostinger menyediakan backup otomatis pada paket Business; **verifikasi** frekuensinya di hPanel, dan **tambahan**: unduh dump manual berkala ke penyimpanan lain (mis. Google Drive) minimal bulanan.
+- **Backup database** — jadwalkan `pg_dump` format custom harian dan PITR bila RPO mengharuskannya. Salin ke lokasi offsite berbeda dan buktikan dengan restore drill berkala; keberadaan file backup saja bukan bukti dapat dipulihkan.
 - **Backup file** mencakup public uploads, private uploads, dan PPKS encrypted storage. Kunci enkripsi PPKS dibackup terpisah dari data.
 - **Uji restore wajib** sebelum go-live dan setiap 6 bulan: restore database + ketiga storage ke lingkungan terisolasi, verifikasi checksum dan satu file terenkripsi, lalu catat hasilnya.
 - **Log aktivitas admin** (`ActivityLog`, disebut di `10-D`) — siapa mengubah apa; membantu melacak bila ada kesalahan.
 - **Monitoring uptime** sederhana (mis. UptimeRobot gratis) + cek broken link berkala.
-- **Redirect dari URL WordPress lama** memakai tabel `Redirect` dan status 301. Tidak boleh ada loop atau chain; destination selalu URL locale final.
+- **Registry redirect aman** tersedia untuk perubahan URL FUSPI di masa depan. Redirect permanen tidak boleh membentuk loop atau chain; destination selalu URL locale final.
 
-### Migrasi WordPress — workstream wajib
+### Kesiapan konten awal manual — workstream wajib
 
-1. Inventaris seluruh post type, page, kategori, tag, author, menu, attachment, dokumen, tanggal, status, slug, dan URL publik lama.
-2. Buat skrip import idempotent dengan tabel mapping ID WordPress → ID baru. Konten lama masuk sebagai translation `id`; EN/AR dibiarkan kosong.
-3. Sanitasi HTML, transformasikan block/shortcode yang didukung, salin media dengan checksum SHA-256, deduplikasi, dan perbaiki internal URL.
-4. Buat satu redirect 301 untuk setiap URL lama menuju URL `/id/...` final. Redirect chain dan loop adalah kegagalan migrasi.
-5. Dry run menghasilkan jumlah source, created, updated, skipped, failed, missing media, dan broken internal links.
-6. Sebelum cutover, rekonsiliasi jumlah per tipe/status/tahun, sampling visual konten, lalu crawl staging untuk 404, missing media, canonical, hreflang, dan redirect.
-7. Backup WordPress lama dipertahankan sampai restore situs baru dan rekonsiliasi produksi disetujui.
+1. Pemilik konten mengesahkan matriks menu, halaman wajib, penanggung jawab, status materi, dan tanggal review.
+2. Admin memasukkan materi melalui CMS; tidak ada proses impor atau pemetaan ID/URL dari sistem terdahulu dalam scope v1.
+3. Nama pimpinan, statistik, sejarah, kontak, akreditasi, program, dan klaim publik hanya diterbitkan setelah diverifikasi pemilik konten.
+4. Media awal memakai aset resmi FUSPI, memiliki alt text, dimensi, hak penggunaan, dan checksum penyimpanan yang valid.
+5. Section beranda tanpa konten valid disembunyikan. Halaman arsip kosong memakai empty state yang jujur dan tidak diisi fixture seolah-olah nyata.
+6. Sebelum cutover, lakukan sampling visual seluruh template utama dan crawl staging untuk 404 internal, media hilang, canonical, hreflang, dan tautan rusak.
+7. Checklist lengkap mengikuti `26-H` dan acceptance `20-G`. Registry redirect tidak perlu dipopulasi dari situs terdahulu.
 
-### SMTP Hostinger & transactional outbox
+### SMTP & transactional outbox
 
-- Semua email aplikasi menggunakan SMTP Hostinger dari env di `01`; tidak ada provider alternatif pada v1.
-- Mutation bisnis menulis `NotificationOutbox` dalam transaksi yang sama. Cron Hostinger memprosesnya setiap 5 menit dengan exponential backoff, maksimal 5 percobaan.
+- Semua email aplikasi menggunakan SMTP yang dipilih institusi dari env di `01`.
+- Mutation bisnis menulis `NotificationOutbox` dalam transaksi yang sama. Worker systemd/container memprosesnya terjadwal dengan exponential backoff, maksimal 5 percobaan.
 - Kegagalan email tidak menggagalkan tiket, booking, atau balasan. Outbox memakai `idempotencyKey` unique untuk mencegah duplikasi.
 - Error permanen tampil di dashboard sesuai role dan dapat di-retry manual. Template tersedia ID/EN/AR berdasarkan locale pengirim.
 

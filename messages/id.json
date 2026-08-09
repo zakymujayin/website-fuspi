@@ -4,5 +4,385 @@
     "description": "Scaffold ini memvalidasi routing multibahasa, arah tulisan, dan quality gate sebelum tiga lane AI mulai bekerja.",
     "languageLabel": "Pilih bahasa",
     "status": "Locale Indonesia aktif (LTR)."
+  },
+  "Auth": {
+    "metaTitle": "Masuk",
+    "title": "Masuk ke panel pengelola {faculty}",
+    "subtitle": "Halaman ini hanya untuk pengelola internal. Tidak ada pendaftaran publik.",
+    "emailLabel": "Email",
+    "passwordLabel": "Kata sandi",
+    "showPassword": "Tampilkan kata sandi",
+    "hidePassword": "Sembunyikan kata sandi",
+    "submit": "Masuk",
+    "submitting": "Memverifikasi…",
+    "submittingStatus": "Memverifikasi kredensial",
+    "sessionInvalid": "Sesi Anda sudah tidak berlaku. Silakan masuk kembali untuk melanjutkan.",
+    "error": {
+      "INVALID_CREDENTIALS": "Email atau kata sandi salah. Periksa kembali dan coba lagi.",
+      "TRY_AGAIN_LATER": "Terlalu banyak percobaan masuk. Coba lagi dalam beberapa menit.",
+      "AUTH_UNAVAILABLE": "Layanan masuk sedang tidak tersedia. Coba lagi beberapa saat lagi."
+    }
+  },
+  "PasswordChange": {
+    "metaTitle": "Ubah kata sandi",
+    "title": "Perbarui kata sandi Anda",
+    "description": "Gunakan sedikitnya 12 karakter. Demi keamanan, sesi aktif akan diakhiri setelah kata sandi berhasil diperbarui.",
+    "currentPasswordLabel": "Kata sandi saat ini",
+    "newPasswordLabel": "Kata sandi baru",
+    "confirmPasswordLabel": "Konfirmasi kata sandi baru",
+    "showCurrentPassword": "Tampilkan kata sandi saat ini",
+    "hideCurrentPassword": "Sembunyikan kata sandi saat ini",
+    "showNewPassword": "Tampilkan kata sandi baru",
+    "hideNewPassword": "Sembunyikan kata sandi baru",
+    "showConfirmation": "Tampilkan konfirmasi kata sandi",
+    "hideConfirmation": "Sembunyikan konfirmasi kata sandi",
+    "submit": "Perbarui kata sandi",
+    "submitting": "Memperbarui…",
+    "submittingStatus": "Sedang memperbarui kata sandi",
+    "error": {
+      "SESSION_INVALID": "Sesi Anda sudah tidak berlaku. Silakan masuk kembali untuk melanjutkan.",
+      "INVALID_CREDENTIALS": "Kata sandi saat ini tidak sesuai. Periksa kembali dan coba lagi.",
+      "PASSWORD_POLICY": "Kata sandi baru belum dapat diterima. Periksa persyaratan di atas dan coba lagi.",
+      "AUTH_UNAVAILABLE": "Layanan perubahan kata sandi sedang tidak tersedia. Coba lagi beberapa saat lagi."
+    }
+  },
+  "AdminLanding": {
+    "metaTitle": "Panel pengelola",
+    "title": "Panel pengelola FUSPI",
+    "description": "Sesi Anda telah diverifikasi. Modul pengelolaan konten akan muncul di sini sesuai tahap implementasi berikutnya.",
+    "securityNote": "Setiap halaman dan tindakan tetap memeriksa sesi serta izin di server. Halaman ini tidak memberikan izin ke modul lain.",
+    "changePassword": "Ubah kata sandi"
+  },
+  "Nav": {
+    "skipToContent": "Lompat ke konten utama",
+    "menu": "Menu",
+    "openMenu": "Buka menu",
+    "closeMenu": "Tutup menu",
+    "languageLabel": "Pilih bahasa",
+    "primaryLabel": "Menu utama",
+    "contentLabel": "Kanal konten",
+    "utilityLabel": "Layanan sistem",
+    "externalLinkHint": "(situs eksternal, terbuka di tab baru)",
+    "profile": "Profil",
+    "studyPrograms": "Program Studi",
+    "academics": "Akademik",
+    "research": "Riset & PkM",
+    "services": "Layanan",
+    "contact": "Kontak",
+    "news": "Berita",
+    "announcements": "Pengumuman",
+    "columns": "Kolom",
+    "agenda": "Agenda",
+    "albums": "Album",
+    "documents": "Dokumen",
+    "pmb": "PMB",
+    "siakad": "SIAKAD",
+    "elearning": "E-Learning",
+    "gkm": "GKM",
+    "complaints": "Pengaduan",
+    "booking": "Peminjaman Ruang",
+    "ppid": "PPID",
+    "faq": "FAQ",
+    "program": {
+      "IAT": "Ilmu Al-Qur’an dan Tafsir",
+      "IH": "Ilmu Hadis",
+      "AFI": "Aqidah dan Filsafat Islam",
+      "SAA": "Studi Agama-Agama",
+      "TASPI": "Tasawuf dan Psikoterapi"
+    }
+  },
+  "Footer": {
+    "quickLinks": "Tautan Cepat",
+    "contact": "Kontak",
+    "contactHint": "Alamat kampus, surel, dan telepon fakultas ditampilkan setelah pengaturan situs tersedia.",
+    "legalLabel": "Tautan kebijakan",
+    "privacy": "Privasi",
+    "accessibility": "Aksesibilitas",
+    "sitemap": "Peta Situs"
+  },
+  "StudyPrograms": {
+    "title": "Program Studi",
+    "description": "Lima program studi sarjana di Fakultas Ushuluddin dan Pemikiran Islam, dari kajian Al-Qur’an dan hadis hingga tasawuf dan psikoterapi.",
+    "readMore": "Selengkapnya"
+  },
+  "Post": {
+    "breadcrumbHome": "Beranda",
+    "readMore": "Selengkapnya",
+    "fallbackNotice": "Konten ini belum tersedia dalam bahasa yang dipilih. Menampilkan versi Bahasa Indonesia.",
+    "readingTime": "{minutes} menit baca",
+    "loading": "Memuat berita…",
+    "sidebar": {
+      "latestTitle": "Berita Terbaru",
+      "seeAll": "Lihat semua berita"
+    },
+    "pagination": {
+      "previous": "Halaman sebelumnya",
+      "next": "Halaman berikutnya",
+      "pageStatus": "Hal {page} dari {totalPages}",
+      "goToPage": "Ke halaman {page}"
+    },
+    "empty": {
+      "title": "Belum ada berita",
+      "description": "Berita akan tampil di sini setelah diterbitkan."
+    },
+    "unavailable": {
+      "title": "Berita sedang tidak dapat dimuat",
+      "description": "Silakan muat ulang halaman ini beberapa saat lagi."
+    },
+    "notFound": {
+      "title": "Berita tidak ditemukan",
+      "description": "Berita yang Anda cari mungkin sudah dipindahkan atau belum diterbitkan.",
+      "backToList": "Kembali ke daftar berita"
+    },
+    "news": {
+      "breadcrumbLabel": "Berita",
+      "title": "Berita",
+      "description": "Kabar dan kegiatan terbaru Fakultas Ushuluddin dan Pemikiran Islam.",
+      "metaDescription": "Kumpulan berita dan kegiatan terbaru Fakultas Ushuluddin dan Pemikiran Islam (FUSPI)."
+    }
+  },
+  "AdminMediaLibrary": {
+    "metaTitle": "Pustaka Media",
+    "title": "Pustaka Media",
+    "description": "Telusuri seluruh gambar dan PDF yang telah disetujui untuk situs ini, lalu saring menurut jenis untuk menemukan berkas yang Anda cari.",
+    "filterAriaLabel": "Saring media berdasarkan jenis",
+    "gridAriaLabel": "Daftar item media",
+    "totalCount": "{count} item media",
+    "kind": {
+      "all": "Semua",
+      "image": "Gambar",
+      "pdf": "PDF"
+    },
+    "decorative": "Dekoratif (tanpa teks alternatif)",
+    "altLabel": "Teks alternatif: {alt}",
+    "uploadedBy": "Diunggah oleh {name}",
+    "loading": "Memuat pustaka media…",
+    "pagination": {
+      "ariaLabel": "Navigasi halaman pustaka media",
+      "previous": "Halaman sebelumnya",
+      "next": "Halaman berikutnya",
+      "pageStatus": "Hal {page} dari {totalPages}",
+      "goToPage": "Ke halaman {page}"
+    },
+    "empty": {
+      "title": "Belum ada media",
+      "description": "Media akan tampil di sini setelah diunggah."
+    },
+    "unavailable": {
+      "title": "Pustaka media sedang tidak dapat dimuat",
+      "description": "Silakan muat ulang halaman ini beberapa saat lagi."
+    }
+  },
+  "AdminPostList": {
+    "metaTitle": "Berita",
+    "title": "Berita",
+    "description": "Telusuri seluruh berita fakultas, lalu saring menurut status penerbitan untuk menemukan tulisan yang Anda cari.",
+    "filterAriaLabel": "Saring berita berdasarkan status",
+    "listAriaLabel": "Daftar berita",
+    "totalCount": "{count} berita",
+    "status": {
+      "all": "Semua",
+      "draft": "Draf",
+      "published": "Terbit",
+      "archived": "Arsip"
+    },
+    "state": {
+      "DRAFT": "Draf",
+      "PUBLISHED": "Terbit",
+      "SCHEDULED": "Terjadwal",
+      "ARCHIVED": "Arsip"
+    },
+    "featured": "Unggulan",
+    "localesLabel": "Bahasa tersedia: {locales}",
+    "uncategorized": "Tanpa kategori",
+    "unknownAuthor": "Penulis tidak diketahui",
+    "byLabel": "Oleh {name}",
+    "publishedAtLabel": "Terbit {instant}",
+    "updatedAtLabel": "Diperbarui {instant}",
+    "loading": "Memuat daftar berita…",
+    "pagination": {
+      "ariaLabel": "Navigasi halaman daftar berita",
+      "previous": "Halaman sebelumnya",
+      "next": "Halaman berikutnya",
+      "pageStatus": "Hal {page} dari {totalPages}",
+      "goToPage": "Ke halaman {page}"
+    },
+    "empty": {
+      "title": "Belum ada berita",
+      "description": "Berita akan tampil di sini setelah dibuat."
+    },
+    "unavailable": {
+      "title": "Daftar berita sedang tidak dapat dimuat",
+      "description": "Silakan muat ulang halaman ini beberapa saat lagi."
+    },
+    "createAction": "Tulis berita",
+    "edit": "Sunting",
+    "editLabelFor": "Sunting berita: {title}"
+  },
+  "AdminPostEditor": {
+    "createMetaTitle": "Tulis Berita",
+    "createTitle": "Tulis Berita",
+    "createDescription": "Isi konten berita dalam Bahasa Indonesia. Terjemahan Inggris dan Arab bersifat opsional dan dapat dilengkapi kemudian. Berita disimpan sebagai draf.",
+    "editMetaTitle": "Sunting Berita",
+    "editTitle": "Sunting Berita",
+    "editDescription": "Perbarui isi berita. Status penerbitan tidak berubah dari halaman ini.",
+    "slug": "Slug",
+    "slugDescription": "Penggal URL berita, contoh: wisuda-fuspi-2026. Gunakan huruf kecil dan tanda hubung.",
+    "featured": "Jadikan berita unggulan",
+    "featuredDescription": "Berita unggulan dapat ditonjolkan di halaman publik.",
+    "localeLegend": "Konten {locale}",
+    "localeOptional": "(opsional)",
+    "title": "Judul",
+    "excerpt": "Ringkasan",
+    "content": "Isi",
+    "contentDescription": "Isi berita. Gunakan bilah alat untuk pemformatan dasar.",
+    "submitCreate": "Simpan draf",
+    "submitUpdate": "Simpan perubahan",
+    "submitting": "Menyimpan…",
+    "cancel": "Batal",
+    "autosave": {
+      "saving": "Menyimpan draf otomatis…",
+      "saved": "Tersimpan otomatis {time}",
+      "conflict": "Versi berubah di tempat lain. Muat ulang halaman.",
+      "error": "Gagal menyimpan otomatis. Perubahan Anda belum tersimpan."
+    },
+    "locale": {
+      "id": "Bahasa Indonesia",
+      "en": "Bahasa Inggris",
+      "ar": "Bahasa Arab"
+    },
+    "unavailable": {
+      "title": "Berita tidak dapat dimuat",
+      "description": "Berita tidak ditemukan, bukan milik Anda, atau sedang tidak dapat diakses."
+    },
+    "error": {
+      "SESSION_INVALID": "Sesi Anda telah berakhir. Silakan masuk kembali lalu coba lagi.",
+      "CSRF_INVALID": "Permintaan tidak dapat diverifikasi. Muat ulang halaman lalu coba lagi.",
+      "REQUEST_INVALID": "Permintaan tidak dapat diproses. Periksa isian Anda lalu coba lagi.",
+      "VALIDATION_FAILED": "Ada isian yang belum sesuai. Periksa bagian yang ditandai.",
+      "NOT_FOUND": "Berita tidak ditemukan atau bukan milik Anda.",
+      "VERSION_CONFLICT": "Berita ini telah diubah orang lain. Muat ulang halaman untuk melihat versi terbaru sebelum menyimpan.",
+      "INVALID_STATE": "Tindakan ini tidak dapat dilakukan pada status berita saat ini.",
+      "SLUG_CONFLICT": "Slug ini sudah dipakai berita lain. Gunakan slug yang berbeda.",
+      "MEDIA_INVALID": "Media yang tertaut tidak valid.",
+      "UNAVAILABLE": "Perubahan tidak dapat disimpan saat ini. Coba lagi beberapa saat lagi."
+    }
+  },
+  "AdminPostPublication": {
+    "title": "Status penerbitan",
+    "currentLabel": "Saat ini:",
+    "state": {
+      "DRAFT": "Draf",
+      "PUBLISHED": "Terbit",
+      "SCHEDULED": "Terjadwal",
+      "ARCHIVED": "Arsip"
+    },
+    "action": {
+      "PUBLISH_NOW": "Terbitkan sekarang",
+      "SCHEDULE": "Jadwalkan",
+      "RETURN_TO_DRAFT": "Kembalikan ke draf",
+      "ARCHIVE": "Arsipkan"
+    },
+    "scheduleLabel": "Jadwalkan terbit pada",
+    "scheduleRequired": "Pilih waktu terbit terlebih dahulu.",
+    "scheduleFuture": "Waktu terbit harus di masa depan.",
+    "error": {
+      "SESSION_INVALID": "Sesi Anda telah berakhir. Silakan masuk kembali lalu coba lagi.",
+      "CSRF_INVALID": "Permintaan tidak dapat diverifikasi. Muat ulang halaman lalu coba lagi.",
+      "REQUEST_INVALID": "Permintaan tidak dapat diproses. Periksa isian Anda lalu coba lagi.",
+      "VALIDATION_FAILED": "Ada isian yang belum sesuai. Periksa bagian yang ditandai.",
+      "NOT_FOUND": "Berita tidak ditemukan atau bukan milik Anda.",
+      "VERSION_CONFLICT": "Berita ini telah diubah orang lain. Muat ulang halaman untuk melihat versi terbaru sebelum menyimpan.",
+      "INVALID_STATE": "Tindakan ini tidak dapat dilakukan pada status berita saat ini.",
+      "SLUG_CONFLICT": "Slug ini sudah dipakai berita lain. Gunakan slug yang berbeda.",
+      "MEDIA_INVALID": "Media yang tertaut tidak valid.",
+      "UNAVAILABLE": "Perubahan tidak dapat disimpan saat ini. Coba lagi beberapa saat lagi."
+    }
+  },
+  "AdminPostDelete": {
+    "title": "Hapus berita",
+    "description": "Menghapus berita bersifat permanen dan tidak dapat dibatalkan.",
+    "action": "Hapus berita",
+    "confirmTitle": "Hapus berita ini?",
+    "confirmDescription": "Tindakan ini permanen. Berita dan seluruh terjemahannya akan dihapus.",
+    "cancel": "Batal",
+    "confirmAction": "Ya, hapus",
+    "error": {
+      "SESSION_INVALID": "Sesi Anda telah berakhir. Silakan masuk kembali lalu coba lagi.",
+      "CSRF_INVALID": "Permintaan tidak dapat diverifikasi. Muat ulang halaman lalu coba lagi.",
+      "REQUEST_INVALID": "Permintaan tidak dapat diproses. Periksa isian Anda lalu coba lagi.",
+      "VALIDATION_FAILED": "Ada isian yang belum sesuai. Periksa bagian yang ditandai.",
+      "NOT_FOUND": "Berita tidak ditemukan atau bukan milik Anda.",
+      "VERSION_CONFLICT": "Berita ini telah diubah orang lain. Muat ulang halaman untuk melihat versi terbaru sebelum menyimpan.",
+      "INVALID_STATE": "Tindakan ini tidak dapat dilakukan pada status berita saat ini.",
+      "SLUG_CONFLICT": "Slug ini sudah dipakai berita lain. Gunakan slug yang berbeda.",
+      "MEDIA_INVALID": "Media yang tertaut tidak valid.",
+      "UNAVAILABLE": "Perubahan tidak dapat disimpan saat ini. Coba lagi beberapa saat lagi."
+    }
+  },
+  "AdminPostCoverPicker": {
+    "label": "Gambar sampul",
+    "description": "Pilih gambar sampul dari Pustaka Media untuk berita ini.",
+    "none": "Belum ada sampul",
+    "selected": "Sampul terpilih",
+    "choose": "Pilih sampul",
+    "change": "Ganti sampul",
+    "clear": "Hapus sampul",
+    "listLabel": "Daftar gambar untuk sampul",
+    "selectLabel": "Pilih {name} sebagai sampul",
+    "loading": "Memuat gambar…",
+    "loadError": "Gagal memuat gambar. Coba lagi.",
+    "empty": "Belum ada gambar di Pustaka Media."
+  },
+  "AdminMediaUpload": {
+    "title": "Unggah media",
+    "description": "Unggah gambar WebP (hingga 20) atau satu berkas PDF ke Pustaka Media.",
+    "policyLabel": "Jenis unggahan",
+    "policy": {
+      "CMS_IMAGE": "Gambar",
+      "PUBLIC_PDF": "PDF"
+    },
+    "images": "Berkas gambar",
+    "imagesHint": "Format WebP, maksimal {max} berkas, masing-masing 5 MB.",
+    "pdf": "Berkas PDF",
+    "pdfHint": "Satu berkas PDF, maksimal 20 MB.",
+    "alt": "Teks alternatif",
+    "decorative": "Dekoratif (tanpa teks alternatif)",
+    "selectedLabel": "Gambar terpilih",
+    "removeLabel": "Hapus {name}",
+    "action": "Unggah",
+    "uploading": "Mengunggah…",
+    "success": "{count} berkas berhasil diunggah.",
+    "validation": {
+      "missing": "Pilih berkas terlebih dahulu.",
+      "count": "Maksimal 20 gambar per unggahan.",
+      "type": "Jenis berkas tidak diperbolehkan.",
+      "size": "Ukuran berkas melebihi batas.",
+      "altRequired": "Isi teks alternatif atau tandai dekoratif.",
+      "altNotEmpty": "Gambar dekoratif tidak boleh memiliki teks alternatif."
+    },
+    "error": {
+      "SESSION_INVALID": "Sesi Anda telah berakhir. Masuk kembali lalu coba lagi.",
+      "CSRF_INVALID": "Permintaan tidak dapat diverifikasi. Muat ulang halaman lalu coba lagi.",
+      "REQUEST_INVALID": "Permintaan tidak dapat diproses. Periksa berkas Anda lalu coba lagi.",
+      "VALIDATION_FAILED": "Berkas atau data tidak valid. Periksa lalu coba lagi.",
+      "NOT_FOUND": "Sumber daya tidak ditemukan.",
+      "MEDIA_IN_USE": "Media sedang digunakan.",
+      "UPLOAD_FAILED": "Unggahan gagal diproses. Coba lagi.",
+      "UNAVAILABLE": "Unggahan tidak dapat diproses saat ini. Coba lagi beberapa saat lagi."
+    }
+  },
+  "AdminPostRichText": {
+    "toolbarLabel": "Alat pemformatan",
+    "tool": {
+      "bold": "Tebal",
+      "italic": "Miring",
+      "h2": "Judul tingkat 2",
+      "h3": "Judul tingkat 3",
+      "bulletList": "Daftar berbutir",
+      "orderedList": "Daftar bernomor",
+      "blockquote": "Kutipan",
+      "code": "Kode"
+    }
   }
 }

@@ -1,6 +1,6 @@
 # 10 — Menu Builder, Branding, Fitur Lanjutan & Referensi
 
-Dokumen ini melengkapi permintaan: menu drag & drop, pengaturan branding (logo), penegasan peran berbasis kepemilikan, editor sekelas WordPress, dan referensi desain website universitas custom (non-WordPress).
+Dokumen ini melengkapi permintaan: menu drag & drop, pengaturan branding (logo), penegasan peran berbasis kepemilikan, editor rich-text modern, dan referensi desain website universitas yang dirancang khusus.
 
 ---
 
@@ -45,9 +45,9 @@ Semua tersimpan di baris singleton `SiteSetting` (id `"singleton"`). Form tungga
 
 ---
 
-## C. Editor teks sekelas WordPress (penegasan)
+## C. Editor rich-text modern (penegasan)
 
-Sesuai permintaan "teks berita bisa diatur sepenuhnya seperti di WordPress", editor (`09-A`) harus mencakup paritas Gutenberg/klasik:
+Editor (`09-A`) harus memberi kontrol editorial yang lengkap dan konsisten:
 
 - Format teks penuh: heading H2–H4, tebal, miring, garis bawah, coret, subscript/superscript, warna teks (opsional), highlight.
 - Perataan paragraf: kiri/tengah/kanan/rata kanan-kiri.
@@ -76,14 +76,14 @@ Distilasi dari praktik situs universitas terbaik (lihat referensi di bawah). Ter
 - **Aksesibilitas WCAG 2.2 AA** — fokus keyboard terlihat, kontras cukup, navigasi keyboard penuh (pola SOAS).
 - **Breadcrumb** di halaman dalam, **sitemap.xml**, **RSS feed** berita (opsional).
 - **Statistik pengunjung** — hitungan tampilan per berita (`viewCount`) + ringkasan sederhana di dashboard.
-- **Manajemen redirect wajib** — semua URL lama WordPress dipetakan ke URL locale baru melalui model `Redirect`; cegah loop dan redirect chain.
+- **Registry redirect aman** — tersedia untuk perubahan URL FUSPI di masa depan; cegah loop dan redirect chain. Tidak ada kewajiban memuat daftar URL dari sistem terdahulu.
 - **Mode pemeliharaan** (opsional) — banner/halaman saat update besar.
 
 ---
 
 ## E. Referensi desain — website universitas/fakultas custom
 
-Situs pemenang penghargaan umumnya **dibangun custom (bukan WordPress)** oleh studio desain — ini memvalidasi arah proyek Anda. Poin kunci: situs higher-ed terbaik mengandalkan konten terstruktur, akses berbasis peran, dan design system yang konsisten; situs yang kacau biasanya bermasalah pada tata kelola dan pemodelan konten, bukan teknologi.
+Situs higher-ed yang kuat mengandalkan konten terstruktur, akses berbasis peran, dan design system yang konsisten. Situs yang kacau biasanya bermasalah pada tata kelola dan pemodelan konten, bukan sekadar teknologi. Arah visual FUSPI yang mengikat berada di `26`.
 
 ### Referensi paling relevan untuk FUSPI (kampus keislaman)
 - **Zaytuna College** — kampus liberal arts Muslim terakreditasi pertama di AS; desain bersih dan elegan yang memadukan tradisi keilmuan Islam dan Barat, dengan akses mudah ke kurikulum, profil dosen, dan program. Acuan utama untuk nuansa akademik-keislaman yang modern.

@@ -4,5 +4,385 @@
     "description": "This scaffold validates multilingual routing, writing direction, and quality gates before the three AI lanes begin.",
     "languageLabel": "Choose a language",
     "status": "English locale is active (LTR)."
+  },
+  "Auth": {
+    "metaTitle": "Sign in",
+    "title": "Sign in to the {faculty} admin panel",
+    "subtitle": "This page is for internal staff only. There is no public registration.",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "submit": "Sign in",
+    "submitting": "Verifying…",
+    "submittingStatus": "Verifying credentials",
+    "sessionInvalid": "Your session is no longer valid. Sign in again to continue.",
+    "error": {
+      "INVALID_CREDENTIALS": "Incorrect email or password. Check your details and try again.",
+      "TRY_AGAIN_LATER": "Too many sign-in attempts. Try again in a few minutes.",
+      "AUTH_UNAVAILABLE": "The sign-in service is unavailable right now. Please try again shortly."
+    }
+  },
+  "PasswordChange": {
+    "metaTitle": "Change password",
+    "title": "Update your password",
+    "description": "Use at least 12 characters. For your security, all active sessions will end after a successful password change.",
+    "currentPasswordLabel": "Current password",
+    "newPasswordLabel": "New password",
+    "confirmPasswordLabel": "Confirm new password",
+    "showCurrentPassword": "Show current password",
+    "hideCurrentPassword": "Hide current password",
+    "showNewPassword": "Show new password",
+    "hideNewPassword": "Hide new password",
+    "showConfirmation": "Show password confirmation",
+    "hideConfirmation": "Hide password confirmation",
+    "submit": "Update password",
+    "submitting": "Updating…",
+    "submittingStatus": "Updating password",
+    "error": {
+      "SESSION_INVALID": "Your session is no longer valid. Sign in again to continue.",
+      "INVALID_CREDENTIALS": "The current password is incorrect. Check it and try again.",
+      "PASSWORD_POLICY": "The new password could not be accepted. Review the requirements above and try again.",
+      "AUTH_UNAVAILABLE": "The password service is unavailable right now. Please try again shortly."
+    }
+  },
+  "AdminLanding": {
+    "metaTitle": "Admin panel",
+    "title": "FUSPI admin panel",
+    "description": "Your session has been verified. Content-management modules will appear here in the next implementation stage.",
+    "securityNote": "Every page and action still checks the session and permissions on the server. This landing page grants no access to other modules.",
+    "changePassword": "Change password"
+  },
+  "Nav": {
+    "skipToContent": "Skip to main content",
+    "menu": "Menu",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "languageLabel": "Choose a language",
+    "primaryLabel": "Main menu",
+    "contentLabel": "Content channels",
+    "utilityLabel": "Campus systems",
+    "externalLinkHint": "(external site, opens in a new tab)",
+    "profile": "Profile",
+    "studyPrograms": "Study Programs",
+    "academics": "Academics",
+    "research": "Research & Community Service",
+    "services": "Services",
+    "contact": "Contact",
+    "news": "News",
+    "announcements": "Announcements",
+    "columns": "Columns",
+    "agenda": "Agenda",
+    "albums": "Albums",
+    "documents": "Documents",
+    "pmb": "Admissions",
+    "siakad": "SIAKAD",
+    "elearning": "E-Learning",
+    "gkm": "Quality Assurance",
+    "complaints": "Complaints",
+    "booking": "Room Booking",
+    "ppid": "PPID",
+    "faq": "FAQ",
+    "program": {
+      "IAT": "Qur’anic Studies and Exegesis",
+      "IH": "Hadith Studies",
+      "AFI": "Islamic Theology and Philosophy",
+      "SAA": "Religious Studies",
+      "TASPI": "Sufism and Psychotherapy"
+    }
+  },
+  "Footer": {
+    "quickLinks": "Quick Links",
+    "contact": "Contact",
+    "contactHint": "Campus addresses, email, and phone numbers appear once site settings are available.",
+    "legalLabel": "Policy links",
+    "privacy": "Privacy",
+    "accessibility": "Accessibility",
+    "sitemap": "Sitemap"
+  },
+  "StudyPrograms": {
+    "title": "Study Programs",
+    "description": "Five undergraduate programs at the Faculty of Ushuluddin and Islamic Thought, from Qur’an and hadith studies to Sufism and psychotherapy.",
+    "readMore": "Read more"
+  },
+  "Post": {
+    "breadcrumbHome": "Home",
+    "readMore": "Read more",
+    "fallbackNotice": "This content is not yet available in the selected language. Showing the Indonesian version.",
+    "readingTime": "{minutes} min read",
+    "loading": "Loading news…",
+    "sidebar": {
+      "latestTitle": "Latest News",
+      "seeAll": "See all news"
+    },
+    "pagination": {
+      "previous": "Previous page",
+      "next": "Next page",
+      "pageStatus": "Page {page} of {totalPages}",
+      "goToPage": "Go to page {page}"
+    },
+    "empty": {
+      "title": "No news yet",
+      "description": "News will appear here once it is published."
+    },
+    "unavailable": {
+      "title": "News cannot be loaded right now",
+      "description": "Please reload this page again in a moment."
+    },
+    "notFound": {
+      "title": "News article not found",
+      "description": "The article you are looking for may have moved or is not yet published.",
+      "backToList": "Back to the news list"
+    },
+    "news": {
+      "breadcrumbLabel": "News",
+      "title": "News",
+      "description": "Latest news and activities from the Faculty of Ushuluddin and Islamic Thought.",
+      "metaDescription": "Latest news and activities from the Faculty of Ushuluddin and Islamic Thought (FUSPI)."
+    }
+  },
+  "AdminMediaLibrary": {
+    "metaTitle": "Media Library",
+    "title": "Media Library",
+    "description": "Browse every image and PDF approved for this site, and filter by type to find the file you need.",
+    "filterAriaLabel": "Filter media by type",
+    "gridAriaLabel": "Media item list",
+    "totalCount": "{count} media items",
+    "kind": {
+      "all": "All",
+      "image": "Image",
+      "pdf": "PDF"
+    },
+    "decorative": "Decorative (no alternative text)",
+    "altLabel": "Alternative text: {alt}",
+    "uploadedBy": "Uploaded by {name}",
+    "loading": "Loading media library…",
+    "pagination": {
+      "ariaLabel": "Media library page navigation",
+      "previous": "Previous page",
+      "next": "Next page",
+      "pageStatus": "Page {page} of {totalPages}",
+      "goToPage": "Go to page {page}"
+    },
+    "empty": {
+      "title": "No media yet",
+      "description": "Media will appear here once it has been uploaded."
+    },
+    "unavailable": {
+      "title": "The media library is temporarily unavailable",
+      "description": "Please reload this page again shortly."
+    }
+  },
+  "AdminPostList": {
+    "metaTitle": "News",
+    "title": "News",
+    "description": "Browse every faculty news item, then filter by publication status to find the piece you are looking for.",
+    "filterAriaLabel": "Filter news by status",
+    "listAriaLabel": "News list",
+    "totalCount": "{count} news items",
+    "status": {
+      "all": "All",
+      "draft": "Draft",
+      "published": "Published",
+      "archived": "Archived"
+    },
+    "state": {
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published",
+      "SCHEDULED": "Scheduled",
+      "ARCHIVED": "Archived"
+    },
+    "featured": "Featured",
+    "localesLabel": "Available languages: {locales}",
+    "uncategorized": "Uncategorized",
+    "unknownAuthor": "Unknown author",
+    "byLabel": "By {name}",
+    "publishedAtLabel": "Published {instant}",
+    "updatedAtLabel": "Updated {instant}",
+    "loading": "Loading the news list…",
+    "pagination": {
+      "ariaLabel": "News list pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "pageStatus": "Page {page} of {totalPages}",
+      "goToPage": "Go to page {page}"
+    },
+    "empty": {
+      "title": "No news yet",
+      "description": "News items will appear here once they are created."
+    },
+    "unavailable": {
+      "title": "The news list cannot be loaded right now",
+      "description": "Please reload this page in a moment."
+    },
+    "createAction": "Write news",
+    "edit": "Edit",
+    "editLabelFor": "Edit news item: {title}"
+  },
+  "AdminPostEditor": {
+    "createMetaTitle": "Write News",
+    "createTitle": "Write News",
+    "createDescription": "Enter the news content in Indonesian. English and Arabic translations are optional and can be added later. The item is saved as a draft.",
+    "editMetaTitle": "Edit News",
+    "editTitle": "Edit News",
+    "editDescription": "Update the news content. Publication status is not changed from this page.",
+    "slug": "Slug",
+    "slugDescription": "The URL segment, for example wisuda-fuspi-2026. Use lowercase letters and hyphens.",
+    "featured": "Mark as featured",
+    "featuredDescription": "Featured news can be highlighted on public pages.",
+    "localeLegend": "{locale} content",
+    "localeOptional": "(optional)",
+    "title": "Title",
+    "excerpt": "Excerpt",
+    "content": "Body",
+    "contentDescription": "The news body. Use the toolbar for basic formatting.",
+    "submitCreate": "Save draft",
+    "submitUpdate": "Save changes",
+    "submitting": "Saving…",
+    "cancel": "Cancel",
+    "autosave": {
+      "saving": "Autosaving draft…",
+      "saved": "Autosaved {time}",
+      "conflict": "The version changed elsewhere. Reload the page.",
+      "error": "Autosave failed. Your changes are not saved yet."
+    },
+    "locale": {
+      "id": "Indonesian",
+      "en": "English",
+      "ar": "Arabic"
+    },
+    "unavailable": {
+      "title": "This news item cannot be loaded",
+      "description": "It was not found, is not yours, or is temporarily unavailable."
+    },
+    "error": {
+      "SESSION_INVALID": "Your session has ended. Please sign in again and retry.",
+      "CSRF_INVALID": "The request could not be verified. Reload the page and try again.",
+      "REQUEST_INVALID": "The request could not be processed. Check your entries and try again.",
+      "VALIDATION_FAILED": "Some entries need attention. Check the highlighted fields.",
+      "NOT_FOUND": "This news item was not found, or it is not yours.",
+      "VERSION_CONFLICT": "Someone else changed this news item. Reload the page to see the latest version before saving.",
+      "INVALID_STATE": "That action is not allowed for this news item's current status.",
+      "SLUG_CONFLICT": "That slug is already used by another news item. Choose a different one.",
+      "MEDIA_INVALID": "The linked media is not valid.",
+      "UNAVAILABLE": "Your changes could not be saved right now. Please try again shortly."
+    }
+  },
+  "AdminPostPublication": {
+    "title": "Publication status",
+    "currentLabel": "Current:",
+    "state": {
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published",
+      "SCHEDULED": "Scheduled",
+      "ARCHIVED": "Archived"
+    },
+    "action": {
+      "PUBLISH_NOW": "Publish now",
+      "SCHEDULE": "Schedule",
+      "RETURN_TO_DRAFT": "Return to draft",
+      "ARCHIVE": "Archive"
+    },
+    "scheduleLabel": "Schedule publication for",
+    "scheduleRequired": "Choose a publication time first.",
+    "scheduleFuture": "The publication time must be in the future.",
+    "error": {
+      "SESSION_INVALID": "Your session has ended. Please sign in again and retry.",
+      "CSRF_INVALID": "The request could not be verified. Reload the page and try again.",
+      "REQUEST_INVALID": "The request could not be processed. Check your entries and try again.",
+      "VALIDATION_FAILED": "Some entries need attention. Check the highlighted fields.",
+      "NOT_FOUND": "This news item was not found, or it is not yours.",
+      "VERSION_CONFLICT": "Someone else changed this news item. Reload the page to see the latest version before saving.",
+      "INVALID_STATE": "That action is not allowed for this news item's current status.",
+      "SLUG_CONFLICT": "That slug is already used by another news item. Choose a different one.",
+      "MEDIA_INVALID": "The linked media is not valid.",
+      "UNAVAILABLE": "Your changes could not be saved right now. Please try again shortly."
+    }
+  },
+  "AdminPostDelete": {
+    "title": "Delete news",
+    "description": "Deleting a news item is permanent and cannot be undone.",
+    "action": "Delete news",
+    "confirmTitle": "Delete this news item?",
+    "confirmDescription": "This action is permanent. The news item and all its translations will be removed.",
+    "cancel": "Cancel",
+    "confirmAction": "Yes, delete",
+    "error": {
+      "SESSION_INVALID": "Your session has ended. Please sign in again and retry.",
+      "CSRF_INVALID": "The request could not be verified. Reload the page and try again.",
+      "REQUEST_INVALID": "The request could not be processed. Check your entries and try again.",
+      "VALIDATION_FAILED": "Some entries need attention. Check the highlighted fields.",
+      "NOT_FOUND": "This news item was not found, or it is not yours.",
+      "VERSION_CONFLICT": "Someone else changed this news item. Reload the page to see the latest version before saving.",
+      "INVALID_STATE": "That action is not allowed for this news item's current status.",
+      "SLUG_CONFLICT": "That slug is already used by another news item. Choose a different one.",
+      "MEDIA_INVALID": "The linked media is not valid.",
+      "UNAVAILABLE": "Your changes could not be saved right now. Please try again shortly."
+    }
+  },
+  "AdminPostCoverPicker": {
+    "label": "Cover image",
+    "description": "Choose a cover image from the Media Library for this news item.",
+    "none": "No cover yet",
+    "selected": "Cover selected",
+    "choose": "Choose cover",
+    "change": "Change cover",
+    "clear": "Remove cover",
+    "listLabel": "Images available as cover",
+    "selectLabel": "Select {name} as the cover",
+    "loading": "Loading images…",
+    "loadError": "Could not load images. Try again.",
+    "empty": "No images in the Media Library yet."
+  },
+  "AdminMediaUpload": {
+    "title": "Upload media",
+    "description": "Upload WebP images (up to 20) or a single PDF to the Media Library.",
+    "policyLabel": "Upload type",
+    "policy": {
+      "CMS_IMAGE": "Images",
+      "PUBLIC_PDF": "PDF"
+    },
+    "images": "Image files",
+    "imagesHint": "WebP format, up to {max} files, 5 MB each.",
+    "pdf": "PDF file",
+    "pdfHint": "One PDF file, up to 20 MB.",
+    "alt": "Alternative text",
+    "decorative": "Decorative (no alternative text)",
+    "selectedLabel": "Selected images",
+    "removeLabel": "Remove {name}",
+    "action": "Upload",
+    "uploading": "Uploading…",
+    "success": "{count} file(s) uploaded.",
+    "validation": {
+      "missing": "Choose a file first.",
+      "count": "At most 20 images per upload.",
+      "type": "File type not allowed.",
+      "size": "The file exceeds the size limit.",
+      "altRequired": "Enter alternative text or mark decorative.",
+      "altNotEmpty": "A decorative image must have no alternative text."
+    },
+    "error": {
+      "SESSION_INVALID": "Your session has ended. Sign in again and retry.",
+      "CSRF_INVALID": "The request could not be verified. Reload the page and try again.",
+      "REQUEST_INVALID": "The request could not be processed. Check your file and try again.",
+      "VALIDATION_FAILED": "The file or data is invalid. Check and try again.",
+      "NOT_FOUND": "The resource was not found.",
+      "MEDIA_IN_USE": "The media is in use.",
+      "UPLOAD_FAILED": "The upload could not be processed. Try again.",
+      "UNAVAILABLE": "The upload cannot be processed right now. Please try again shortly."
+    }
+  },
+  "AdminPostRichText": {
+    "toolbarLabel": "Formatting tools",
+    "tool": {
+      "bold": "Bold",
+      "italic": "Italic",
+      "h2": "Heading level 2",
+      "h3": "Heading level 3",
+      "bulletList": "Bullet list",
+      "orderedList": "Numbered list",
+      "blockquote": "Quote",
+      "code": "Code"
+    }
   }
 }

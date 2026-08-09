@@ -4,157 +4,138 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* FUSPI design tokens — docs/03-design-system.md.
+   Do not add colors, fonts, or effects beyond this palette. */
 :root {
-  --surface: #ffffff;
-  --brand: #4169e1;
-  --brand-strong: #253667;
-  --accent: #c79a3a;
-  --border: #e2e8f0;
+  --royal-50: #eef2fe;
+  --royal-100: #e0e8fd;
+  --royal-200: #c7d4fb;
+  --royal-300: #a0b5f6;
+  --royal-400: #728eef;
+  --royal-500: #4169e1;
+  --royal-600: #3352c9;
+  --royal-700: #2a43a6;
+  --royal-800: #263a83;
+  --royal-900: #253667;
+  --royal-950: #182042;
+
+  --navy-800: #1e2a5a;
+  --navy-900: #16204a;
+  --navy-950: #0e1533;
+
+  --brass-400: #d6b45e;
+  --brass-500: #c79a3a;
+  --brass-600: #a87f28;
+
+  --slate-50: #f8fafc;
+  --slate-100: #f1f5f9;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-600: #475569;
+  --slate-700: #334155;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+
+  --success: #16a34a;
+  --success-surface: #dcfce7;
+  --warning: #d97706;
+  --warning-surface: #fef3c7;
+  --danger: #dc2626;
+  --danger-surface: #fee2e2;
+  --info: #4169e1;
+  --info-surface: #e0e8fd;
+
+  /* next/font attaches --font-* on the public shell. The inner fallback keeps
+     these stacks valid outside the shell: an undefined custom property makes
+     the whole font-family declaration invalid, not just that one entry. */
+  --font-display: var(--font-plus-jakarta-sans, "Plus Jakarta Sans"), system-ui, sans-serif;
+  --font-body: var(--font-inter, "Inter"), system-ui, sans-serif;
+  --font-arabic-ui: var(--font-ibm-plex-sans-arabic, "IBM Plex Sans Arabic"),
+    "Noto Sans Arabic", system-ui, sans-serif;
+  --font-arabic: var(--font-amiri, "Amiri"), "Noto Naskh Arabic", serif;
+
+  --shadow-card-sm: 0 1px 2px rgb(15 23 42 / 6%);
+  --shadow-card-md: 0 4px 12px rgb(15 23 42 / 8%);
+  --shadow-card-lg: 0 12px 32px rgb(15 23 42 / 10%);
+
+  --container-max: 1200px;
   --radius: 0.625rem;
-  --background: #f8fafc;
-  --foreground: #0f172a;
+
+  --surface: #ffffff;
+  --brand: var(--royal-500);
+  --brand-strong: var(--royal-900);
+  --background: var(--slate-50);
+  --foreground: var(--slate-900);
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: var(--slate-900);
   --popover: #ffffff;
-  --popover-foreground: #0f172a;
-  --primary: #4169e1;
+  --popover-foreground: var(--slate-900);
+  --primary: var(--royal-500);
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
+  --secondary: var(--slate-100);
+  --secondary-foreground: var(--slate-900);
+  --muted: var(--slate-100);
+  --muted-foreground: var(--slate-500);
+  --accent: var(--brass-500);
   --accent-foreground: #ffffff;
-  --destructive: #dc2626;
-  --input: #cbd5e1;
-  --ring: #4169e1;
+  --destructive: var(--danger);
+  --border: var(--slate-200);
+  --input: var(--slate-300);
+  --ring: var(--royal-500);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html {
-  background: var(--background);
-}
-
-body {
-  min-height: 100vh;
-  margin: 0;
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-a {
-  color: inherit;
-}
-
-.foundation-shell {
-  display: grid;
-  min-height: 100vh;
-  place-items: center;
-  padding: 1.5rem;
-}
-
-.foundation-card {
-  width: min(100%, 48rem);
-  padding: clamp(1.5rem, 5vw, 4rem);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: color-mix(in srgb, var(--surface) 94%, transparent);
-  box-shadow: 0 1.5rem 4rem rgb(20 36 28 / 10%);
-}
-
-.foundation-eyebrow {
-  margin-block: 0 1rem;
-  color: var(--brand);
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.18em;
-}
-
-.foundation-card h1 {
-  max-width: 18ch;
-  margin-block: 0 1rem;
-  font-size: clamp(2rem, 7vw, 4.5rem);
-  line-height: 0.98;
-  letter-spacing: -0.04em;
-}
-
-html[dir="rtl"] body {
-  font-family: "IBM Plex Sans Arabic", "Noto Sans Arabic", Arial, sans-serif;
-  line-height: 1.8;
-}
-
-html[dir="rtl"] .foundation-card h1 {
-  line-height: 1.2;
-  letter-spacing: normal;
-}
-
-.foundation-card > p:not(.foundation-eyebrow) {
-  max-width: 62ch;
-  line-height: 1.7;
-}
-
-.locale-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-block: 2rem;
-}
-
-.locale-list a {
-  min-width: 3.5rem;
-  padding: 0.65rem 0.9rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  text-align: center;
-  text-decoration: none;
-}
-
-.locale-list a[aria-current="page"] {
-  border-color: var(--brand);
-  color: white;
-  background: var(--brand);
-}
-
-.locale-list a:focus-visible {
-  outline: 3px solid var(--accent);
-  outline-offset: 3px;
-}
-
-.foundation-status {
-  margin-block-end: 0;
-  padding-inline-start: 1rem;
-  border-inline-start: 0.25rem solid var(--accent);
-  color: var(--brand-strong);
-  font-weight: 700;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+  --sidebar: var(--navy-900);
+  --sidebar-foreground: var(--slate-300);
+  --sidebar-primary: var(--royal-500);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--royal-400);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgb(255 255 255 / 12%);
+  --sidebar-ring: var(--royal-400);
 }
 
 @theme inline {
+  --color-royal-50: var(--royal-50);
+  --color-royal-100: var(--royal-100);
+  --color-royal-200: var(--royal-200);
+  --color-royal-300: var(--royal-300);
+  --color-royal-400: var(--royal-400);
+  --color-royal-500: var(--royal-500);
+  --color-royal-600: var(--royal-600);
+  --color-royal-700: var(--royal-700);
+  --color-royal-800: var(--royal-800);
+  --color-royal-900: var(--royal-900);
+  --color-royal-950: var(--royal-950);
+  --color-navy-800: var(--navy-800);
+  --color-navy-900: var(--navy-900);
+  --color-navy-950: var(--navy-950);
+  --color-brass-400: var(--brass-400);
+  --color-brass-500: var(--brass-500);
+  --color-brass-600: var(--brass-600);
+  --color-success: var(--success);
+  --color-success-surface: var(--success-surface);
+  --color-warning: var(--warning);
+  --color-warning-surface: var(--warning-surface);
+  --color-danger: var(--danger);
+  --color-danger-surface: var(--danger-surface);
+  --color-info: var(--info);
+  --color-info-surface: var(--info-surface);
+
+  --font-sans: var(--font-body);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-arabic-ui: var(--font-arabic-ui);
+  --font-arabic: var(--font-arabic);
+
+  --shadow-sm: var(--shadow-card-sm);
+  --shadow-md: var(--shadow-card-md);
+  --shadow-lg: var(--shadow-card-lg);
+
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -196,47 +177,197 @@ html[dir="rtl"] .foundation-card h1 {
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --background: var(--navy-950);
+  --foreground: var(--slate-50);
+  --surface: var(--navy-900);
+  --card: var(--navy-900);
+  --card-foreground: var(--slate-50);
+  --popover: var(--navy-900);
+  --popover-foreground: var(--slate-50);
+  --primary: var(--royal-400);
+  --primary-foreground: var(--navy-950);
+  --secondary: var(--navy-800);
+  --secondary-foreground: var(--slate-50);
+  --muted: var(--navy-800);
+  --muted-foreground: var(--slate-400);
+  --accent: var(--brass-400);
+  --accent-foreground: var(--navy-950);
+  --destructive: #f87171;
+  --border: rgb(255 255 255 / 12%);
+  --input: rgb(255 255 255 / 18%);
+  --ring: var(--royal-400);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
+}
+
+/* No page may scroll horizontally at any breakpoint (docs/03). Overflow is not
+   hidden here on purpose: layout bugs must stay visible to the e2e guard. */
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--background);
+  font-family: var(--font-body);
+}
+
+/* The shell re-declares font-family so the next/font variables it carries are
+   resolved in their own scope; body only inherits a computed value. */
+.public-shell {
+  font-family: var(--font-body);
+}
+
+/* Arabic UI stack + looser leading for diacritics (docs/12-E-5). */
+html[dir="rtl"] :is(body, .public-shell) {
+  font-family: var(--font-arabic-ui);
+  font-size: 1.0625rem;
+  line-height: 1.8;
+}
+
+html[dir="rtl"] :is(h1, h2, h3, h4) {
+  letter-spacing: normal;
+  line-height: 1.4;
+}
+
+.font-arabic {
+  font-family: var(--font-arabic);
 }
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
-  html {
-    @apply font-sans;
+
+  /* Layered on purpose: an unlayered `a { color: inherit }` would outrank every
+     Tailwind text-* utility and silently break link contrast on dark bars. */
+  a {
+    color: inherit;
   }
+
+  :is(h1, h2, h3, h4) {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--slate-900);
+  }
+
+  /* One visible focus treatment for every interactive element (docs/03). */
+  :is(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+}
+
+@utility container-fuspi {
+  width: 100%;
+  max-width: var(--container-max);
+  margin-inline: auto;
+  padding-inline: 1rem;
+
+  @media (width >= 640px) {
+    padding-inline: 1.5rem;
+  }
+}
+
+/* Signature ornament: 2px brass rule under every public section heading. */
+@utility section-rule {
+  &::after {
+    content: "";
+    display: block;
+    inline-size: 48px;
+    block-size: 2px;
+    margin-block-start: 12px;
+    background: var(--brass-500);
+  }
+}
+
+@utility prose-measure {
+  max-width: 72ch;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* M0 foundation page (src/app/[locale]/page.tsx) — owned outside this lane. */
+.foundation-shell {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+.foundation-card {
+  width: min(100%, 48rem);
+  padding: clamp(1.5rem, 5vw, 4rem);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  box-shadow: var(--shadow-card-lg);
+}
+
+.foundation-eyebrow {
+  margin-block: 0 1rem;
+  color: var(--brand);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+}
+
+.foundation-card h1 {
+  max-width: 18ch;
+  margin-block: 0 1rem;
+  font-size: clamp(2rem, 7vw, 4.5rem);
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+}
+
+.foundation-card > p:not(.foundation-eyebrow) {
+  max-width: 62ch;
+  line-height: 1.7;
+}
+
+.locale-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-block: 2rem;
+}
+
+.locale-list a {
+  min-width: 3.5rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  text-align: center;
+  text-decoration: none;
+}
+
+.locale-list a[aria-current="page"] {
+  border-color: var(--brand);
+  color: white;
+  background: var(--brand);
+}
+
+.foundation-status {
+  margin-block-end: 0;
+  padding-inline-start: 1rem;
+  border-inline-start: 0.25rem solid var(--accent);
+  color: var(--brand-strong);
+  font-weight: 700;
 }

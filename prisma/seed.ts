@@ -1,17 +1,12 @@
 import bcrypt from "bcryptjs";
 import {PrismaClient} from "../src/generated/prisma/client";
-import {PrismaMariaDb} from "@prisma/adapter-mariadb";
+import {PrismaPg} from "@prisma/adapter-pg";
 import {institution} from "../src/config/institution";
+import {parseDatabaseUrl} from "../src/lib/db/config";
 
-const databaseUrl = new URL(process.env.DATABASE_URL ?? "");
-const adapter = new PrismaMariaDb({
-  host: databaseUrl.hostname,
-  port: Number(databaseUrl.port || 3306),
-  user: decodeURIComponent(databaseUrl.username),
-  password: decodeURIComponent(databaseUrl.password),
-  database: databaseUrl.pathname.slice(1),
-  connectionLimit: 5,
-});
+const adapter = new PrismaPg(
+  parseDatabaseUrl(process.env.DATABASE_URL ?? ""),
+);
 const prisma = new PrismaClient({adapter});
 
 const sections = [
@@ -26,7 +21,7 @@ async function main() {
     throw new Error("SEED_ADMIN_EMAIL dan SEED_ADMIN_PASSWORD (minimal 12 karakter) wajib diisi.");
   }
 
-  await prisma.user.upsert({
+  const admin = await prisma.user.upsert({
     where: {email},
     update: {},
     create: {
@@ -40,10 +35,11 @@ async function main() {
 
   await prisma.siteSetting.upsert({
     where: {id: "singleton"},
-    update: {},
+    update: {contentOwnerId: admin.id},
     create: {
       id: "singleton",
       email: "fuspi@uinbanten.ac.id",
+      contentOwnerId: admin.id,
       translations: {
         create: {
           locale: "id",
@@ -57,12 +53,13 @@ async function main() {
   for (const [index, {code, slug, name}] of institution.studyPrograms.entries()) {
     await prisma.studyProgram.upsert({
       where: {code},
-      update: {slug, externalUrl: null, order: index},
+      update: {slug, externalUrl: null, order: index, contentOwnerId: admin.id},
       create: {
         code,
         slug,
         degree: "S1",
         order: index,
+        contentOwnerId: admin.id,
         translations: {create: {locale: "id", name, status: "PUBLISHED"}},
       },
     });

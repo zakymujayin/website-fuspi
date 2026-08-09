@@ -1,5 +1,5 @@
 version: 1
-coordinator: human
+coordinator: gpt
 lanes:
   gpt:
     owns:
@@ -47,12 +47,23 @@ ui_hotspots:
     - src/components/ui/**
     - messages/**
 active_leases:
-  - task: M1-GPT-PLATFORM
+  - task: M4-GPT-HOME-NAV-DOMAINS
     owner: gpt
-    paths: ["prisma/**", "src/contracts/**", "src/lib/db/**", "src/lib/audit/**", "src/lib/outbox/**", "tests/platform/**"]
-  - task: M1-CLAUDE-EXPERIENCE
+    paths:
+      - src/features/home-nav/**
+      - tests/m4/runtime/home-nav*.test.ts
+      - tests/m4/runtime/home-nav*.integration.test.ts
+      - tests/security/home-nav*.integration.test.ts
+      - coordination/handoffs/M4-GPT-HOME-NAV-DOMAINS-gpt.md
+  - task: M4-CLAUDE-PAGE-ADMIN-UI
     owner: claude
-    paths: ["src/app/[locale]/(public)/**", "src/components/public/**", "src/components/ui/**", "src/app/globals.css", "messages/**", "e2e/experience/**"]
-  - task: M1-DEEPSEEK-QA
-    owner: deepseek
-    paths: ["tests/foundation/**", "src/test/**", "e2e/foundation/**"]
+    paths:
+      - src/app/[locale]/admin/layout.tsx
+      - src/app/[locale]/admin/pages/**
+      - src/components/admin/pages/**
+      - messages/id.json
+      - messages/en.json
+      - messages/ar.json
+      - tests/m4/ui/page-admin/**
+      - e2e/m4/page-admin.spec.ts
+      - coordination/handoffs/M4-CLAUDE-PAGE-ADMIN-UI-claude.md

@@ -5,7 +5,7 @@ Custom multilingual website and CMS for Fakultas Ushuluddin dan Pemikiran Islam,
 ## Stack
 
 - Next.js 16, React 19, TypeScript, Tailwind CSS, shadcn/ui
-- Prisma 7 + MariaDB
+- Prisma 7 + PostgreSQL
 - Auth.js Credentials with database sessions
 - next-intl: Indonesian, English, Arabic/RTL
 - Vitest + Playwright

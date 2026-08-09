@@ -2,7 +2,7 @@
 
 Dokumen ini adalah rencana eksekusi v1 Website & CMS FUSPI oleh tiga agent CLI yang berjalan simultan. Tujuannya bukan membuat tiga model mengerjakan file yang sama, tetapi membangun tiga lane paralel dengan kontrak beku, kepemilikan path, review silang, dan merge queue tunggal.
 
-Kontrak identitas tidak boleh dinegosiasikan ulang: target adalah **FUSPI — Fakultas Ushuluddin dan Pemikiran Islam**, dengan tepat lima prodi **IAT, IH, AFI, SAA, TASPI**. FUDA hanya referensi eksternal. Kontrak kode berada di `src/config/institution.ts`; CI wajib gagal bila daftar tersebut berubah tanpa keputusan pemilik proyek.
+Kontrak identitas tidak boleh dinegosiasikan ulang: target adalah **FUSPI — Fakultas Ushuluddin dan Pemikiran Islam**, dengan tepat lima prodi **IAT, IH, AFI, SAA, TASPI**. Situs yang ditunjuk pemilik hanya referensi struktur informasi dan tidak boleh menjadi sumber identitas atau copy. Kontrak kode berada di `src/config/institution.ts`; CI wajib gagal bila daftar tersebut berubah tanpa keputusan pemilik proyek.
 
 Target v1 mengikuti `README` dan mengecualikan Course/Curriculum, profil riset bibliografis penuh, API SILA read-only, serta SSO SILA yang sudah ditetapkan sebagai fase 2/3.
 
@@ -71,7 +71,7 @@ Isolasi runtime agar tiga agent tidak bertabrakan di luar Git:
 |---|---|
 | GPT | `package*.json`, config root, `.github/**`, `prisma/**`, migration/seed, `.env.example`, `src/proxy.ts`, auth/RBAC, storage/crypto, outbox/rate-limit, `src/contracts/**`, route operasional sensitif |
 | Claude | `src/app/[locale]/(public)/**`, `src/components/public/**`, `src/components/ui/**`, `globals.css`, design tokens, public messages ID/EN/AR, test visual/accessibility |
-| DeepSeek | admin content non-sensitif, `src/components/admin/**`, action/query/validation domain CMS yang kontraknya sudah beku, import/migration scripts WordPress, fixture, unit/integration test domain |
+| DeepSeek | admin content non-sensitif, `src/components/admin/**`, action/query/validation domain CMS yang kontraknya sudah beku, fixture netral, validasi kesiapan konten, unit/integration test domain |
 
 Hotspot berikut selalu serial dan hanya diubah GPT/integrator: dependency lockfile, Prisma schema/migration, root layout, navigation registry, shared contract/type, Auth config, proxy, CI, env contract. Global CSS dan UI primitives hanya Claude. Agent lain membuat request contract; tidak mengedit hotspot sendiri.
 
@@ -139,8 +139,8 @@ Writer melakukan rebase dan `ci:quick` di branch sendiri. Bila rebase memerlukan
 
 ### DeepSeek — CMS Delivery & QA Owner
 
-- Menghasilkan CRUD/admin berulang dari reference slice, validation/query domain, seed/fixture, import WordPress, negative test, concurrency test harness, dan reconciliation report.
-- V4 Pro non-thinking/low untuk boilerplate; thinking medium untuk integration tests; high untuk adversarial security test atau importer edge cases.
+- Menghasilkan CRUD/admin berulang dari reference slice, validation/query domain, seed/fixture netral, negative test, concurrency test harness, content-readiness check, dan laporan crawl.
+- V4 Pro non-thinking/low untuk boilerplate; thinking medium untuk integration tests; high untuk adversarial security test atau content-readiness edge cases.
 - Tidak mengubah migration/schema/dependency. Semua kebutuhan field baru diajukan sebagai contract task ke GPT.
 
 ## D. Definition of Ready dan Done
@@ -174,11 +174,11 @@ Task dianggap selesai bila:
 Pekerjaan:
 
 - Initial commit/tag/remote/protection, governance files, worktrees, task manifests, PR template, CODEOWNERS, scope-check.
-- Scaffold Next.js di root repo, pin Node/dependency/lockfile, next-intl `[locale]`, Vitest, Playwright, lint/typecheck/build, MariaDB test.
-- Feasibility spike Hostinger: Node runtime, MariaDB, public/private filesystem, Sharp, pdf.js, SMTP, cron, Serializable transaction dan FULLTEXT.
+- Scaffold Next.js di root repo, pin Node/dependency/lockfile, next-intl `[locale]`, Vitest, Playwright, lint/typecheck/build, PostgreSQL test.
+- Feasibility spike VPS: Node runtime, PostgreSQL, public/private filesystem, Sharp, pdf.js, SMTP, worker scheduler, Serializable transaction dan full-text search.
 - Materialisasikan `docs/02` menjadi satu `prisma/schema.prisma` kanonik sebelum lane lain memakai model data.
 
-Gate: clean install/build; `/id`, `/en`, `/ar`; Prisma validate; CI hijau; capability Hostinger tercatat. Tidak ada worktree feature sebelum gate ini.
+Gate: clean install/build; `/id`, `/en`, `/ar`; Prisma validate; CI hijau; capability VPS/PostgreSQL tercatat. Tidak ada worktree feature sebelum gate ini.
 
 ### M1 — Fondasi paralel
 
@@ -186,7 +186,7 @@ Gate: clean install/build; `/id`, `/en`, `/ar`; Prisma validate; CI hijau; capab
 
 **Claude Sonnet 5:** design tokens, fonts, logical CSS, public/admin shell visual, messages dasar, RTL.
 
-**DeepSeek V4 Pro medium:** test harness MariaDB, fixtures sintetis, threat-test matrix, inventaris WordPress/URL/media.
+**DeepSeek V4 Pro medium:** test harness PostgreSQL, fixtures sintetis, threat-test matrix, serta matriks halaman/menu/kepemilikan konten awal.
 
 Gate: database kosong migrate+seed dan rerun tanpa duplikasi; shell 360–1440 px + RTL; unit/integration foundation hijau.
 
@@ -243,15 +243,15 @@ Aturan M4: setiap module PR kecil mengikuti reference slice. Schema request merg
 
 Gate: suite per lane hijau; PPKS isolation dan booking concurrency adalah blocker absolut.
 
-### M5 — Integrasi, migrasi WordPress, dan hardening
+### M5 — Integrasi, kesiapan konten, dan hardening
 
 **GPT Terra high (integrator):** cross-module contracts, navigation, search aggregation, outbox/status integration, CSP/security headers.
 
-**DeepSeek V4 Pro high:** importer idempotent, checksum/dedup media, HTML transform, internal-link rewrite, redirect map, reconciliation.
+**DeepSeek V4 Pro high:** validasi kelengkapan konten, media integrity, internal-link crawl, fixture neutrality, empty-state, dan laporan kesiapan.
 
 **Claude Sonnet 5:** visual regression, content sampling, ID/EN/AR/RTL, accessibility dan CWV tuning.
 
-Gate: dry-run dan final-run staging rekonsiliasi 100%; nol broken internal URL/media; seluruh role/locale E2E hijau. Course/Curriculum, API SILA dan SSO tetap tidak masuk v1.
+Gate: checklist halaman/menu/konten awal disetujui; nol broken internal URL/media; seluruh role/locale E2E hijau. Course/Curriculum, API SILA dan SSO tetap tidak masuk v1.
 
 ### M6 — Staging, restore, security, dan go-live
 
@@ -266,8 +266,8 @@ Pekerjaan:
 - Deploy staging identik produksi; SMTP/cron/storage/redeploy.
 - Backup + restore drill DB/public/private/PPKS; encryption key terpisah.
 - Lighthouse/axe/manual keyboard/screen-reader, CSP/headers, disk monitoring.
-- Persetujuan institusional PPKS, privacy/retention, serta exclusion migrasi.
-- Cutover, redirect 301, production smoke test dan rollback window.
+- Persetujuan institusional PPKS, privacy/retention, serta materi awal manual.
+- Cutover, production smoke test, registry redirect aman, dan rollback window.
 
 Gate: semua kondisi `20-test-acceptance-go-live.md` terpenuhi dan manusia memberi approval. Agent tidak melakukan go-live sendiri.
 
@@ -279,7 +279,7 @@ Gate: semua kondisi `20-test-acceptance-go-live.md` terpenuhi dan manusia member
 | CRUD/admin | DeepSeek Pro | Claude Sonnet 5 | GPT Terra |
 | Schema/auth/security/PPKS | GPT Sol | Claude Opus read-only | DeepSeek Pro high |
 | Booking concurrency | GPT Sol | Claude Opus read-only | DeepSeek Pro high |
-| Import/migration | DeepSeek Pro high | GPT Terra/Sol | Claude content sampling |
+| Content readiness/crawl | DeepSeek Pro high | GPT Terra/Sol | Claude content sampling |
 | Release | GPT Sol | Claude Opus | DeepSeek full regression + manusia |
 
 Reviewer tidak melakukan silent fix pada branch writer. Bila review menemukan contract bug, buka task kontrak baru milik GPT; bila implementation bug, writer memperbaiki branch yang sama.
@@ -287,10 +287,10 @@ Reviewer tidak melakukan silent fix pada branch writer. Bila review menemukan co
 ## G. CI bertingkat dan merge policy
 
 - **Fast CI per PR:** scope-check, secret scan, format/lint, typecheck, affected unit tests, Prisma validate bila relevan.
-- **Domain CI:** MariaDB integration, E2E domain, locale/RTL, axe untuk UI, security tests untuk action/upload.
+- **Domain CI:** PostgreSQL integration, E2E domain, locale/RTL, axe untuk UI, security tests untuk action/upload.
 - **Full CI setelah merge queue:** build production, semua unit/integration/E2E, migration fresh DB, seed idempotency.
-- **Nightly:** browser matrix, crawl/broken link, visual regression, import dry-run fixture, dependency/security scan.
-- **Milestone:** restore drill (M6), performance field/lab gate, PPKS isolation, booking parallel approval, WordPress reconciliation.
+- **Nightly:** browser matrix, crawl/broken link, visual regression, fixture-neutrality/content-readiness check, dependency/security scan.
+- **Milestone:** restore drill (M6), performance field/lab gate, PPKS isolation, booking parallel approval, dan persetujuan konten awal manual.
 
 PR tidak dapat merge bila scope-check gagal, reviewer adalah writer, migration lama diedit, generated client dicampur manual, atau CI flaky di-rerun tanpa issue/penjelasan.
 

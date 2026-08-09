@@ -1,6 +1,6 @@
 # 16 — Audit Kelengkapan Fitur (Final)
 
-Perbandingan menyeluruh antara dokumentasi ini dengan kebutuhan website fakultas/universitas pada umumnya (referensi: NN/g, Modern Campus, Kanopi, Optasy, situs UIN Suka, Zaytuna, dan situs FUDA sebagai referensi eksternal—bukan identitas target).
+Perbandingan menyeluruh antara dokumentasi ini dengan kebutuhan website fakultas/universitas pada umumnya dan referensi eksternal yang ditunjuk pemilik—bukan identitas target.
 
 ## ✅ Sudah lengkap
 
@@ -9,7 +9,7 @@ Perbandingan menyeluruh antara dokumentasi ini dengan kebutuhan website fakultas
 |---|---|
 | Berita, Pengumuman, Kolom (+ draft, jadwal terbit, unggulan, pratinjau) | 04, 09 |
 | Halaman statis hierarkis | 04 |
-| Editor sekelas WordPress (gambar berposisi, tabel, embed, paste bersih) | 09-A, 10-C |
+| Editor rich-text modern (gambar berposisi, tabel, embed, paste bersih) | 09-A, 10-C |
 | Media library + picker + upload native Hostinger | 04, 07 |
 | Arsip berita (per bulan/tahun/kategori/tag) | 11-B |
 | Album foto + lightbox | 11-D |
@@ -59,7 +59,7 @@ Perbandingan menyeluruh antara dokumentasi ini dengan kebutuhan website fakultas
 | Keamanan: security headers, CSP, sanitasi HTML, rate limit | 13-J |
 | Analytics + cookie consent + kebijakan privasi | 13-I |
 | Backup DB **dan folder uploads**, uji restore | 13-K |
-| **Redirect URL WordPress lama** (jangan sampai SEO mati) | 13-K |
+| **Registry redirect aman** untuk perubahan URL FUSPI di masa depan | 13-K |
 | Log aktivitas admin | 10-D |
 | 404/500, sitemap HTML | 13-H |
 
@@ -86,7 +86,7 @@ Perbandingan menyeluruh antara dokumentasi ini dengan kebutuhan website fakultas
 2. **Cron:** hanya wajib untuk outbox. Status booking selesai dihitung saat query. SLA dihitung dari timestamp/timeline dan tidak bergantung cron.
 3. **Subdomain prodi:** tetap situs eksternal pada v1; tidak ada multisite.
 4. **Storage:** public/private/PPKS dipisahkan, quota dimonitor, alert 70% dan critical 85%, backup mencakup seluruh kelas storage.
-5. **Migrasi konten:** workstream wajib dengan importer idempotent, media checksum, rekonsiliasi, crawl staging, dan redirect 301.
+5. **Konten awal:** dimasukkan manual melalui CMS; pemilik konten mengesahkan materi, media, statistik, menu, dan crawl staging sebelum go-live.
 6. **Auth:** Credentials + database session; tidak ada fallback JWT.
 7. **Publishing:** EDITOR boleh publish/schedule Post miliknya.
 8. **PPKS:** token hash, encryption, query-level isolation, audit akses, dan retention hold wajib.
@@ -102,7 +102,7 @@ Ini bukan keputusan arsitektur terbuka. Sistem memakai default aman sampai pemil
 
 - Satgas PPKS memverifikasi kontak bantuan, wording korban, cakupan role, alur resmi, target waktu, dan retention hold.
 - Pengelola Hostinger memverifikasi quota, lokasi private storage, SMTP, cron, backup, dan restore.
-- Pemilik konten menyetujui daftar exclusion migrasi WordPress bila ada.
+- Pemilik konten menyetujui identitas, struktur menu, halaman wajib, statistik, media, serta materi awal sebelum publikasi.
 
 Tidak adanya persetujuan tersebut memblokir **go-live**, bukan memblokir pembangunan fitur lain.
 
@@ -110,4 +110,4 @@ Tidak adanya persetujuan tersebut memblokir **go-live**, bukan memblokir pembang
 
 Dokumentasi dinilai **decision-complete untuk implementasi** setelah seluruh kontradiksi terhapus dan checklist konsistensi lulus. Produk baru dinilai lengkap setelah seluruh test dan gerbang pada `20-test-acceptance-go-live.md` mempunyai bukti.
 
-Klaim “selesai” tidak boleh hanya berdasarkan keberadaan halaman atau komponen. Security isolation PPKS, concurrency booking, restore, SMTP/outbox, migrasi WordPress, RTL, dan accessibility adalah acceptance gate setara fitur utama.
+Klaim “selesai” tidak boleh hanya berdasarkan keberadaan halaman atau komponen. Security isolation PPKS, concurrency booking, restore, SMTP/outbox, kesiapan konten manual, RTL, dan accessibility adalah acceptance gate setara fitur utama.
