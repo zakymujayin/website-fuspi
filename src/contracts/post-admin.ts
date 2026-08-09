@@ -47,6 +47,7 @@ export const AdminPostSortSchema = z.enum([
 export const AdminPostListQuerySchema = z.object({
   page: z.number().int().min(1).max(10_000),
   pageSize: z.union([z.literal(10), z.literal(20), z.literal(50)]),
+  type: z.enum(["BERITA", "PENGUMUMAN", "KOLOM", "ALL"]).default("BERITA"),
   status: z.union([z.literal("ALL"), PostStatusSchema]),
   search: SearchTextSchema,
   sort: AdminPostSortSchema,
@@ -55,6 +56,7 @@ export const AdminPostListQuerySchema = z.object({
 const RawAdminPostListQuerySchema = z.object({
   page: z.string().regex(/^(?:[1-9]\d{0,3}|10000)$/u).optional(),
   pageSize: z.enum(["10", "20", "50"]).optional(),
+  type: z.enum(["BERITA", "PENGUMUMAN", "KOLOM", "ALL"]).optional(),
   status: z.enum(["ALL", "DRAFT", "PUBLISHED", "ARCHIVED"]).optional(),
   search: SearchTextSchema.optional(),
   sort: AdminPostSortSchema.optional(),
@@ -68,6 +70,7 @@ export const AdminPostListSearchParamsSchema = RawAdminPostListQuerySchema.trans
   AdminPostListQuerySchema.parse({
     page: value.page ? Number(value.page) : 1,
     pageSize: value.pageSize ? Number(value.pageSize) : 20,
+    type: value.type ?? "BERITA",
     status: value.status ?? "ALL",
     search: value.search ?? "",
     sort: value.sort ?? "UPDATED_DESC",
@@ -165,6 +168,7 @@ export const AdminPostListResultSchema = z.object({
   items: z.array(AdminPostSummarySchema).max(50),
   page: z.number().int().min(1).max(10_000),
   pageSize: z.union([z.literal(10), z.literal(20), z.literal(50)]),
+  type: z.enum(["BERITA", "PENGUMUMAN", "KOLOM", "ALL"]).default("BERITA"),
   total: z.number().int().min(0),
   hasNextPage: z.boolean(),
 }).strict().superRefine((value, context) => {

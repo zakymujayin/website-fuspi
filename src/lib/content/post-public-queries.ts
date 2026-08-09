@@ -339,3 +339,128 @@ export async function getPublicPostDetail(
     return {ok: false, code: "NOT_FOUND"};
   }
 }
+
+export async function incrementPostViewCount(
+  database: PublicPostQueryDatabase,
+  postId: string,
+): Promise<void> {
+  await database.post.update({
+    where: {id: postId},
+    data: {viewCount: {increment: 1}},
+  });
+}
+
+export type RelatedPostCard = {
+  id: string;
+  type: string;
+  slug: string;
+  publishedAt: Date;
+  translation: {
+    locale: string;
+    title: string;
+    excerpt: string | null;
+  };
+  cover: ReturnType<typeof publicMediaView>;
+};
+
+export async function getRelatedPosts(
+  database: PublicPostQueryDatabase,
+  postId: string,
+  type: "BERITA" | "PENGUMUMAN" | "INFORMASI" | "KOLOM",
+  categoryId: string | null,
+  publicUploadBaseUrl: string,
+  limit = 3,
+): Promise<RelatedPostCard[]> {
+  const uploadBase = normalizeUploadBase(publicUploadBaseUrl);
+  if (!uploadBase) return [];
+
+  const now = new Date();
+  const whereBase: Prisma.PostWhereInput = {
+    type,
+    status: "PUBLISHED",
+    publishedAt: {not: null, lte: now},
+    id: {not: postId},
+    translations: {
+      some: {
+        locale: "id",
+        status: "PUBLISHED",
+      },
+    },
+  };
+
+  const byCategory = categoryId
+    ? await database.post.findMany({
+        where: {...whereBase, categoryId},
+        orderBy: {publishedAt: "desc"},
+        take: limit,
+        select: {
+          ...PUBLIC_POST_SELECT,
+          translations: {
+            where: translationWhere("id"),
+            select: {
+              locale: true,
+              title: true,
+              excerpt: true,
+            },
+          },
+        },
+      })
+    : [];
+
+  if (byCategory.length >= limit) {
+    return byCategory.map((row): RelatedPostCard => ({
+      id: row.id,
+      type: row.type,
+      slug: row.slug,
+      publishedAt: row.publishedAt!,
+      translation: row.translations[0]
+        ? {
+            locale: row.translations[0].locale,
+            title: row.translations[0].title,
+            excerpt: row.translations[0].excerpt,
+          }
+        : {locale: "id", title: "", excerpt: null},
+      cover: publicMediaView(row.coverMedia, uploadBase),
+    }));
+  }
+
+  const remaining = limit - byCategory.length;
+  const excludeIds = [postId, ...byCategory.map((r) => r.id)];
+
+  const fallback = await database.post.findMany({
+    where: {
+      ...whereBase,
+      id: {notIn: excludeIds},
+    },
+    orderBy: {publishedAt: "desc"},
+    take: remaining,
+    select: {
+      ...PUBLIC_POST_SELECT,
+      translations: {
+        where: translationWhere("id"),
+        select: {
+          locale: true,
+          title: true,
+          excerpt: true,
+        },
+      },
+    },
+  });
+
+  const allRows = [...byCategory, ...fallback];
+
+  return allRows.map((row): RelatedPostCard => ({
+    id: row.id,
+    type: row.type,
+    slug: row.slug,
+    publishedAt: row.publishedAt!,
+    translation: row.translations[0]
+      ? {
+          locale: row.translations[0].locale,
+          title: row.translations[0].title,
+          excerpt: row.translations[0].excerpt,
+        }
+      : {locale: "id", title: "", excerpt: null},
+    cover: publicMediaView(row.coverMedia, uploadBase),
+  }));
+}

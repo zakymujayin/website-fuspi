@@ -46,7 +46,7 @@ describe("M3 Post admin transport runtime", () => {
     });
     expect(normalizeAdminPostSearchParams(new URLSearchParams("page=2&pageSize=10"))).toEqual({
       ok: true,
-      data: {page: 2, pageSize: 10, status: "ALL", search: "", sort: "UPDATED_DESC"},
+      data: {page: 2, pageSize: 10, type: "BERITA", status: "ALL", search: "", sort: "UPDATED_DESC"},
     });
   });
 

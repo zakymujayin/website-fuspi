@@ -50,7 +50,7 @@ acceptance_commands:
   - "TASK_MANIFEST=coordination/tasks/M4-GPT-ACADEMIC-EDITOR-IMPORT-CONTRACTS.md TASK_BASE=origin/integration/m4-features npm run check:scope"
 risk: medium
 token_class: M
-status: closed
+status: merged
 ---
 
 # Academic editor detail and people import contracts

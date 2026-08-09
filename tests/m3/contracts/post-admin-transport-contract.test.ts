@@ -58,6 +58,7 @@ describe("M3 Berita admin list transport contract", () => {
     expect(AdminPostListSearchParamsSchema.parse({})).toEqual({
       page: 1,
       pageSize: 20,
+      type: "BERITA",
       status: "ALL",
       search: "",
       sort: "UPDATED_DESC",
@@ -71,6 +72,7 @@ describe("M3 Berita admin list transport contract", () => {
     })).toEqual({
       page: 10_000,
       pageSize: 50,
+      type: "BERITA",
       status: "PUBLISHED",
       search: "kegiatan FUSPI",
       sort: "TITLE_ASC",

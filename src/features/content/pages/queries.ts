@@ -11,6 +11,7 @@ import {
   PageIdSchema,
   PageListQuerySchema,
   PageListResultSchema,
+  PageSlugSchema,
   type PageDetailView,
   type PageListResult,
 } from "@/features/content/pages/contract";
@@ -233,6 +234,67 @@ export async function getPageDetail(
     });
 
     return result.success ? {ok: true, data: result.data} : {ok: false, code: "UNAVAILABLE"};
+  } catch {
+    return {ok: false, code: "UNAVAILABLE"};
+  }
+}
+
+// ── Public page query ────────────────────────────────────
+
+const PUBLIC_PAGE_SELECT = {
+  id: true,
+  slug: true,
+  heroMedia: {select: {id: true, storageKey: true, storageClass: true, mimeType: true, size: true, alt: true, isDecorative: true, width: true, height: true}},
+  parentId: true,
+  translations: {
+    select: {locale: true, title: true, content: true, metaTitle: true, metaDesc: true},
+  },
+} as const;
+
+type PublicPageResult =
+  | {ok: true; data: {slug: string; title: string; content: string; metaTitle: string | null; metaDesc: string | null; heroUrl: string | null; parentSlug: string | null}}
+  | {ok: false; code: "NOT_FOUND" | "UNAVAILABLE"};
+
+export async function getPublicPageBySlug(
+  database: PageQueryDatabase,
+  slug: string,
+  locale = "id" as "id" | "en" | "ar",
+): Promise<PublicPageResult> {
+  const parsed = PageSlugSchema.safeParse(slug);
+  if (!parsed.success) return {ok: false, code: "NOT_FOUND"};
+
+  try {
+    const row = await database.page.findFirst({
+      where: {slug: parsed.data, status: "PUBLISHED"},
+      select: {...PUBLIC_PAGE_SELECT, parent: {select: {slug: true, translations: {where: {locale: "id" as const}, select: {title: true}}}}},
+    });
+
+    if (!row) return {ok: false, code: "NOT_FOUND"};
+
+    const idTranslation = row.translations.find((t) => t.locale === "id");
+    if (!idTranslation) return {ok: false, code: "NOT_FOUND"};
+
+    const localeTranslation = row.translations.find((t) => t.locale === locale);
+    const translation = localeTranslation ?? idTranslation;
+
+    let heroUrl: string | null = null;
+    if (row.heroMedia?.storageClass === "PUBLIC" && row.heroMedia.mimeType === "image/webp") {
+      const uploadBase = (process.env.UPLOAD_BASE_URL ?? "/uploads").replace(/\/+$/u, "") || "/uploads";
+      heroUrl = `${uploadBase}/${row.heroMedia.storageKey}`;
+    }
+
+    return {
+      ok: true,
+      data: {
+        slug: row.slug,
+        title: translation.title,
+        content: translation.content,
+        metaTitle: translation.metaTitle ?? null,
+        metaDesc: translation.metaDesc ?? null,
+        heroUrl,
+        parentSlug: row.parent?.slug ?? null,
+      },
+    };
   } catch {
     return {ok: false, code: "UNAVAILABLE"};
   }

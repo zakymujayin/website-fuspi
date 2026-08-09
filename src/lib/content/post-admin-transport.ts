@@ -166,7 +166,7 @@ export async function listAdminPosts(
   const query = AdminPostListQuerySchema.safeParse(rawQuery);
   if (!query.success) return {ok: false, code: "REQUEST_INVALID"};
   const where: Prisma.PostWhereInput = {
-    type: "BERITA",
+    ...(query.data.type !== "ALL" ? {type: query.data.type} : {}),
     ...ownershipWhere(actor),
     ...(query.data.status === "ALL" ? {} : {status: query.data.status}),
     ...(query.data.search ? {translations: {some: {
@@ -193,6 +193,9 @@ export async function listAdminPosts(
       const statusSql = query.data.status === "ALL" ? Prisma.empty : Prisma.sql`
         AND p."status"::text = ${query.data.status}
       `;
+      const typeSql = query.data.type === "ALL" ? Prisma.empty : Prisma.sql`
+        AND p."type"::text = ${query.data.type}
+      `;
       const searchSql = query.data.search ? Prisma.sql`
         AND t."title" ILIKE ${`%${query.data.search}%`}
       ` : Prisma.empty;
@@ -202,7 +205,8 @@ export async function listAdminPosts(
           FROM "Post" p
           INNER JOIN "PostTranslation" t
             ON t."postId" = p."id" AND t."locale"::text = 'id'
-          WHERE p."type"::text = 'BERITA'
+          WHERE 1=1
+            ${typeSql}
             ${ownershipSql}
             ${statusSql}
             ${searchSql}
