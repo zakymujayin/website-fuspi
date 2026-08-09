@@ -71,7 +71,7 @@ export async function getPublicContentAdminDetail(
         return {ok: false as const, code: "NOT_FOUND" as const};
       }
       const document = documentView(row.document, "id", uploadBase);
-      data = {id, resource, version: null, translationWorkflow: workflows(row.translations), governance: null,
+      data = {id, resource, version: row.version, translationWorkflow: workflows(row.translations), governance: null,
         assets: [...(logo ? [logo] : []), ...(document ? [{kind: "DOCUMENT" as const, document}] : [])], input: {
           slug: row.slug, partnerName: row.partnerName, level: row.level, country: row.country,
           startDate: safeDate(row.startDate), endDate: safeDate(row.endDate), documentId: row.documentId,
@@ -84,7 +84,7 @@ export async function getPublicContentAdminDetail(
       const registrationUrl = externalUrl(row.registrationUrl);
       if (registrationUrl === undefined) return {ok: false as const, code: "NOT_FOUND" as const};
       const document = documentView(row.document, "id", uploadBase);
-      data = {id, resource, version: null, translationWorkflow: workflows(row.translations), governance: null,
+      data = {id, resource, version: row.version, translationWorkflow: workflows(row.translations), governance: null,
         assets: document ? [{kind: "DOCUMENT", document}] : [], input: {
           slug: row.slug, startDate: safeDate(row.startDate), endDate: safeDate(row.endDate), registrationUrl,
           documentId: row.documentId, isActive: row.isActive,
@@ -95,7 +95,7 @@ export async function getPublicContentAdminDetail(
       if (!row) return {ok: false as const, code: "NOT_FOUND" as const};
       const image = row.imageMedia ? mediaAsset(row.imageMedia, uploadBase) : null;
       if (row.imageMedia && !image) return {ok: false as const, code: "NOT_FOUND" as const};
-      data = {id, resource, version: null, translationWorkflow: workflows(row.translations), governance: null,
+      data = {id, resource, version: row.version, translationWorkflow: workflows(row.translations), governance: null,
         assets: image ? [image] : [], input: {slug: row.slug, studentName: row.studentName, level: row.level,
           achievedAt: safeDate(row.achievedAt), imageMediaId: row.imageMediaId,
           translations: localized(row.translations, ["title", "description"])}};
@@ -105,7 +105,7 @@ export async function getPublicContentAdminDetail(
       if (!row) return {ok: false as const, code: "NOT_FOUND" as const};
       const assets = row.images.map(({media}) => mediaAsset(media, uploadBase));
       if (assets.some((asset) => !asset)) return {ok: false as const, code: "NOT_FOUND" as const};
-      data = {id, resource, version: null, translationWorkflow: workflows(row.translations), governance: null,
+      data = {id, resource, version: row.version, translationWorkflow: workflows(row.translations), governance: null,
         assets, input: {slug: row.slug, date: safeDate(row.date),
           images: row.images.map(({mediaId, caption, order}) => ({mediaId, caption, order})),
           translations: localized(row.translations, ["title", "description"])}};
@@ -126,7 +126,7 @@ export async function getPublicContentAdminDetail(
       const cover = row.coverMedia ? mediaAsset(row.coverMedia, uploadBase) : null;
       const photos = row.photos.map(({media}) => mediaAsset(media, uploadBase));
       if ((row.coverMedia && !cover) || photos.some((asset) => !asset)) return {ok: false as const, code: "NOT_FOUND" as const};
-      data = {id, resource, version: null, translationWorkflow: workflows(row.translations), governance: null,
+      data = {id, resource, version: row.version, translationWorkflow: workflows(row.translations), governance: null,
         assets: [...(cover ? [cover] : []), ...photos], input: {slug: row.slug, coverMediaId: row.coverMediaId,
           eventDate: safeDate(row.eventDate), isPublished: row.isPublished,
           photos: row.photos.map(({mediaId, caption, order}) => ({mediaId, caption, order})),
@@ -153,7 +153,7 @@ export async function getPublicContentAdminDetail(
       if (!row) return {ok: false as const, code: "NOT_FOUND" as const};
       const photo = row.photoMedia ? mediaAsset(row.photoMedia, uploadBase) : null;
       if (row.photoMedia && !photo) return {ok: false as const, code: "NOT_FOUND" as const};
-      data = {id, resource, version: null, translationWorkflow: workflows(row.translations), governance: null,
+      data = {id, resource, version: row.version, translationWorkflow: workflows(row.translations), governance: null,
         assets: photo ? [photo] : [], input: {name: row.name, graduationYear: row.graduationYear,
           photoMediaId: row.photoMediaId, order: row.order, isVisible: row.isVisible,
           publicationConsentAt: safeDate(row.publicationConsentAt),

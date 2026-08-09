@@ -45,8 +45,34 @@ type EventInput = z.infer<typeof EventInputSchema>;
 type FaqInput = z.infer<typeof FaqInputSchema>;
 type TestimonialInput = z.infer<typeof TestimonialInputSchema>;
 type Mutation = {id: string; expectedVersion: number | null};
+type RevisionResourceType =
+  | "Service"
+  | "Partnership"
+  | "Scholarship"
+  | "Achievement"
+  | "StudentActivity"
+  | "Document"
+  | "Album"
+  | "Event"
+  | "Faq"
+  | "Testimonial";
 
-const VERSIONED = new Set<PublicContentResource>(["SERVICE", "DOCUMENT", "EVENT", "FAQ"]);
+const VERSIONED = new Set<PublicContentResource>([
+  "SERVICE", "PARTNERSHIP", "SCHOLARSHIP", "ACHIEVEMENT", "STUDENT_ACTIVITY",
+  "DOCUMENT", "ALBUM", "EVENT", "FAQ", "TESTIMONIAL",
+]);
+const RESOURCE_TYPES: Record<PublicContentResource, RevisionResourceType> = {
+  SERVICE: "Service",
+  PARTNERSHIP: "Partnership",
+  SCHOLARSHIP: "Scholarship",
+  ACHIEVEMENT: "Achievement",
+  STUDENT_ACTIVITY: "StudentActivity",
+  DOCUMENT: "Document",
+  ALBUM: "Album",
+  EVENT: "Event",
+  FAQ: "Faq",
+  TESTIMONIAL: "Testimonial",
+};
 const RICH_FIELDS: Record<PublicContentResource, string[]> = {
   SERVICE: ["description"], PARTNERSHIP: ["description"], SCHOLARSHIP: ["description"],
   ACHIEVEMENT: ["description"], STUDENT_ACTIVITY: ["description"], DOCUMENT: [],
@@ -101,22 +127,28 @@ function versionIntent(resource: PublicContentResource, mutation: Mutation | nul
 
 async function claimVersion(
   tx: Prisma.TransactionClient,
-  resource: "SERVICE" | "DOCUMENT" | "EVENT" | "FAQ",
+  resource: PublicContentResource,
   mutation: Mutation,
 ) {
   if (mutation.expectedVersion === null) return null;
   const where = {id: mutation.id, version: mutation.expectedVersion};
   const data = {version: {increment: 1 as const}};
   const result = resource === "SERVICE" ? await tx.service.updateMany({where, data})
+    : resource === "PARTNERSHIP" ? await tx.partnership.updateMany({where, data})
+    : resource === "SCHOLARSHIP" ? await tx.scholarship.updateMany({where, data})
+    : resource === "ACHIEVEMENT" ? await tx.achievement.updateMany({where, data})
+    : resource === "STUDENT_ACTIVITY" ? await tx.studentActivity.updateMany({where, data})
     : resource === "DOCUMENT" ? await tx.document.updateMany({where, data})
+    : resource === "ALBUM" ? await tx.album.updateMany({where, data})
     : resource === "EVENT" ? await tx.event.updateMany({where, data})
-    : await tx.faq.updateMany({where, data});
+    : resource === "FAQ" ? await tx.faq.updateMany({where, data})
+    : await tx.testimonial.updateMany({where, data});
   return result.count === 1 ? mutation.expectedVersion + 1 : null;
 }
 
 async function revision(
   tx: Prisma.TransactionClient,
-  resourceType: "Service" | "Document" | "Event" | "Faq",
+  resourceType: RevisionResourceType,
   id: string,
   version: number,
   actorId: string,
@@ -179,55 +211,76 @@ async function mutatePartnership(tx: Prisma.TransactionClient, action: "CREATE" 
     documentId: input.documentId, documentUrl: input.legacyDocumentUrl, websiteUrl: input.websiteUrl,
     logoMediaId: input.logoMediaId, isActive: input.isActive, order: input.order,
   };
-  let id: string;
-  if (action === "CREATE") id = (await tx.partnership.create({data: {...data, translations: {create: translationRows<Prisma.PartnershipTranslationCreateWithoutPartnershipInput, PartnershipInput>(input, input.isActive, actorId, now)}}})).id;
+  let id: string; let version: number;
+  if (action === "CREATE") {
+    const row = await tx.partnership.create({data: {...data, translations: {create: translationRows<Prisma.PartnershipTranslationCreateWithoutPartnershipInput, PartnershipInput>(input, input.isActive, actorId, now)}}});
+    id = row.id; version = row.version;
+  }
   else {
     if (!mutation || !await tx.partnership.findUnique({where: {id: mutation.id}, select: {id: true}})) return {ok: false, code: "NOT_FOUND"} as const;
-    id = mutation.id; await tx.partnership.update({where: {id}, data: {...data, translations: {deleteMany: {}, create: translationRows<Prisma.PartnershipTranslationCreateWithoutPartnershipInput, PartnershipInput>(input, input.isActive, actorId, now)}}});
+    const claimed = await claimVersion(tx, "PARTNERSHIP", mutation); if (!claimed) return {ok: false, code: "VERSION_CONFLICT"} as const;
+    id = mutation.id; version = claimed; await tx.partnership.update({where: {id}, data: {...data, translations: {deleteMany: {}, create: translationRows<Prisma.PartnershipTranslationCreateWithoutPartnershipInput, PartnershipInput>(input, input.isActive, actorId, now, version)}}});
   }
+  await revision(tx, "Partnership", id, version, actorId, input, action);
   await audit(tx, actorId, action, "Partnership", id);
-  return PublicContentMutationResultSchema.parse({ok: true, id, resource: "PARTNERSHIP", version: null});
+  return PublicContentMutationResultSchema.parse({ok: true, id, resource: "PARTNERSHIP", version});
 }
 
 async function mutateScholarship(tx: Prisma.TransactionClient, action: "CREATE" | "UPDATE", input: ScholarshipInput, mutation: Mutation | null, actorId: string, now: Date) {
   if (!versionIntent("SCHOLARSHIP", mutation)) return {ok: false, code: "VALIDATION_FAILED"} as const;
   if (!await validDocument(tx, input.documentId)) return {ok: false, code: "DOCUMENT_INVALID"} as const;
   const data = {slug: input.slug, startDate: input.startDate ? new Date(input.startDate) : null, endDate: input.endDate ? new Date(input.endDate) : null, registrationUrl: input.registrationUrl, documentId: input.documentId, isActive: input.isActive};
-  let id: string;
-  if (action === "CREATE") id = (await tx.scholarship.create({data: {...data, translations: {create: translationRows<Prisma.ScholarshipTranslationCreateWithoutScholarshipInput, ScholarshipInput>(input, input.isActive, actorId, now)}}})).id;
+  let id: string; let version: number;
+  if (action === "CREATE") {
+    const row = await tx.scholarship.create({data: {...data, translations: {create: translationRows<Prisma.ScholarshipTranslationCreateWithoutScholarshipInput, ScholarshipInput>(input, input.isActive, actorId, now)}}});
+    id = row.id; version = row.version;
+  }
   else {
     if (!mutation || !await tx.scholarship.findUnique({where: {id: mutation.id}, select: {id: true}})) return {ok: false, code: "NOT_FOUND"} as const;
-    id = mutation.id; await tx.scholarship.update({where: {id}, data: {...data, translations: {deleteMany: {}, create: translationRows<Prisma.ScholarshipTranslationCreateWithoutScholarshipInput, ScholarshipInput>(input, input.isActive, actorId, now)}}});
+    const claimed = await claimVersion(tx, "SCHOLARSHIP", mutation); if (!claimed) return {ok: false, code: "VERSION_CONFLICT"} as const;
+    id = mutation.id; version = claimed; await tx.scholarship.update({where: {id}, data: {...data, translations: {deleteMany: {}, create: translationRows<Prisma.ScholarshipTranslationCreateWithoutScholarshipInput, ScholarshipInput>(input, input.isActive, actorId, now, version)}}});
   }
+  await revision(tx, "Scholarship", id, version, actorId, input, action);
   await audit(tx, actorId, action, "Scholarship", id);
-  return PublicContentMutationResultSchema.parse({ok: true, id, resource: "SCHOLARSHIP", version: null});
+  return PublicContentMutationResultSchema.parse({ok: true, id, resource: "SCHOLARSHIP", version});
 }
 
 async function mutateAchievement(tx: Prisma.TransactionClient, action: "CREATE" | "UPDATE", input: AchievementInput, mutation: Mutation | null, actorId: string, now: Date) {
   if (!versionIntent("ACHIEVEMENT", mutation)) return {ok: false, code: "VALIDATION_FAILED"} as const;
   if (!await validImages(tx, input.imageMediaId ? [input.imageMediaId] : [])) return {ok: false, code: "MEDIA_INVALID"} as const;
   const data = {slug: input.slug, studentName: input.studentName, level: input.level, achievedAt: input.achievedAt ? new Date(input.achievedAt) : null, imageMediaId: input.imageMediaId};
-  let id: string;
-  if (action === "CREATE") id = (await tx.achievement.create({data: {...data, translations: {create: translationRows<Prisma.AchievementTranslationCreateWithoutAchievementInput, AchievementInput>(input, true, actorId, now)}}})).id;
+  let id: string; let version: number;
+  if (action === "CREATE") {
+    const row = await tx.achievement.create({data: {...data, translations: {create: translationRows<Prisma.AchievementTranslationCreateWithoutAchievementInput, AchievementInput>(input, true, actorId, now)}}});
+    id = row.id; version = row.version;
+  }
   else {
     if (!mutation || !await tx.achievement.findUnique({where: {id: mutation.id}, select: {id: true}})) return {ok: false, code: "NOT_FOUND"} as const;
-    id = mutation.id; await tx.achievement.update({where: {id}, data: {...data, translations: {deleteMany: {}, create: translationRows<Prisma.AchievementTranslationCreateWithoutAchievementInput, AchievementInput>(input, true, actorId, now)}}});
+    const claimed = await claimVersion(tx, "ACHIEVEMENT", mutation); if (!claimed) return {ok: false, code: "VERSION_CONFLICT"} as const;
+    id = mutation.id; version = claimed; await tx.achievement.update({where: {id}, data: {...data, translations: {deleteMany: {}, create: translationRows<Prisma.AchievementTranslationCreateWithoutAchievementInput, AchievementInput>(input, true, actorId, now, version)}}});
   }
+  await revision(tx, "Achievement", id, version, actorId, input, action);
   await audit(tx, actorId, action, "Achievement", id);
-  return PublicContentMutationResultSchema.parse({ok: true, id, resource: "ACHIEVEMENT", version: null});
+  return PublicContentMutationResultSchema.parse({ok: true, id, resource: "ACHIEVEMENT", version});
 }
 
 async function mutateStudentActivity(tx: Prisma.TransactionClient, action: "CREATE" | "UPDATE", input: StudentActivityInput, mutation: Mutation | null, actorId: string, now: Date) {
   if (!versionIntent("STUDENT_ACTIVITY", mutation)) return {ok: false, code: "VALIDATION_FAILED"} as const;
   if (!await validImages(tx, input.images.map(({mediaId}) => mediaId))) return {ok: false, code: "MEDIA_INVALID"} as const;
   const data = {slug: input.slug, date: input.date ? new Date(input.date) : null}; let id: string;
-  if (action === "CREATE") id = (await tx.studentActivity.create({data: {...data, translations: {create: translationRows<Prisma.StudentActivityTranslationCreateWithoutStudentActivityInput, StudentActivityInput>(input, true, actorId, now)}, images: {create: input.images}}})).id;
+  let version: number;
+  if (action === "CREATE") {
+    const row = await tx.studentActivity.create({data: {...data, translations: {create: translationRows<Prisma.StudentActivityTranslationCreateWithoutStudentActivityInput, StudentActivityInput>(input, true, actorId, now)}, images: {create: input.images}}});
+    id = row.id; version = row.version;
+  }
   else {
     if (!mutation || !await tx.studentActivity.findUnique({where: {id: mutation.id}, select: {id: true}})) return {ok: false, code: "NOT_FOUND"} as const;
-    id = mutation.id; await tx.studentActivity.update({where: {id}, data: {...data, translations: {deleteMany: {}, create: translationRows<Prisma.StudentActivityTranslationCreateWithoutStudentActivityInput, StudentActivityInput>(input, true, actorId, now)}, images: {deleteMany: {}, create: input.images}}});
+    const claimed = await claimVersion(tx, "STUDENT_ACTIVITY", mutation); if (!claimed) return {ok: false, code: "VERSION_CONFLICT"} as const;
+    id = mutation.id; version = claimed; await tx.studentActivity.update({where: {id}, data: {...data, translations: {deleteMany: {}, create: translationRows<Prisma.StudentActivityTranslationCreateWithoutStudentActivityInput, StudentActivityInput>(input, true, actorId, now, version)}, images: {deleteMany: {}, create: input.images}}});
   }
+  await revision(tx, "StudentActivity", id, version, actorId, input, action);
   await audit(tx, actorId, action, "StudentActivity", id);
-  return PublicContentMutationResultSchema.parse({ok: true, id, resource: "STUDENT_ACTIVITY", version: null});
+  return PublicContentMutationResultSchema.parse({ok: true, id, resource: "STUDENT_ACTIVITY", version});
 }
 
 async function mutateDocument(tx: Prisma.TransactionClient, action: "CREATE" | "UPDATE", input: DocumentInput, mutation: Mutation | null, actorId: string, now: Date) {
@@ -254,13 +307,19 @@ async function mutateAlbum(tx: Prisma.TransactionClient, action: "CREATE" | "UPD
   const imageIds = [...input.photos.map(({mediaId}) => mediaId), ...(input.coverMediaId ? [input.coverMediaId] : [])];
   if (!await validImages(tx, imageIds)) return {ok: false, code: "MEDIA_INVALID"} as const;
   const data = {slug: input.slug, coverMediaId: input.coverMediaId, eventDate: input.eventDate ? new Date(input.eventDate) : null, isPublished: input.isPublished}; let id: string;
-  if (action === "CREATE") id = (await tx.album.create({data: {...data, translations: {create: translationRows<Prisma.AlbumTranslationCreateWithoutAlbumInput, AlbumInput>(input, input.isPublished, actorId, now)}, photos: {create: input.photos}}})).id;
+  let version: number;
+  if (action === "CREATE") {
+    const row = await tx.album.create({data: {...data, translations: {create: translationRows<Prisma.AlbumTranslationCreateWithoutAlbumInput, AlbumInput>(input, input.isPublished, actorId, now)}, photos: {create: input.photos}}});
+    id = row.id; version = row.version;
+  }
   else {
     if (!mutation || !await tx.album.findUnique({where: {id: mutation.id}, select: {id: true}})) return {ok: false, code: "NOT_FOUND"} as const;
-    id = mutation.id; await tx.album.update({where: {id}, data: {...data, translations: {deleteMany: {}, create: translationRows<Prisma.AlbumTranslationCreateWithoutAlbumInput, AlbumInput>(input, input.isPublished, actorId, now)}, photos: {deleteMany: {}, create: input.photos}}});
+    const claimed = await claimVersion(tx, "ALBUM", mutation); if (!claimed) return {ok: false, code: "VERSION_CONFLICT"} as const;
+    id = mutation.id; version = claimed; await tx.album.update({where: {id}, data: {...data, translations: {deleteMany: {}, create: translationRows<Prisma.AlbumTranslationCreateWithoutAlbumInput, AlbumInput>(input, input.isPublished, actorId, now, version)}, photos: {deleteMany: {}, create: input.photos}}});
   }
+  await revision(tx, "Album", id, version, actorId, input, action);
   await audit(tx, actorId, action, "Album", id);
-  return PublicContentMutationResultSchema.parse({ok: true, id, resource: "ALBUM", version: null});
+  return PublicContentMutationResultSchema.parse({ok: true, id, resource: "ALBUM", version});
 }
 
 async function mutateEvent(tx: Prisma.TransactionClient, action: "CREATE" | "UPDATE", input: EventInput, mutation: Mutation | null, actorId: string, now: Date) {
@@ -295,13 +354,19 @@ async function mutateTestimonial(tx: Prisma.TransactionClient, action: "CREATE" 
   if (!versionIntent("TESTIMONIAL", mutation) || (input.publicationConsentAt && new Date(input.publicationConsentAt) > now)) return {ok: false, code: "VALIDATION_FAILED"} as const;
   if (!await validImages(tx, input.photoMediaId ? [input.photoMediaId] : [])) return {ok: false, code: "MEDIA_INVALID"} as const;
   const data = {name: input.name, graduationYear: input.graduationYear, photoMediaId: input.photoMediaId, order: input.order, isVisible: input.isVisible, publicationConsentAt: input.publicationConsentAt ? new Date(input.publicationConsentAt) : null}; let id: string;
-  if (action === "CREATE") id = (await tx.testimonial.create({data: {...data, translations: {create: translationRows<Prisma.TestimonialTranslationCreateWithoutTestimonialInput, TestimonialInput>(input, input.isVisible, actorId, now)}}})).id;
+  let version: number;
+  if (action === "CREATE") {
+    const row = await tx.testimonial.create({data: {...data, translations: {create: translationRows<Prisma.TestimonialTranslationCreateWithoutTestimonialInput, TestimonialInput>(input, input.isVisible, actorId, now)}}});
+    id = row.id; version = row.version;
+  }
   else {
     if (!mutation || !await tx.testimonial.findUnique({where: {id: mutation.id}, select: {id: true}})) return {ok: false, code: "NOT_FOUND"} as const;
-    id = mutation.id; await tx.testimonial.update({where: {id}, data: {...data, translations: {deleteMany: {}, create: translationRows<Prisma.TestimonialTranslationCreateWithoutTestimonialInput, TestimonialInput>(input, input.isVisible, actorId, now)}}});
+    const claimed = await claimVersion(tx, "TESTIMONIAL", mutation); if (!claimed) return {ok: false, code: "VERSION_CONFLICT"} as const;
+    id = mutation.id; version = claimed; await tx.testimonial.update({where: {id}, data: {...data, translations: {deleteMany: {}, create: translationRows<Prisma.TestimonialTranslationCreateWithoutTestimonialInput, TestimonialInput>(input, input.isVisible, actorId, now, version)}}});
   }
+  await revision(tx, "Testimonial", id, version, actorId, input, action);
   await audit(tx, actorId, action, "Testimonial", id);
-  return PublicContentMutationResultSchema.parse({ok: true, id, resource: "TESTIMONIAL", version: null});
+  return PublicContentMutationResultSchema.parse({ok: true, id, resource: "TESTIMONIAL", version});
 }
 
 async function remove(tx: Prisma.TransactionClient, resource: PublicContentResource, id: string, expectedVersion: number | null, actorId: string) {
@@ -319,7 +384,7 @@ async function remove(tx: Prisma.TransactionClient, resource: PublicContentResou
   if (!exists) return {ok: false, code: "NOT_FOUND"} as const;
   let version: number | null = null;
   if (VERSIONED.has(resource)) {
-    const claimed = await claimVersion(tx, resource as "SERVICE" | "DOCUMENT" | "EVENT" | "FAQ", {id, expectedVersion});
+    const claimed = await claimVersion(tx, resource, {id, expectedVersion});
     if (!claimed) return {ok: false, code: "VERSION_CONFLICT"} as const;
     version = claimed;
   }
@@ -333,7 +398,10 @@ async function remove(tx: Prisma.TransactionClient, resource: PublicContentResou
   else if (resource === "EVENT") await tx.event.delete({where: {id}});
   else if (resource === "FAQ") await tx.faq.delete({where: {id}});
   else await tx.testimonial.delete({where: {id}});
-  const resourceType = resource.split("_").map((part) => part[0] + part.slice(1).toLowerCase()).join("");
+  const resourceType = RESOURCE_TYPES[resource];
+  if (version !== null) {
+    await revision(tx, resourceType, id, version, actorId, {deleted: true}, "DELETE");
+  }
   await audit(tx, actorId, "UPDATE", resourceType, id, "DELETE", version ?? undefined);
   return PublicContentMutationResultSchema.parse({ok: true, id, resource, version});
 }
@@ -351,14 +419,20 @@ async function reorder(tx: Prisma.TransactionClient, command: Extract<PublicCont
       const row = await tx.service.update({where: {id}, data: {order: position, version: {increment: 1}}, select: {version: true}});
       versions.set(id, row.version); await revision(tx, "Service", id, row.version, actorId, {order: position}, "REORDER");
     }
-    else if (command.resource === "PARTNERSHIP") await tx.partnership.update({where: {id}, data: {order: position}});
+    else if (command.resource === "PARTNERSHIP") {
+      const row = await tx.partnership.update({where: {id}, data: {order: position, version: {increment: 1}}, select: {version: true}});
+      versions.set(id, row.version); await revision(tx, "Partnership", id, row.version, actorId, {order: position}, "REORDER");
+    }
     else if (command.resource === "FAQ") {
       const row = await tx.faq.update({where: {id}, data: {order: position, version: {increment: 1}}, select: {version: true}});
       versions.set(id, row.version); await revision(tx, "Faq", id, row.version, actorId, {order: position}, "REORDER");
     }
-    else await tx.testimonial.update({where: {id}, data: {order: position}});
+    else {
+      const row = await tx.testimonial.update({where: {id}, data: {order: position, version: {increment: 1}}, select: {version: true}});
+      versions.set(id, row.version); await revision(tx, "Testimonial", id, row.version, actorId, {order: position}, "REORDER");
+    }
   }
-  const resourceType = command.resource[0] + command.resource.slice(1).toLowerCase();
+  const resourceType = RESOURCE_TYPES[command.resource];
   for (const {id} of command.payload.items) await audit(tx, actorId, "UPDATE", resourceType, id, "REORDER", versions.get(id));
   const firstId = command.payload.items[0]!.id;
   return PublicContentMutationResultSchema.parse({ok: true, id: firstId, resource: command.resource, version: versions.get(firstId) ?? null});

@@ -87,7 +87,7 @@ suite("public content domains PostgreSQL runtime", () => {
     }
     expect(ids.size).toBe(10);
     expect(await prisma.activityLog.count({where: {actorId: adminId, resourceId: {in: [...ids.values()]}}})).toBe(10);
-    expect(await prisma.contentRevision.count({where: {resourceId: {in: [...ids.values()]}}})).toBe(4);
+    expect(await prisma.contentRevision.count({where: {resourceId: {in: [...ids.values()]}}})).toBe(10);
     expect((await prisma.serviceTranslation.findFirstOrThrow({where: {serviceId: ids.get("SERVICE"), locale: "id"}})).description).toBe("<p>Aman</p>");
   });
 
@@ -124,25 +124,25 @@ suite("public content domains PostgreSQL runtime", () => {
     const commands = [
       {resource: "SERVICE", expectedVersion: 1, payload: {slug: `${marker}-service`, category: "UMUM", link: null, icon: null,
         isActive: true, order: 1, contentOwnerId: adminId, expiresAt: null, translations: {id: {name: `${marker} Layanan Ubah`, description: null}}}},
-      {resource: "PARTNERSHIP", expectedVersion: null, payload: {slug: `${marker}-partnership`, partnerName: `${marker} Mitra Ubah`, level: "NASIONAL", country: "Indonesia",
+      {resource: "PARTNERSHIP", expectedVersion: 1, payload: {slug: `${marker}-partnership`, partnerName: `${marker} Mitra Ubah`, level: "NASIONAL", country: "Indonesia",
         startDate: "2026-01-01T00:00:00.000Z", endDate: null, documentId: null, legacyDocumentUrl: null, websiteUrl: "https://example.org",
         logoMediaId: null, isActive: true, order: 1, translations: {id: {category: "Riset", description: null}}}},
-      {resource: "SCHOLARSHIP", expectedVersion: null, payload: {slug: `${marker}-scholarship`, startDate: null, endDate: "2026-10-01T00:00:00.000Z",
+      {resource: "SCHOLARSHIP", expectedVersion: 1, payload: {slug: `${marker}-scholarship`, startDate: null, endDate: "2026-10-01T00:00:00.000Z",
         registrationUrl: null, documentId: null, isActive: true, translations: {id: {title: `${marker} Beasiswa Ubah`, provider: null, description: null}}}},
-      {resource: "ACHIEVEMENT", expectedVersion: null, payload: {slug: `${marker}-achievement`, studentName: `${marker} Mahasiswa Ubah`, level: "REGIONAL",
+      {resource: "ACHIEVEMENT", expectedVersion: 1, payload: {slug: `${marker}-achievement`, studentName: `${marker} Mahasiswa Ubah`, level: "REGIONAL",
         achievedAt: null, imageMediaId: null, translations: {id: {title: `${marker} Prestasi Ubah`, description: null}}}},
-      {resource: "STUDENT_ACTIVITY", expectedVersion: null, payload: {slug: `${marker}-activity`, date: null, images: [],
+      {resource: "STUDENT_ACTIVITY", expectedVersion: 1, payload: {slug: `${marker}-activity`, date: null, images: [],
         translations: {id: {title: `${marker} Kegiatan Ubah`, description: null}}}},
       {resource: "DOCUMENT", expectedVersion: 1, payload: {slug: `${marker}-document`, publicPdfMediaId: pdfMediaId, isPublished: true,
         contentOwnerId: adminId, expiresAt: null, translations: {id: {title: `${marker} Dokumen Ubah`, category: null}}}},
-      {resource: "ALBUM", expectedVersion: null, payload: {slug: `${marker}-album`, coverMediaId: null, eventDate: null, isPublished: true,
+      {resource: "ALBUM", expectedVersion: 1, payload: {slug: `${marker}-album`, coverMediaId: null, eventDate: null, isPublished: true,
         photos: [], translations: {id: {title: `${marker} Album Ubah`, description: null}}}},
       {resource: "EVENT", expectedVersion: 1, payload: {slug: `${marker}-event`, startAt: "2026-08-07T03:00:00.000Z", endAt: null,
         registrationUrl: null, isPublished: true, contentOwnerId: adminId, expiresAt: null,
         translations: {id: {title: `${marker} Agenda Ubah`, description: null, location: null}}}},
       {resource: "FAQ", expectedVersion: 1, payload: {order: 1, isVisible: true, contentOwnerId: adminId, expiresAt: null,
         translations: {id: {category: null, question: `${marker} Pertanyaan baru?`, answer: "<p>Jawaban baru.</p>"}}}},
-      {resource: "TESTIMONIAL", expectedVersion: null, payload: {name: `${marker} Alumni Ubah`, graduationYear: 2024, photoMediaId: null,
+      {resource: "TESTIMONIAL", expectedVersion: 1, payload: {name: `${marker} Alumni Ubah`, graduationYear: 2024, photoMediaId: null,
         order: 1, isVisible: true, publicationConsentAt: "2026-08-01T03:00:00.000Z",
         translations: {id: {currentRole: null, quote: "Tetap baik."}}}},
     ] as const;
@@ -151,7 +151,7 @@ suite("public content domains PostgreSQL runtime", () => {
         mutation: {id: ids.get(command.resource), expectedVersion: command.expectedVersion}, payload: command.payload}, now);
       expect(result, command.resource).toMatchObject({ok: true, resource: command.resource});
     }
-    expect(await prisma.contentRevision.count({where: {resourceId: {in: [...ids.values()]}}})).toBe(8);
+    expect(await prisma.contentRevision.count({where: {resourceId: {in: [...ids.values()]}}})).toBe(20);
     expect((await prisma.partnership.findUniqueOrThrow({where: {id: ids.get("PARTNERSHIP")}})).partnerName).toBe(`${marker} Mitra Ubah`);
   });
 
@@ -172,6 +172,11 @@ suite("public content domains PostgreSQL runtime", () => {
       mutation: {id: serviceId, expectedVersion: 99}, payload}, now)).toEqual({ok: false, code: "VERSION_CONFLICT"});
     expect(await executePublicContentCommand(prisma, actor(), {action: "UPDATE", resource: "SERVICE",
       mutation: {id: serviceId, expectedVersion: 3}, payload}, now)).toEqual({ok: true, id: serviceId, resource: "SERVICE", version: 4});
+    const partnershipPayload = {slug: `${marker}-partnership`, partnerName: `${marker} Mitra Konflik`, level: "NASIONAL", country: "Indonesia",
+      startDate: "2026-01-01T00:00:00.000Z", endDate: null, documentId: null, legacyDocumentUrl: null, websiteUrl: "https://example.org",
+      logoMediaId: null, isActive: true, order: 1, translations: {id: {category: "Riset", description: null}}};
+    expect(await executePublicContentCommand(prisma, actor(), {action: "UPDATE", resource: "PARTNERSHIP",
+      mutation: {id: ids.get("PARTNERSHIP")!, expectedVersion: 99}, payload: partnershipPayload}, now)).toEqual({ok: false, code: "VERSION_CONFLICT"});
     const before = await prisma.achievement.count({where: {slug: `${marker}-private-image`}});
     expect(await executePublicContentCommand(prisma, actor(), {action: "CREATE", resource: "ACHIEVEMENT", payload: {
       slug: `${marker}-private-image`, studentName: "Mahasiswa", level: "LOKAL", achievedAt: null, imageMediaId: privateMediaId,
@@ -181,11 +186,11 @@ suite("public content domains PostgreSQL runtime", () => {
   });
 
   it("deletes all ten resources with version intent and durable audit metadata", async () => {
-    const versions: Record<string, number | null> = {SERVICE: 4, PARTNERSHIP: null, SCHOLARSHIP: null, ACHIEVEMENT: null,
-      STUDENT_ACTIVITY: null, DOCUMENT: 2, ALBUM: null, EVENT: 2, FAQ: 2, TESTIMONIAL: null};
+    const versions: Record<string, number> = {SERVICE: 4, PARTNERSHIP: 2, SCHOLARSHIP: 2, ACHIEVEMENT: 2,
+      STUDENT_ACTIVITY: 2, DOCUMENT: 2, ALBUM: 2, EVENT: 2, FAQ: 2, TESTIMONIAL: 2};
     for (const [resource, id] of ids) {
       const result = await executePublicContentCommand(prisma, actor(), {action: "DELETE", resource, id, expectedVersion: versions[resource]}, now);
-      expect(result, resource).toMatchObject({ok: true, resource, id, version: versions[resource] === null ? null : (versions[resource] as number) + 1});
+      expect(result, resource).toMatchObject({ok: true, resource, id, version: versions[resource] + 1});
     }
     const counts = await Promise.all([prisma.service.count({where: {id: ids.get("SERVICE")}}),
       prisma.partnership.count({where: {id: ids.get("PARTNERSHIP")}}), prisma.scholarship.count({where: {id: ids.get("SCHOLARSHIP")}}),

@@ -14,6 +14,12 @@ const serviceInput = {
   isActive: true, order: 0, contentOwnerId: "admin-1", expiresAt: null,
   translations: {id: {name: "Layanan Akademik", description: "<p>Aman<script>jahat</script></p>"}},
 };
+const partnershipInput = {
+  slug: "mitra-riset", partnerName: "Mitra Riset", level: "NASIONAL" as const, country: "Indonesia",
+  startDate: null, endDate: null, documentId: null, legacyDocumentUrl: null, websiteUrl: "https://example.org",
+  logoMediaId: null, isActive: true, order: 0,
+  translations: {id: {category: "Riset", description: "<p>Kolaborasi.</p>"}},
+};
 
 describe("public content ADMIN command boundary", () => {
   it("rejects invalid actors and commands before opening a transaction", async () => {
@@ -51,6 +57,19 @@ describe("public content ADMIN command boundary", () => {
     const database = {$transaction: vi.fn(async (callback: (value: typeof tx) => unknown) => callback(tx))} as unknown as PublicContentDatabase;
     expect(await executePublicContentCommand(database, actor, {
       action: "UPDATE", resource: "SERVICE", mutation: {id: "service-1", expectedVersion: 3}, payload: serviceInput,
+    }, now)).toEqual({ok: false, code: "VERSION_CONFLICT"});
+  });
+
+  it("returns VERSION_CONFLICT when a partnership update loses its version claim", async () => {
+    const tx = {
+      partnership: {
+        findUnique: vi.fn().mockResolvedValue({id: "partnership-1"}),
+        updateMany: vi.fn().mockResolvedValue({count: 0}),
+      },
+    };
+    const database = {$transaction: vi.fn(async (callback: (value: typeof tx) => unknown) => callback(tx))} as unknown as PublicContentDatabase;
+    expect(await executePublicContentCommand(database, actor, {
+      action: "UPDATE", resource: "PARTNERSHIP", mutation: {id: "partnership-1", expectedVersion: 2}, payload: partnershipInput,
     }, now)).toEqual({ok: false, code: "VERSION_CONFLICT"});
   });
 
@@ -112,5 +131,20 @@ describe("public content ADMIN command boundary", () => {
       data: {order: 0, version: {increment: 1}}, select: {version: true}});
     expect(tx.contentRevision.create).toHaveBeenCalledOnce();
     expect(tx.activityLog.create).toHaveBeenCalledWith({data: expect.objectContaining({metadata: {operation: "REORDER", version: 2}})});
+  });
+
+  it("increments partnership reorder versions and records revisions", async () => {
+    const tx = {partnership: {
+      count: vi.fn().mockResolvedValue(1), update: vi.fn().mockResolvedValue({version: 2}),
+    }, contentRevision: {create: vi.fn().mockResolvedValue({id: "revision-1"})},
+    activityLog: {create: vi.fn().mockResolvedValue({id: "audit-1"})}};
+    const database = {$transaction: vi.fn(async (callback: (value: typeof tx) => unknown) => callback(tx))} as unknown as PublicContentDatabase;
+    expect(await executePublicContentCommand(database, actor, {
+      action: "REORDER", resource: "PARTNERSHIP", payload: {items: [{id: "partnership-1", position: 0}]},
+    }, now)).toEqual({ok: true, id: "partnership-1", resource: "PARTNERSHIP", version: 2});
+    expect(tx.partnership.update).toHaveBeenCalledWith({where: {id: "partnership-1"},
+      data: {order: 0, version: {increment: 1}}, select: {version: true}});
+    expect(tx.contentRevision.create).toHaveBeenCalledOnce();
+    expect(tx.activityLog.create).toHaveBeenCalledWith({data: expect.objectContaining({resourceType: "Partnership", metadata: {operation: "REORDER", version: 2}})});
   });
 });

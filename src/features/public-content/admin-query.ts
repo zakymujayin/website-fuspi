@@ -73,7 +73,7 @@ export async function listPublicContentAdmin(
         ...(query.search ? {OR: [{partnerName: {contains: query.search, mode: "insensitive"}}, {translations: {some: {category: {contains: query.search, mode: "insensitive"}}}}]} : {})};
       const result = await prisma.$transaction([prisma.partnership.findMany({where, ...pagination, orderBy: [{order: direction}, {id: "asc"}], include: {translations: true}}), prisma.partnership.count({where})]);
       total = result[1]; items = result[0].map((row) => summary({id: row.id, resource: "PARTNERSHIP", slug: row.slug, primaryText: row.partnerName,
-        isPublic: row.isActive, expired: false, order: row.order, version: null, translations: row.translations, governance: null}));
+        isPublic: row.isActive, expired: false, order: row.order, version: row.version, translations: row.translations, governance: null}));
     } else if (query.resource === "SCHOLARSHIP") {
       const where: Prisma.ScholarshipWhereInput = {...status,
         ...(query.visibility === "PUBLIC" ? {isActive: true, OR: [{endDate: null}, {endDate: {gte: now}}]}
@@ -84,7 +84,7 @@ export async function listPublicContentAdmin(
       const result = await prisma.$transaction([prisma.scholarship.findMany({where, ...pagination, orderBy: [{endDate: direction}, {id: "asc"}], include: {translations: true}}), prisma.scholarship.count({where})]);
       total = result[1]; items = result[0].map((row) => summary({id: row.id, resource: "SCHOLARSHIP", slug: row.slug,
         primaryText: row.translations.find(({locale}) => locale === "id")?.title ?? row.slug, isPublic: row.isActive,
-        expired: Boolean(row.endDate && row.endDate < now), order: null, version: null, translations: row.translations, governance: null}));
+        expired: Boolean(row.endDate && row.endDate < now), order: null, version: row.version, translations: row.translations, governance: null}));
     } else if (query.resource === "ACHIEVEMENT") {
       const level = query.category && ["INTERNASIONAL", "NASIONAL", "REGIONAL", "LOKAL"].includes(query.category) ? query.category as "INTERNASIONAL" | "NASIONAL" | "REGIONAL" | "LOKAL" : null;
       const where: Prisma.AchievementWhereInput = {...status, ...(level ? {level} : query.category ? {id: "__no_match__"} : {}),
@@ -92,14 +92,14 @@ export async function listPublicContentAdmin(
         ...(query.search ? {OR: [{studentName: {contains: query.search, mode: "insensitive"}}, {translations: {some: {title: {contains: query.search, mode: "insensitive"}}}}]} : {})};
       const result = await prisma.$transaction([prisma.achievement.findMany({where, ...pagination, orderBy: [{achievedAt: direction}, {id: "asc"}], include: {translations: true}}), prisma.achievement.count({where})]);
       total = result[1]; items = result[0].map((row) => summary({id: row.id, resource: "ACHIEVEMENT", slug: row.slug,
-        primaryText: row.translations.find(({locale}) => locale === "id")?.title ?? row.studentName, isPublic: true, expired: false, order: null, version: null, translations: row.translations, governance: null}));
+        primaryText: row.translations.find(({locale}) => locale === "id")?.title ?? row.studentName, isPublic: true, expired: false, order: null, version: row.version, translations: row.translations, governance: null}));
     } else if (query.resource === "STUDENT_ACTIVITY") {
       const where: Prisma.StudentActivityWhereInput = {...status,
         ...(query.year ? {date: {gte: new Date(`${query.year}-01-01T00:00:00.000Z`), lt: new Date(`${query.year + 1}-01-01T00:00:00.000Z`)}} : {}),
         ...(query.search ? {translations: {some: {title: {contains: query.search, mode: "insensitive"}}}} : {})};
       const result = await prisma.$transaction([prisma.studentActivity.findMany({where, ...pagination, orderBy: [{date: direction}, {id: "asc"}], include: {translations: true}}), prisma.studentActivity.count({where})]);
       total = result[1]; items = result[0].map((row) => summary({id: row.id, resource: "STUDENT_ACTIVITY", slug: row.slug,
-        primaryText: row.translations.find(({locale}) => locale === "id")?.title ?? row.slug, isPublic: true, expired: false, order: null, version: null, translations: row.translations, governance: null}));
+        primaryText: row.translations.find(({locale}) => locale === "id")?.title ?? row.slug, isPublic: true, expired: false, order: null, version: row.version, translations: row.translations, governance: null}));
     } else if (query.resource === "DOCUMENT") {
       const where: Prisma.DocumentWhereInput = {...status, ...governanceFilter(query, now),
         ...(query.visibility === "PUBLIC" ? {publishedAt: {not: null}} : query.visibility === "HIDDEN" ? {publishedAt: null} : {}),
@@ -117,7 +117,7 @@ export async function listPublicContentAdmin(
         ...(query.search ? {translations: {some: {title: {contains: query.search, mode: "insensitive"}}}} : {})};
       const result = await prisma.$transaction([prisma.album.findMany({where, ...pagination, orderBy: [{eventDate: direction}, {id: "asc"}], include: {translations: true}}), prisma.album.count({where})]);
       total = result[1]; items = result[0].map((row) => summary({id: row.id, resource: "ALBUM", slug: row.slug,
-        primaryText: row.translations.find(({locale}) => locale === "id")?.title ?? row.slug, isPublic: row.isPublished, expired: false, order: null, version: null, translations: row.translations, governance: null}));
+        primaryText: row.translations.find(({locale}) => locale === "id")?.title ?? row.slug, isPublic: row.isPublished, expired: false, order: null, version: row.version, translations: row.translations, governance: null}));
     } else if (query.resource === "EVENT") {
       const where: Prisma.EventWhereInput = {...status, ...governanceFilter(query, now),
         ...(query.visibility === "PUBLIC" ? {isPublished: true} : query.visibility === "HIDDEN" ? {isPublished: false} : {}),
@@ -145,7 +145,7 @@ export async function listPublicContentAdmin(
         ...(query.search ? {OR: [{name: {contains: query.search, mode: "insensitive"}}, {translations: {some: {currentRole: {contains: query.search, mode: "insensitive"}}}}]} : {})};
       const result = await prisma.$transaction([prisma.testimonial.findMany({where, ...pagination, orderBy: [{order: direction}, {id: "asc"}], include: {translations: true}}), prisma.testimonial.count({where})]);
       total = result[1]; items = result[0].map((row) => summary({id: row.id, resource: "TESTIMONIAL", slug: null, primaryText: row.name,
-        isPublic: row.isVisible && Boolean(row.publicationConsentAt && row.publicationConsentAt <= now), expired: false, order: row.order, version: null, translations: row.translations, governance: null}));
+        isPublic: row.isVisible && Boolean(row.publicationConsentAt && row.publicationConsentAt <= now), expired: false, order: row.order, version: row.version, translations: row.translations, governance: null}));
     }
     return {ok: true as const, data: PublicContentAdminListResultSchema.parse({items, page: pageMetadata(query.page, query.pageSize, total)})};
   } catch {

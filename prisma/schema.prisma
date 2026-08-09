@@ -878,6 +878,7 @@ model Partnership {
   logoMediaId  String?
   isActive     Boolean                  @default(true)
   order        Int                      @default(0)
+  version      Int                      @default(1)
   logoMedia    Media?                   @relation("PartnershipLogo", fields: [logoMediaId], references: [id], onDelete: Restrict)
   document     Document?                @relation("PartnershipDocument", fields: [documentId], references: [id], onDelete: Restrict)
   translations PartnershipTranslation[]
@@ -910,6 +911,7 @@ model Scholarship {
   registrationUrl String?
   documentId      String?
   isActive        Boolean                  @default(true)
+  version         Int                      @default(1)
   document        Document?                @relation("ScholarshipDocument", fields: [documentId], references: [id], onDelete: Restrict)
   translations    ScholarshipTranslation[]
 }
@@ -939,6 +941,7 @@ model Achievement {
   level        AchievementLevel
   achievedAt   DateTime?
   imageMediaId String?
+  version      Int                      @default(1)
   imageMedia   Media?                   @relation("AchievementImage", fields: [imageMediaId], references: [id], onDelete: Restrict)
   translations AchievementTranslation[]
 }
@@ -964,6 +967,7 @@ model StudentActivity {
   id           String                       @id @default(cuid())
   slug         String                       @unique
   date         DateTime?
+  version      Int                          @default(1)
   translations StudentActivityTranslation[]
   images       ActivityImage[]
 }
@@ -1046,6 +1050,7 @@ model Album {
   coverMediaId  String?
   eventDate     DateTime?
   isPublished   Boolean             @default(false)
+  version       Int                 @default(1)
   coverMedia    Media?              @relation("AlbumCover", fields: [coverMediaId], references: [id], onDelete: Restrict)
   translations  AlbumTranslation[]
   photos        AlbumPhoto[]
@@ -1395,6 +1400,7 @@ model Testimonial {
   order                Int                      @default(0)
   isVisible            Boolean                  @default(false)
   publicationConsentAt DateTime?
+  version              Int                      @default(1)
   photoMedia           Media?                   @relation("TestimonialPhoto", fields: [photoMediaId], references: [id], onDelete: Restrict)
   translations         TestimonialTranslation[]
 }
