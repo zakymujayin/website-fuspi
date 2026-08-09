@@ -1,4 +1,5 @@
 import {ArrowRight, BookOpen, Globe, GraduationCap} from "lucide-react";
+import Image from "next/image";
 import {notFound} from "next/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import type {Metadata} from "next";
@@ -88,10 +89,14 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
 
         <aside className="space-y-6">
           {lecturer.photoMedia ? (
-            <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
-              <img src={`/uploads/${lecturer.photoMedia.storageKey}`}
+            <div className="relative aspect-[3/4] overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+              <Image
+                src={`/uploads/${lecturer.photoMedia.storageKey}`}
                 alt={lecturer.photoMedia.alt ?? lecturer.name}
-                className="aspect-[3/4] w-full object-cover" />
+                fill
+                sizes="(min-width: 1024px) 33vw, 100vw"
+                className="object-cover"
+              />
             </div>
           ) : null}
           <div className="rounded-xl border border-slate-200 p-6 space-y-3">

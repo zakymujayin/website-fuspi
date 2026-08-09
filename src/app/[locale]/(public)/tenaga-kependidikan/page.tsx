@@ -1,4 +1,5 @@
 import type {Metadata} from "next";
+import Image from "next/image";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {SectionHeading} from "@/components/public/section-heading";
@@ -48,9 +49,15 @@ export default async function StaffPage({params}: {params: Promise<{locale: AppL
             const tl = resolveLocale(s.translations, locale);
             return (
               <div key={s.id} className="flex items-center gap-4 rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="size-14 shrink-0 overflow-hidden rounded-full bg-slate-100">
+                <div className="relative size-14 shrink-0 overflow-hidden rounded-full bg-slate-100">
                   {s.photoMedia ? (
-                    <img src={`/uploads/${s.photoMedia.storageKey}`} alt={s.photoMedia.alt ?? s.name} className="size-full object-cover" />
+                    <Image
+                      src={`/uploads/${s.photoMedia.storageKey}`}
+                      alt={s.photoMedia.alt ?? s.name}
+                      fill
+                      sizes="56px"
+                      className="object-cover"
+                    />
                   ) : (
                     <span className="flex size-full items-center justify-center font-display text-lg font-bold text-slate-300">{s.name.charAt(0)}</span>
                   )}

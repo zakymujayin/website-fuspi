@@ -1,4 +1,5 @@
 import type {Metadata} from "next";
+import Image from "next/image";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {SectionHeading} from "@/components/public/section-heading";
@@ -58,8 +59,13 @@ export default async function DosenPage({params}: {params: Promise<{locale: AppL
                 className="group flex flex-col items-center gap-4 rounded-xl border border-slate-200 bg-white p-6 text-center shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
                 <div className="relative size-24 overflow-hidden rounded-full bg-slate-100">
                   {d.photoMedia ? (
-                    <img src={`/uploads/${d.photoMedia.storageKey}`} alt={d.photoMedia.alt ?? d.name}
-                      className="size-full object-cover" />
+                    <Image
+                      src={`/uploads/${d.photoMedia.storageKey}`}
+                      alt={d.photoMedia.alt ?? d.name}
+                      fill
+                      sizes="96px"
+                      className="object-cover"
+                    />
                   ) : (
                     <span className="flex size-full items-center justify-center font-display text-2xl font-bold text-slate-300">
                       {d.name.charAt(0)}
