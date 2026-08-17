@@ -5,7 +5,7 @@
 - Task ID: M4-GPT-TAXONOMY-ADMIN-POST-PICKER
 - Branch: ai/gpt/m4-facility-homepage-admin
 - Base SHA: 8aa05b3
-- Head SHA: 90c6150
+- Head SHA: 991f544
 - Status: review
 
 ## Summary
