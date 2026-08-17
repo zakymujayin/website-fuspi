@@ -1,0 +1,7 @@
+-- Compatibility migration.
+--
+-- Claude's local database history recorded this migration name while the
+-- branch later consolidated the SiteSetting logo/favicon columns into
+-- 20260810002000_home_video_facility_site_media. Keep this migration as a
+-- no-op so existing local databases and fresh databases share the same
+-- migration history without replaying duplicate ALTER TABLE statements.

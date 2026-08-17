@@ -57,7 +57,7 @@ function StatItem({
   return (
     <div
       className={cn(
-        "text-center transition-all duration-700",
+        "w-28 shrink-0 text-center transition-all duration-700 sm:w-32",
         inView ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
       )}
       style={{transitionDelay: `${index * 80}ms`}}
@@ -105,7 +105,7 @@ export function StatsSection({ items }: StatsSectionProps) {
     >
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(65,105,225,.14),transparent_55%)]" />
       <Container className="relative z-10">
-        <div className="grid grid-cols-2 gap-y-12 gap-x-8 md:grid-cols-3 lg:grid-cols-6">
+        <div className="flex flex-wrap justify-center gap-x-10 gap-y-12 sm:gap-x-16 lg:gap-x-20">
           {items.map((item, index) => (
             <StatItem key={item.id} item={item} index={index} inView={inView} />
           ))}
