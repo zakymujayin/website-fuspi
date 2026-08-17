@@ -6,6 +6,7 @@ import { PostEditorShell } from "@/components/admin/posts/post-editor-shell";
 import { draftFromEditorView } from "@/components/admin/posts/post-editor-view";
 import { AdminPostStateNotice } from "@/components/admin/posts/post-state-notice";
 import { loadAdminPostsSafely } from "@/components/admin/posts/post-safe-load";
+import { loadPostTaxonomyOptions } from "@/components/admin/taxonomy/taxonomy-options";
 import { decideProtectedRoute, getRequestSession } from "@/lib/auth/runtime/request-session";
 import { parseAppLocale } from "@/lib/auth/runtime/redirect";
 import { getAdminPostEditor } from "@/lib/content/post-admin-transport";
@@ -35,10 +36,11 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
   if (!decision.allow) redirect(decision.redirectTo);
 
   const t = await getTranslations("AdminPostEditor");
+  const prisma = getPrismaClient();
 
   const result = await loadAdminPostsSafely(() =>
     getAdminPostEditor(
-      getPrismaClient(),
+      prisma,
       session.ok ? session.session : null,
       postId,
       process.env.UPLOAD_PUBLIC_URL ?? "",
@@ -68,6 +70,10 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
   }
 
   const view = result.data;
+  const taxonomyOptions = await loadPostTaxonomyOptions(
+    prisma,
+    session.ok ? session.session : null,
+  );
 
   return (
     <section aria-labelledby="admin-post-edit-title" className="flex flex-col gap-6">
@@ -82,10 +88,7 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
         postId={view.id}
         initialVersion={view.version}
         initialDraft={draftFromEditorView(view)}
-        carried={{
-          categoryId: view.categoryId,
-          tagIds: view.tagIds,
-        }}
+        taxonomyOptions={taxonomyOptions}
         initialCover={view.cover}
         uploadPublicUrl={process.env.UPLOAD_PUBLIC_URL ?? ""}
         listHref="/admin/posts"

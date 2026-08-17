@@ -7,28 +7,26 @@ import { AdminPostAutosavePayloadSchema } from "@/contracts/post-admin";
 import {
   buildAutosavePayload,
   emptyDraft,
-  type PostEditorCarriedFields,
   type PostEditorDraft,
 } from "@/components/admin/posts/post-editor-payload";
-
-const carried: PostEditorCarriedFields = { categoryId: "cat-1", tagIds: ["t-1", "t-2"] };
 
 function draftWith(content: string): PostEditorDraft {
   const draft = emptyDraft();
   draft.slug = "sebuah-berita";
+  draft.categoryId = "cat-1";
+  draft.tagIds = ["t-1", "t-2"];
   draft.translations.id = { title: "Judul", excerpt: "  ", content };
   return draft;
 }
 
 describe("buildAutosavePayload", () => {
-  it("emits the frozen AUTOSAVE_DRAFT payload with the passed version and preserved carried fields", () => {
-    const parsed = buildAutosavePayload(draftWith("<p>Halo</p>"), "post-1", 7, carried);
+  it("emits the frozen AUTOSAVE_DRAFT payload with the passed version and editable taxonomy fields", () => {
+    const parsed = buildAutosavePayload(draftWith("<p>Halo</p>"), "post-1", 7);
     expect(parsed.success).toBe(true);
     if (!parsed.success) return;
     expect(parsed.data.intent).toBe("AUTOSAVE_DRAFT");
     expect(parsed.data.postId).toBe("post-1");
     expect(parsed.data.expectedVersion).toBe(7);
-    // Fields the editor cannot edit must ride through untouched, exactly like UPDATE.
     expect(parsed.data.categoryId).toBe("cat-1");
     expect(parsed.data.tagIds).toEqual(["t-1", "t-2"]);
     // An all-whitespace excerpt is normalised to null by the contract.
@@ -37,9 +35,9 @@ describe("buildAutosavePayload", () => {
 
   it("always uses the version it is given, so the shared owner controls optimistic locking", () => {
     const draft = draftWith("<p>x</p>");
-    expect(buildAutosavePayload(draft, "post-1", 3, carried).success).toBe(true);
-    const a = buildAutosavePayload(draft, "post-1", 3, carried);
-    const b = buildAutosavePayload(draft, "post-1", 99, carried);
+    expect(buildAutosavePayload(draft, "post-1", 3).success).toBe(true);
+    const a = buildAutosavePayload(draft, "post-1", 3);
+    const b = buildAutosavePayload(draft, "post-1", 99);
     if (a.success && b.success) {
       expect(a.data.expectedVersion).toBe(3);
       expect(b.data.expectedVersion).toBe(99);
@@ -47,7 +45,7 @@ describe("buildAutosavePayload", () => {
   });
 
   it("produces a body the frozen schema accepts as an AUTOSAVE command payload", () => {
-    const parsed = buildAutosavePayload(draftWith("<p>ok</p>"), "post-1", 1, carried);
+    const parsed = buildAutosavePayload(draftWith("<p>ok</p>"), "post-1", 1);
     expect(parsed.success).toBe(true);
     if (parsed.success) {
       expect(AdminPostAutosavePayloadSchema.safeParse(parsed.data).success).toBe(true);
@@ -57,7 +55,7 @@ describe("buildAutosavePayload", () => {
   it("rejects an empty required Indonesian title (autosave never persists an invalid draft)", () => {
     const draft = draftWith("<p>x</p>");
     draft.translations.id.title = "   ";
-    expect(buildAutosavePayload(draft, "post-1", 1, carried).success).toBe(false);
+    expect(buildAutosavePayload(draft, "post-1", 1).success).toBe(false);
   });
 });
 

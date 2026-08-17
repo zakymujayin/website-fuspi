@@ -5,7 +5,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { PostDeleteAction } from "./post-delete-action";
 import { PostEditorForm } from "./post-editor-form";
 import type { CoverPreview } from "./post-cover-picker";
-import type { PostEditorCarriedFields, PostEditorDraft } from "./post-editor-payload";
+import type { PostEditorDraft } from "./post-editor-payload";
+import type { PostTaxonomyOptions } from "@/components/admin/taxonomy/taxonomy-options";
 import { PostPublicationActions } from "./post-publication-actions";
 import type { AdminPostPublicationState } from "./post-status-badge";
 
@@ -14,7 +15,7 @@ type PostEditorShellProps = {
   /** The server's version at load; the shared source of truth for optimistic locking. */
   initialVersion: number;
   initialDraft: PostEditorDraft;
-  carried: PostEditorCarriedFields;
+  taxonomyOptions: PostTaxonomyOptions;
   initialCover: CoverPreview | null;
   uploadPublicUrl: string;
   listHref: string;
@@ -32,7 +33,7 @@ export function PostEditorShell({
   postId,
   initialVersion,
   initialDraft,
-  carried,
+  taxonomyOptions,
   initialCover,
   uploadPublicUrl,
   listHref,
@@ -95,7 +96,7 @@ export function PostEditorShell({
         initialDraft={initialDraft}
         postId={postId}
         expectedVersion={version}
-        carried={carried}
+        taxonomyOptions={taxonomyOptions}
         initialCover={initialCover}
         uploadPublicUrl={uploadPublicUrl}
         mutationBusy={mutationBusy}

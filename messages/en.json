@@ -287,6 +287,14 @@
     "slugDescription": "The URL segment, for example wisuda-fuspi-2026. Use lowercase letters and hyphens.",
     "featured": "Mark as featured",
     "featuredDescription": "Featured news can be highlighted on public pages.",
+    "taxonomyLegend": "Category and tags",
+    "taxonomyDescription": "Choose the main category and tags so news can be found in the public archive.",
+    "category": "Category",
+    "categoryNone": "No category",
+    "categoryDescription": "The category appears in news lists and archives.",
+    "tags": "Tags",
+    "tagsDescription": "Tags help group topics across news items.",
+    "tagsEmpty": "No tags yet. Add tags from the Taxonomy page.",
     "localeLegend": "{locale} content",
     "localeOptional": "(optional)",
     "title": "Title",
@@ -323,6 +331,65 @@
       "SLUG_CONFLICT": "That slug is already used by another news item. Choose a different one.",
       "MEDIA_INVALID": "The linked media is not valid.",
       "UNAVAILABLE": "Your changes could not be saved right now. Please try again shortly."
+    }
+  },
+  "AdminTaxonomy": {
+    "metaTitle": "Taxonomies",
+    "title": "Taxonomies",
+    "description": "Manage categories and tags used to organize news.",
+    "createTitle": "Add Taxonomy",
+    "createDescription": "Create a new category or tag for the news editor.",
+    "editTitle": "Edit Taxonomy",
+    "editDescription": "Update the taxonomy name and slug.",
+    "createAction": "Add",
+    "updateAction": "Save",
+    "deleteAction": "Delete",
+    "deleteConfirm": "Delete this taxonomy?",
+    "cancel": "Cancel",
+    "filterAriaLabel": "Filter taxonomies",
+    "listAriaLabel": "Taxonomy list",
+    "totalCount": "{count} taxonomies",
+    "usageCount": "{count} news items",
+    "edit": "Edit",
+    "editLabelFor": "Edit {name}",
+    "settings": "Settings",
+    "settingsDescription": "The slug must be unique within categories or tags.",
+    "kind": "Type",
+    "kindLocked": "The type cannot be changed after creation.",
+    "slug": "Slug",
+    "slugDescription": "Use lowercase letters, numbers, and hyphens.",
+    "translations": "Translations",
+    "translationsDescription": "Indonesian name is required. English and Arabic are optional.",
+    "name": "Name",
+    "notFound": "Taxonomy not found.",
+    "unavailable": "The taxonomy list cannot be loaded right now.",
+    "kindLabel": {
+      "CATEGORY": "Category",
+      "TAG": "Tag"
+    },
+    "filter": {
+      "ALL": "All",
+      "CATEGORY": "Categories",
+      "TAG": "Tags"
+    },
+    "locale": {
+      "id": "ID",
+      "en": "EN",
+      "ar": "AR"
+    },
+    "empty": {
+      "title": "No taxonomies yet",
+      "description": "Categories and tags will appear here after they are created."
+    },
+    "error": {
+      "SESSION_INVALID": "The admin session is invalid.",
+      "CSRF_INVALID": "The request was rejected.",
+      "REQUEST_INVALID": "The request is invalid.",
+      "VALIDATION_FAILED": "The data is not valid yet. Check the fields.",
+      "NOT_FOUND": "Taxonomy not found.",
+      "SLUG_CONFLICT": "The slug is already used.",
+      "IN_USE": "This taxonomy is still used by news items.",
+      "UNAVAILABLE": "The service is unavailable."
     }
   },
   "AdminPostPublication": {
@@ -743,6 +810,7 @@
       "pages": "Pages",
       "posts": "Posts",
       "media": "Media",
+      "taxonomies": "Taxonomies",
       "services": "Services",
       "partnerships": "Partnerships",
       "scholarships": "Scholarships",
@@ -773,6 +841,7 @@
       "agenda": "Events",
       "testimoni": "Testimonials",
       "fasilitas": "Facilities",
+      "taksonomi": "Taxonomies",
       "new": "New",
       "baru": "New",
       "edit": "Edit"

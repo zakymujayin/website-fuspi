@@ -17,16 +17,16 @@ export type PostEditorTranslationDraft = {
 export type PostEditorDraft = {
   slug: string;
   isFeatured: boolean;
+  categoryId: string | null;
+  tagIds: readonly string[];
   /** Editable via the cover picker; null means no cover. */
   coverMediaId: string | null;
   translations: Record<PostEditorLocale, PostEditorTranslationDraft>;
 };
 
 /**
- * Fields the editor still cannot edit but must preserve. `AdminPostUpdatePayloadSchema` requires
- * them on every update, so an edit that omitted them would silently erase an existing category or
- * tags. They are carried through untouched from the loaded editor view. (coverMediaId used to live
- * here too; it is now editable via the cover picker and lives on `PostEditorDraft`.)
+ * Backwards-compatible alias for tests/components that still refer to the old carried-field shape.
+ * Category and tags are now first-class editable draft fields.
  */
 export type PostEditorCarriedFields = {
   categoryId: string | null;
@@ -43,6 +43,8 @@ export function emptyDraft(): PostEditorDraft {
   return {
     slug: "",
     isFeatured: false,
+    categoryId: null,
+    tagIds: [],
     coverMediaId: null,
     translations: {
       id: { ...EMPTY_TRANSLATION },
@@ -86,29 +88,28 @@ export function buildCreatePayload(draft: PostEditorDraft) {
   return AdminPostCreatePayloadSchema.safeParse({
     slug: draft.slug.trim(),
     isFeatured: draft.isFeatured,
-    categoryId: null,
+    categoryId: draft.categoryId,
     coverMediaId: draft.coverMediaId,
-    tagIds: [],
+    tagIds: [...draft.tagIds],
     translations: toTranslationsInput(draft),
     publication: { intent: "SAVE_DRAFT" },
   });
 }
 
-/** Build the frozen UPDATE payload, preserving fields this form cannot edit. */
+/** Build the frozen UPDATE payload. */
 export function buildUpdatePayload(
   draft: PostEditorDraft,
   postId: string,
   expectedVersion: number,
-  carried: PostEditorCarriedFields,
 ) {
   return AdminPostUpdatePayloadSchema.safeParse({
     postId,
     expectedVersion,
     slug: draft.slug.trim(),
     isFeatured: draft.isFeatured,
-    categoryId: carried.categoryId,
+    categoryId: draft.categoryId,
     coverMediaId: draft.coverMediaId,
-    tagIds: [...carried.tagIds],
+    tagIds: [...draft.tagIds],
     translations: toTranslationsInput(draft),
   });
 }
@@ -122,7 +123,6 @@ export function buildAutosavePayload(
   draft: PostEditorDraft,
   postId: string,
   expectedVersion: number,
-  carried: PostEditorCarriedFields,
 ) {
   return AdminPostAutosavePayloadSchema.safeParse({
     intent: "AUTOSAVE_DRAFT",
@@ -130,9 +130,9 @@ export function buildAutosavePayload(
     expectedVersion,
     slug: draft.slug.trim(),
     isFeatured: draft.isFeatured,
-    categoryId: carried.categoryId,
+    categoryId: draft.categoryId,
     coverMediaId: draft.coverMediaId,
-    tagIds: [...carried.tagIds],
+    tagIds: [...draft.tagIds],
     translations: toTranslationsInput(draft),
   });
 }

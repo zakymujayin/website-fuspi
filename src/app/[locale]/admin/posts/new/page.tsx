@@ -3,8 +3,10 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { PostEditorForm } from "@/components/admin/posts/post-editor-form";
+import { loadPostTaxonomyOptions } from "@/components/admin/taxonomy/taxonomy-options";
 import { decideProtectedRoute, getRequestSession } from "@/lib/auth/runtime/request-session";
 import { parseAppLocale } from "@/lib/auth/runtime/redirect";
+import { getPrismaClient } from "@/lib/db/client";
 
 type NewPostPageProps = {
   params: Promise<{ locale: string }>;
@@ -26,6 +28,11 @@ export default async function NewPostPage({ params }: NewPostPageProps) {
   if (!decision.allow) redirect(decision.redirectTo);
 
   const t = await getTranslations("AdminPostEditor");
+  const prisma = getPrismaClient();
+  const taxonomyOptions = await loadPostTaxonomyOptions(
+    prisma,
+    session.ok ? session.session : null,
+  );
 
   return (
     <section aria-labelledby="admin-post-new-title" className="flex flex-col gap-6">
@@ -39,6 +46,7 @@ export default async function NewPostPage({ params }: NewPostPageProps) {
       <PostEditorForm
         mode="create"
         listHref="/admin/posts"
+        taxonomyOptions={taxonomyOptions}
         uploadPublicUrl={process.env.UPLOAD_PUBLIC_URL ?? ""}
       />
     </section>

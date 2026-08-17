@@ -9,7 +9,6 @@ const { buildCreatePayload, buildUpdatePayload, emptyDraft } = await import(
 const { draftFromEditorView } = await import("@/components/admin/posts/post-editor-view");
 
 const COVER_ID = "22222222-2222-4222-8222-222222222222";
-const CARRIED = { categoryId: null, tagIds: [] as string[] };
 
 function validDraft() {
   const d = emptyDraft();
@@ -38,7 +37,6 @@ describe("coverMediaId flows through the editable draft", () => {
       { ...validDraft(), coverMediaId: COVER_ID },
       "44444444-4444-4444-8444-444444444444",
       3,
-      CARRIED,
     );
     expect(r.success).toBe(true);
     if (!r.success) return;
@@ -50,7 +48,6 @@ describe("coverMediaId flows through the editable draft", () => {
       { ...validDraft(), coverMediaId: null },
       "44444444-4444-4444-8444-444444444444",
       3,
-      CARRIED,
     );
     expect(r.success).toBe(true);
     if (!r.success) return;

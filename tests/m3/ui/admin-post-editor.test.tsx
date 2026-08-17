@@ -26,15 +26,15 @@ function validDraft() {
   return draft;
 }
 
-const CARRIED = {
+const TAXONOMY = {
   categoryId: "11111111-1111-4111-8111-111111111111",
   tagIds: ["33333333-3333-4333-8333-333333333333"],
 };
-// coverMediaId is now editable via the cover picker, so it travels on the draft, not `carried`.
+// coverMediaId, categoryId, and tagIds now travel on the editable draft.
 const COVER_ID = "22222222-2222-4222-8222-222222222222";
 
 describe("buildCreatePayload", () => {
-  it("produces a SAVE_DRAFT payload with empty carried fields", () => {
+  it("produces a SAVE_DRAFT payload with empty taxonomy fields by default", () => {
     const result = buildCreatePayload(validDraft());
     expect(result.success).toBe(true);
     if (!result.success) return;
@@ -43,6 +43,17 @@ describe("buildCreatePayload", () => {
     expect(result.data.coverMediaId).toBeNull();
     expect(result.data.tagIds).toEqual([]);
     expect(result.data.slug).toBe("wisuda-fuspi-2026");
+  });
+
+  it("includes selected category and tags on create", () => {
+    const draft = validDraft();
+    draft.categoryId = TAXONOMY.categoryId;
+    draft.tagIds = TAXONOMY.tagIds;
+    const result = buildCreatePayload(draft);
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data.categoryId).toBe(TAXONOMY.categoryId);
+    expect(result.data.tagIds).toEqual(TAXONOMY.tagIds);
   });
 
   it("trims the slug and title", () => {
@@ -106,29 +117,27 @@ describe("buildCreatePayload", () => {
   });
 });
 
-describe("buildUpdatePayload — carried-field preservation", () => {
-  it("round-trips categoryId and tagIds unchanged, and takes coverMediaId from the draft", () => {
-    const draft = { ...validDraft(), coverMediaId: COVER_ID };
+describe("buildUpdatePayload", () => {
+  it("round-trips editable categoryId, tagIds, and coverMediaId from the draft", () => {
+    const draft = { ...validDraft(), ...TAXONOMY, coverMediaId: COVER_ID };
     const result = buildUpdatePayload(
       draft,
       "44444444-4444-4444-8444-444444444444",
       7,
-      CARRIED,
     );
     expect(result.success).toBe(true);
     if (!result.success) return;
-    expect(result.data.categoryId).toBe(CARRIED.categoryId);
-    expect(result.data.tagIds).toEqual(CARRIED.tagIds);
-    // Cover now comes from the editable draft, not the carried set.
+    expect(result.data.categoryId).toBe(TAXONOMY.categoryId);
+    expect(result.data.tagIds).toEqual(TAXONOMY.tagIds);
     expect(result.data.coverMediaId).toBe(COVER_ID);
   });
 
-  it("never silently erases an existing category when the form cannot edit it", () => {
+  it("keeps the draft category when updating", () => {
+    const draft = {...validDraft(), categoryId: TAXONOMY.categoryId};
     const result = buildUpdatePayload(
-      validDraft(),
+      draft,
       "44444444-4444-4444-8444-444444444444",
       1,
-      CARRIED,
     );
     expect(result.success).toBe(true);
     if (!result.success) return;
@@ -140,7 +149,6 @@ describe("buildUpdatePayload — carried-field preservation", () => {
       validDraft(),
       "44444444-4444-4444-8444-444444444444",
       12,
-      CARRIED,
     );
     expect(result.success).toBe(true);
     if (!result.success) return;
@@ -152,17 +160,15 @@ describe("buildUpdatePayload — carried-field preservation", () => {
       validDraft(),
       "44444444-4444-4444-8444-444444444444",
       0,
-      CARRIED,
     );
     expect(result.success).toBe(false);
   });
 
-  it("preserves an intentionally empty carried set", () => {
+  it("preserves intentionally empty taxonomy fields", () => {
     const result = buildUpdatePayload(
       validDraft(),
       "44444444-4444-4444-8444-444444444444",
       3,
-      { categoryId: null, tagIds: [] },
     );
     expect(result.success).toBe(true);
     if (!result.success) return;
@@ -228,9 +234,9 @@ describe("draftFromEditorView", () => {
     slug: "berita-lama",
     isFeatured: true,
     version: 4,
-    categoryId: CARRIED.categoryId,
+    categoryId: TAXONOMY.categoryId,
     coverMediaId: null,
-    tagIds: [],
+    tagIds: TAXONOMY.tagIds,
     translations: {
       id: { title: "Judul", excerpt: null, content: "<p>isi</p>" },
     },
@@ -242,6 +248,8 @@ describe("draftFromEditorView", () => {
     expect(draft.translations.id.title).toBe("Judul");
     expect(draft.slug).toBe("berita-lama");
     expect(draft.isFeatured).toBe(true);
+    expect(draft.categoryId).toBe(TAXONOMY.categoryId);
+    expect(draft.tagIds).toEqual(TAXONOMY.tagIds);
   });
 
   it("gives absent EN and AR blank drafts", () => {
@@ -264,14 +272,11 @@ describe("draftFromEditorView", () => {
 
   it("survives a full round trip back into an update payload", () => {
     const draft = draftFromEditorView(baseView as never);
-    const result = buildUpdatePayload(draft, baseView.id, baseView.version, {
-      categoryId: baseView.categoryId,
-      tagIds: baseView.tagIds,
-    });
+    const result = buildUpdatePayload(draft, baseView.id, baseView.version);
     expect(result.success).toBe(true);
     if (!result.success) return;
     expect(result.data.translations.id.excerpt).toBeNull();
-    expect(result.data.categoryId).toBe(CARRIED.categoryId);
+    expect(result.data.categoryId).toBe(TAXONOMY.categoryId);
     // draftFromEditorView carries the view's cover onto the editable draft.
     expect(result.data.coverMediaId).toBe(baseView.coverMediaId);
   });

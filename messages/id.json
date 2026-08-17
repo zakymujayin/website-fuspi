@@ -287,6 +287,14 @@
     "slugDescription": "Penggal URL berita, contoh: wisuda-fuspi-2026. Gunakan huruf kecil dan tanda hubung.",
     "featured": "Jadikan berita unggulan",
     "featuredDescription": "Berita unggulan dapat ditonjolkan di halaman publik.",
+    "taxonomyLegend": "Kategori dan tag",
+    "taxonomyDescription": "Pilih kategori utama dan tag agar berita mudah ditemukan di arsip publik.",
+    "category": "Kategori",
+    "categoryNone": "Tanpa kategori",
+    "categoryDescription": "Kategori tampil di daftar dan arsip berita.",
+    "tags": "Tag",
+    "tagsDescription": "Tag membantu pengelompokan topik lintas berita.",
+    "tagsEmpty": "Belum ada tag. Tambahkan tag dari halaman Taksonomi.",
     "localeLegend": "Konten {locale}",
     "localeOptional": "(opsional)",
     "title": "Judul",
@@ -323,6 +331,65 @@
       "SLUG_CONFLICT": "Slug ini sudah dipakai berita lain. Gunakan slug yang berbeda.",
       "MEDIA_INVALID": "Media yang tertaut tidak valid.",
       "UNAVAILABLE": "Perubahan tidak dapat disimpan saat ini. Coba lagi beberapa saat lagi."
+    }
+  },
+  "AdminTaxonomy": {
+    "metaTitle": "Taksonomi",
+    "title": "Taksonomi",
+    "description": "Kelola kategori dan tag yang dipakai untuk mengelompokkan berita.",
+    "createTitle": "Tambah Taksonomi",
+    "createDescription": "Buat kategori atau tag baru untuk editor berita.",
+    "editTitle": "Sunting Taksonomi",
+    "editDescription": "Perbarui nama dan slug taksonomi.",
+    "createAction": "Tambah",
+    "updateAction": "Simpan",
+    "deleteAction": "Hapus",
+    "deleteConfirm": "Hapus taksonomi ini?",
+    "cancel": "Batal",
+    "filterAriaLabel": "Saring taksonomi",
+    "listAriaLabel": "Daftar taksonomi",
+    "totalCount": "{count} taksonomi",
+    "usageCount": "{count} berita",
+    "edit": "Sunting",
+    "editLabelFor": "Sunting {name}",
+    "settings": "Pengaturan",
+    "settingsDescription": "Slug harus unik dalam jenis kategori atau tag.",
+    "kind": "Jenis",
+    "kindLocked": "Jenis tidak dapat diubah setelah dibuat.",
+    "slug": "Slug",
+    "slugDescription": "Gunakan huruf kecil, angka, dan tanda hubung.",
+    "translations": "Terjemahan",
+    "translationsDescription": "Nama Indonesia wajib diisi. Inggris dan Arab opsional.",
+    "name": "Nama",
+    "notFound": "Taksonomi tidak ditemukan.",
+    "unavailable": "Daftar taksonomi sedang tidak dapat dimuat.",
+    "kindLabel": {
+      "CATEGORY": "Kategori",
+      "TAG": "Tag"
+    },
+    "filter": {
+      "ALL": "Semua",
+      "CATEGORY": "Kategori",
+      "TAG": "Tag"
+    },
+    "locale": {
+      "id": "ID",
+      "en": "EN",
+      "ar": "AR"
+    },
+    "empty": {
+      "title": "Belum ada taksonomi",
+      "description": "Kategori dan tag akan tampil di sini setelah dibuat."
+    },
+    "error": {
+      "SESSION_INVALID": "Sesi admin tidak valid.",
+      "CSRF_INVALID": "Permintaan ditolak.",
+      "REQUEST_INVALID": "Permintaan tidak valid.",
+      "VALIDATION_FAILED": "Data belum valid. Periksa kembali isian.",
+      "NOT_FOUND": "Taksonomi tidak ditemukan.",
+      "SLUG_CONFLICT": "Slug sudah digunakan.",
+      "IN_USE": "Taksonomi masih digunakan berita.",
+      "UNAVAILABLE": "Layanan sedang tidak tersedia."
     }
   },
   "AdminPostPublication": {
@@ -743,6 +810,7 @@
       "pages": "Halaman",
       "posts": "Berita",
       "media": "Media",
+      "taxonomies": "Taksonomi",
       "services": "Layanan",
       "partnerships": "Kerjasama",
       "scholarships": "Beasiswa",
@@ -773,6 +841,7 @@
       "agenda": "Agenda",
       "testimoni": "Testimoni",
       "fasilitas": "Fasilitas",
+      "taksonomi": "Taksonomi",
       "new": "Baru",
       "baru": "Baru",
       "edit": "Sunting"

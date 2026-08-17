@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
+import type { PostTaxonomyOptions } from "@/components/admin/taxonomy/taxonomy-options";
 
 import { PostCoverPicker, type CoverPreview } from "./post-cover-picker";
 import { RichTextField } from "./post-rich-text-field";
@@ -31,7 +32,6 @@ import {
   buildUpdatePayload,
   collectFieldErrors,
   emptyDraft,
-  type PostEditorCarriedFields,
   type PostEditorDraft,
   type PostEditorLocale,
 } from "./post-editor-payload";
@@ -40,10 +40,10 @@ type PostEditorFormProps = {
   mode: "create" | "edit";
   listHref: string;
   initialDraft?: PostEditorDraft;
-  /** Present only in edit mode; drives optimistic locking and field preservation. */
+  /** Present only in edit mode; drives optimistic locking. */
   postId?: string;
   expectedVersion?: number;
-  carried?: PostEditorCarriedFields;
+  taxonomyOptions?: PostTaxonomyOptions;
   /** Current cover (edit mode) so the picker shows it without a refetch. */
   initialCover?: CoverPreview | null;
   uploadPublicUrl: string;
@@ -59,10 +59,7 @@ type AutosaveState =
   | { status: "conflict" }
   | { status: "error" };
 
-const CREATE_CARRIED: PostEditorCarriedFields = {
-  categoryId: null,
-  tagIds: [],
-};
+const EMPTY_TAXONOMY_OPTIONS: PostTaxonomyOptions = {categories: [], tags: []};
 
 export function PostEditorForm({
   mode,
@@ -70,7 +67,7 @@ export function PostEditorForm({
   initialDraft,
   postId,
   expectedVersion,
-  carried,
+  taxonomyOptions = EMPTY_TAXONOMY_OPTIONS,
   initialCover = null,
   uploadPublicUrl,
   mutationBusy = false,
@@ -120,7 +117,6 @@ export function PostEditorForm({
       current,
       postId,
       lease.version,
-      carried ?? CREATE_CARRIED,
     );
     // An invalid draft is not an autosave error; the manual save surfaces the field messages.
     if (!parsed.success) {
@@ -168,7 +164,7 @@ export function PostEditorForm({
     } finally {
       if (!released) finishMutation(lease.token);
     }
-  }, [mode, postId, carried, beginMutation, finishMutation]);
+  }, [mode, postId, beginMutation, finishMutation]);
 
   useEffect(() => {
     if (mode !== "edit") return;
@@ -190,6 +186,15 @@ export function PostEditorForm({
     }));
   }
 
+  function toggleTag(tagId: string, selected: boolean) {
+    setDraft((current) => ({
+      ...current,
+      tagIds: selected
+        ? [...new Set([...current.tagIds, tagId])]
+        : current.tagIds.filter((id) => id !== tagId),
+    }));
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (submitting || mutationBusy) return;
@@ -201,7 +206,7 @@ export function PostEditorForm({
     const mutationVersion = lease?.version ?? expectedVersion ?? 0;
     const parsed = mode === "create"
       ? buildCreatePayload(draft)
-      : buildUpdatePayload(draft, postId ?? "", mutationVersion, carried ?? CREATE_CARRIED);
+      : buildUpdatePayload(draft, postId ?? "", mutationVersion);
 
     if (!parsed.success) {
       if (lease && finishMutation) finishMutation(lease.token);
@@ -313,6 +318,57 @@ export function PostEditorForm({
         initialCover={initialCover}
         uploadPublicUrl={uploadPublicUrl}
       />
+
+      <FieldSet>
+        <FieldLegend>{t("taxonomyLegend")}</FieldLegend>
+        <FieldDescription>{t("taxonomyDescription")}</FieldDescription>
+        <FieldGroup>
+          <Field data-invalid={Boolean(fieldErrors.categoryId)}>
+            <FieldLabel htmlFor={`${formId}-category`}>{t("category")}</FieldLabel>
+            <select
+              id={`${formId}-category`}
+              value={draft.categoryId ?? ""}
+              onChange={(event) => setDraft((current) => ({
+                ...current,
+                categoryId: event.target.value || null,
+              }))}
+              aria-invalid={fieldErrors.categoryId ? true : undefined}
+              className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              <option value="">{t("categoryNone")}</option>
+              {taxonomyOptions.categories.map((category) => (
+                <option key={category.id} value={category.id}>{category.label}</option>
+              ))}
+            </select>
+            <FieldDescription>{t("categoryDescription")}</FieldDescription>
+            {fieldErrors.categoryId ? <FieldError>{fieldErrors.categoryId}</FieldError> : null}
+          </Field>
+
+          <Field>
+            <FieldLabel>{t("tags")}</FieldLabel>
+            {taxonomyOptions.tags.length > 0 ? (
+              <div className="grid gap-2 sm:grid-cols-2">
+                {taxonomyOptions.tags.map((tag) => {
+                  const checked = draft.tagIds.includes(tag.id);
+                  return (
+                    <Field key={tag.id} orientation="horizontal" className="rounded-lg border border-border p-3">
+                      <Checkbox
+                        id={`${formId}-tag-${tag.id}`}
+                        checked={checked}
+                        onCheckedChange={(value) => toggleTag(tag.id, value === true)}
+                      />
+                      <FieldLabel htmlFor={`${formId}-tag-${tag.id}`}>{tag.label}</FieldLabel>
+                    </Field>
+                  );
+                })}
+              </div>
+            ) : (
+              <FieldDescription>{t("tagsEmpty")}</FieldDescription>
+            )}
+            <FieldDescription>{t("tagsDescription")}</FieldDescription>
+          </Field>
+        </FieldGroup>
+      </FieldSet>
 
       {POST_EDITOR_LOCALES.map((locale) => {
         const required = locale === "id";

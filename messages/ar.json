@@ -287,6 +287,14 @@
     "slugDescription": "مقطع الرابط، مثل wisuda-fuspi-2026. استخدم حروفًا صغيرة وشرطات.",
     "featured": "تعيينه خبرًا مميّزًا",
     "featuredDescription": "يمكن إبراز الأخبار المميّزة في الصفحات العامة.",
+    "taxonomyLegend": "الفئة والوسوم",
+    "taxonomyDescription": "اختر الفئة الرئيسية والوسوم حتى يسهل العثور على الخبر في الأرشيف العام.",
+    "category": "الفئة",
+    "categoryNone": "بلا فئة",
+    "categoryDescription": "تظهر الفئة في قوائم الأخبار والأرشيف.",
+    "tags": "الوسوم",
+    "tagsDescription": "تساعد الوسوم في تجميع الموضوعات عبر الأخبار.",
+    "tagsEmpty": "لا توجد وسوم بعد. أضف الوسوم من صفحة التصنيفات.",
     "localeLegend": "محتوى {locale}",
     "localeOptional": "(اختياري)",
     "title": "العنوان",
@@ -323,6 +331,65 @@
       "SLUG_CONFLICT": "هذا المعرّف مستخدم في خبر آخر. اختر معرّفًا مختلفًا.",
       "MEDIA_INVALID": "الوسائط المرتبطة غير صالحة.",
       "UNAVAILABLE": "تعذّر حفظ التغييرات الآن. يرجى المحاولة بعد قليل."
+    }
+  },
+  "AdminTaxonomy": {
+    "metaTitle": "التصنيفات",
+    "title": "التصنيفات",
+    "description": "إدارة الفئات والوسوم المستخدمة لتنظيم الأخبار.",
+    "createTitle": "إضافة تصنيف",
+    "createDescription": "أنشئ فئة أو وسمًا جديدًا لمحرر الأخبار.",
+    "editTitle": "تحرير التصنيف",
+    "editDescription": "حدّث اسم التصنيف والمعرّف.",
+    "createAction": "إضافة",
+    "updateAction": "حفظ",
+    "deleteAction": "حذف",
+    "deleteConfirm": "هل تريد حذف هذا التصنيف؟",
+    "cancel": "إلغاء",
+    "filterAriaLabel": "تصفية التصنيفات",
+    "listAriaLabel": "قائمة التصنيفات",
+    "totalCount": "{count} تصنيف",
+    "usageCount": "{count} خبر",
+    "edit": "تحرير",
+    "editLabelFor": "تحرير {name}",
+    "settings": "الإعدادات",
+    "settingsDescription": "يجب أن يكون المعرّف فريدًا داخل الفئات أو الوسوم.",
+    "kind": "النوع",
+    "kindLocked": "لا يمكن تغيير النوع بعد الإنشاء.",
+    "slug": "المعرّف",
+    "slugDescription": "استخدم حروفًا صغيرة وأرقامًا وشرطات.",
+    "translations": "الترجمات",
+    "translationsDescription": "الاسم الإندونيسي مطلوب. الإنجليزية والعربية اختياريتان.",
+    "name": "الاسم",
+    "notFound": "لم يتم العثور على التصنيف.",
+    "unavailable": "تعذّر تحميل قائمة التصنيفات حاليًا.",
+    "kindLabel": {
+      "CATEGORY": "فئة",
+      "TAG": "وسم"
+    },
+    "filter": {
+      "ALL": "الكل",
+      "CATEGORY": "الفئات",
+      "TAG": "الوسوم"
+    },
+    "locale": {
+      "id": "ID",
+      "en": "EN",
+      "ar": "AR"
+    },
+    "empty": {
+      "title": "لا توجد تصنيفات بعد",
+      "description": "ستظهر الفئات والوسوم هنا بعد إنشائها."
+    },
+    "error": {
+      "SESSION_INVALID": "جلسة الإدارة غير صالحة.",
+      "CSRF_INVALID": "تم رفض الطلب.",
+      "REQUEST_INVALID": "الطلب غير صالح.",
+      "VALIDATION_FAILED": "البيانات غير صالحة بعد. تحقق من الحقول.",
+      "NOT_FOUND": "لم يتم العثور على التصنيف.",
+      "SLUG_CONFLICT": "المعرّف مستخدم بالفعل.",
+      "IN_USE": "لا يزال هذا التصنيف مستخدمًا في الأخبار.",
+      "UNAVAILABLE": "الخدمة غير متاحة."
     }
   },
   "AdminPostPublication": {
@@ -743,6 +810,7 @@
       "pages": "الصفحات",
       "posts": "الأخبار",
       "media": "الوسائط",
+      "taxonomies": "التصنيفات",
       "services": "الخدمات",
       "partnerships": "التعاون",
       "scholarships": "المنح",
@@ -773,6 +841,7 @@
       "agenda": "الفعاليات",
       "testimoni": "الشهادات",
       "fasilitas": "المرافق",
+      "taksonomi": "التصنيفات",
       "new": "جديد",
       "baru": "جديد",
       "edit": "تعديل"
