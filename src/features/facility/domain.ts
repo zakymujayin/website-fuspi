@@ -6,12 +6,12 @@ import {
   collectDuplicateAwareSearchParams,
 } from "@/contracts/cms";
 import {
+  FacilityAdminDetailSchema,
   FacilityAdminViewSchema,
   FacilityCommandSchema,
   FacilityInputSchema,
   FacilityListQuerySchema,
   FacilityListResultSchema,
-  FacilityLoadResultSchema,
   FacilityMutationResultSchema,
   PublicFacilityItemSchema,
   PublicFacilityListResultSchema,
@@ -29,6 +29,13 @@ import {createContentRevision} from "@/lib/db/revision";
 export type FacilityDatabase = ReturnType<typeof createPrismaClient>;
 type Locale = "id" | "en" | "ar";
 type FacilityInput = z.infer<typeof FacilityInputSchema>;
+export type PublicHomeFacility = {
+  id: string;
+  slug: string;
+  image: NonNullable<ReturnType<typeof publicMedia>>;
+  caption: string;
+  description: string | null;
+};
 
 const MEDIA_SELECT = {
   id: true,
@@ -304,7 +311,19 @@ export async function getFacilityDetail(
     const assets: unknown[] = [];
     const cover = publicMedia(row.coverMedia as unknown as MediaRow, rawUploadBase);
     if (cover) assets.push({kind: "MEDIA", media: cover});
-    return {ok: true as const, data: FacilityLoadResultSchema.parse(FacilityAdminViewSchema.parse({
+    const input = FacilityInputSchema.parse({
+      slug: row.slug,
+      type: row.type,
+      isActive: row.isActive,
+      order: row.order,
+      coverMediaId: row.coverMediaId,
+      contentOwnerId: row.contentOwnerId,
+      translations: Object.fromEntries(row.translations.map((translation) => [
+        translation.locale,
+        {name: translation.name, description: translation.description},
+      ])),
+    });
+    return {ok: true as const, data: FacilityAdminDetailSchema.parse({
       id: row.id, slug: row.slug, type: row.type, isActive: row.isActive,
       order: row.order, version: row.version, governance: governance(row),
       translations: row.translations.map(t => ({
@@ -312,8 +331,8 @@ export async function getFacilityDetail(
         translatorId: t.translatorId, reviewerId: t.reviewerId,
         reviewedAt: t.reviewedAt?.toISOString() ?? null,
       })),
-      assets,
-    }))};
+      assets, input, cover,
+    })};
   } catch {
     return {ok: false as const, code: "UNAVAILABLE" as const};
   }
@@ -359,11 +378,11 @@ export async function listPublicFacilities(
   prisma: FacilityDatabase,
   rawQuery: unknown,
   rawUploadBase = "/uploads",
+  locale: Locale = "id",
 ) {
   const parsed = FacilityListQuerySchema.safeParse(rawQuery);
   if (!parsed.success) return {ok: false as const, code: "REQUEST_INVALID" as const};
   const query = parsed.data;
-  const locale = "id";
   const direction = query.direction.toLowerCase() as "asc" | "desc";
   const pagination = {skip: (query.page - 1) * query.pageSize, take: query.pageSize};
 
@@ -402,6 +421,34 @@ export async function listPublicFacilities(
   } catch {
     return {ok: false as const, code: "UNAVAILABLE" as const};
   }
+}
+
+export async function listPublicHomeFacilities(
+  prisma: FacilityDatabase,
+  locale: Locale,
+  limit: number,
+  rawUploadBase = "/uploads",
+): Promise<PublicHomeFacility[]> {
+  const safeLimit = Math.max(0, Math.min(limit, 12));
+  if (safeLimit === 0) return [];
+  const result = await listPublicFacilities(prisma, {
+    page: 1,
+    pageSize: safeLimit <= 10 ? 10 : 20,
+    search: "",
+    direction: "ASC",
+    active: "ACTIVE",
+  }, rawUploadBase, locale);
+  if (!result.ok) return [];
+  return result.data.items.flatMap((item) => {
+    if (!item.cover) return [];
+    return [{
+      id: item.id,
+      slug: item.slug,
+      image: item.cover,
+      caption: item.translation.name,
+      description: item.translation.description,
+    }];
+  }).slice(0, safeLimit);
 }
 
 export function facilityHttpStatus(result: {ok: boolean; code?: string}) {

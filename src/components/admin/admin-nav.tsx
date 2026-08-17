@@ -1,4 +1,4 @@
-import {FileTextIcon, Building2Icon, HandshakeIcon, GraduationCapIcon, TrophyIcon, UsersIcon, FileDownIcon, ImageIcon, CalendarIcon, MessageCircleQuestionIcon, QuoteIcon, GalleryHorizontalIcon, BarChart3Icon, LayoutPanelTopIcon, SlidersHorizontalIcon} from "lucide-react";
+import {FileTextIcon, Building2Icon, HandshakeIcon, GraduationCapIcon, TrophyIcon, UsersIcon, FileDownIcon, ImageIcon, CalendarIcon, MessageCircleQuestionIcon, QuoteIcon, GalleryHorizontalIcon, BarChart3Icon, LayoutPanelTopIcon, SlidersHorizontalIcon, LandmarkIcon} from "lucide-react";
 import {getTranslations} from "next-intl/server";
 
 import {Link} from "@/i18n/navigation";
@@ -8,6 +8,7 @@ const ADMIN_ROUTES = [
   {href: "/admin/beranda/statistik", icon: BarChart3Icon, labelKey: "homeStatistic"},
   {href: "/admin/beranda/bagian", icon: LayoutPanelTopIcon, labelKey: "homeSection"},
   {href: "/admin/beranda/pengaturan", icon: SlidersHorizontalIcon, labelKey: "homeSettings"},
+  {href: "/admin/fasilitas", icon: LandmarkIcon, labelKey: "facilities"},
   {href: "/admin/pages", icon: FileTextIcon, labelKey: "pages"},
   {href: "/admin/layanan", icon: Building2Icon, labelKey: "services"},
   {href: "/admin/kerjasama", icon: HandshakeIcon, labelKey: "partnerships"},

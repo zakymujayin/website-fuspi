@@ -726,7 +726,8 @@
     "homeSlider": "Home Slider",
     "homeStatistic": "Statistics",
     "homeSection": "Home Sections",
-    "homeSettings": "Home Settings"
+    "homeSettings": "Home Settings",
+    "facilities": "Facilities"
   },
   "PublicContent": {
     "readMore": "Read More",
@@ -1010,6 +1011,80 @@
     "bookingTitle": "Room Booking",
     "bookingDescription": "Request room booking for academic and non-academic activities.",
     "studyPrograms": "Study Programs"
+  },
+  "AdminFacility": {
+    "title": "Facilities",
+    "description": "Manage facilities and infrastructure shown on the homepage and facilities profile page.",
+    "createTitle": "Add Facility",
+    "editTitle": "Edit Facility",
+    "createAction": "Add",
+    "updateAction": "Save",
+    "deleteAction": "Delete",
+    "deleteConfirm": "Delete this facility?",
+    "cancel": "Cancel",
+    "commonFields": "Facility Settings",
+    "slug": "Slug",
+    "type": "Facility type",
+    "order": "Order",
+    "orderLabel": "Order {order}",
+    "isActive": "Visible",
+    "cover": "Facility image",
+    "coverDescription": "Public WebP image for the homepage facility card.",
+    "translations": "Translations",
+    "localeTabs": "Choose language",
+    "name": "Facility name",
+    "descriptionField": "Description",
+    "searchPlaceholder": "Search facilities...",
+    "searchAriaLabel": "Search facilities",
+    "searchAction": "Search",
+    "activeFilter": "Status filter",
+    "listAriaLabel": "Facility list",
+    "editLabelFor": "Edit {title}",
+    "empty": "No facilities yet.",
+    "unavailable": "Could not load facilities. Reload the page and try again.",
+    "locale": {
+      "id": "ID",
+      "en": "EN",
+      "ar": "AR"
+    },
+    "active": {
+      "ALL": "All",
+      "ACTIVE": "Active",
+      "INACTIVE": "Inactive"
+    },
+    "types": {
+      "BANGUNAN": "Building",
+      "LABORATORIUM": "Laboratory",
+      "PERPUSTAKAAN": "Library",
+      "MUSHOLA": "Prayer room",
+      "AULA": "Hall",
+      "PARKIR": "Parking",
+      "KANTIN": "Canteen",
+      "LAINNYA": "Other"
+    },
+    "picker": {
+      "choose": "Choose image",
+      "change": "Change image",
+      "clear": "Clear image",
+      "selected": "Selected image",
+      "none": "No image selected",
+      "loading": "Loading images…",
+      "loadError": "Could not load images. Try again.",
+      "empty": "No images in the Media Library yet.",
+      "listLabel": "Image list"
+    },
+    "errors": {
+      "SESSION_INVALID": "Admin session is invalid.",
+      "CSRF_INVALID": "Request was rejected.",
+      "REQUEST_INVALID": "Request is invalid.",
+      "VALIDATION_FAILED": "The data is not valid. Check the fields again.",
+      "NOT_FOUND": "Facility was not found.",
+      "VERSION_CONFLICT": "The record changed. Reload and try again.",
+      "SLUG_CONFLICT": "Slug is already used.",
+      "MEDIA_INVALID": "Image must be a valid public WebP media item.",
+      "IN_USE": "Facility is still used by other data.",
+      "UNAVAILABLE": "Service is currently unavailable."
+    }
   },
   "AdminHomeNav": {
     "createAction": "Add",

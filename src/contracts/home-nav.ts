@@ -48,7 +48,7 @@ const SiteSettingTranslationInputSchema = z.object({
 
 export const HomeSectionKeySchema = z.enum([
   "HERO", "QUICKLINK", "DEAN", "STATS", "INTRO", "PRODI", "ANNOUNCEMENT", "SERVICE",
-  "NEWS", "PARTNERSHIP", "COLUMN", "VIDEO", "AGENDA", "TESTIMONIAL", "CTA",
+  "FACILITY", "NEWS", "PARTNERSHIP", "COLUMN", "VIDEO", "AGENDA", "TESTIMONIAL", "CTA",
 ]);
 export const HomeNavResourceSchema = z.enum([
   "MENU_ITEM", "QUICK_LINK", "EXTERNAL_LINK", "HOME_SLIDER", "HOME_SECTION", "STATISTIC", "SITE_SETTING", "HOME_VIDEO",
@@ -266,7 +266,7 @@ const PublicColumnCardSchema = PublicHomePostCardSchema.extend({type: z.literal(
 export const PublicHomeSnapshotQuerySchema = z.object({locale: LocaleSchema}).strict();
 export const PublicHomeSnapshotSchema = z.object({
   locale: LocaleSchema, generatedAt: DateTimeSchema, navigation: PublicNavigationSchema,
-  externalLinks: z.array(PublicExternalLinkSchema).max(100), sections: z.array(PublicHomeSectionSchema).max(15),
+  externalLinks: z.array(PublicExternalLinkSchema).max(100), sections: z.array(PublicHomeSectionSchema).max(16),
   sliders: z.array(PublicHomeSliderSchema).max(12), homeVideos: z.array(PublicHomeVideoSchema).max(12), quickLinks: z.array(PublicQuickLinkSchema).max(12),
   statistics: z.array(PublicStatisticSchema).max(12), siteSetting: PublicSiteSettingSchema,
   content: z.object({

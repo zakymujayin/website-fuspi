@@ -1,28 +1,6 @@
 import type {HomeSectionKey} from "@/contracts/home-nav";
 import {configuredLink, mediaView, resolve, type Locale, type PublicContentDatabase} from "@/features/public-content/shared";
 
-export type PublicFacilityPhoto = {id: string; image: NonNullable<ReturnType<typeof mediaView>>; caption: string | null};
-
-const FACILITIES_ALBUM_SLUG = "fasilitas-kampus";
-
-export async function listFacilityPhotos(
-  prisma: PublicContentDatabase,
-  uploadBase = "/uploads",
-): Promise<PublicFacilityPhoto[]> {
-  const album = await prisma.album.findUnique({
-    where: {slug: FACILITIES_ALBUM_SLUG, isPublished: true},
-    include: {photos: {orderBy: [{order: "asc"}, {id: "asc"}], include: {media: true}}},
-  });
-  if (!album) return [];
-  const photos: PublicFacilityPhoto[] = [];
-  for (const photo of album.photos) {
-    const image = mediaView(photo.media, uploadBase);
-    if (!image) continue;
-    photos.push({id: photo.id, image, caption: photo.caption});
-  }
-  return photos;
-}
-
 export type PublicHomeSlide = {
   id: string;
   image: NonNullable<ReturnType<typeof mediaView>>;

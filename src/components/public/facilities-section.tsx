@@ -4,9 +4,9 @@ import { getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/ui/container";
 import { Link } from "@/i18n/navigation";
-import type { PublicFacilityPhoto } from "@/features/home-nav/public-query";
+import type { PublicHomeFacility } from "@/features/facility/domain";
 
-type FacilitiesSectionProps = { items: readonly PublicFacilityPhoto[] };
+type FacilitiesSectionProps = { items: readonly PublicHomeFacility[] };
 
 export async function FacilitiesSection({ items }: FacilitiesSectionProps) {
   const t = await getTranslations("Home");
@@ -50,11 +50,9 @@ export async function FacilitiesSection({ items }: FacilitiesSectionProps) {
                   unoptimized
                 />
               </div>
-              {facility.caption ? (
-                <div className="p-5">
-                  <h3 className="font-display text-sm font-semibold text-slate-900">{facility.caption}</h3>
-                </div>
-              ) : null}
+              <div className="p-5">
+                <h3 className="font-display text-sm font-semibold text-slate-900">{facility.caption}</h3>
+              </div>
             </article>
           ))}
         </div>

@@ -71,6 +71,11 @@ export const FacilityListResultSchema = z.object({
   page: CmsPageMetadataSchema,
 }).strict();
 
+export const FacilityAdminDetailSchema = FacilityAdminViewSchema.extend({
+  input: FacilityInputSchema,
+  cover: PublicMediaViewSchema.nullable(),
+}).strict();
+
 export const FacilityFailureCodeSchema = z.enum([
   "SESSION_INVALID", "CSRF_INVALID", "REQUEST_INVALID", "VALIDATION_FAILED",
   "NOT_FOUND", "VERSION_CONFLICT", "SLUG_CONFLICT", "MEDIA_INVALID",
@@ -100,7 +105,7 @@ export const PublicFacilityListResultSchema = z.object({
 }).strict();
 
 export const FacilityLoadResultSchema = z.discriminatedUnion("ok", [
-  z.object({ok: z.literal(true), data: FacilityAdminViewSchema}).strict(),
+  z.object({ok: z.literal(true), data: FacilityAdminDetailSchema}).strict(),
   z.object({ok: z.literal(false), code: FacilityFailureCodeSchema.exclude([
     "CSRF_INVALID", "VERSION_CONFLICT", "SLUG_CONFLICT", "MEDIA_INVALID", "IN_USE",
   ])}).strict(),
@@ -109,3 +114,4 @@ export const FacilityLoadResultSchema = z.discriminatedUnion("ok", [
 export type FacilityInput = z.infer<typeof FacilityInputSchema>;
 export type FacilityCommand = z.infer<typeof FacilityCommandSchema>;
 export type FacilityMutationResult = z.infer<typeof FacilityMutationResultSchema>;
+export type FacilityAdminDetail = z.infer<typeof FacilityAdminDetailSchema>;

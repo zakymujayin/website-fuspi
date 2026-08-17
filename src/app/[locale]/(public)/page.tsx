@@ -17,10 +17,10 @@ import type {AppLocale} from "@/i18n/routing";
 import {getPrismaClient} from "@/lib/db/client";
 import {listPublicPosts} from "@/lib/content/post-public-queries";
 import {listPublicContent} from "@/features/public-content/public-list";
+import {listPublicHomeFacilities} from "@/features/facility/domain";
 import {
   getPublicHomeSections,
   getPublicSiteSetting,
-  listFacilityPhotos,
   listPublicHomeSliders,
   listPublicStatistics,
 } from "@/features/home-nav/public-query";
@@ -46,14 +46,13 @@ export default async function HomePage({params}: {params: Promise<{locale: AppLo
   const uploadBase = process.env.UPLOAD_PUBLIC_URL ?? "/uploads";
 
   const [
-    sliders, siteSetting, statistics, sections, facilities,
+    sliders, siteSetting, statistics, sections,
     newsResult, announcementResult, columnResult, partnershipResult, eventResult,
   ] = await Promise.all([
     listPublicHomeSliders(prisma, locale, uploadBase),
     getPublicSiteSetting(prisma, locale, uploadBase),
     listPublicStatistics(prisma, locale),
     getPublicHomeSections(prisma, locale),
-    listFacilityPhotos(prisma, uploadBase),
     listPublicPosts(prisma, {locale, type: "BERITA", pageSize: 5}, uploadBase),
     listPublicPosts(prisma, {locale, type: "PENGUMUMAN", pageSize: 5}, uploadBase),
     listPublicPosts(prisma, {locale, type: "KOLOM", pageSize: 4}, uploadBase),
@@ -68,6 +67,10 @@ export default async function HomePage({params}: {params: Promise<{locale: AppLo
   const events = "ok" in eventResult && eventResult.ok ? eventResult.items : [];
 
   const isVisible = (key: Parameters<typeof sections.get>[0]) => sections.get(key)?.isVisible ?? false;
+  const facilitySection = sections.get("FACILITY");
+  const facilityItems = facilitySection?.isVisible
+    ? await listPublicHomeFacilities(prisma, locale, facilitySection.itemLimit, uploadBase)
+    : [];
 
   return (
     <>
@@ -97,7 +100,7 @@ export default async function HomePage({params}: {params: Promise<{locale: AppLo
 
       {isVisible("COLUMN") ? <ColumnsSection items={columns} locale={locale} /> : null}
 
-      {facilities.length > 0 ? <FacilitiesSection items={facilities} /> : null}
+      {facilityItems.length > 0 ? <FacilitiesSection items={facilityItems} /> : null}
 
       {isVisible("VIDEO") && siteSetting?.video ? <VideosSection video={siteSetting.video} eyebrow={sections.get("VIDEO")?.title ?? ""} /> : null}
 

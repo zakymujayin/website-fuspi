@@ -87,7 +87,8 @@ export async function POST(request: Request) {
   if (result.ok) {
     for (const locale of ["id", "en", "ar"] as const) {
       revalidatePath(`/${locale}/admin/fasilitas`);
-      revalidatePath(`/${locale}/fasilitas`, "page");
+      revalidatePath(`/${locale}/profil/fasilitas`, "page");
+      revalidatePath(`/${locale}`);
     }
   }
   return json(result, facilityHttpStatus(result));

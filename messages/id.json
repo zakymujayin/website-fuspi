@@ -726,7 +726,8 @@
     "homeSlider": "Slider Beranda",
     "homeStatistic": "Statistik",
     "homeSection": "Bagian Beranda",
-    "homeSettings": "Pengaturan Beranda"
+    "homeSettings": "Pengaturan Beranda",
+    "facilities": "Fasilitas"
   },
   "PublicContent": {
     "readMore": "Selengkapnya",
@@ -1010,6 +1011,80 @@
     "bookingTitle": "Peminjaman Ruangan",
     "bookingDescription": "Ajukan peminjaman ruangan untuk kegiatan akademik dan non-akademik.",
     "studyPrograms": "Program Studi"
+  },
+  "AdminFacility": {
+    "title": "Fasilitas",
+    "description": "Kelola sarana dan prasarana yang tampil di beranda dan halaman profil fasilitas.",
+    "createTitle": "Tambah Fasilitas",
+    "editTitle": "Sunting Fasilitas",
+    "createAction": "Tambah",
+    "updateAction": "Simpan",
+    "deleteAction": "Hapus",
+    "deleteConfirm": "Hapus fasilitas ini?",
+    "cancel": "Batal",
+    "commonFields": "Pengaturan Fasilitas",
+    "slug": "Slug",
+    "type": "Jenis fasilitas",
+    "order": "Urutan",
+    "orderLabel": "Urutan {order}",
+    "isActive": "Tampilkan",
+    "cover": "Gambar fasilitas",
+    "coverDescription": "Gambar WebP publik untuk kartu fasilitas di beranda.",
+    "translations": "Terjemahan",
+    "localeTabs": "Pilih bahasa",
+    "name": "Nama fasilitas",
+    "descriptionField": "Deskripsi",
+    "searchPlaceholder": "Cari fasilitas...",
+    "searchAriaLabel": "Cari fasilitas",
+    "searchAction": "Cari",
+    "activeFilter": "Filter status",
+    "listAriaLabel": "Daftar fasilitas",
+    "editLabelFor": "Sunting {title}",
+    "empty": "Belum ada fasilitas.",
+    "unavailable": "Gagal memuat fasilitas. Coba muat ulang halaman.",
+    "locale": {
+      "id": "ID",
+      "en": "EN",
+      "ar": "AR"
+    },
+    "active": {
+      "ALL": "Semua",
+      "ACTIVE": "Aktif",
+      "INACTIVE": "Nonaktif"
+    },
+    "types": {
+      "BANGUNAN": "Bangunan",
+      "LABORATORIUM": "Laboratorium",
+      "PERPUSTAKAAN": "Perpustakaan",
+      "MUSHOLA": "Mushola",
+      "AULA": "Aula",
+      "PARKIR": "Parkir",
+      "KANTIN": "Kantin",
+      "LAINNYA": "Lainnya"
+    },
+    "picker": {
+      "choose": "Pilih gambar",
+      "change": "Ganti gambar",
+      "clear": "Hapus gambar",
+      "selected": "Gambar terpilih",
+      "none": "Belum ada gambar",
+      "loading": "Memuat gambar…",
+      "loadError": "Gagal memuat gambar. Coba lagi.",
+      "empty": "Belum ada gambar di Pustaka Media.",
+      "listLabel": "Daftar gambar"
+    },
+    "errors": {
+      "SESSION_INVALID": "Sesi admin tidak valid.",
+      "CSRF_INVALID": "Permintaan ditolak.",
+      "REQUEST_INVALID": "Permintaan tidak valid.",
+      "VALIDATION_FAILED": "Data belum valid. Periksa kembali isian.",
+      "NOT_FOUND": "Fasilitas tidak ditemukan.",
+      "VERSION_CONFLICT": "Data sudah berubah. Muat ulang lalu coba lagi.",
+      "SLUG_CONFLICT": "Slug sudah digunakan.",
+      "MEDIA_INVALID": "Gambar harus berupa media publik WebP yang valid.",
+      "IN_USE": "Fasilitas masih dipakai data lain.",
+      "UNAVAILABLE": "Layanan sedang tidak tersedia."
+    }
   },
   "AdminHomeNav": {
     "createAction": "Tambah",

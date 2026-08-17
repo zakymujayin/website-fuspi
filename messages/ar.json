@@ -726,7 +726,8 @@
     "homeSlider": "شريحة الرئيسية",
     "homeStatistic": "الإحصائيات",
     "homeSection": "أقسام الرئيسية",
-    "homeSettings": "إعدادات الرئيسية"
+    "homeSettings": "إعدادات الرئيسية",
+    "facilities": "المرافق"
   },
   "PublicContent": {
     "readMore": "اقرأ المزيد",
@@ -1010,6 +1011,80 @@
     "bookingTitle": "حجز الغرف",
     "bookingDescription": "طلب حجز غرفة للأنشطة الأكاديمية وغير الأكاديمية.",
     "studyPrograms": "البرامج الدراسية"
+  },
+  "AdminFacility": {
+    "title": "المرافق",
+    "description": "إدارة المرافق والبنية التحتية المعروضة في الصفحة الرئيسية وصفحة مرافق الكلية.",
+    "createTitle": "إضافة مرفق",
+    "editTitle": "تحرير المرفق",
+    "createAction": "إضافة",
+    "updateAction": "حفظ",
+    "deleteAction": "حذف",
+    "deleteConfirm": "هل تريد حذف هذا المرفق؟",
+    "cancel": "إلغاء",
+    "commonFields": "إعدادات المرفق",
+    "slug": "المعرف",
+    "type": "نوع المرفق",
+    "order": "الترتيب",
+    "orderLabel": "الترتيب {order}",
+    "isActive": "ظاهر",
+    "cover": "صورة المرفق",
+    "coverDescription": "صورة WebP عامة لبطاقة المرفق في الصفحة الرئيسية.",
+    "translations": "الترجمات",
+    "localeTabs": "اختر اللغة",
+    "name": "اسم المرفق",
+    "descriptionField": "الوصف",
+    "searchPlaceholder": "ابحث في المرافق...",
+    "searchAriaLabel": "بحث المرافق",
+    "searchAction": "بحث",
+    "activeFilter": "تصفية الحالة",
+    "listAriaLabel": "قائمة المرافق",
+    "editLabelFor": "تحرير {title}",
+    "empty": "لا توجد مرافق بعد.",
+    "unavailable": "تعذر تحميل المرافق. أعد تحميل الصفحة وحاول مرة أخرى.",
+    "locale": {
+      "id": "ID",
+      "en": "EN",
+      "ar": "AR"
+    },
+    "active": {
+      "ALL": "الكل",
+      "ACTIVE": "نشط",
+      "INACTIVE": "غير نشط"
+    },
+    "types": {
+      "BANGUNAN": "مبنى",
+      "LABORATORIUM": "مختبر",
+      "PERPUSTAKAAN": "مكتبة",
+      "MUSHOLA": "مصلى",
+      "AULA": "قاعة",
+      "PARKIR": "موقف سيارات",
+      "KANTIN": "مقصف",
+      "LAINNYA": "أخرى"
+    },
+    "picker": {
+      "choose": "اختر صورة",
+      "change": "غيّر الصورة",
+      "clear": "إزالة الصورة",
+      "selected": "الصورة المختارة",
+      "none": "لا توجد صورة",
+      "loading": "جار تحميل الصور…",
+      "loadError": "تعذر تحميل الصور. حاول مرة أخرى.",
+      "empty": "لا توجد صور في مكتبة الوسائط.",
+      "listLabel": "قائمة الصور"
+    },
+    "errors": {
+      "SESSION_INVALID": "جلسة الإدارة غير صالحة.",
+      "CSRF_INVALID": "تم رفض الطلب.",
+      "REQUEST_INVALID": "الطلب غير صالح.",
+      "VALIDATION_FAILED": "البيانات غير صالحة. تحقق من الحقول.",
+      "NOT_FOUND": "لم يتم العثور على المرفق.",
+      "VERSION_CONFLICT": "تغيرت البيانات. أعد التحميل وحاول مرة أخرى.",
+      "SLUG_CONFLICT": "المعرف مستخدم بالفعل.",
+      "MEDIA_INVALID": "يجب أن تكون الصورة ملف WebP عاماً وصالحاً.",
+      "IN_USE": "لا يزال المرفق مستخدماً في بيانات أخرى.",
+      "UNAVAILABLE": "الخدمة غير متاحة حالياً."
+    }
   },
   "AdminHomeNav": {
     "createAction": "إضافة",

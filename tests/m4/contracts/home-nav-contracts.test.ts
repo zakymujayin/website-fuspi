@@ -23,10 +23,10 @@ const emptySnapshot = {
 };
 
 describe("home and navigation frozen contracts", () => {
-  it("freezes all fifteen editable home section keys", () => {
+  it("freezes all sixteen editable home section keys", () => {
     expect(HomeSectionKeySchema.options).toEqual([
       "HERO", "QUICKLINK", "DEAN", "STATS", "INTRO", "PRODI", "ANNOUNCEMENT", "SERVICE",
-      "NEWS", "PARTNERSHIP", "COLUMN", "VIDEO", "AGENDA", "TESTIMONIAL", "CTA",
+      "FACILITY", "NEWS", "PARTNERSHIP", "COLUMN", "VIDEO", "AGENDA", "TESTIMONIAL", "CTA",
     ]);
     expect(HomeSectionKeySchema.safeParse("OTHER").success).toBe(false);
   });
