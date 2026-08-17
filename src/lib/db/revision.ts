@@ -19,6 +19,7 @@ const REVISION_RESOURCE_TYPES = new Set([
   "Faq",
   "Testimonial",
   "Event",
+  "Facility",
   "Room",
   "MenuItem",
   "HomeSection",

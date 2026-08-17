@@ -23,6 +23,18 @@ describe("content revision contract", () => {
     expect(arabic.scopeKey).toBe("ar");
   });
 
+  it("allows Facility revisions for admin-managed facilities", () => {
+    const revision = prepareRevision({
+      resourceType: "Facility",
+      resourceId: "facility-1",
+      version: 1,
+      snapshot: {slug: "aula-fuspi", type: "AULA", isActive: true},
+    });
+
+    expect(revision.resourceType).toBe("Facility");
+    expect(revision.scopeKey).toBe("root");
+  });
+
   it("rejects operational resources and sensitive snapshot fields", () => {
     expect(() =>
       prepareRevision({
