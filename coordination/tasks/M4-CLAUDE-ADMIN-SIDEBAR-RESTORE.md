@@ -48,7 +48,7 @@ acceptance_commands:
   - npm run lint
   - npm run typecheck
   - npm run test
-status: assigned
+status: review
 ---
 
 ## GPT approval
