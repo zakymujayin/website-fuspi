@@ -1,8 +1,8 @@
-# Handoff — M4-CLAUDE-ADMIN-FORM-LAYOUT (Phase 1 + 2 + 3) — claude
+# Handoff — M4-CLAUDE-ADMIN-FORM-LAYOUT (Phase 1–4) — claude
 
 - Branch: `ai/claude/m4-admin-form-layout`
 - Base SHA: `e951a79` (`ai/gpt/m4-facility-homepage-admin`)
-- Head SHA: `43e4670050f9bbdc5222e2ff9ccfce52994c2004`
+- Head SHA: `fd8196155efbfa0c64428971a6321a5a89043813`
 
 No formal task manifest for this one — user asked directly, in discussion
 first (plan mode), then approved direct implementation without a
@@ -43,6 +43,17 @@ the fix out to all 17 admin editor forms in two commits:
   `createDescription`/`editDescription` pairs for the 10 resources' create/
   edit page subtitles, and fixed a doubled-parentheses bug the missing
   `localeOptional` key had been masking. See "Result" detail below.
+- **Phase 4** (`fd81961`): fixed the RTL sidebar-overlap bug flagged as a
+  known issue since Phase 1. Root cause: `src/components/ui/sidebar.tsx`'s
+  fixed-position container keys its physical `left`/`right` offset off an
+  explicit `side` prop (default `"left"`), which `AdminSidebarServer`
+  never set — so the sidebar always rendered at physical `left:0`
+  regardless of `dir="rtl"`, overlapping content that had correctly
+  shifted right in the RTL-aware flex flow. Fix: `AdminSidebarServer` now
+  reads the locale via `useLocale()` and passes
+  `side={locale === "ar" ? "right" : "left"}` — the component's own
+  designed, already-tested mechanism for right-hand sidebars (border/rail/
+  offcanvas mirroring already key off the same `data-side` attribute).
 
 ## Files changed
 
@@ -84,6 +95,9 @@ the fix out to all 17 admin editor forms in two commits:
   literal `(...)` wrapper around the `localeOptional` tab badge (the
   translated value already includes parentheses; this rendered
   `((opsional))` once the key stopped being invisible-broken).
+- `src/components/admin/admin-sidebar.tsx` (Phase 4) — `AdminSidebarServer`
+  now passes `side={locale === "ar" ? "right" : "left"}` to `<Sidebar>`
+  instead of relying on the component's LTR-only default.
 
 ## Contract/schema/migration impact
 
@@ -94,9 +108,9 @@ None. Pure UI restructuring; no `prisma/**`, `src/features/**`,
 
 | Command | Result |
 |---|---|
-| `npm run lint` | Pass — no issues (all 3 phases) |
-| `npx tsc --noEmit -p tsconfig.json` | Pass — no errors (all 3 phases) |
-| `npm run test` | Pass — 91 files, 1151 tests (all 3 phases) |
+| `npm run lint` | Pass — no issues (all 4 phases) |
+| `npx tsc --noEmit -p tsconfig.json` | Pass — no errors (all 4 phases) |
+| `npm run test` | Pass — 91 files, 1151 tests (all 4 phases) |
 
 **Phase 1 manual verification:** minted a real session directly via
 `createDatabaseSession` against the isolated `fuspi_dev_claude` dev
@@ -133,6 +147,19 @@ single parentheses, and the Next.js dev "N Issues" overlay badge — present
 in every earlier screenshot — is gone, corroborating that it was tracking
 these exact missing-message warnings.
 
+**Phase 4 manual verification:** computed bounding-rect geometry on
+`/ar/admin` before/after — `[data-slot="sidebar-container"]` now reports
+`data-side="right"` at `x=1184, width=256` (viewport 1440), main content
+at `x=0, width=1184` — adjacent, zero overlap. Re-checked `/id/admin`
+(LTR) unchanged: `data-side="left"`, `x=0`. Screenshotted `/ar/admin` and
+`/ar/admin/posts/new` at 1440px: sidebar nav correctly on the visual
+right, breadcrumb/header mirrored, and the Phase 1
+`AdminFormLayout`'s own main/sidebar column split (confirmed correct back
+in Phase 1 via geometry, but painted under the overlapping shell sidebar
+at the time) is now visible and correctly composed with the shell fix —
+the two-column form sidebar sits on the visual left with no overlap
+anywhere.
+
 ## Untested areas
 
 - Only 4 of 15 Phase 2 forms were visually spot-checked (the other 11
@@ -149,15 +176,14 @@ these exact missing-message warnings.
 
 ## Risks and follow-ups
 
-- **Found in Phase 1, still unfixed (pre-existing, out of this task's
-  scope):** in Arabic (`dir="rtl"`), the admin shell's dark sidebar nav
-  (`src/components/ui/sidebar.tsx` / `admin-layout-shell.tsx`, from the
-  earlier `M4-CLAUDE-ADMIN-SIDEBAR-RESTORE` task) renders at a fixed
-  **physical** left position instead of a logical inline-start position,
-  so it visually overlaps the left edge of any page's content in RTL.
-  Confirmed unrelated to this task by screenshotting the untouched `/ar/
-  admin` dashboard — same overlap there. Needs its own fix in the
-  sidebar/shell components.
+- No RTL visual check yet on the other 16 editor forms with the shell fix
+  applied (only `posts/post-editor-form.tsx` was screenshotted in Arabic
+  post-fix); the geometry fix is shell-level so it should apply uniformly,
+  but not individually re-verified per form.
+- The `data-side` fix only covers the admin shell's own sidebar. If any
+  other component elsewhere in the codebase independently assumes a
+  physical-left sidebar (none found during this fix), it would need the
+  same treatment.
 - Deferred by explicit user choice, not part of this round: converting
   admin list pages from `<ul><li>` cards to a real `DataTable` (matches
   `docs/04-panel-admin.md`'s own spec, which the current list pages already
