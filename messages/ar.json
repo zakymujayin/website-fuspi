@@ -695,53 +695,133 @@
     "SERVICE": {
       "metaTitle": "الخدمات",
       "title": "الخدمات",
-      "description": "إدارة الخدمات العامة. تصفية وبحث وتحديث الخدمات المعروضة على الموقع."
+      "description": "إدارة الخدمات العامة. تصفية وبحث وتحديث الخدمات المعروضة على الموقع.",
+      "createDescription": "أضف خدمة جديدة لعرضها على الموقع العام.",
+      "editDescription": "تحديث تفاصيل هذه الخدمة."
     },
     "PARTNERSHIP": {
       "metaTitle": "التعاون",
       "title": "التعاون",
-      "description": "إدارة بيانات التعاون. تصفية وبحث وتحديث سجلات التعاون."
+      "description": "إدارة بيانات التعاون. تصفية وبحث وتحديث سجلات التعاون.",
+      "createDescription": "أضف سجل تعاون جديد.",
+      "editDescription": "تحديث تفاصيل هذا التعاون."
     },
     "SCHOLARSHIP": {
       "metaTitle": "المنح الدراسية",
       "title": "المنح الدراسية",
-      "description": "إدارة معلومات المنح الدراسية. تصفية وبحث وتحديث بيانات المنح."
+      "description": "إدارة معلومات المنح الدراسية. تصفية وبحث وتحديث بيانات المنح.",
+      "createDescription": "أضف معلومات منحة دراسية جديدة.",
+      "editDescription": "تحديث تفاصيل هذه المنحة."
     },
     "ACHIEVEMENT": {
       "metaTitle": "الإنجازات",
       "title": "الإنجازات",
-      "description": "إدارة إنجازات الطلاب. تصفية وبحث وتحديث الإنجازات."
+      "description": "إدارة إنجازات الطلاب. تصفية وبحث وتحديث الإنجازات.",
+      "createDescription": "أضف إنجازًا جديدًا للطالب.",
+      "editDescription": "تحديث تفاصيل هذا الإنجاز."
     },
     "STUDENT_ACTIVITY": {
       "metaTitle": "أنشطة الطلاب",
       "title": "أنشطة الطلاب",
-      "description": "إدارة أنشطة الطلاب. تصفية وبحث وتحديث سجلات الأنشطة."
+      "description": "إدارة أنشطة الطلاب. تصفية وبحث وتحديث سجلات الأنشطة.",
+      "createDescription": "أضف نشاطًا طلابيًا جديدًا.",
+      "editDescription": "تحديث تفاصيل هذا النشاط."
     },
     "DOCUMENT": {
       "metaTitle": "المستندات",
       "title": "المستندات",
-      "description": "إدارة المستندات العامة. تصفية وبحث وتحديث المستندات المتاحة."
+      "description": "إدارة المستندات العامة. تصفية وبحث وتحديث المستندات المتاحة.",
+      "createDescription": "أضف مستندًا عامًا جديدًا.",
+      "editDescription": "تحديث تفاصيل هذا المستند.",
+      "slug": "الرابط المختصر",
+      "publicPdfMediaId": "معرف ملف PDF",
+      "isPublished": "منشور",
+      "category": "الفئة"
     },
     "ALBUM": {
       "metaTitle": "الألبومات",
       "title": "الألبومات",
-      "description": "إدارة ألبومات الصور. تصفية وبحث وتحديث المعارض."
+      "description": "إدارة ألبومات الصور. تصفية وبحث وتحديث المعارض.",
+      "createDescription": "أضف ألبوم صور جديد.",
+      "editDescription": "تحديث تفاصيل هذا الألبوم.",
+      "slug": "الرابط المختصر",
+      "eventDate": "تاريخ الفعالية",
+      "isPublished": "منشور"
     },
     "EVENT": {
       "metaTitle": "الأحداث",
       "title": "الأحداث",
-      "description": "إدارة الأحداث. تصفية وبحث وتحديث جداول الفعاليات."
+      "description": "إدارة الأحداث. تصفية وبحث وتحديث جداول الفعاليات.",
+      "createDescription": "أضف حدثًا جديدًا.",
+      "editDescription": "تحديث تفاصيل هذا الحدث.",
+      "slug": "الرابط المختصر",
+      "startAt": "يبدأ في",
+      "endAt": "ينتهي في",
+      "registrationUrl": "رابط التسجيل",
+      "isPublished": "منشور",
+      "location": "الموقع"
     },
     "FAQ": {
       "metaTitle": "الأسئلة الشائعة",
       "title": "الأسئلة الشائعة",
-      "description": "إدارة الأسئلة الشائعة. تصفية وبحث وتحديث الإجابات."
+      "description": "إدارة الأسئلة الشائعة. تصفية وبحث وتحديث الإجابات.",
+      "createDescription": "أضف سؤالًا شائعًا جديدًا.",
+      "editDescription": "تحديث إجابة هذا السؤال.",
+      "category": "الفئة",
+      "question": "السؤال",
+      "answer": "الإجابة",
+      "order": "الترتيب",
+      "isVisible": "إظهار"
     },
     "TESTIMONIAL": {
       "metaTitle": "الشهادات",
       "title": "الشهادات",
-      "description": "إدارة شهادات الخريجين. تصفية وبحث وتحديث الشهادات."
+      "description": "إدارة شهادات الخريجين. تصفية وبحث وتحديث الشهادات.",
+      "createDescription": "أضف شهادة خريج جديدة.",
+      "editDescription": "تحديث تفاصيل هذه الشهادة.",
+      "name": "الاسم",
+      "graduationYear": "سنة التخرج",
+      "order": "الترتيب",
+      "isVisible": "إظهار",
+      "currentRole": "الدور الحالي",
+      "quote": "الاقتباس"
     },
+    "field": {
+      "slug": "الرابط المختصر",
+      "category": "الفئة",
+      "link": "الرابط",
+      "linkHrefPlaceholder": "/صفحة أو https://…",
+      "icon": "الأيقونة",
+      "order": "الترتيب",
+      "isActive": "نشط",
+      "name": "الاسم",
+      "description": "الوصف",
+      "partnerName": "اسم الشريك",
+      "level": "المستوى",
+      "country": "الدولة",
+      "startDate": "تاريخ البدء",
+      "endDate": "تاريخ الانتهاء",
+      "websiteUrl": "رابط الموقع الإلكتروني",
+      "title": "العنوان",
+      "provider": "الجهة المانحة",
+      "studentName": "اسم الطالب",
+      "achievedAt": "تاريخ الإنجاز",
+      "date": "التاريخ",
+      "registrationUrl": "رابط التسجيل"
+    },
+    "error": {
+      "UNAVAILABLE": "الخدمة غير متاحة حاليًا. يرجى المحاولة مرة أخرى بعد قليل."
+    },
+    "cancel": "إلغاء",
+    "localeOptional": "(اختياري)",
+    "localeTabs": "اختر اللغة",
+    "localeTabsAriaLabel": "اختر اللغة",
+    "submitting": "جارٍ الحفظ…",
+    "submitCreate": "إضافة",
+    "submitUpdate": "حفظ",
+    "translations": "الترجمات",
+    "translationsTitle": "المحتوى حسب اللغة",
+    "updateAction": "حفظ",
     "createAction": "إضافة",
     "filterAriaLabel": "تصفية حسب حالة الظهور",
     "listAriaLabel": "قائمة المحتوى",

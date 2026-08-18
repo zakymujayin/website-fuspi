@@ -210,7 +210,7 @@ export function ActivityEditorForm({
                 >
                   {locale.toUpperCase()}
                   {hasTranslation[locale] ? null : (
-                    <span className="text-[10px] opacity-70">({t("localeOptional")})</span>
+                    <span className="text-[10px] opacity-70">{t("localeOptional")}</span>
                   )}
                 </button>
               ))}

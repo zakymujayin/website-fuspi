@@ -695,53 +695,133 @@
     "SERVICE": {
       "metaTitle": "Layanan",
       "title": "Layanan",
-      "description": "Kelola layanan publik. Saring, telusuri, dan perbarui layanan yang ditampilkan di situs."
+      "description": "Kelola layanan publik. Saring, telusuri, dan perbarui layanan yang ditampilkan di situs.",
+      "createDescription": "Tambahkan layanan baru untuk ditampilkan di situs publik.",
+      "editDescription": "Perbarui detail layanan ini."
     },
     "PARTNERSHIP": {
       "metaTitle": "Kerjasama",
       "title": "Kerjasama",
-      "description": "Kelola data kerjasama. Saring, telusuri, dan perbarui mitra kerjasama."
+      "description": "Kelola data kerjasama. Saring, telusuri, dan perbarui mitra kerjasama.",
+      "createDescription": "Tambahkan data kerjasama baru.",
+      "editDescription": "Perbarui detail kerjasama ini."
     },
     "SCHOLARSHIP": {
       "metaTitle": "Beasiswa",
       "title": "Beasiswa",
-      "description": "Kelola informasi beasiswa. Saring, telusuri, dan perbarui data beasiswa."
+      "description": "Kelola informasi beasiswa. Saring, telusuri, dan perbarui data beasiswa.",
+      "createDescription": "Tambahkan informasi beasiswa baru.",
+      "editDescription": "Perbarui detail beasiswa ini."
     },
     "ACHIEVEMENT": {
       "metaTitle": "Prestasi",
       "title": "Prestasi",
-      "description": "Kelola data prestasi mahasiswa. Saring, telusuri, dan perbarui pencapaian."
+      "description": "Kelola data prestasi mahasiswa. Saring, telusuri, dan perbarui pencapaian.",
+      "createDescription": "Tambahkan data prestasi mahasiswa baru.",
+      "editDescription": "Perbarui detail prestasi ini."
     },
     "STUDENT_ACTIVITY": {
       "metaTitle": "Kegiatan",
       "title": "Kegiatan Mahasiswa",
-      "description": "Kelola kegiatan mahasiswa. Saring, telusuri, dan perbarui aktivitas."
+      "description": "Kelola kegiatan mahasiswa. Saring, telusuri, dan perbarui aktivitas.",
+      "createDescription": "Tambahkan kegiatan mahasiswa baru.",
+      "editDescription": "Perbarui detail kegiatan ini."
     },
     "DOCUMENT": {
       "metaTitle": "Dokumen",
       "title": "Dokumen",
-      "description": "Kelola dokumen publik. Saring, telusuri, dan perbarui dokumen yang tersedia."
+      "description": "Kelola dokumen publik. Saring, telusuri, dan perbarui dokumen yang tersedia.",
+      "createDescription": "Tambahkan dokumen publik baru.",
+      "editDescription": "Perbarui detail dokumen ini.",
+      "slug": "Slug",
+      "publicPdfMediaId": "ID Media PDF",
+      "isPublished": "Terbitkan",
+      "category": "Kategori"
     },
     "ALBUM": {
       "metaTitle": "Album",
       "title": "Album",
-      "description": "Kelola album foto. Saring, telusuri, dan perbarui galeri."
+      "description": "Kelola album foto. Saring, telusuri, dan perbarui galeri.",
+      "createDescription": "Tambahkan album foto baru.",
+      "editDescription": "Perbarui detail album ini.",
+      "slug": "Slug",
+      "eventDate": "Tanggal Acara",
+      "isPublished": "Terbitkan"
     },
     "EVENT": {
       "metaTitle": "Agenda",
       "title": "Agenda",
-      "description": "Kelola agenda acara. Saring, telusuri, dan perbarui jadwal kegiatan."
+      "description": "Kelola agenda acara. Saring, telusuri, dan perbarui jadwal kegiatan.",
+      "createDescription": "Tambahkan agenda acara baru.",
+      "editDescription": "Perbarui detail agenda ini.",
+      "slug": "Slug",
+      "startAt": "Mulai",
+      "endAt": "Selesai",
+      "registrationUrl": "URL Pendaftaran",
+      "isPublished": "Terbitkan",
+      "location": "Lokasi"
     },
     "FAQ": {
       "metaTitle": "FAQ",
       "title": "Pertanyaan Umum",
-      "description": "Kelola pertanyaan umum (FAQ). Saring, telusuri, dan perbarui jawaban."
+      "description": "Kelola pertanyaan umum (FAQ). Saring, telusuri, dan perbarui jawaban.",
+      "createDescription": "Tambahkan pertanyaan umum baru.",
+      "editDescription": "Perbarui jawaban pertanyaan ini.",
+      "category": "Kategori",
+      "question": "Pertanyaan",
+      "answer": "Jawaban",
+      "order": "Urutan",
+      "isVisible": "Tampilkan"
     },
     "TESTIMONIAL": {
       "metaTitle": "Testimoni",
       "title": "Testimoni",
-      "description": "Kelola testimoni alumni. Saring, telusuri, dan perbarui kesan alumni."
+      "description": "Kelola testimoni alumni. Saring, telusuri, dan perbarui kesan alumni.",
+      "createDescription": "Tambahkan testimoni alumni baru.",
+      "editDescription": "Perbarui detail testimoni ini.",
+      "name": "Nama",
+      "graduationYear": "Tahun Lulus",
+      "order": "Urutan",
+      "isVisible": "Tampilkan",
+      "currentRole": "Peran Saat Ini",
+      "quote": "Kutipan"
     },
+    "field": {
+      "slug": "Slug",
+      "category": "Kategori",
+      "link": "Tautan",
+      "linkHrefPlaceholder": "/halaman atau https://…",
+      "icon": "Ikon",
+      "order": "Urutan",
+      "isActive": "Aktif",
+      "name": "Nama",
+      "description": "Deskripsi",
+      "partnerName": "Nama Mitra",
+      "level": "Tingkat",
+      "country": "Negara",
+      "startDate": "Tanggal Mulai",
+      "endDate": "Tanggal Selesai",
+      "websiteUrl": "URL Situs Web",
+      "title": "Judul",
+      "provider": "Penyedia",
+      "studentName": "Nama Mahasiswa",
+      "achievedAt": "Tanggal Diraih",
+      "date": "Tanggal",
+      "registrationUrl": "URL Pendaftaran"
+    },
+    "error": {
+      "UNAVAILABLE": "Layanan tidak tersedia saat ini. Silakan coba lagi sebentar lagi."
+    },
+    "cancel": "Batal",
+    "localeOptional": "(opsional)",
+    "localeTabs": "Pilih bahasa",
+    "localeTabsAriaLabel": "Pilih bahasa",
+    "submitting": "Menyimpan…",
+    "submitCreate": "Tambah",
+    "submitUpdate": "Simpan",
+    "translations": "Terjemahan",
+    "translationsTitle": "Konten per bahasa",
+    "updateAction": "Simpan",
     "createAction": "Tambah",
     "filterAriaLabel": "Saring berdasarkan status tampil",
     "listAriaLabel": "Daftar konten",

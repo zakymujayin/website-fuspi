@@ -695,53 +695,133 @@
     "SERVICE": {
       "metaTitle": "Services",
       "title": "Services",
-      "description": "Manage public services. Filter, search, and update services displayed on the site."
+      "description": "Manage public services. Filter, search, and update services displayed on the site.",
+      "createDescription": "Add a new service to display on the public site.",
+      "editDescription": "Update this service's details."
     },
     "PARTNERSHIP": {
       "metaTitle": "Partnerships",
       "title": "Partnerships",
-      "description": "Manage partnership data. Filter, search, and update partnership records."
+      "description": "Manage partnership data. Filter, search, and update partnership records.",
+      "createDescription": "Add a new partnership record.",
+      "editDescription": "Update this partnership's details."
     },
     "SCHOLARSHIP": {
       "metaTitle": "Scholarships",
       "title": "Scholarships",
-      "description": "Manage scholarship information. Filter, search, and update scholarship data."
+      "description": "Manage scholarship information. Filter, search, and update scholarship data.",
+      "createDescription": "Add new scholarship information.",
+      "editDescription": "Update this scholarship's details."
     },
     "ACHIEVEMENT": {
       "metaTitle": "Achievements",
       "title": "Achievements",
-      "description": "Manage student achievements. Filter, search, and update accomplishments."
+      "description": "Manage student achievements. Filter, search, and update accomplishments.",
+      "createDescription": "Add a new student achievement.",
+      "editDescription": "Update this achievement's details."
     },
     "STUDENT_ACTIVITY": {
       "metaTitle": "Student Activities",
       "title": "Student Activities",
-      "description": "Manage student activities. Filter, search, and update activity records."
+      "description": "Manage student activities. Filter, search, and update activity records.",
+      "createDescription": "Add a new student activity.",
+      "editDescription": "Update this activity's details."
     },
     "DOCUMENT": {
       "metaTitle": "Documents",
       "title": "Documents",
-      "description": "Manage public documents. Filter, search, and update available documents."
+      "description": "Manage public documents. Filter, search, and update available documents.",
+      "createDescription": "Add a new public document.",
+      "editDescription": "Update this document's details.",
+      "slug": "Slug",
+      "publicPdfMediaId": "PDF Media ID",
+      "isPublished": "Published",
+      "category": "Category"
     },
     "ALBUM": {
       "metaTitle": "Albums",
       "title": "Albums",
-      "description": "Manage photo albums. Filter, search, and update galleries."
+      "description": "Manage photo albums. Filter, search, and update galleries.",
+      "createDescription": "Add a new photo album.",
+      "editDescription": "Update this album's details.",
+      "slug": "Slug",
+      "eventDate": "Event Date",
+      "isPublished": "Published"
     },
     "EVENT": {
       "metaTitle": "Events",
       "title": "Events",
-      "description": "Manage events. Filter, search, and update event schedules."
+      "description": "Manage events. Filter, search, and update event schedules.",
+      "createDescription": "Add a new event.",
+      "editDescription": "Update this event's details.",
+      "slug": "Slug",
+      "startAt": "Starts At",
+      "endAt": "Ends At",
+      "registrationUrl": "Registration URL",
+      "isPublished": "Published",
+      "location": "Location"
     },
     "FAQ": {
       "metaTitle": "FAQ",
       "title": "FAQ",
-      "description": "Manage frequently asked questions. Filter, search, and update answers."
+      "description": "Manage frequently asked questions. Filter, search, and update answers.",
+      "createDescription": "Add a new frequently asked question.",
+      "editDescription": "Update the answer to this question.",
+      "category": "Category",
+      "question": "Question",
+      "answer": "Answer",
+      "order": "Order",
+      "isVisible": "Visible"
     },
     "TESTIMONIAL": {
       "metaTitle": "Testimonials",
       "title": "Testimonials",
-      "description": "Manage alumni testimonials. Filter, search, and update testimonials."
+      "description": "Manage alumni testimonials. Filter, search, and update testimonials.",
+      "createDescription": "Add a new alumni testimonial.",
+      "editDescription": "Update this testimonial's details.",
+      "name": "Name",
+      "graduationYear": "Graduation Year",
+      "order": "Order",
+      "isVisible": "Visible",
+      "currentRole": "Current Role",
+      "quote": "Quote"
     },
+    "field": {
+      "slug": "Slug",
+      "category": "Category",
+      "link": "Link",
+      "linkHrefPlaceholder": "/page or https://…",
+      "icon": "Icon",
+      "order": "Order",
+      "isActive": "Active",
+      "name": "Name",
+      "description": "Description",
+      "partnerName": "Partner Name",
+      "level": "Level",
+      "country": "Country",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "websiteUrl": "Website URL",
+      "title": "Title",
+      "provider": "Provider",
+      "studentName": "Student Name",
+      "achievedAt": "Date Achieved",
+      "date": "Date",
+      "registrationUrl": "Registration URL"
+    },
+    "error": {
+      "UNAVAILABLE": "The service is unavailable right now. Please try again shortly."
+    },
+    "cancel": "Cancel",
+    "localeOptional": "(optional)",
+    "localeTabs": "Choose language",
+    "localeTabsAriaLabel": "Choose language",
+    "submitting": "Saving…",
+    "submitCreate": "Create",
+    "submitUpdate": "Save",
+    "translations": "Translations",
+    "translationsTitle": "Content per language",
+    "updateAction": "Save",
     "createAction": "Create",
     "filterAriaLabel": "Filter by visibility",
     "listAriaLabel": "Content list",
