@@ -276,6 +276,52 @@
     "edit": "Edit",
     "editLabelFor": "Edit news item: {title}"
   },
+  "AdminColumnList": {
+    "metaTitle": "Columns",
+    "title": "Columns",
+    "description": "Browse every \"Ideas from the Academic Community\" column, then filter by publication status to find the piece you are looking for.",
+    "filterAriaLabel": "Filter columns by status",
+    "listAriaLabel": "Column list",
+    "totalCount": "{count} columns",
+    "status": {
+      "all": "All",
+      "draft": "Draft",
+      "published": "Published",
+      "archived": "Archived"
+    },
+    "state": {
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published",
+      "SCHEDULED": "Scheduled",
+      "ARCHIVED": "Archived"
+    },
+    "featured": "Featured",
+    "localesLabel": "Available languages: {locales}",
+    "uncategorized": "Uncategorized",
+    "unknownAuthor": "Unknown author",
+    "byLabel": "By {name}",
+    "publishedAtLabel": "Published {instant}",
+    "updatedAtLabel": "Updated {instant}",
+    "loading": "Loading the column list…",
+    "pagination": {
+      "ariaLabel": "Column list pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "pageStatus": "Page {page} of {totalPages}",
+      "goToPage": "Go to page {page}"
+    },
+    "empty": {
+      "title": "No columns yet",
+      "description": "Columns will appear here once they are created."
+    },
+    "unavailable": {
+      "title": "The column list cannot be loaded right now",
+      "description": "Please reload this page in a moment."
+    },
+    "createAction": "Write column",
+    "edit": "Edit",
+    "editLabelFor": "Edit column: {title}"
+  },
   "AdminPostEditor": {
     "createMetaTitle": "Write News",
     "createTitle": "Write News",
@@ -329,6 +375,66 @@
       "VERSION_CONFLICT": "Someone else changed this news item. Reload the page to see the latest version before saving.",
       "INVALID_STATE": "That action is not allowed for this news item's current status.",
       "SLUG_CONFLICT": "That slug is already used by another news item. Choose a different one.",
+      "MEDIA_INVALID": "The linked media is not valid.",
+      "UNAVAILABLE": "Your changes could not be saved right now. Please try again shortly."
+    }
+  },
+  "AdminColumnEditor": {
+    "createMetaTitle": "Write Column",
+    "createTitle": "Write Column",
+    "createDescription": "Fill in the column content in Indonesian. English and Arabic translations are optional and can be completed later. The column is saved as a draft.",
+    "editMetaTitle": "Edit Column",
+    "editTitle": "Edit Column",
+    "editDescription": "Update the column content. The publication status does not change from this page.",
+    "slug": "Slug",
+    "slugDescription": "The column's URL segment, e.g. ramadan-reflection-2026. Use lowercase letters and hyphens.",
+    "featured": "Feature this column",
+    "featuredDescription": "Featured columns can be highlighted on the public site.",
+    "columnTypeLegend": "Author role",
+    "columnTypeDescription": "Choose this column's author role, matching the badge shown on the public site.",
+    "columnType": {
+      "DEKAN": "Dean",
+      "DOSEN": "Lecturer",
+      "MAHASISWA": "Student"
+    },
+    "localeLegend": "{locale} content",
+    "localeOptional": "(optional)",
+    "title": "Title",
+    "excerpt": "Excerpt",
+    "content": "Content",
+    "contentDescription": "The column's content. Use the toolbar for basic formatting.",
+    "submitCreate": "Save draft",
+    "submitUpdate": "Save changes",
+    "submitting": "Saving…",
+    "cancel": "Cancel",
+    "autosave": {
+      "saving": "Autosaving…",
+      "saved": "Autosaved {time}",
+      "conflict": "This version changed elsewhere. Reload the page.",
+      "error": "Autosave failed. Your changes are not yet saved."
+    },
+    "locale": {
+      "id": "Indonesian",
+      "en": "English",
+      "ar": "Arabic"
+    },
+    "unavailable": {
+      "title": "This column could not be loaded",
+      "description": "The column was not found, is not yours, or is temporarily unavailable."
+    },
+    "blocked": {
+      "title": "Saving columns is not available yet",
+      "description": "This form is ready, but the admin backend is still locked to the News type. Saving columns will be enabled once the backend contract update lands (see coordination/handoffs/M4-CLAUDE-KOLOM-ADMIN-UI-claude.md)."
+    },
+    "error": {
+      "SESSION_INVALID": "Your session has ended. Please sign in again and retry.",
+      "CSRF_INVALID": "The request could not be verified. Reload the page and try again.",
+      "REQUEST_INVALID": "The request could not be processed. Check your entries and try again.",
+      "VALIDATION_FAILED": "Some entries need attention. Check the highlighted fields.",
+      "NOT_FOUND": "This column was not found, or it is not yours.",
+      "VERSION_CONFLICT": "Someone else changed this column. Reload the page to see the latest version before saving.",
+      "INVALID_STATE": "That action is not allowed for this column's current status.",
+      "SLUG_CONFLICT": "That slug is already used by another column. Choose a different one.",
       "MEDIA_INVALID": "The linked media is not valid.",
       "UNAVAILABLE": "Your changes could not be saved right now. Please try again shortly."
     }
@@ -809,6 +915,7 @@
       "dashboard": "Dashboard",
       "pages": "Pages",
       "posts": "Posts",
+      "columns": "Columns",
       "media": "Media",
       "taxonomies": "Taxonomies",
       "services": "Services",
@@ -842,6 +949,7 @@
       "testimoni": "Testimonials",
       "fasilitas": "Facilities",
       "taksonomi": "Taxonomies",
+      "kolom": "Columns",
       "new": "New",
       "baru": "New",
       "edit": "Edit"

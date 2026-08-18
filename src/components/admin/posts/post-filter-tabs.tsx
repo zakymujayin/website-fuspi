@@ -7,12 +7,14 @@ type AdminPostFilterTabsProps = {
   active: AdminPostStatusFilter;
   ariaLabel: string;
   labels: Record<AdminPostStatusFilter, string>;
+  /** Defaults to `/admin/posts`; the Kolom list passes `/admin/kolom`. */
+  basePath?: string;
 };
 
 const FILTERS: readonly AdminPostStatusFilter[] = ["ALL", "DRAFT", "PUBLISHED", "ARCHIVED"];
 
 /** Status filter links; switching filter always resets to page 1 and preserves the active locale. */
-export function AdminPostFilterTabs({ active, ariaLabel, labels }: AdminPostFilterTabsProps) {
+export function AdminPostFilterTabs({ active, ariaLabel, labels, basePath }: AdminPostFilterTabsProps) {
   return (
     <nav aria-label={ariaLabel} className="flex flex-wrap gap-2">
       {FILTERS.map((filter) => {
@@ -20,7 +22,7 @@ export function AdminPostFilterTabs({ active, ariaLabel, labels }: AdminPostFilt
         return (
           <Link
             key={filter}
-            href={buildAdminPostHref(filter, 1)}
+            href={buildAdminPostHref(filter, 1, basePath)}
             aria-current={isActive ? "page" : undefined}
             className={cn(
               "inline-flex h-10 items-center justify-center rounded-lg px-3 text-sm font-medium transition-colors",

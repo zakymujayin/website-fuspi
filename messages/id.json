@@ -276,6 +276,52 @@
     "edit": "Sunting",
     "editLabelFor": "Sunting berita: {title}"
   },
+  "AdminColumnList": {
+    "metaTitle": "Kolom",
+    "title": "Kolom",
+    "description": "Telusuri seluruh kolom \"Gagasan dari Sivitas Akademika\", lalu saring menurut status penerbitan untuk menemukan tulisan yang Anda cari.",
+    "filterAriaLabel": "Saring kolom berdasarkan status",
+    "listAriaLabel": "Daftar kolom",
+    "totalCount": "{count} kolom",
+    "status": {
+      "all": "Semua",
+      "draft": "Draf",
+      "published": "Terbit",
+      "archived": "Arsip"
+    },
+    "state": {
+      "DRAFT": "Draf",
+      "PUBLISHED": "Terbit",
+      "SCHEDULED": "Terjadwal",
+      "ARCHIVED": "Arsip"
+    },
+    "featured": "Unggulan",
+    "localesLabel": "Bahasa tersedia: {locales}",
+    "uncategorized": "Tanpa kategori",
+    "unknownAuthor": "Penulis tidak diketahui",
+    "byLabel": "Oleh {name}",
+    "publishedAtLabel": "Terbit {instant}",
+    "updatedAtLabel": "Diperbarui {instant}",
+    "loading": "Memuat daftar kolom…",
+    "pagination": {
+      "ariaLabel": "Navigasi halaman daftar kolom",
+      "previous": "Halaman sebelumnya",
+      "next": "Halaman berikutnya",
+      "pageStatus": "Hal {page} dari {totalPages}",
+      "goToPage": "Ke halaman {page}"
+    },
+    "empty": {
+      "title": "Belum ada kolom",
+      "description": "Kolom akan tampil di sini setelah dibuat."
+    },
+    "unavailable": {
+      "title": "Daftar kolom sedang tidak dapat dimuat",
+      "description": "Silakan muat ulang halaman ini beberapa saat lagi."
+    },
+    "createAction": "Tulis kolom",
+    "edit": "Sunting",
+    "editLabelFor": "Sunting kolom: {title}"
+  },
   "AdminPostEditor": {
     "createMetaTitle": "Tulis Berita",
     "createTitle": "Tulis Berita",
@@ -329,6 +375,66 @@
       "VERSION_CONFLICT": "Berita ini telah diubah orang lain. Muat ulang halaman untuk melihat versi terbaru sebelum menyimpan.",
       "INVALID_STATE": "Tindakan ini tidak dapat dilakukan pada status berita saat ini.",
       "SLUG_CONFLICT": "Slug ini sudah dipakai berita lain. Gunakan slug yang berbeda.",
+      "MEDIA_INVALID": "Media yang tertaut tidak valid.",
+      "UNAVAILABLE": "Perubahan tidak dapat disimpan saat ini. Coba lagi beberapa saat lagi."
+    }
+  },
+  "AdminColumnEditor": {
+    "createMetaTitle": "Tulis Kolom",
+    "createTitle": "Tulis Kolom",
+    "createDescription": "Isi konten kolom dalam Bahasa Indonesia. Terjemahan Inggris dan Arab bersifat opsional dan dapat dilengkapi kemudian. Kolom disimpan sebagai draf.",
+    "editMetaTitle": "Sunting Kolom",
+    "editTitle": "Sunting Kolom",
+    "editDescription": "Perbarui isi kolom. Status penerbitan tidak berubah dari halaman ini.",
+    "slug": "Slug",
+    "slugDescription": "Penggal URL kolom, contoh: refleksi-ramadhan-2026. Gunakan huruf kecil dan tanda hubung.",
+    "featured": "Jadikan kolom unggulan",
+    "featuredDescription": "Kolom unggulan dapat ditonjolkan di halaman publik.",
+    "columnTypeLegend": "Penulis",
+    "columnTypeDescription": "Pilih peran penulis kolom ini, sesuai tampilan badge di halaman publik.",
+    "columnType": {
+      "DEKAN": "Dekan",
+      "DOSEN": "Dosen",
+      "MAHASISWA": "Mahasiswa"
+    },
+    "localeLegend": "Konten {locale}",
+    "localeOptional": "(opsional)",
+    "title": "Judul",
+    "excerpt": "Ringkasan",
+    "content": "Isi",
+    "contentDescription": "Isi kolom. Gunakan bilah alat untuk pemformatan dasar.",
+    "submitCreate": "Simpan draf",
+    "submitUpdate": "Simpan perubahan",
+    "submitting": "Menyimpan…",
+    "cancel": "Batal",
+    "autosave": {
+      "saving": "Menyimpan draf otomatis…",
+      "saved": "Tersimpan otomatis {time}",
+      "conflict": "Versi berubah di tempat lain. Muat ulang halaman.",
+      "error": "Gagal menyimpan otomatis. Perubahan Anda belum tersimpan."
+    },
+    "locale": {
+      "id": "Bahasa Indonesia",
+      "en": "Bahasa Inggris",
+      "ar": "Bahasa Arab"
+    },
+    "unavailable": {
+      "title": "Kolom tidak dapat dimuat",
+      "description": "Kolom tidak ditemukan, bukan milik Anda, atau sedang tidak dapat diakses."
+    },
+    "blocked": {
+      "title": "Penyimpanan Kolom belum tersedia",
+      "description": "Formulir ini sudah siap, tetapi backend admin masih dikunci ke tipe Berita. Penyimpanan Kolom akan aktif setelah pembaruan kontrak backend selesai (lihat coordination/handoffs/M4-CLAUDE-KOLOM-ADMIN-UI-claude.md)."
+    },
+    "error": {
+      "SESSION_INVALID": "Sesi Anda telah berakhir. Silakan masuk kembali lalu coba lagi.",
+      "CSRF_INVALID": "Permintaan tidak dapat diverifikasi. Muat ulang halaman lalu coba lagi.",
+      "REQUEST_INVALID": "Permintaan tidak dapat diproses. Periksa isian Anda lalu coba lagi.",
+      "VALIDATION_FAILED": "Ada isian yang belum sesuai. Periksa bagian yang ditandai.",
+      "NOT_FOUND": "Kolom tidak ditemukan atau bukan milik Anda.",
+      "VERSION_CONFLICT": "Kolom ini telah diubah orang lain. Muat ulang halaman untuk melihat versi terbaru sebelum menyimpan.",
+      "INVALID_STATE": "Tindakan ini tidak dapat dilakukan pada status kolom saat ini.",
+      "SLUG_CONFLICT": "Slug ini sudah dipakai kolom lain. Gunakan slug yang berbeda.",
       "MEDIA_INVALID": "Media yang tertaut tidak valid.",
       "UNAVAILABLE": "Perubahan tidak dapat disimpan saat ini. Coba lagi beberapa saat lagi."
     }
@@ -809,6 +915,7 @@
       "dashboard": "Dashboard",
       "pages": "Halaman",
       "posts": "Berita",
+      "columns": "Kolom",
       "media": "Media",
       "taxonomies": "Taksonomi",
       "services": "Layanan",
@@ -842,6 +949,7 @@
       "testimoni": "Testimoni",
       "fasilitas": "Fasilitas",
       "taksonomi": "Taksonomi",
+      "kolom": "Kolom",
       "new": "Baru",
       "baru": "Baru",
       "edit": "Sunting"

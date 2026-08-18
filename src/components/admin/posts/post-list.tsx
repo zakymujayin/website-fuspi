@@ -41,6 +41,8 @@ type AdminPostListProps = {
   locale: AppLocale;
   ariaLabel: string;
   labels: AdminPostListLabels;
+  /** Defaults to `/admin/posts`; the Kolom list passes `/admin/kolom`. */
+  editHrefBase?: string;
 };
 
 /**
@@ -48,7 +50,13 @@ type AdminPostListProps = {
  * reported `capabilities.update`. The list itself still performs no mutation — no publish, archive,
  * or delete control lives here, because those flows are not built.
  */
-export function AdminPostList({ items, locale, ariaLabel, labels }: AdminPostListProps) {
+export function AdminPostList({
+  items,
+  locale,
+  ariaLabel,
+  labels,
+  editHrefBase = "/admin/posts",
+}: AdminPostListProps) {
   return (
     <ul aria-label={ariaLabel} className="flex flex-col gap-2">
       {items.map((item) => (
@@ -72,7 +80,7 @@ export function AdminPostList({ items, locale, ariaLabel, labels }: AdminPostLis
               />
               {item.capabilities.update ? (
                 <Link
-                  href={`/admin/posts/${item.id}/edit`}
+                  href={`${editHrefBase}/${item.id}/edit`}
                   aria-label={labels.editLabelFor(item.title)}
                   className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-slate-300 px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
                 >

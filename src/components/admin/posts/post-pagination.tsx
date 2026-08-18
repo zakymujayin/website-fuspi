@@ -14,6 +14,8 @@ type AdminPostPaginationProps = {
   nextLabel: string;
   pageStatusLabel: string;
   goToPageLabel: (page: number) => string;
+  /** Defaults to `/admin/posts`; the Kolom list passes `/admin/kolom`. */
+  basePath?: string;
 };
 
 /** Windowed pagination control, preserving the active filter and locale in every link. */
@@ -26,6 +28,7 @@ export function AdminPostPagination({
   nextLabel,
   pageStatusLabel,
   goToPageLabel,
+  basePath,
 }: AdminPostPaginationProps) {
   if (totalPages <= 1) return null;
 
@@ -37,7 +40,7 @@ export function AdminPostPagination({
     <nav aria-label={ariaLabel} className="mt-8 flex items-center justify-center gap-1">
       {hasPrevious ? (
         <Link
-          href={buildAdminPostHref(status, current - 1)}
+          href={buildAdminPostHref(status, current - 1, basePath)}
           aria-label={previousLabel}
           className="inline-flex size-9 items-center justify-center rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100"
         >
@@ -68,7 +71,7 @@ export function AdminPostPagination({
                 </span>
               ) : (
                 <Link
-                  href={buildAdminPostHref(status, item)}
+                  href={buildAdminPostHref(status, item, basePath)}
                   aria-label={goToPageLabel(item)}
                   className="inline-flex size-9 items-center justify-center rounded-lg border border-slate-300 text-sm text-slate-600 hover:bg-slate-100"
                 >
@@ -82,7 +85,7 @@ export function AdminPostPagination({
 
       {hasNext ? (
         <Link
-          href={buildAdminPostHref(status, current + 1)}
+          href={buildAdminPostHref(status, current + 1, basePath)}
           aria-label={nextLabel}
           className="inline-flex size-9 items-center justify-center rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100"
         >
