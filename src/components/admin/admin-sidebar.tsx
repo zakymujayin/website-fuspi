@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocale } from "next-intl";
+
 import { Link, usePathname } from "@/i18n/navigation";
 
 import { SIDEBAR_MENU_GROUPS } from "@/components/admin/admin-sidebar-data";
@@ -42,9 +44,15 @@ export function AdminSidebarServer({
 }) {
   const pathname = usePathname();
   const activePath = getActivePath(pathname);
+  const locale = useLocale();
+  // The Sidebar primitive positions itself with a fixed physical left/right
+  // offset (see src/components/ui/sidebar.tsx) rather than a logical
+  // inset-inline-start, so it doesn't auto-mirror for dir="rtl" — it has to
+  // be told which physical side to render on.
+  const side = locale === "ar" ? "right" : "left";
 
   return (
-    <Sidebar collapsible="icon" variant="sidebar">
+    <Sidebar side={side} collapsible="icon" variant="sidebar">
       <SidebarHeader className="gap-3 p-4">
         <div className="flex items-center gap-2">
           <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
