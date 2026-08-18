@@ -1,8 +1,8 @@
-# Handoff — M4-CLAUDE-ADMIN-FORM-LAYOUT (Phase 1 + 2) — claude
+# Handoff — M4-CLAUDE-ADMIN-FORM-LAYOUT (Phase 1 + 2 + 3) — claude
 
 - Branch: `ai/claude/m4-admin-form-layout`
 - Base SHA: `e951a79` (`ai/gpt/m4-facility-homepage-admin`)
-- Head SHA: `4026786db7209ea2c9d2781a1a34e7898b6bd664`
+- Head SHA: `43e4670050f9bbdc5222e2ff9ccfce52994c2004`
 
 No formal task manifest for this one — user asked directly, in discussion
 first (plan mode), then approved direct implementation without a
@@ -34,6 +34,15 @@ the fix out to all 17 admin editor forms in two commits:
   (service, partnership, scholarship, achievement, activity, album,
   document, event, faq, testimonial). All 17 editor forms now use
   `AdminFormLayout`.
+- **Phase 3** (`43e4670`): visual QA during Phase 2 found all 10
+  `public-content/*-editor-form.tsx` forms rendering literal untranslated
+  key paths on screen (pre-existing, not caused by the layout change —
+  see the finding recorded below at the time). User asked to continue
+  refining and picked this as the top priority. Filled all 56 missing
+  `AdminPublicContent.*` keys (id/en/ar) plus 20
+  `createDescription`/`editDescription` pairs for the 10 resources' create/
+  edit page subtitles, and fixed a doubled-parentheses bug the missing
+  `localeOptional` key had been masking. See "Result" detail below.
 
 ## Files changed
 
@@ -62,6 +71,19 @@ the fix out to all 17 admin editor forms in two commits:
 - `messages/{id,en,ar}.json` (Phase 1) — added `AdminPostEditor.localeTabs`
   (the other 16 forms already had an equivalent key in their own
   namespace — except see the i18n gap noted below).
+- `messages/{id,en,ar}.json` (Phase 3) — added 56 missing
+  `AdminPublicContent.*` keys (`translations`, `cancel`, `field.*` [21
+  sub-keys], `submitCreate`, `submitUpdate`, `submitting`,
+  `translationsTitle`, `localeTabsAriaLabel`, `localeOptional`,
+  `error.UNAVAILABLE`, and per-resource field labels under
+  `FAQ`/`ALBUM`/`DOCUMENT`/`EVENT`/`TESTIMONIAL`) plus 20
+  `createDescription`/`editDescription` pairs (one per resource) used by
+  `src/app/[locale]/admin/**/{baru,new,[id]/edit}/page.tsx` subtitles.
+- `src/components/admin/public-content/{service,partnership,scholarship,
+  achievement,activity}-editor-form.tsx` (Phase 3) — removed a redundant
+  literal `(...)` wrapper around the `localeOptional` tab badge (the
+  translated value already includes parentheses; this rendered
+  `((opsional))` once the key stopped being invisible-broken).
 
 ## Contract/schema/migration impact
 
@@ -72,9 +94,9 @@ None. Pure UI restructuring; no `prisma/**`, `src/features/**`,
 
 | Command | Result |
 |---|---|
-| `npm run lint` | Pass — no issues (both phases) |
-| `npx tsc --noEmit -p tsconfig.json` | Pass — no errors (both phases) |
-| `npm run test` | Pass — 91 files, 1151 tests (both phases) |
+| `npm run lint` | Pass — no issues (all 3 phases) |
+| `npx tsc --noEmit -p tsconfig.json` | Pass — no errors (all 3 phases) |
+| `npm run test` | Pass — 91 files, 1151 tests (all 3 phases) |
 
 **Phase 1 manual verification:** minted a real session directly via
 `createDatabaseSession` against the isolated `fuspi_dev_claude` dev
@@ -96,8 +118,20 @@ in a real browser at 1440px (`/id/admin/faq/baru`, `/id/admin/pages/new`,
 horizontal overflow on all 4. `page-editor-form.tsx` and
 `site-setting-editor-form.tsx` render correctly with real translated text
 and the intended WordPress-style layout (multiple stacked sidebar Cards
-for site-setting: Contact, Dean, Video). See the i18n finding below for
-`faq`/`testimonial`.
+for site-setting: Contact, Dean, Video). This is what surfaced the i18n
+gap fixed in Phase 3, below.
+
+**Phase 3 manual verification:** ran a programmatic diff (extract every
+`t("...")` call across all 10 `public-content/*-editor-form.tsx` files
+and every resource's `page.tsx` under `src/app/[locale]/admin/**`,
+resolve each dotted path against the actual parsed JSON) — zero missing
+keys in `id`/`en`/`ar` after the fix, versus 56 missing before. Screenshot
+re-check of `/id/admin/faq/baru`, `/id/admin/layanan/baru` (id) and
+`/en/admin/faq/baru` (en): every previously-broken label now renders real
+translated text, the `EN (opsional)` / `AR (opsional)` tab badges show
+single parentheses, and the Next.js dev "N Issues" overlay badge — present
+in every earlier screenshot — is gone, corroborating that it was tracking
+these exact missing-message warnings.
 
 ## Untested areas
 
@@ -106,27 +140,15 @@ for site-setting: Contact, Dean, Video). See the i18n finding below for
   but not visual rendering).
 - No axe/automated a11y run; relied on reusing existing `Field`/`Card`
   primitives and the already-established locale-tab pattern.
-- No EN/AR visual check on Phase 2 forms (only `id`, only at 1440px).
+- Phase 3's programmatic key-diff covers every `t("...")` call with a
+  static string argument; it can't see genuinely dynamic keys (there
+  weren't any found in these files, but a future form using a computed
+  key string wouldn't be caught by the same method).
+- No Arabic visual check of the Phase 3 i18n fix (only `id`/`en`
+  screenshotted).
 
 ## Risks and follow-ups
 
-- **Found via this task's visual QA, NOT fixed (pre-existing, confirmed
-  unrelated to this change):** all 10
-  `public-content/*-editor-form.tsx` forms render **literal untranslated
-  key paths** on screen — e.g. `AdminPublicContent.cancel`,
-  `AdminPublicContent.FAQ.category (ID)`,
-  `AdminPublicContent.TESTIMONIAL.createDescription` — because
-  `messages/id.json`'s `AdminPublicContent` namespace is missing every
-  generic key these forms call: `translations`, `cancel`, `field.*`,
-  `submitCreate`, `submitUpdate`, `submitting`, `translationsTitle`,
-  `localeTabsAriaLabel`, `localeOptional`. Confirmed by inspecting
-  `messages/id.json` directly — none of these keys exist at all, and none
-  of the `t(...)` call sites were touched by this task, only the layout
-  wrapper around them moved. This affects the *content* of those 10 forms,
-  not their new layout — the same broken keys would have rendered exactly
-  the same way in the old single-column layout. Needs a content/i18n task
-  to author the missing keys across `id`/`en`/`ar`; out of scope here
-  (this task only restructures layout, not translation content).
 - **Found in Phase 1, still unfixed (pre-existing, out of this task's
   scope):** in Arabic (`dir="rtl"`), the admin shell's dark sidebar nav
   (`src/components/ui/sidebar.tsx` / `admin-layout-shell.tsx`, from the
