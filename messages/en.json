@@ -297,6 +297,7 @@
     "tagsEmpty": "No tags yet. Add tags from the Taxonomy page.",
     "localeLegend": "{locale} content",
     "localeOptional": "(optional)",
+    "localeTabs": "Choose language",
     "title": "Title",
     "excerpt": "Excerpt",
     "content": "Body",

@@ -297,6 +297,7 @@
     "tagsEmpty": "Belum ada tag. Tambahkan tag dari halaman Taksonomi.",
     "localeLegend": "Konten {locale}",
     "localeOptional": "(opsional)",
+    "localeTabs": "Pilih bahasa",
     "title": "Judul",
     "excerpt": "Ringkasan",
     "content": "Isi",

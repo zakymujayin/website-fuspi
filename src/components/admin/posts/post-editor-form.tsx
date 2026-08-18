@@ -6,7 +6,9 @@ import { useCallback, useEffect, useId, useRef, useState, type FormEvent } from 
 
 import { ADMIN_POST_AUTOSAVE_INTERVAL_MS } from "@/contracts/post-admin";
 
+import { AdminFormLayout } from "@/components/admin/admin-form-layout";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
@@ -84,6 +86,7 @@ export function PostEditorForm({
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [autosave, setAutosave] = useState<AutosaveState>({ status: "idle" });
+  const [locale, setLocale] = useState<PostEditorLocale>("id");
 
   // Everything the autosave timer needs, read through a ref so the interval always sees the latest
   // draft/version without being torn down and rebuilt on every keystroke.
@@ -269,8 +272,24 @@ export function PostEditorForm({
     }
   }
 
+  const localeTabs = POST_EDITOR_LOCALES.map((lc) => (
+    <button
+      key={lc}
+      type="button"
+      role="tab"
+      aria-selected={locale === lc}
+      onClick={() => setLocale(lc)}
+      className={`inline-flex h-8 items-center rounded-lg px-3 text-xs font-medium transition-colors ${
+        locale === lc ? "bg-royal-500 text-white" : "border border-slate-200 text-slate-600 hover:bg-slate-100"
+      }`}
+    >
+      {t(`locale.${lc}`)}
+    </button>
+  ));
+  const localeRequired = locale === "id";
+
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-8">
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
       {formError ? (
         <div
           role="alert"
@@ -280,197 +299,222 @@ export function PostEditorForm({
         </div>
       ) : null}
 
-      <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor={`${formId}-slug`}>{t("slug")}</FieldLabel>
-          <Input
-            id={`${formId}-slug`}
-            name="slug"
-            value={draft.slug}
-            onChange={(event) => setDraft((c) => ({ ...c, slug: event.target.value }))}
-            aria-invalid={fieldErrors.slug ? true : undefined}
-            aria-describedby={`${formId}-slug-description`}
-            autoComplete="off"
-          />
-          <FieldDescription id={`${formId}-slug-description`}>
-            {t("slugDescription")}
-          </FieldDescription>
-          {fieldErrors.slug ? <FieldError>{fieldErrors.slug}</FieldError> : null}
-        </Field>
-
-        <Field orientation="horizontal">
-          <Checkbox
-            id={`${formId}-featured`}
-            name="isFeatured"
-            checked={draft.isFeatured}
-            onCheckedChange={(checked) =>
-              setDraft((c) => ({ ...c, isFeatured: checked === true }))
-            }
-          />
-          <FieldLabel htmlFor={`${formId}-featured`}>{t("featured")}</FieldLabel>
-        </Field>
-        <FieldDescription>{t("featuredDescription")}</FieldDescription>
-      </FieldGroup>
-
-      <PostCoverPicker
-        value={draft.coverMediaId}
-        onChange={(coverMediaId) => setDraft((c) => ({ ...c, coverMediaId }))}
-        initialCover={initialCover}
-        uploadPublicUrl={uploadPublicUrl}
-      />
-
-      <FieldSet>
-        <FieldLegend>{t("taxonomyLegend")}</FieldLegend>
-        <FieldDescription>{t("taxonomyDescription")}</FieldDescription>
-        <FieldGroup>
-          <Field data-invalid={Boolean(fieldErrors.categoryId)}>
-            <FieldLabel htmlFor={`${formId}-category`}>{t("category")}</FieldLabel>
-            <select
-              id={`${formId}-category`}
-              value={draft.categoryId ?? ""}
-              onChange={(event) => setDraft((current) => ({
-                ...current,
-                categoryId: event.target.value || null,
-              }))}
-              aria-invalid={fieldErrors.categoryId ? true : undefined}
-              className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-            >
-              <option value="">{t("categoryNone")}</option>
-              {taxonomyOptions.categories.map((category) => (
-                <option key={category.id} value={category.id}>{category.label}</option>
-              ))}
-            </select>
-            <FieldDescription>{t("categoryDescription")}</FieldDescription>
-            {fieldErrors.categoryId ? <FieldError>{fieldErrors.categoryId}</FieldError> : null}
-          </Field>
-
-          <Field>
-            <FieldLabel>{t("tags")}</FieldLabel>
-            {taxonomyOptions.tags.length > 0 ? (
-              <div className="grid gap-2 sm:grid-cols-2">
-                {taxonomyOptions.tags.map((tag) => {
-                  const checked = draft.tagIds.includes(tag.id);
-                  return (
-                    <Field key={tag.id} orientation="horizontal" className="rounded-lg border border-border p-3">
-                      <Checkbox
-                        id={`${formId}-tag-${tag.id}`}
-                        checked={checked}
-                        onCheckedChange={(value) => toggleTag(tag.id, value === true)}
-                      />
-                      <FieldLabel htmlFor={`${formId}-tag-${tag.id}`}>{tag.label}</FieldLabel>
-                    </Field>
-                  );
-                })}
-              </div>
-            ) : (
-              <FieldDescription>{t("tagsEmpty")}</FieldDescription>
-            )}
-            <FieldDescription>{t("tagsDescription")}</FieldDescription>
-          </Field>
-        </FieldGroup>
-      </FieldSet>
-
-      {POST_EDITOR_LOCALES.map((locale) => {
-        const required = locale === "id";
-        const translation = draft.translations[locale];
-        return (
-          <FieldSet key={locale}>
+      <AdminFormLayout
+        main={
+          <FieldSet>
             <FieldLegend>
               {t("localeLegend", { locale: t(`locale.${locale}`) })}
-              {required ? null : (
+              {localeRequired ? null : (
                 <span className="ms-2 text-sm font-normal text-muted-foreground">
                   {t("localeOptional")}
                 </span>
               )}
             </FieldLegend>
+            <div role="tablist" aria-label={t("localeTabs")} className="flex gap-1">
+              {localeTabs}
+            </div>
             <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-${locale}-title`}>{t("title")}</FieldLabel>
-                <Input
-                  id={`${formId}-${locale}-title`}
-                  value={translation.title}
-                  onChange={(event) => updateTranslation(locale, "title", event.target.value)}
-                  aria-invalid={fieldErrors[`translations.${locale}.title`] ? true : undefined}
-                  // Arabic content must be authored right-to-left from the first implementation.
-                  dir={locale === "ar" ? "rtl" : undefined}
-                  autoComplete="off"
-                />
-                {fieldErrors[`translations.${locale}.title`] ? (
-                  <FieldError>{fieldErrors[`translations.${locale}.title`]}</FieldError>
-                ) : null}
-              </Field>
+              {(() => {
+                const translation = draft.translations[locale];
+                return (
+                  <>
+                    <Field>
+                      <FieldLabel htmlFor={`${formId}-${locale}-title`}>{t("title")}</FieldLabel>
+                      <Input
+                        id={`${formId}-${locale}-title`}
+                        value={translation.title}
+                        onChange={(event) => updateTranslation(locale, "title", event.target.value)}
+                        aria-invalid={fieldErrors[`translations.${locale}.title`] ? true : undefined}
+                        // Arabic content must be authored right-to-left from the first implementation.
+                        dir={locale === "ar" ? "rtl" : undefined}
+                        autoComplete="off"
+                      />
+                      {fieldErrors[`translations.${locale}.title`] ? (
+                        <FieldError>{fieldErrors[`translations.${locale}.title`]}</FieldError>
+                      ) : null}
+                    </Field>
 
-              <Field>
-                <FieldLabel htmlFor={`${formId}-${locale}-excerpt`}>{t("excerpt")}</FieldLabel>
-                <Textarea
-                  id={`${formId}-${locale}-excerpt`}
-                  rows={2}
-                  value={translation.excerpt}
-                  onChange={(event) => updateTranslation(locale, "excerpt", event.target.value)}
-                  aria-invalid={fieldErrors[`translations.${locale}.excerpt`] ? true : undefined}
-                  dir={locale === "ar" ? "rtl" : undefined}
-                />
-                {fieldErrors[`translations.${locale}.excerpt`] ? (
-                  <FieldError>{fieldErrors[`translations.${locale}.excerpt`]}</FieldError>
-                ) : null}
-              </Field>
+                    <Field>
+                      <FieldLabel htmlFor={`${formId}-${locale}-excerpt`}>{t("excerpt")}</FieldLabel>
+                      <Textarea
+                        id={`${formId}-${locale}-excerpt`}
+                        rows={2}
+                        value={translation.excerpt}
+                        onChange={(event) => updateTranslation(locale, "excerpt", event.target.value)}
+                        aria-invalid={fieldErrors[`translations.${locale}.excerpt`] ? true : undefined}
+                        dir={locale === "ar" ? "rtl" : undefined}
+                      />
+                      {fieldErrors[`translations.${locale}.excerpt`] ? (
+                        <FieldError>{fieldErrors[`translations.${locale}.excerpt`]}</FieldError>
+                      ) : null}
+                    </Field>
 
-              <Field>
-                <span id={`${formId}-${locale}-content-label`} className="text-sm font-medium">
-                  {t("content")}
-                </span>
-                <RichTextField
-                  value={translation.content}
-                  onChange={(html) => updateTranslation(locale, "content", html)}
-                  ariaLabel={t("content")}
-                  dir={locale === "ar" ? "rtl" : undefined}
-                />
-                <FieldDescription>{t("contentDescription")}</FieldDescription>
-                {fieldErrors[`translations.${locale}.content`] ? (
-                  <FieldError>{fieldErrors[`translations.${locale}.content`]}</FieldError>
-                ) : null}
-              </Field>
+                    <Field>
+                      <span id={`${formId}-${locale}-content-label`} className="text-sm font-medium">
+                        {t("content")}
+                      </span>
+                      <RichTextField
+                        value={translation.content}
+                        onChange={(html) => updateTranslation(locale, "content", html)}
+                        ariaLabel={t("content")}
+                        dir={locale === "ar" ? "rtl" : undefined}
+                      />
+                      <FieldDescription>{t("contentDescription")}</FieldDescription>
+                      {fieldErrors[`translations.${locale}.content`] ? (
+                        <FieldError>{fieldErrors[`translations.${locale}.content`]}</FieldError>
+                      ) : null}
+                    </Field>
+                  </>
+                );
+              })()}
             </FieldGroup>
           </FieldSet>
-        );
-      })}
+        }
+        sidebar={
+          <div className="flex flex-col gap-4">
+            <Card>
+              <CardContent className="flex flex-wrap items-center gap-3">
+                <Button type="submit" disabled={submitting || mutationBusy}>
+                  {submitting ? <Spinner data-icon /> : null}
+                  {submitting
+                    ? t("submitting")
+                    : mode === "create"
+                      ? t("submitCreate")
+                      : t("submitUpdate")}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => router.push(listHref)}>
+                  {t("cancel")}
+                </Button>
+                {mode === "edit" ? (
+                  <p
+                    role="status"
+                    aria-live="polite"
+                    className="w-full text-sm text-muted-foreground"
+                    data-autosave-status={autosave.status}
+                  >
+                    {autosave.status === "saving"
+                      ? t("autosave.saving")
+                      : autosave.status === "saved"
+                        ? t("autosave.saved", {
+                            time: new Date(autosave.at).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }),
+                          })
+                        : autosave.status === "conflict"
+                          ? t("autosave.conflict")
+                          : autosave.status === "error"
+                            ? t("autosave.error")
+                            : null}
+                  </p>
+                ) : null}
+              </CardContent>
+            </Card>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" disabled={submitting || mutationBusy}>
-          {submitting ? <Spinner data-icon /> : null}
-          {submitting
-            ? t("submitting")
-            : mode === "create"
-              ? t("submitCreate")
-              : t("submitUpdate")}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.push(listHref)}>
-          {t("cancel")}
-        </Button>
-        {mode === "edit" ? (
-          <p
-            role="status"
-            aria-live="polite"
-            className="text-sm text-muted-foreground"
-            data-autosave-status={autosave.status}
-          >
-            {autosave.status === "saving"
-              ? t("autosave.saving")
-              : autosave.status === "saved"
-                ? t("autosave.saved", {
-                    time: new Date(autosave.at).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }),
-                  })
-                : autosave.status === "conflict"
-                  ? t("autosave.conflict")
-                  : autosave.status === "error"
-                    ? t("autosave.error")
-                    : null}
-          </p>
-        ) : null}
-      </div>
+            <Card>
+              <CardContent>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-slug`}>{t("slug")}</FieldLabel>
+                    <Input
+                      id={`${formId}-slug`}
+                      name="slug"
+                      value={draft.slug}
+                      onChange={(event) => setDraft((c) => ({ ...c, slug: event.target.value }))}
+                      aria-invalid={fieldErrors.slug ? true : undefined}
+                      aria-describedby={`${formId}-slug-description`}
+                      autoComplete="off"
+                    />
+                    <FieldDescription id={`${formId}-slug-description`}>
+                      {t("slugDescription")}
+                    </FieldDescription>
+                    {fieldErrors.slug ? <FieldError>{fieldErrors.slug}</FieldError> : null}
+                  </Field>
+
+                  <Field orientation="horizontal">
+                    <Checkbox
+                      id={`${formId}-featured`}
+                      name="isFeatured"
+                      checked={draft.isFeatured}
+                      onCheckedChange={(checked) =>
+                        setDraft((c) => ({ ...c, isFeatured: checked === true }))
+                      }
+                    />
+                    <FieldLabel htmlFor={`${formId}-featured`}>{t("featured")}</FieldLabel>
+                  </Field>
+                  <FieldDescription>{t("featuredDescription")}</FieldDescription>
+                </FieldGroup>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent>
+                <PostCoverPicker
+                  value={draft.coverMediaId}
+                  onChange={(coverMediaId) => setDraft((c) => ({ ...c, coverMediaId }))}
+                  initialCover={initialCover}
+                  uploadPublicUrl={uploadPublicUrl}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("taxonomyLegend")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FieldDescription>{t("taxonomyDescription")}</FieldDescription>
+                <FieldGroup>
+                  <Field data-invalid={Boolean(fieldErrors.categoryId)}>
+                    <FieldLabel htmlFor={`${formId}-category`}>{t("category")}</FieldLabel>
+                    <select
+                      id={`${formId}-category`}
+                      value={draft.categoryId ?? ""}
+                      onChange={(event) => setDraft((current) => ({
+                        ...current,
+                        categoryId: event.target.value || null,
+                      }))}
+                      aria-invalid={fieldErrors.categoryId ? true : undefined}
+                      className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                    >
+                      <option value="">{t("categoryNone")}</option>
+                      {taxonomyOptions.categories.map((category) => (
+                        <option key={category.id} value={category.id}>{category.label}</option>
+                      ))}
+                    </select>
+                    <FieldDescription>{t("categoryDescription")}</FieldDescription>
+                    {fieldErrors.categoryId ? <FieldError>{fieldErrors.categoryId}</FieldError> : null}
+                  </Field>
+
+                  <Field>
+                    <FieldLabel>{t("tags")}</FieldLabel>
+                    {taxonomyOptions.tags.length > 0 ? (
+                      <div className="grid gap-2">
+                        {taxonomyOptions.tags.map((tag) => {
+                          const checked = draft.tagIds.includes(tag.id);
+                          return (
+                            <Field key={tag.id} orientation="horizontal" className="rounded-lg border border-border p-3">
+                              <Checkbox
+                                id={`${formId}-tag-${tag.id}`}
+                                checked={checked}
+                                onCheckedChange={(value) => toggleTag(tag.id, value === true)}
+                              />
+                              <FieldLabel htmlFor={`${formId}-tag-${tag.id}`}>{tag.label}</FieldLabel>
+                            </Field>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <FieldDescription>{t("tagsEmpty")}</FieldDescription>
+                    )}
+                    <FieldDescription>{t("tagsDescription")}</FieldDescription>
+                  </Field>
+                </FieldGroup>
+              </CardContent>
+            </Card>
+          </div>
+        }
+      />
     </form>
   );
 }

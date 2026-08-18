@@ -49,7 +49,7 @@ export function AdminLayoutShell({
             tabIndex={-1}
             className="flex-1 overflow-auto p-4 outline-none sm:p-6"
           >
-            {children}
+            <div className="mx-auto w-full max-w-[1200px]">{children}</div>
           </main>
         </div>
       </SidebarProvider>

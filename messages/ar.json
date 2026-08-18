@@ -297,6 +297,7 @@
     "tagsEmpty": "لا توجد وسوم بعد. أضف الوسوم من صفحة التصنيفات.",
     "localeLegend": "محتوى {locale}",
     "localeOptional": "(اختياري)",
+    "localeTabs": "اختر اللغة",
     "title": "العنوان",
     "excerpt": "المُلخّص",
     "content": "المحتوى",
