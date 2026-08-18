@@ -3,7 +3,9 @@
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useState, useId, type FormEvent } from "react";
+import { AdminFormLayout } from "@/components/admin/admin-form-layout";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
@@ -104,79 +106,89 @@ export function DocumentEditorForm({ mode, listHref, initialData, pageId, expect
         </div>
       )}
 
-      <FieldSet>
-        <FieldLegend>{t("DOCUMENT.commonFields")}</FieldLegend>
-        <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-slug`}>{t("DOCUMENT.slug")}</FieldLabel>
-            <Input id={`${formId}-slug`} name="slug" defaultValue={(input.slug as string) ?? ""} required />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-pdf`}>{t("DOCUMENT.publicPdfMediaId")}</FieldLabel>
-            <Input id={`${formId}-pdf`} name="publicPdfMediaId" defaultValue={(input.publicPdfMediaId as string) ?? ""} required />
-          </Field>
-          <Field orientation="horizontal">
-            <Checkbox id={`${formId}-published`} checked={isPublished} onCheckedChange={(c) => setIsPublished(c === true)} />
-            <FieldLabel htmlFor={`${formId}-published`}>{t("DOCUMENT.isPublished")}</FieldLabel>
-          </Field>
-        </FieldGroup>
-      </FieldSet>
+      <AdminFormLayout
+        main={
+          <FieldSet>
+            <FieldLegend>{t("translations")}</FieldLegend>
+            <div role="tablist" aria-label={t("localeTabs")} className="flex gap-1">
+              {localeTabs}
+            </div>
 
-      <FieldSet>
-        <FieldLegend>{t("translations")}</FieldLegend>
-        <div role="tablist" aria-label={t("localeTabs")} className="flex gap-1">
-          {localeTabs}
-        </div>
+            <FieldGroup>
+              {locale === "id" && (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-id-title`}>{t("DOCUMENT.title")} (ID) *</FieldLabel>
+                    <Input id={`${formId}-id-title`} name="id.title" defaultValue={idTr.title} required />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-id-category`}>{t("DOCUMENT.category")} (ID)</FieldLabel>
+                    <Input id={`${formId}-id-category`} name="id.category" defaultValue={idTr.category} />
+                  </Field>
+                </>
+              )}
+              {locale === "en" && (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-en-title`}>{t("DOCUMENT.title")} (EN)</FieldLabel>
+                    <Input id={`${formId}-en-title`} name="en.title" defaultValue={enTr.title} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-en-category`}>{t("DOCUMENT.category")} (EN)</FieldLabel>
+                    <Input id={`${formId}-en-category`} name="en.category" defaultValue={enTr.category} />
+                  </Field>
+                </>
+              )}
+              {locale === "ar" && (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-ar-title`}>{t("DOCUMENT.title")} (AR)</FieldLabel>
+                    <Input id={`${formId}-ar-title`} name="ar.title" defaultValue={arTr.title} dir="rtl" />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-ar-category`}>{t("DOCUMENT.category")} (AR)</FieldLabel>
+                    <Input id={`${formId}-ar-category`} name="ar.category" defaultValue={arTr.category} dir="rtl" />
+                  </Field>
+                </>
+              )}
+            </FieldGroup>
+          </FieldSet>
+        }
+        sidebar={
+          <div className="flex flex-col gap-4">
+            <Card>
+              <CardContent className="flex items-center gap-3">
+                <Button type="submit" disabled={submitting}>
+                  {submitting && <Spinner className="mr-1" />}
+                  {mode === "create" ? t("createAction") : t("updateAction")}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => router.push(listHref)} disabled={submitting}>
+                  {t("cancel")}
+                </Button>
+              </CardContent>
+            </Card>
 
-        <FieldGroup>
-          {locale === "id" && (
-            <>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-id-title`}>{t("DOCUMENT.title")} (ID) *</FieldLabel>
-                <Input id={`${formId}-id-title`} name="id.title" defaultValue={idTr.title} required />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-id-category`}>{t("DOCUMENT.category")} (ID)</FieldLabel>
-                <Input id={`${formId}-id-category`} name="id.category" defaultValue={idTr.category} />
-              </Field>
-            </>
-          )}
-          {locale === "en" && (
-            <>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-en-title`}>{t("DOCUMENT.title")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-title`} name="en.title" defaultValue={enTr.title} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-en-category`}>{t("DOCUMENT.category")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-category`} name="en.category" defaultValue={enTr.category} />
-              </Field>
-            </>
-          )}
-          {locale === "ar" && (
-            <>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-ar-title`}>{t("DOCUMENT.title")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-title`} name="ar.title" defaultValue={arTr.title} dir="rtl" />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-ar-category`}>{t("DOCUMENT.category")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-category`} name="ar.category" defaultValue={arTr.category} dir="rtl" />
-              </Field>
-            </>
-          )}
-        </FieldGroup>
-      </FieldSet>
-
-      <div className="flex items-center gap-3">
-        <Button type="submit" disabled={submitting}>
-          {submitting && <Spinner className="mr-1" />}
-          {mode === "create" ? t("createAction") : t("updateAction")}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.push(listHref)} disabled={submitting}>
-          {t("cancel")}
-        </Button>
-      </div>
+            <Card>
+              <CardContent>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-slug`}>{t("DOCUMENT.slug")}</FieldLabel>
+                    <Input id={`${formId}-slug`} name="slug" defaultValue={(input.slug as string) ?? ""} required />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-pdf`}>{t("DOCUMENT.publicPdfMediaId")}</FieldLabel>
+                    <Input id={`${formId}-pdf`} name="publicPdfMediaId" defaultValue={(input.publicPdfMediaId as string) ?? ""} required />
+                  </Field>
+                  <Field orientation="horizontal">
+                    <Checkbox id={`${formId}-published`} checked={isPublished} onCheckedChange={(c) => setIsPublished(c === true)} />
+                    <FieldLabel htmlFor={`${formId}-published`}>{t("DOCUMENT.isPublished")}</FieldLabel>
+                  </Field>
+                </FieldGroup>
+              </CardContent>
+            </Card>
+          </div>
+        }
+      />
     </form>
   );
 }

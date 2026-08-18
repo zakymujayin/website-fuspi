@@ -4,7 +4,9 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useId, useState, type FormEvent } from "react";
 
+import { AdminFormLayout } from "@/components/admin/admin-form-layout";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
@@ -135,183 +137,204 @@ export function SiteSettingEditorForm({ listHref, initialData, initialVersion, i
         </div>
       )}
 
-      <FieldSet>
-        <FieldLegend>{t("settings.contact")}</FieldLegend>
-        <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-email`}>{t("settings.email")}</FieldLabel>
-            <Input id={`${formId}-email`} name="email" type="email" defaultValue={(initialData.email as string) ?? ""} />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-phone`}>{t("settings.phone")}</FieldLabel>
-            <Input id={`${formId}-phone`} name="phone" defaultValue={(initialData.phone as string) ?? ""} />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-facebook`}>Facebook</FieldLabel>
-            <Input id={`${formId}-facebook`} name="facebookUrl" defaultValue={(initialData.facebookUrl as string) ?? ""} />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-instagram`}>Instagram</FieldLabel>
-            <Input id={`${formId}-instagram`} name="instagramUrl" defaultValue={(initialData.instagramUrl as string) ?? ""} />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-youtube`}>YouTube</FieldLabel>
-            <Input id={`${formId}-youtube`} name="youtubeUrl" defaultValue={(initialData.youtubeUrl as string) ?? ""} />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-x`}>X</FieldLabel>
-            <Input id={`${formId}-x`} name="xUrl" defaultValue={(initialData.xUrl as string) ?? ""} />
-          </Field>
-        </FieldGroup>
-      </FieldSet>
+      <AdminFormLayout
+        main={
+          <FieldSet>
+            <FieldLegend>{t("translations")}</FieldLegend>
+            <div role="tablist" aria-label={t("localeTabs")} className="flex gap-1">{localeTabs}</div>
+            <FieldGroup>
+              {locale === "id" && (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-id-faculty`}>{t("settings.facultyName")} (ID) *</FieldLabel>
+                    <Input id={`${formId}-id-faculty`} name="id.facultyName" defaultValue={idTr.facultyName} required />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-id-tagline`}>{t("settings.tagline")} (ID)</FieldLabel>
+                    <Input id={`${formId}-id-tagline`} name="id.tagline" defaultValue={idTr.tagline} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-id-address1`}>{t("settings.address1")} (ID)</FieldLabel>
+                    <Textarea id={`${formId}-id-address1`} name="id.address1" defaultValue={idTr.address1} rows={2} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-id-dean-position`}>{t("settings.deanPosition")} (ID)</FieldLabel>
+                    <Input id={`${formId}-id-dean-position`} name="id.deanPosition" defaultValue={idTr.deanPosition} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-id-dean-message`}>{t("settings.deanMessage")} (ID)</FieldLabel>
+                    <Textarea id={`${formId}-id-dean-message`} name="id.deanMessage" defaultValue={idTr.deanMessage} rows={6} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-id-video-title`}>{t("settings.videoTitle")} (ID)</FieldLabel>
+                    <Input id={`${formId}-id-video-title`} name="id.videoTitle" defaultValue={idTr.videoTitle} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-id-video-desc`}>{t("settings.videoDesc")} (ID)</FieldLabel>
+                    <Textarea id={`${formId}-id-video-desc`} name="id.videoDesc" defaultValue={idTr.videoDesc} rows={3} />
+                  </Field>
+                </>
+              )}
+              {locale === "en" && (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-en-faculty`}>{t("settings.facultyName")} (EN)</FieldLabel>
+                    <Input id={`${formId}-en-faculty`} name="en.facultyName" defaultValue={enTr.facultyName} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-en-tagline`}>{t("settings.tagline")} (EN)</FieldLabel>
+                    <Input id={`${formId}-en-tagline`} name="en.tagline" defaultValue={enTr.tagline} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-en-dean-position`}>{t("settings.deanPosition")} (EN)</FieldLabel>
+                    <Input id={`${formId}-en-dean-position`} name="en.deanPosition" defaultValue={enTr.deanPosition} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-en-dean-message`}>{t("settings.deanMessage")} (EN)</FieldLabel>
+                    <Textarea id={`${formId}-en-dean-message`} name="en.deanMessage" defaultValue={enTr.deanMessage} rows={6} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-en-video-title`}>{t("settings.videoTitle")} (EN)</FieldLabel>
+                    <Input id={`${formId}-en-video-title`} name="en.videoTitle" defaultValue={enTr.videoTitle} />
+                  </Field>
+                </>
+              )}
+              {locale === "ar" && (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-ar-faculty`}>{t("settings.facultyName")} (AR)</FieldLabel>
+                    <Input id={`${formId}-ar-faculty`} name="ar.facultyName" defaultValue={arTr.facultyName} dir="rtl" />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-ar-tagline`}>{t("settings.tagline")} (AR)</FieldLabel>
+                    <Input id={`${formId}-ar-tagline`} name="ar.tagline" defaultValue={arTr.tagline} dir="rtl" />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-ar-dean-position`}>{t("settings.deanPosition")} (AR)</FieldLabel>
+                    <Input id={`${formId}-ar-dean-position`} name="ar.deanPosition" defaultValue={arTr.deanPosition} dir="rtl" />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-ar-dean-message`}>{t("settings.deanMessage")} (AR)</FieldLabel>
+                    <Textarea id={`${formId}-ar-dean-message`} name="ar.deanMessage" defaultValue={arTr.deanMessage} rows={6} dir="rtl" />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-ar-video-title`}>{t("settings.videoTitle")} (AR)</FieldLabel>
+                    <Input id={`${formId}-ar-video-title`} name="ar.videoTitle" defaultValue={arTr.videoTitle} dir="rtl" />
+                  </Field>
+                </>
+              )}
+            </FieldGroup>
+          </FieldSet>
+        }
+        sidebar={
+          <div className="flex flex-col gap-4">
+            <Card>
+              <CardContent className="flex items-center gap-3">
+                <Button type="submit" disabled={submitting}>
+                  {submitting && <Spinner className="mr-1" />}
+                  {t("updateAction")}
+                </Button>
+              </CardContent>
+            </Card>
 
-      <FieldSet>
-        <FieldLegend>{t("settings.dean")}</FieldLegend>
-        <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-dean-name`}>{t("settings.deanName")}</FieldLabel>
-            <Input id={`${formId}-dean-name`} name="deanName" defaultValue={(initialData.deanName as string) ?? ""} />
-          </Field>
-          <HomeMediaPicker
-            value={deanPhotoId}
-            onChange={setDeanPhotoId}
-            initialMedia={initialDeanPhoto}
-            uploadPublicUrl={uploadPublicUrl}
-            label={t("settings.deanPhoto")}
-            description={t("settings.deanPhotoDescription")}
-            chooseLabel={t("picker.choose")}
-            changeLabel={t("picker.change")}
-            clearLabel={t("picker.clear")}
-            selectedLabel={t("picker.selected")}
-            noneLabel={t("picker.none")}
-            loadingLabel={t("picker.loading")}
-            loadErrorLabel={t("picker.loadError")}
-            emptyLabel={t("picker.empty")}
-            listLabel={t("picker.listLabel")}
-          />
-        </FieldGroup>
-      </FieldSet>
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("settings.contact")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-email`}>{t("settings.email")}</FieldLabel>
+                    <Input id={`${formId}-email`} name="email" type="email" defaultValue={(initialData.email as string) ?? ""} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-phone`}>{t("settings.phone")}</FieldLabel>
+                    <Input id={`${formId}-phone`} name="phone" defaultValue={(initialData.phone as string) ?? ""} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-facebook`}>Facebook</FieldLabel>
+                    <Input id={`${formId}-facebook`} name="facebookUrl" defaultValue={(initialData.facebookUrl as string) ?? ""} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-instagram`}>Instagram</FieldLabel>
+                    <Input id={`${formId}-instagram`} name="instagramUrl" defaultValue={(initialData.instagramUrl as string) ?? ""} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-youtube`}>YouTube</FieldLabel>
+                    <Input id={`${formId}-youtube`} name="youtubeUrl" defaultValue={(initialData.youtubeUrl as string) ?? ""} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-x`}>X</FieldLabel>
+                    <Input id={`${formId}-x`} name="xUrl" defaultValue={(initialData.xUrl as string) ?? ""} />
+                  </Field>
+                </FieldGroup>
+              </CardContent>
+            </Card>
 
-      <FieldSet>
-        <FieldLegend>{t("settings.video")}</FieldLegend>
-        <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-video-url`}>{t("settings.videoUrl")}</FieldLabel>
-            <Input id={`${formId}-video-url`} name="videoUrl" defaultValue={(initialData.videoUrl as string) ?? ""} placeholder="https://youtube.com/watch?v=..." />
-          </Field>
-          <HomeMediaPicker
-            value={videoPosterId}
-            onChange={setVideoPosterId}
-            initialMedia={initialVideoPoster}
-            uploadPublicUrl={uploadPublicUrl}
-            label={t("settings.videoPoster")}
-            description={t("settings.videoPosterDescription")}
-            chooseLabel={t("picker.choose")}
-            changeLabel={t("picker.change")}
-            clearLabel={t("picker.clear")}
-            selectedLabel={t("picker.selected")}
-            noneLabel={t("picker.none")}
-            loadingLabel={t("picker.loading")}
-            loadErrorLabel={t("picker.loadError")}
-            emptyLabel={t("picker.empty")}
-            listLabel={t("picker.listLabel")}
-          />
-        </FieldGroup>
-      </FieldSet>
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("settings.dean")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-dean-name`}>{t("settings.deanName")}</FieldLabel>
+                    <Input id={`${formId}-dean-name`} name="deanName" defaultValue={(initialData.deanName as string) ?? ""} />
+                  </Field>
+                  <HomeMediaPicker
+                    value={deanPhotoId}
+                    onChange={setDeanPhotoId}
+                    initialMedia={initialDeanPhoto}
+                    uploadPublicUrl={uploadPublicUrl}
+                    label={t("settings.deanPhoto")}
+                    description={t("settings.deanPhotoDescription")}
+                    chooseLabel={t("picker.choose")}
+                    changeLabel={t("picker.change")}
+                    clearLabel={t("picker.clear")}
+                    selectedLabel={t("picker.selected")}
+                    noneLabel={t("picker.none")}
+                    loadingLabel={t("picker.loading")}
+                    loadErrorLabel={t("picker.loadError")}
+                    emptyLabel={t("picker.empty")}
+                    listLabel={t("picker.listLabel")}
+                  />
+                </FieldGroup>
+              </CardContent>
+            </Card>
 
-      <FieldSet>
-        <FieldLegend>{t("translations")}</FieldLegend>
-        <div role="tablist" aria-label={t("localeTabs")} className="flex gap-1">{localeTabs}</div>
-        <FieldGroup>
-          {locale === "id" && (
-            <>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-id-faculty`}>{t("settings.facultyName")} (ID) *</FieldLabel>
-                <Input id={`${formId}-id-faculty`} name="id.facultyName" defaultValue={idTr.facultyName} required />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-id-tagline`}>{t("settings.tagline")} (ID)</FieldLabel>
-                <Input id={`${formId}-id-tagline`} name="id.tagline" defaultValue={idTr.tagline} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-id-address1`}>{t("settings.address1")} (ID)</FieldLabel>
-                <Textarea id={`${formId}-id-address1`} name="id.address1" defaultValue={idTr.address1} rows={2} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-id-dean-position`}>{t("settings.deanPosition")} (ID)</FieldLabel>
-                <Input id={`${formId}-id-dean-position`} name="id.deanPosition" defaultValue={idTr.deanPosition} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-id-dean-message`}>{t("settings.deanMessage")} (ID)</FieldLabel>
-                <Textarea id={`${formId}-id-dean-message`} name="id.deanMessage" defaultValue={idTr.deanMessage} rows={6} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-id-video-title`}>{t("settings.videoTitle")} (ID)</FieldLabel>
-                <Input id={`${formId}-id-video-title`} name="id.videoTitle" defaultValue={idTr.videoTitle} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-id-video-desc`}>{t("settings.videoDesc")} (ID)</FieldLabel>
-                <Textarea id={`${formId}-id-video-desc`} name="id.videoDesc" defaultValue={idTr.videoDesc} rows={3} />
-              </Field>
-            </>
-          )}
-          {locale === "en" && (
-            <>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-en-faculty`}>{t("settings.facultyName")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-faculty`} name="en.facultyName" defaultValue={enTr.facultyName} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-en-tagline`}>{t("settings.tagline")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-tagline`} name="en.tagline" defaultValue={enTr.tagline} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-en-dean-position`}>{t("settings.deanPosition")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-dean-position`} name="en.deanPosition" defaultValue={enTr.deanPosition} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-en-dean-message`}>{t("settings.deanMessage")} (EN)</FieldLabel>
-                <Textarea id={`${formId}-en-dean-message`} name="en.deanMessage" defaultValue={enTr.deanMessage} rows={6} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-en-video-title`}>{t("settings.videoTitle")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-video-title`} name="en.videoTitle" defaultValue={enTr.videoTitle} />
-              </Field>
-            </>
-          )}
-          {locale === "ar" && (
-            <>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-ar-faculty`}>{t("settings.facultyName")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-faculty`} name="ar.facultyName" defaultValue={arTr.facultyName} dir="rtl" />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-ar-tagline`}>{t("settings.tagline")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-tagline`} name="ar.tagline" defaultValue={arTr.tagline} dir="rtl" />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-ar-dean-position`}>{t("settings.deanPosition")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-dean-position`} name="ar.deanPosition" defaultValue={arTr.deanPosition} dir="rtl" />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-ar-dean-message`}>{t("settings.deanMessage")} (AR)</FieldLabel>
-                <Textarea id={`${formId}-ar-dean-message`} name="ar.deanMessage" defaultValue={arTr.deanMessage} rows={6} dir="rtl" />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-ar-video-title`}>{t("settings.videoTitle")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-video-title`} name="ar.videoTitle" defaultValue={arTr.videoTitle} dir="rtl" />
-              </Field>
-            </>
-          )}
-        </FieldGroup>
-      </FieldSet>
-
-      <div className="flex items-center gap-3">
-        <Button type="submit" disabled={submitting}>
-          {submitting && <Spinner className="mr-1" />}
-          {t("updateAction")}
-        </Button>
-      </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("settings.video")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-video-url`}>{t("settings.videoUrl")}</FieldLabel>
+                    <Input id={`${formId}-video-url`} name="videoUrl" defaultValue={(initialData.videoUrl as string) ?? ""} placeholder="https://youtube.com/watch?v=..." />
+                  </Field>
+                  <HomeMediaPicker
+                    value={videoPosterId}
+                    onChange={setVideoPosterId}
+                    initialMedia={initialVideoPoster}
+                    uploadPublicUrl={uploadPublicUrl}
+                    label={t("settings.videoPoster")}
+                    description={t("settings.videoPosterDescription")}
+                    chooseLabel={t("picker.choose")}
+                    changeLabel={t("picker.change")}
+                    clearLabel={t("picker.clear")}
+                    selectedLabel={t("picker.selected")}
+                    noneLabel={t("picker.none")}
+                    loadingLabel={t("picker.loading")}
+                    loadErrorLabel={t("picker.loadError")}
+                    emptyLabel={t("picker.empty")}
+                    listLabel={t("picker.listLabel")}
+                  />
+                </FieldGroup>
+              </CardContent>
+            </Card>
+          </div>
+        }
+      />
     </form>
   );
 }

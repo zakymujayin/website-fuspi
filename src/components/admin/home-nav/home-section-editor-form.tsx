@@ -4,7 +4,9 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useId, useState, type FormEvent } from "react";
 
+import { AdminFormLayout } from "@/components/admin/admin-form-layout";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
@@ -109,116 +111,133 @@ export function HomeSectionEditorForm({ listHref, pageId, initialData, initialBa
         </div>
       )}
 
-      <FieldSet>
-        <FieldLegend>{String(initialData.key)}</FieldLegend>
-        <FieldGroup>
-          <Field orientation="horizontal">
-            <Checkbox id={`${formId}-visible`} checked={isVisible} onCheckedChange={(c) => setIsVisible(c === true)} />
-            <FieldLabel htmlFor={`${formId}-visible`}>{t("isVisible")}</FieldLabel>
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-order`}>{t("order")}</FieldLabel>
-            <Input id={`${formId}-order`} name="order" type="number" min={0} max={10000} defaultValue={(initialData.order as number) ?? 0} required />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-item-limit`}>{t("section.itemLimit")}</FieldLabel>
-            <Input id={`${formId}-item-limit`} name="itemLimit" type="number" min={1} max={12} defaultValue={(initialData.itemLimit as number) ?? 4} required />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-cta-href`}>{t("slider.ctaHref")}</FieldLabel>
-            <Input id={`${formId}-cta-href`} value={ctaHref} onChange={(e) => setCtaHref(e.target.value)} placeholder="/berita" />
-          </Field>
-        </FieldGroup>
-      </FieldSet>
+      <AdminFormLayout
+        main={
+          <FieldSet>
+            <FieldLegend>{t("translations")}</FieldLegend>
+            <div role="tablist" aria-label={t("localeTabs")} className="flex gap-1">{localeTabs}</div>
+            <FieldGroup>
+              {locale === "id" && (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-id-title`}>{t("section.sectionTitle")} (ID) *</FieldLabel>
+                    <Input id={`${formId}-id-title`} name="id.title" defaultValue={idTr.title} required />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-id-subtitle`}>{t("slider.subtitle")} (ID)</FieldLabel>
+                    <Input id={`${formId}-id-subtitle`} name="id.subtitle" defaultValue={idTr.subtitle} />
+                  </Field>
+                  {ctaHref && (
+                    <Field>
+                      <FieldLabel htmlFor={`${formId}-id-cta`}>{t("slider.ctaLabel")} (ID)</FieldLabel>
+                      <Input id={`${formId}-id-cta`} name="id.ctaLabel" defaultValue={idTr.ctaLabel} />
+                    </Field>
+                  )}
+                </>
+              )}
+              {locale === "en" && (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-en-title`}>{t("section.sectionTitle")} (EN)</FieldLabel>
+                    <Input id={`${formId}-en-title`} name="en.title" defaultValue={enTr.title} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-en-subtitle`}>{t("slider.subtitle")} (EN)</FieldLabel>
+                    <Input id={`${formId}-en-subtitle`} name="en.subtitle" defaultValue={enTr.subtitle} />
+                  </Field>
+                  {ctaHref && (
+                    <Field>
+                      <FieldLabel htmlFor={`${formId}-en-cta`}>{t("slider.ctaLabel")} (EN)</FieldLabel>
+                      <Input id={`${formId}-en-cta`} name="en.ctaLabel" defaultValue={enTr.ctaLabel} />
+                    </Field>
+                  )}
+                </>
+              )}
+              {locale === "ar" && (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-ar-title`}>{t("section.sectionTitle")} (AR)</FieldLabel>
+                    <Input id={`${formId}-ar-title`} name="ar.title" defaultValue={arTr.title} dir="rtl" />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-ar-subtitle`}>{t("slider.subtitle")} (AR)</FieldLabel>
+                    <Input id={`${formId}-ar-subtitle`} name="ar.subtitle" defaultValue={arTr.subtitle} dir="rtl" />
+                  </Field>
+                  {ctaHref && (
+                    <Field>
+                      <FieldLabel htmlFor={`${formId}-ar-cta`}>{t("slider.ctaLabel")} (AR)</FieldLabel>
+                      <Input id={`${formId}-ar-cta`} name="ar.ctaLabel" defaultValue={arTr.ctaLabel} dir="rtl" />
+                    </Field>
+                  )}
+                </>
+              )}
+            </FieldGroup>
+          </FieldSet>
+        }
+        sidebar={
+          <div className="flex flex-col gap-4">
+            <Card>
+              <CardContent className="flex items-center gap-3">
+                <Button type="submit" disabled={submitting}>
+                  {submitting && <Spinner className="mr-1" />}
+                  {t("updateAction")}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => router.push(listHref)} disabled={submitting}>
+                  {t("cancel")}
+                </Button>
+              </CardContent>
+            </Card>
 
-      <HomeMediaPicker
-        value={backgroundId}
-        onChange={setBackgroundId}
-        initialMedia={initialBackground}
-        uploadPublicUrl={uploadPublicUrl}
-        label={t("section.background")}
-        description={t("section.backgroundDescription")}
-        chooseLabel={t("picker.choose")}
-        changeLabel={t("picker.change")}
-        clearLabel={t("picker.clear")}
-        selectedLabel={t("picker.selected")}
-        noneLabel={t("picker.none")}
-        loadingLabel={t("picker.loading")}
-        loadErrorLabel={t("picker.loadError")}
-        emptyLabel={t("picker.empty")}
-        listLabel={t("picker.listLabel")}
+            <Card>
+              <CardHeader>
+                <CardTitle>{String(initialData.key)}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FieldGroup>
+                  <Field orientation="horizontal">
+                    <Checkbox id={`${formId}-visible`} checked={isVisible} onCheckedChange={(c) => setIsVisible(c === true)} />
+                    <FieldLabel htmlFor={`${formId}-visible`}>{t("isVisible")}</FieldLabel>
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-order`}>{t("order")}</FieldLabel>
+                    <Input id={`${formId}-order`} name="order" type="number" min={0} max={10000} defaultValue={(initialData.order as number) ?? 0} required />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-item-limit`}>{t("section.itemLimit")}</FieldLabel>
+                    <Input id={`${formId}-item-limit`} name="itemLimit" type="number" min={1} max={12} defaultValue={(initialData.itemLimit as number) ?? 4} required />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-cta-href`}>{t("slider.ctaHref")}</FieldLabel>
+                    <Input id={`${formId}-cta-href`} value={ctaHref} onChange={(e) => setCtaHref(e.target.value)} placeholder="/berita" />
+                  </Field>
+                </FieldGroup>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent>
+                <HomeMediaPicker
+                  value={backgroundId}
+                  onChange={setBackgroundId}
+                  initialMedia={initialBackground}
+                  uploadPublicUrl={uploadPublicUrl}
+                  label={t("section.background")}
+                  description={t("section.backgroundDescription")}
+                  chooseLabel={t("picker.choose")}
+                  changeLabel={t("picker.change")}
+                  clearLabel={t("picker.clear")}
+                  selectedLabel={t("picker.selected")}
+                  noneLabel={t("picker.none")}
+                  loadingLabel={t("picker.loading")}
+                  loadErrorLabel={t("picker.loadError")}
+                  emptyLabel={t("picker.empty")}
+                  listLabel={t("picker.listLabel")}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        }
       />
-
-      <FieldSet>
-        <FieldLegend>{t("translations")}</FieldLegend>
-        <div role="tablist" aria-label={t("localeTabs")} className="flex gap-1">{localeTabs}</div>
-        <FieldGroup>
-          {locale === "id" && (
-            <>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-id-title`}>{t("section.sectionTitle")} (ID) *</FieldLabel>
-                <Input id={`${formId}-id-title`} name="id.title" defaultValue={idTr.title} required />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-id-subtitle`}>{t("slider.subtitle")} (ID)</FieldLabel>
-                <Input id={`${formId}-id-subtitle`} name="id.subtitle" defaultValue={idTr.subtitle} />
-              </Field>
-              {ctaHref && (
-                <Field>
-                  <FieldLabel htmlFor={`${formId}-id-cta`}>{t("slider.ctaLabel")} (ID)</FieldLabel>
-                  <Input id={`${formId}-id-cta`} name="id.ctaLabel" defaultValue={idTr.ctaLabel} />
-                </Field>
-              )}
-            </>
-          )}
-          {locale === "en" && (
-            <>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-en-title`}>{t("section.sectionTitle")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-title`} name="en.title" defaultValue={enTr.title} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-en-subtitle`}>{t("slider.subtitle")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-subtitle`} name="en.subtitle" defaultValue={enTr.subtitle} />
-              </Field>
-              {ctaHref && (
-                <Field>
-                  <FieldLabel htmlFor={`${formId}-en-cta`}>{t("slider.ctaLabel")} (EN)</FieldLabel>
-                  <Input id={`${formId}-en-cta`} name="en.ctaLabel" defaultValue={enTr.ctaLabel} />
-                </Field>
-              )}
-            </>
-          )}
-          {locale === "ar" && (
-            <>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-ar-title`}>{t("section.sectionTitle")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-title`} name="ar.title" defaultValue={arTr.title} dir="rtl" />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-ar-subtitle`}>{t("slider.subtitle")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-subtitle`} name="ar.subtitle" defaultValue={arTr.subtitle} dir="rtl" />
-              </Field>
-              {ctaHref && (
-                <Field>
-                  <FieldLabel htmlFor={`${formId}-ar-cta`}>{t("slider.ctaLabel")} (AR)</FieldLabel>
-                  <Input id={`${formId}-ar-cta`} name="ar.ctaLabel" defaultValue={arTr.ctaLabel} dir="rtl" />
-                </Field>
-              )}
-            </>
-          )}
-        </FieldGroup>
-      </FieldSet>
-
-      <div className="flex items-center gap-3">
-        <Button type="submit" disabled={submitting}>
-          {submitting && <Spinner className="mr-1" />}
-          {t("updateAction")}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.push(listHref)} disabled={submitting}>
-          {t("cancel")}
-        </Button>
-      </div>
     </form>
   );
 }

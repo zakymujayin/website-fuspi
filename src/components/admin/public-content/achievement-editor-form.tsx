@@ -4,7 +4,9 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useId, useState, type FormEvent } from "react";
 
+import { AdminFormLayout } from "@/components/admin/admin-form-layout";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
@@ -194,164 +196,177 @@ export function AchievementEditorForm({
         </div>
       ) : null}
 
-      <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor={`${formId}-slug`}>{t("field.slug")}</FieldLabel>
-          <Input
-            id={`${formId}-slug`}
-            name="slug"
-            value={draft.slug}
-            onChange={(e) => setDraft((c) => ({ ...c, slug: e.target.value }))}
-            aria-invalid={fieldErrors.slug ? true : undefined}
-            autoComplete="off"
-          />
-          {fieldErrors.slug ? <FieldError>{fieldErrors.slug}</FieldError> : null}
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor={`${formId}-studentName`}>{t("field.studentName")}</FieldLabel>
-          <Input
-            id={`${formId}-studentName`}
-            name="studentName"
-            value={draft.studentName}
-            onChange={(e) => setDraft((c) => ({ ...c, studentName: e.target.value }))}
-            aria-invalid={fieldErrors.studentName ? true : undefined}
-            autoComplete="off"
-          />
-          {fieldErrors.studentName ? <FieldError>{fieldErrors.studentName}</FieldError> : null}
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor={`${formId}-level`}>{t("field.level")}</FieldLabel>
-          <select
-            id={`${formId}-level`}
-            name="level"
-            value={draft.level}
-            onChange={(e) => setDraft((c) => ({ ...c, level: e.target.value }))}
-            className="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm"
-            aria-invalid={fieldErrors.level ? true : undefined}
-          >
-            <option value="INTERNASIONAL">INTERNASIONAL</option>
-            <option value="NASIONAL">NASIONAL</option>
-            <option value="REGIONAL">REGIONAL</option>
-            <option value="LOKAL">LOKAL</option>
-          </select>
-          {fieldErrors.level ? <FieldError>{fieldErrors.level}</FieldError> : null}
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor={`${formId}-achievedAt`}>{t("field.achievedAt")}</FieldLabel>
-          <Input
-            id={`${formId}-achievedAt`}
-            name="achievedAt"
-            type="datetime-local"
-            value={draft.achievedAt ? draft.achievedAt.slice(0, 16) : ""}
-            onChange={(e) => setDraft((c) => ({ ...c, achievedAt: e.target.value ? new Date(e.target.value).toISOString() : "" }))}
-            aria-invalid={fieldErrors.achievedAt ? true : undefined}
-          />
-          {fieldErrors.achievedAt ? <FieldError>{fieldErrors.achievedAt}</FieldError> : null}
-        </Field>
-      </FieldGroup>
-
-      <FieldSet className="gap-4">
-        <FieldLegend>{t("translationsTitle")}</FieldLegend>
-        <div role="tablist" aria-label={t("localeTabsAriaLabel")} className="flex gap-1">
-          {EDITOR_LOCALES.map((locale) => (
-            <button
-              key={locale}
-              type="button"
-              role="tab"
-              id={`locale-tab-${locale}`}
-              aria-selected={activeLocale === locale}
-              aria-controls={`locale-panel-${locale}`}
-              onClick={() => setActiveLocale(locale)}
-              className={`inline-flex h-8 items-center gap-1 rounded-lg px-3 text-xs font-medium transition-colors ${
-                activeLocale === locale
-                  ? "bg-royal-500 text-white"
-                  : "border border-slate-200 text-slate-600 hover:bg-slate-100"
-              }`}
-            >
-              {locale.toUpperCase()}
-              {hasTranslation[locale] ? null : (
-                <span className="text-[10px] opacity-70">({t("localeOptional")})</span>
-              )}
-            </button>
-          ))}
-        </div>
-
-        {EDITOR_LOCALES.map((locale) => {
-          const required = locale === "id";
-          const translation = draft.translations[locale];
-          const isActive = locale === activeLocale;
-          return (
-            <div
-              key={locale}
-              role="tabpanel"
-              id={`locale-panel-${locale}`}
-              aria-labelledby={`locale-tab-${locale}`}
-              hidden={!isActive}
-              className={isActive ? "flex flex-col gap-5" : "hidden"}
-            >
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor={`${formId}-${locale}-title`}>
-                    {t("field.title")}
-                    {required ? (
-                      <span className="ms-1 text-red-500">*</span>
-                    ) : (
-                      <span className="ms-1 text-sm font-normal text-muted-foreground">
-                        {t("localeOptional")}
-                      </span>
-                    )}
-                  </FieldLabel>
-                  <Input
-                    id={`${formId}-${locale}-title`}
-                    value={translation.title}
-                    onChange={(e) => updateTranslation(locale, "title", e.target.value)}
-                    aria-invalid={fieldErrors[`translations.${locale}.title`] ? true : undefined}
-                    dir={locale === "ar" ? "rtl" : undefined}
-                    autoComplete="off"
-                  />
-                  {fieldErrors[`translations.${locale}.title`] ? (
-                    <FieldError>{fieldErrors[`translations.${locale}.title`]}</FieldError>
-                  ) : null}
-                </Field>
-
-                <Field>
-                  <FieldLabel htmlFor={`${formId}-${locale}-description`}>
-                    {t("field.description")}
-                  </FieldLabel>
-                  <Textarea
-                    id={`${formId}-${locale}-description`}
-                    rows={4}
-                    value={translation.description}
-                    onChange={(e) => updateTranslation(locale, "description", e.target.value)}
-                    aria-invalid={fieldErrors[`translations.${locale}.description`] ? true : undefined}
-                    dir={locale === "ar" ? "rtl" : undefined}
-                  />
-                  {fieldErrors[`translations.${locale}.description`] ? (
-                    <FieldError>{fieldErrors[`translations.${locale}.description`]}</FieldError>
-                  ) : null}
-                </Field>
-              </FieldGroup>
+      <AdminFormLayout
+        main={
+          <FieldSet className="gap-4">
+            <FieldLegend>{t("translationsTitle")}</FieldLegend>
+            <div role="tablist" aria-label={t("localeTabsAriaLabel")} className="flex gap-1">
+              {EDITOR_LOCALES.map((locale) => (
+                <button
+                  key={locale}
+                  type="button"
+                  role="tab"
+                  id={`locale-tab-${locale}`}
+                  aria-selected={activeLocale === locale}
+                  aria-controls={`locale-panel-${locale}`}
+                  onClick={() => setActiveLocale(locale)}
+                  className={`inline-flex h-8 items-center gap-1 rounded-lg px-3 text-xs font-medium transition-colors ${
+                    activeLocale === locale
+                      ? "bg-royal-500 text-white"
+                      : "border border-slate-200 text-slate-600 hover:bg-slate-100"
+                  }`}
+                >
+                  {locale.toUpperCase()}
+                  {hasTranslation[locale] ? null : (
+                    <span className="text-[10px] opacity-70">({t("localeOptional")})</span>
+                  )}
+                </button>
+              ))}
             </div>
-          );
-        })}
-      </FieldSet>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" disabled={submitting}>
-          {submitting ? <Spinner data-icon /> : null}
-          {submitting
-            ? t("submitting")
-            : mode === "create"
-              ? t("submitCreate")
-              : t("submitUpdate")}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.push(listHref)}>
-          {t("cancel")}
-        </Button>
-      </div>
+            {EDITOR_LOCALES.map((locale) => {
+              const required = locale === "id";
+              const translation = draft.translations[locale];
+              const isActive = locale === activeLocale;
+              return (
+                <div
+                  key={locale}
+                  role="tabpanel"
+                  id={`locale-panel-${locale}`}
+                  aria-labelledby={`locale-tab-${locale}`}
+                  hidden={!isActive}
+                  className={isActive ? "flex flex-col gap-5" : "hidden"}
+                >
+                  <FieldGroup>
+                    <Field>
+                      <FieldLabel htmlFor={`${formId}-${locale}-title`}>
+                        {t("field.title")}
+                        {required ? (
+                          <span className="ms-1 text-red-500">*</span>
+                        ) : (
+                          <span className="ms-1 text-sm font-normal text-muted-foreground">
+                            {t("localeOptional")}
+                          </span>
+                        )}
+                      </FieldLabel>
+                      <Input
+                        id={`${formId}-${locale}-title`}
+                        value={translation.title}
+                        onChange={(e) => updateTranslation(locale, "title", e.target.value)}
+                        aria-invalid={fieldErrors[`translations.${locale}.title`] ? true : undefined}
+                        dir={locale === "ar" ? "rtl" : undefined}
+                        autoComplete="off"
+                      />
+                      {fieldErrors[`translations.${locale}.title`] ? (
+                        <FieldError>{fieldErrors[`translations.${locale}.title`]}</FieldError>
+                      ) : null}
+                    </Field>
+
+                    <Field>
+                      <FieldLabel htmlFor={`${formId}-${locale}-description`}>
+                        {t("field.description")}
+                      </FieldLabel>
+                      <Textarea
+                        id={`${formId}-${locale}-description`}
+                        rows={4}
+                        value={translation.description}
+                        onChange={(e) => updateTranslation(locale, "description", e.target.value)}
+                        aria-invalid={fieldErrors[`translations.${locale}.description`] ? true : undefined}
+                        dir={locale === "ar" ? "rtl" : undefined}
+                      />
+                      {fieldErrors[`translations.${locale}.description`] ? (
+                        <FieldError>{fieldErrors[`translations.${locale}.description`]}</FieldError>
+                      ) : null}
+                    </Field>
+                  </FieldGroup>
+                </div>
+              );
+            })}
+          </FieldSet>
+        }
+        sidebar={
+          <div className="flex flex-col gap-4">
+            <Card>
+              <CardContent className="flex flex-wrap items-center gap-3">
+                <Button type="submit" disabled={submitting}>
+                  {submitting ? <Spinner data-icon /> : null}
+                  {submitting
+                    ? t("submitting")
+                    : mode === "create"
+                      ? t("submitCreate")
+                      : t("submitUpdate")}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => router.push(listHref)}>
+                  {t("cancel")}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-slug`}>{t("field.slug")}</FieldLabel>
+                    <Input
+                      id={`${formId}-slug`}
+                      name="slug"
+                      value={draft.slug}
+                      onChange={(e) => setDraft((c) => ({ ...c, slug: e.target.value }))}
+                      aria-invalid={fieldErrors.slug ? true : undefined}
+                      autoComplete="off"
+                    />
+                    {fieldErrors.slug ? <FieldError>{fieldErrors.slug}</FieldError> : null}
+                  </Field>
+
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-studentName`}>{t("field.studentName")}</FieldLabel>
+                    <Input
+                      id={`${formId}-studentName`}
+                      name="studentName"
+                      value={draft.studentName}
+                      onChange={(e) => setDraft((c) => ({ ...c, studentName: e.target.value }))}
+                      aria-invalid={fieldErrors.studentName ? true : undefined}
+                      autoComplete="off"
+                    />
+                    {fieldErrors.studentName ? <FieldError>{fieldErrors.studentName}</FieldError> : null}
+                  </Field>
+
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-level`}>{t("field.level")}</FieldLabel>
+                    <select
+                      id={`${formId}-level`}
+                      name="level"
+                      value={draft.level}
+                      onChange={(e) => setDraft((c) => ({ ...c, level: e.target.value }))}
+                      className="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm"
+                      aria-invalid={fieldErrors.level ? true : undefined}
+                    >
+                      <option value="INTERNASIONAL">INTERNASIONAL</option>
+                      <option value="NASIONAL">NASIONAL</option>
+                      <option value="REGIONAL">REGIONAL</option>
+                      <option value="LOKAL">LOKAL</option>
+                    </select>
+                    {fieldErrors.level ? <FieldError>{fieldErrors.level}</FieldError> : null}
+                  </Field>
+
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-achievedAt`}>{t("field.achievedAt")}</FieldLabel>
+                    <Input
+                      id={`${formId}-achievedAt`}
+                      name="achievedAt"
+                      type="datetime-local"
+                      value={draft.achievedAt ? draft.achievedAt.slice(0, 16) : ""}
+                      onChange={(e) => setDraft((c) => ({ ...c, achievedAt: e.target.value ? new Date(e.target.value).toISOString() : "" }))}
+                      aria-invalid={fieldErrors.achievedAt ? true : undefined}
+                    />
+                    {fieldErrors.achievedAt ? <FieldError>{fieldErrors.achievedAt}</FieldError> : null}
+                  </Field>
+                </FieldGroup>
+              </CardContent>
+            </Card>
+          </div>
+        }
+      />
     </form>
   );
 }

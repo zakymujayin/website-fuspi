@@ -4,7 +4,9 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useId, useState, type FormEvent } from "react";
 
+import { AdminFormLayout } from "@/components/admin/admin-form-layout";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
@@ -180,190 +182,206 @@ export function PageEditorForm({
         </div>
       ) : null}
 
-      <FieldGroup>
-        <Field>
-          <FieldLabel htmlFor={`${formId}-slug`}>{t("slug")}</FieldLabel>
-          <Input
-            id={`${formId}-slug`}
-            name="slug"
-            value={draft.slug}
-            onChange={(event) => setDraft((c) => ({ ...c, slug: event.target.value }))}
-            aria-invalid={fieldErrors.slug ? true : undefined}
-            aria-describedby={`${formId}-slug-description`}
-            autoComplete="off"
+      <AdminFormLayout
+        main={
+          <FieldSet className="gap-4">
+            <FieldLegend>{t("translationsTitle")}</FieldLegend>
+            <PageLocaleTabs
+              active={activeLocale}
+              labels={{
+                id: t("locale.id"),
+                en: t("locale.en"),
+                ar: t("locale.ar"),
+              }}
+              hasTranslation={hasTranslation}
+              onChange={setActiveLocale}
+            />
 
-          />
-          <FieldDescription id={`${formId}-slug-description`}>
-            {t("slugDescription")}
-          </FieldDescription>
-          {fieldErrors.slug ? <FieldError>{fieldErrors.slug}</FieldError> : null}
-        </Field>
+            {PAGE_EDITOR_LOCALES.map((locale) => {
+              const required = locale === "id";
+              const translation = draft.translations[locale];
+              const isActive = locale === activeLocale;
+              return (
+                <div
+                  key={locale}
+                  role="tabpanel"
+                  id={`page-locale-panel-${locale}`}
+                  aria-labelledby={`page-locale-tab-${locale}`}
+                  hidden={!isActive}
+                  className={isActive ? "flex flex-col gap-5" : "hidden"}
+                >
+                  <FieldGroup>
+                    <Field>
+                      <FieldLabel htmlFor={`${formId}-${locale}-title`}>
+                        {t("title")}
+                        {required ? null : (
+                          <span className="ms-1 text-sm font-normal text-muted-foreground">
+                            {t("localeOptional")}
+                          </span>
+                        )}
+                      </FieldLabel>
+                      <Input
+                        id={`${formId}-${locale}-title`}
+                        value={translation.title}
+                        onChange={(event) => updateTranslation(locale, "title", event.target.value)}
+                        aria-invalid={fieldErrors[`translations.${locale}.title`] ? true : undefined}
+                        dir={locale === "ar" ? "rtl" : undefined}
+                        autoComplete="off"
+                      />
+                      {fieldErrors[`translations.${locale}.title`] ? (
+                        <FieldError>{fieldErrors[`translations.${locale}.title`]}</FieldError>
+                      ) : null}
+                    </Field>
 
-        <Field>
-          <FieldLabel htmlFor={`${formId}-parentId`}>{t("parentId")}</FieldLabel>
-          <Input
-            id={`${formId}-parentId`}
-            name="parentId"
-            value={draft.parentId ?? ""}
-            onChange={(event) =>
-              setDraft((c) => ({ ...c, parentId: normalizeParentId(event.target.value) }))
-            }
-            aria-invalid={fieldErrors.parentId ? true : undefined}
-            aria-describedby={`${formId}-parentId-description`}
-            autoComplete="off"
-            placeholder={t("parentIdPlaceholder")}
-          />
-          <FieldDescription id={`${formId}-parentId-description`}>
-            {t("parentIdDescription")}
-          </FieldDescription>
-          {fieldErrors.parentId ? <FieldError>{fieldErrors.parentId}</FieldError> : null}
-        </Field>
-
-        <Field>
-          <FieldLabel htmlFor={`${formId}-order`}>{t("order")}</FieldLabel>
-          <Input
-            id={`${formId}-order`}
-            name="order"
-            type="number"
-            min={0}
-            step={1}
-            value={draft.order}
-            onChange={(event) => setDraft((c) => ({ ...c, order: parseOrder(event.target.value) }))}
-            aria-invalid={fieldErrors.order ? true : undefined}
-          />
-          {fieldErrors.order ? <FieldError>{fieldErrors.order}</FieldError> : null}
-        </Field>
-      </FieldGroup>
-
-      <PageHeroPicker
-        value={draft.heroMediaId}
-        onChange={(heroMediaId) => setDraft((c) => ({ ...c, heroMediaId }))}
-        initialHero={initialHero}
-        uploadPublicUrl={uploadPublicUrl}
-      />
-      {fieldErrors.heroMediaId ? (
-        <p role="alert" className="text-sm text-destructive">
-          {fieldErrors.heroMediaId}
-        </p>
-      ) : null}
-
-      <FieldSet className="gap-4">
-        <FieldLegend>{t("translationsTitle")}</FieldLegend>
-        <PageLocaleTabs
-          active={activeLocale}
-          labels={{
-            id: t("locale.id"),
-            en: t("locale.en"),
-            ar: t("locale.ar"),
-          }}
-          hasTranslation={hasTranslation}
-          onChange={setActiveLocale}
-        />
-
-        {PAGE_EDITOR_LOCALES.map((locale) => {
-          const required = locale === "id";
-          const translation = draft.translations[locale];
-          const isActive = locale === activeLocale;
-          return (
-            <div
-              key={locale}
-              role="tabpanel"
-              id={`page-locale-panel-${locale}`}
-              aria-labelledby={`page-locale-tab-${locale}`}
-              hidden={!isActive}
-              className={isActive ? "flex flex-col gap-5" : "hidden"}
-            >
-              <FieldGroup>
-                <Field>
-                  <FieldLabel htmlFor={`${formId}-${locale}-title`}>
-                    {t("title")}
-                    {required ? null : (
-                      <span className="ms-1 text-sm font-normal text-muted-foreground">
-                        {t("localeOptional")}
+                    <Field>
+                      <span id={`${formId}-${locale}-content-label`} className="text-sm font-medium">
+                        {t("content")}
                       </span>
-                    )}
-                  </FieldLabel>
-                  <Input
-                    id={`${formId}-${locale}-title`}
-                    value={translation.title}
-                    onChange={(event) => updateTranslation(locale, "title", event.target.value)}
-                    aria-invalid={fieldErrors[`translations.${locale}.title`] ? true : undefined}
-                    dir={locale === "ar" ? "rtl" : undefined}
-                    autoComplete="off"
-                  />
-                  {fieldErrors[`translations.${locale}.title`] ? (
-                    <FieldError>{fieldErrors[`translations.${locale}.title`]}</FieldError>
-                  ) : null}
-                </Field>
+                      <PageRichTextField
+                        value={translation.content}
+                        onChange={(html) => updateTranslation(locale, "content", html)}
+                        ariaLabel={t("content")}
+                        dir={locale === "ar" ? "rtl" : undefined}
+                      />
+                      <FieldDescription>{t("contentDescription")}</FieldDescription>
+                      {fieldErrors[`translations.${locale}.content`] ? (
+                        <FieldError>{fieldErrors[`translations.${locale}.content`]}</FieldError>
+                      ) : null}
+                    </Field>
 
-                <Field>
-                  <span id={`${formId}-${locale}-content-label`} className="text-sm font-medium">
-                    {t("content")}
-                  </span>
-                  <PageRichTextField
-                    value={translation.content}
-                    onChange={(html) => updateTranslation(locale, "content", html)}
-                    ariaLabel={t("content")}
-                    dir={locale === "ar" ? "rtl" : undefined}
-                  />
-                  <FieldDescription>{t("contentDescription")}</FieldDescription>
-                  {fieldErrors[`translations.${locale}.content`] ? (
-                    <FieldError>{fieldErrors[`translations.${locale}.content`]}</FieldError>
-                  ) : null}
-                </Field>
+                    <Field>
+                      <FieldLabel htmlFor={`${formId}-${locale}-metaTitle`}>
+                        {t("metaTitle")}
+                      </FieldLabel>
+                      <Input
+                        id={`${formId}-${locale}-metaTitle`}
+                        value={translation.metaTitle}
+                        onChange={(event) => updateTranslation(locale, "metaTitle", event.target.value)}
+                        aria-invalid={fieldErrors[`translations.${locale}.metaTitle`] ? true : undefined}
+                        dir={locale === "ar" ? "rtl" : undefined}
+                        autoComplete="off"
+                      />
+                      {fieldErrors[`translations.${locale}.metaTitle`] ? (
+                        <FieldError>{fieldErrors[`translations.${locale}.metaTitle`]}</FieldError>
+                      ) : null}
+                    </Field>
 
-                <Field>
-                  <FieldLabel htmlFor={`${formId}-${locale}-metaTitle`}>
-                    {t("metaTitle")}
-                  </FieldLabel>
-                  <Input
-                    id={`${formId}-${locale}-metaTitle`}
-                    value={translation.metaTitle}
-                    onChange={(event) => updateTranslation(locale, "metaTitle", event.target.value)}
-                    aria-invalid={fieldErrors[`translations.${locale}.metaTitle`] ? true : undefined}
-                    dir={locale === "ar" ? "rtl" : undefined}
-                    autoComplete="off"
-                  />
-                  {fieldErrors[`translations.${locale}.metaTitle`] ? (
-                    <FieldError>{fieldErrors[`translations.${locale}.metaTitle`]}</FieldError>
-                  ) : null}
-                </Field>
+                    <Field>
+                      <FieldLabel htmlFor={`${formId}-${locale}-metaDesc`}>
+                        {t("metaDesc")}
+                      </FieldLabel>
+                      <Textarea
+                        id={`${formId}-${locale}-metaDesc`}
+                        rows={2}
+                        value={translation.metaDesc}
+                        onChange={(event) => updateTranslation(locale, "metaDesc", event.target.value)}
+                        aria-invalid={fieldErrors[`translations.${locale}.metaDesc`] ? true : undefined}
+                        dir={locale === "ar" ? "rtl" : undefined}
+                      />
+                      {fieldErrors[`translations.${locale}.metaDesc`] ? (
+                        <FieldError>{fieldErrors[`translations.${locale}.metaDesc`]}</FieldError>
+                      ) : null}
+                    </Field>
+                  </FieldGroup>
+                </div>
+              );
+            })}
+          </FieldSet>
+        }
+        sidebar={
+          <div className="flex flex-col gap-4">
+            <Card>
+              <CardContent className="flex flex-wrap items-center gap-3">
+                <Button type="submit" disabled={submitting || mutationBusy}>
+                  {submitting ? <Spinner data-icon /> : null}
+                  {submitting
+                    ? t("submitting")
+                    : mode === "create"
+                      ? t("submitCreate")
+                      : t("submitUpdate")}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => router.push(listHref)}>
+                  {t("cancel")}
+                </Button>
+              </CardContent>
+            </Card>
 
-                <Field>
-                  <FieldLabel htmlFor={`${formId}-${locale}-metaDesc`}>
-                    {t("metaDesc")}
-                  </FieldLabel>
-                  <Textarea
-                    id={`${formId}-${locale}-metaDesc`}
-                    rows={2}
-                    value={translation.metaDesc}
-                    onChange={(event) => updateTranslation(locale, "metaDesc", event.target.value)}
-                    aria-invalid={fieldErrors[`translations.${locale}.metaDesc`] ? true : undefined}
-                    dir={locale === "ar" ? "rtl" : undefined}
-                  />
-                  {fieldErrors[`translations.${locale}.metaDesc`] ? (
-                    <FieldError>{fieldErrors[`translations.${locale}.metaDesc`]}</FieldError>
-                  ) : null}
-                </Field>
-              </FieldGroup>
-            </div>
-          );
-        })}
-      </FieldSet>
+            <Card>
+              <CardContent>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-slug`}>{t("slug")}</FieldLabel>
+                    <Input
+                      id={`${formId}-slug`}
+                      name="slug"
+                      value={draft.slug}
+                      onChange={(event) => setDraft((c) => ({ ...c, slug: event.target.value }))}
+                      aria-invalid={fieldErrors.slug ? true : undefined}
+                      aria-describedby={`${formId}-slug-description`}
+                      autoComplete="off"
+                    />
+                    <FieldDescription id={`${formId}-slug-description`}>
+                      {t("slugDescription")}
+                    </FieldDescription>
+                    {fieldErrors.slug ? <FieldError>{fieldErrors.slug}</FieldError> : null}
+                  </Field>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" disabled={submitting || mutationBusy}>
-          {submitting ? <Spinner data-icon /> : null}
-          {submitting
-            ? t("submitting")
-            : mode === "create"
-              ? t("submitCreate")
-              : t("submitUpdate")}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.push(listHref)}>
-          {t("cancel")}
-        </Button>
-      </div>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-parentId`}>{t("parentId")}</FieldLabel>
+                    <Input
+                      id={`${formId}-parentId`}
+                      name="parentId"
+                      value={draft.parentId ?? ""}
+                      onChange={(event) =>
+                        setDraft((c) => ({ ...c, parentId: normalizeParentId(event.target.value) }))
+                      }
+                      aria-invalid={fieldErrors.parentId ? true : undefined}
+                      aria-describedby={`${formId}-parentId-description`}
+                      autoComplete="off"
+                      placeholder={t("parentIdPlaceholder")}
+                    />
+                    <FieldDescription id={`${formId}-parentId-description`}>
+                      {t("parentIdDescription")}
+                    </FieldDescription>
+                    {fieldErrors.parentId ? <FieldError>{fieldErrors.parentId}</FieldError> : null}
+                  </Field>
+
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-order`}>{t("order")}</FieldLabel>
+                    <Input
+                      id={`${formId}-order`}
+                      name="order"
+                      type="number"
+                      min={0}
+                      step={1}
+                      value={draft.order}
+                      onChange={(event) => setDraft((c) => ({ ...c, order: parseOrder(event.target.value) }))}
+                      aria-invalid={fieldErrors.order ? true : undefined}
+                    />
+                    {fieldErrors.order ? <FieldError>{fieldErrors.order}</FieldError> : null}
+                  </Field>
+                </FieldGroup>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent>
+                <PageHeroPicker
+                  value={draft.heroMediaId}
+                  onChange={(heroMediaId) => setDraft((c) => ({ ...c, heroMediaId }))}
+                  initialHero={initialHero}
+                  uploadPublicUrl={uploadPublicUrl}
+                />
+                {fieldErrors.heroMediaId ? (
+                  <p role="alert" className="mt-2 text-sm text-destructive">
+                    {fieldErrors.heroMediaId}
+                  </p>
+                ) : null}
+              </CardContent>
+            </Card>
+          </div>
+        }
+      />
     </form>
   );
 }

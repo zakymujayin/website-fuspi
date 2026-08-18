@@ -3,7 +3,9 @@
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useState, useId, type FormEvent } from "react";
+import { AdminFormLayout } from "@/components/admin/admin-form-layout";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -105,87 +107,97 @@ export function FaqEditorForm({ mode, listHref, initialData, pageId, expectedVer
         </div>
       )}
 
-      <FieldSet>
-        <FieldLegend>{t("FAQ.commonFields")}</FieldLegend>
-        <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-order`}>{t("FAQ.order")}</FieldLabel>
-            <Input id={`${formId}-order`} name="order" type="number" min={0} max={10000} defaultValue={(input.order as number) ?? 0} required />
-          </Field>
-          <Field orientation="horizontal">
-            <Checkbox id={`${formId}-visible`} checked={isVisible} onCheckedChange={(c) => setIsVisible(c === true)} />
-            <FieldLabel htmlFor={`${formId}-visible`}>{t("FAQ.isVisible")}</FieldLabel>
-          </Field>
-        </FieldGroup>
-      </FieldSet>
+      <AdminFormLayout
+        main={
+          <FieldSet>
+            <FieldLegend>{t("translations")}</FieldLegend>
+            <div role="tablist" aria-label={t("localeTabs")} className="flex gap-1">
+              {localeTabs}
+            </div>
 
-      <FieldSet>
-        <FieldLegend>{t("translations")}</FieldLegend>
-        <div role="tablist" aria-label={t("localeTabs")} className="flex gap-1">
-          {localeTabs}
-        </div>
+            <FieldGroup>
+              {locale === "id" && (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-id-category`}>{t("FAQ.category")} (ID)</FieldLabel>
+                    <Input id={`${formId}-id-category`} name="id.category" defaultValue={idTr.category} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-id-question`}>{t("FAQ.question")} (ID) *</FieldLabel>
+                    <Input id={`${formId}-id-question`} name="id.question" defaultValue={idTr.question} required />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-id-answer`}>{t("FAQ.answer")} (ID) *</FieldLabel>
+                    <Textarea id={`${formId}-id-answer`} name="id.answer" defaultValue={idTr.answer} rows={6} required />
+                  </Field>
+                </>
+              )}
+              {locale === "en" && (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-en-category`}>{t("FAQ.category")} (EN)</FieldLabel>
+                    <Input id={`${formId}-en-category`} name="en.category" defaultValue={enTr.category} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-en-question`}>{t("FAQ.question")} (EN)</FieldLabel>
+                    <Input id={`${formId}-en-question`} name="en.question" defaultValue={enTr.question} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-en-answer`}>{t("FAQ.answer")} (EN)</FieldLabel>
+                    <Textarea id={`${formId}-en-answer`} name="en.answer" defaultValue={enTr.answer} rows={6} />
+                  </Field>
+                </>
+              )}
+              {locale === "ar" && (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-ar-category`}>{t("FAQ.category")} (AR)</FieldLabel>
+                    <Input id={`${formId}-ar-category`} name="ar.category" defaultValue={arTr.category} dir="rtl" />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-ar-question`}>{t("FAQ.question")} (AR)</FieldLabel>
+                    <Input id={`${formId}-ar-question`} name="ar.question" defaultValue={arTr.question} dir="rtl" />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-ar-answer`}>{t("FAQ.answer")} (AR)</FieldLabel>
+                    <Textarea id={`${formId}-ar-answer`} name="ar.answer" defaultValue={arTr.answer} rows={6} dir="rtl" />
+                  </Field>
+                </>
+              )}
+            </FieldGroup>
+          </FieldSet>
+        }
+        sidebar={
+          <div className="flex flex-col gap-4">
+            <Card>
+              <CardContent className="flex items-center gap-3">
+                <Button type="submit" disabled={submitting}>
+                  {submitting && <Spinner className="mr-1" />}
+                  {mode === "create" ? t("createAction") : t("updateAction")}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => router.push(listHref)} disabled={submitting}>
+                  {t("cancel")}
+                </Button>
+              </CardContent>
+            </Card>
 
-        <FieldGroup>
-          {locale === "id" && (
-            <>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-id-category`}>{t("FAQ.category")} (ID)</FieldLabel>
-                <Input id={`${formId}-id-category`} name="id.category" defaultValue={idTr.category} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-id-question`}>{t("FAQ.question")} (ID) *</FieldLabel>
-                <Input id={`${formId}-id-question`} name="id.question" defaultValue={idTr.question} required />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-id-answer`}>{t("FAQ.answer")} (ID) *</FieldLabel>
-                <Textarea id={`${formId}-id-answer`} name="id.answer" defaultValue={idTr.answer} rows={6} required />
-              </Field>
-            </>
-          )}
-          {locale === "en" && (
-            <>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-en-category`}>{t("FAQ.category")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-category`} name="en.category" defaultValue={enTr.category} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-en-question`}>{t("FAQ.question")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-question`} name="en.question" defaultValue={enTr.question} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-en-answer`}>{t("FAQ.answer")} (EN)</FieldLabel>
-                <Textarea id={`${formId}-en-answer`} name="en.answer" defaultValue={enTr.answer} rows={6} />
-              </Field>
-            </>
-          )}
-          {locale === "ar" && (
-            <>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-ar-category`}>{t("FAQ.category")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-category`} name="ar.category" defaultValue={arTr.category} dir="rtl" />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-ar-question`}>{t("FAQ.question")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-question`} name="ar.question" defaultValue={arTr.question} dir="rtl" />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-ar-answer`}>{t("FAQ.answer")} (AR)</FieldLabel>
-                <Textarea id={`${formId}-ar-answer`} name="ar.answer" defaultValue={arTr.answer} rows={6} dir="rtl" />
-              </Field>
-            </>
-          )}
-        </FieldGroup>
-      </FieldSet>
-
-      <div className="flex items-center gap-3">
-        <Button type="submit" disabled={submitting}>
-          {submitting && <Spinner className="mr-1" />}
-          {mode === "create" ? t("createAction") : t("updateAction")}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.push(listHref)} disabled={submitting}>
-          {t("cancel")}
-        </Button>
-      </div>
+            <Card>
+              <CardContent>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-order`}>{t("FAQ.order")}</FieldLabel>
+                    <Input id={`${formId}-order`} name="order" type="number" min={0} max={10000} defaultValue={(input.order as number) ?? 0} required />
+                  </Field>
+                  <Field orientation="horizontal">
+                    <Checkbox id={`${formId}-visible`} checked={isVisible} onCheckedChange={(c) => setIsVisible(c === true)} />
+                    <FieldLabel htmlFor={`${formId}-visible`}>{t("FAQ.isVisible")}</FieldLabel>
+                  </Field>
+                </FieldGroup>
+              </CardContent>
+            </Card>
+          </div>
+        }
+      />
     </form>
   );
 }

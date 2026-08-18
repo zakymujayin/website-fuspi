@@ -4,7 +4,9 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useId, useState, type FormEvent } from "react";
 
+import { AdminFormLayout } from "@/components/admin/admin-form-layout";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Spinner } from "@/components/ui/spinner";
@@ -94,66 +96,79 @@ export function StatisticEditorForm({ mode, listHref, initialData, pageId }: Pro
         </div>
       )}
 
-      <FieldSet>
-        <FieldLegend>{t("statistic.commonFields")}</FieldLegend>
-        <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-value`}>{t("statistic.value")}</FieldLabel>
-            <Input id={`${formId}-value`} name="value" defaultValue={(input.value as string) ?? ""} placeholder="100" required />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-suffix`}>{t("statistic.suffix")}</FieldLabel>
-            <Input id={`${formId}-suffix`} name="suffix" defaultValue={(input.suffix as string) ?? ""} placeholder="+" />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-icon`}>{t("statistic.icon")}</FieldLabel>
-            <Input id={`${formId}-icon`} name="icon" defaultValue={(input.icon as string) ?? ""} placeholder="graduation-cap" />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-order`}>{t("order")}</FieldLabel>
-            <Input id={`${formId}-order`} name="order" type="number" min={0} max={10000} defaultValue={(input.order as number) ?? 0} required />
-          </Field>
-          <Field orientation="horizontal">
-            <Checkbox id={`${formId}-visible`} checked={isVisible} onCheckedChange={(c) => setIsVisible(c === true)} />
-            <FieldLabel htmlFor={`${formId}-visible`}>{t("isVisible")}</FieldLabel>
-          </Field>
-        </FieldGroup>
-      </FieldSet>
+      <AdminFormLayout
+        main={
+          <FieldSet>
+            <FieldLegend>{t("translations")}</FieldLegend>
+            <div role="tablist" aria-label={t("localeTabs")} className="flex gap-1">{localeTabs}</div>
+            <FieldGroup>
+              {locale === "id" && (
+                <Field>
+                  <FieldLabel htmlFor={`${formId}-id-label`}>{t("statistic.label")} (ID) *</FieldLabel>
+                  <Input id={`${formId}-id-label`} name="id.label" defaultValue={idTr.label} required />
+                </Field>
+              )}
+              {locale === "en" && (
+                <Field>
+                  <FieldLabel htmlFor={`${formId}-en-label`}>{t("statistic.label")} (EN)</FieldLabel>
+                  <Input id={`${formId}-en-label`} name="en.label" defaultValue={enTr.label} />
+                </Field>
+              )}
+              {locale === "ar" && (
+                <Field>
+                  <FieldLabel htmlFor={`${formId}-ar-label`}>{t("statistic.label")} (AR)</FieldLabel>
+                  <Input id={`${formId}-ar-label`} name="ar.label" defaultValue={arTr.label} dir="rtl" />
+                </Field>
+              )}
+            </FieldGroup>
+          </FieldSet>
+        }
+        sidebar={
+          <div className="flex flex-col gap-4">
+            <Card>
+              <CardContent className="flex items-center gap-3">
+                <Button type="submit" disabled={submitting}>
+                  {submitting && <Spinner className="mr-1" />}
+                  {mode === "create" ? t("createAction") : t("updateAction")}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => router.push(listHref)} disabled={submitting}>
+                  {t("cancel")}
+                </Button>
+              </CardContent>
+            </Card>
 
-      <FieldSet>
-        <FieldLegend>{t("translations")}</FieldLegend>
-        <div role="tablist" aria-label={t("localeTabs")} className="flex gap-1">{localeTabs}</div>
-        <FieldGroup>
-          {locale === "id" && (
-            <Field>
-              <FieldLabel htmlFor={`${formId}-id-label`}>{t("statistic.label")} (ID) *</FieldLabel>
-              <Input id={`${formId}-id-label`} name="id.label" defaultValue={idTr.label} required />
-            </Field>
-          )}
-          {locale === "en" && (
-            <Field>
-              <FieldLabel htmlFor={`${formId}-en-label`}>{t("statistic.label")} (EN)</FieldLabel>
-              <Input id={`${formId}-en-label`} name="en.label" defaultValue={enTr.label} />
-            </Field>
-          )}
-          {locale === "ar" && (
-            <Field>
-              <FieldLabel htmlFor={`${formId}-ar-label`}>{t("statistic.label")} (AR)</FieldLabel>
-              <Input id={`${formId}-ar-label`} name="ar.label" defaultValue={arTr.label} dir="rtl" />
-            </Field>
-          )}
-        </FieldGroup>
-      </FieldSet>
-
-      <div className="flex items-center gap-3">
-        <Button type="submit" disabled={submitting}>
-          {submitting && <Spinner className="mr-1" />}
-          {mode === "create" ? t("createAction") : t("updateAction")}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.push(listHref)} disabled={submitting}>
-          {t("cancel")}
-        </Button>
-      </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>{t("statistic.commonFields")}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-value`}>{t("statistic.value")}</FieldLabel>
+                    <Input id={`${formId}-value`} name="value" defaultValue={(input.value as string) ?? ""} placeholder="100" required />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-suffix`}>{t("statistic.suffix")}</FieldLabel>
+                    <Input id={`${formId}-suffix`} name="suffix" defaultValue={(input.suffix as string) ?? ""} placeholder="+" />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-icon`}>{t("statistic.icon")}</FieldLabel>
+                    <Input id={`${formId}-icon`} name="icon" defaultValue={(input.icon as string) ?? ""} placeholder="graduation-cap" />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-order`}>{t("order")}</FieldLabel>
+                    <Input id={`${formId}-order`} name="order" type="number" min={0} max={10000} defaultValue={(input.order as number) ?? 0} required />
+                  </Field>
+                  <Field orientation="horizontal">
+                    <Checkbox id={`${formId}-visible`} checked={isVisible} onCheckedChange={(c) => setIsVisible(c === true)} />
+                    <FieldLabel htmlFor={`${formId}-visible`}>{t("isVisible")}</FieldLabel>
+                  </Field>
+                </FieldGroup>
+              </CardContent>
+            </Card>
+          </div>
+        }
+      />
     </form>
   );
 }

@@ -3,7 +3,9 @@
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useState, useId, type FormEvent } from "react";
+import { AdminFormLayout } from "@/components/admin/admin-form-layout";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -113,99 +115,109 @@ export function EventEditorForm({ mode, listHref, initialData, pageId, expectedV
         </div>
       )}
 
-      <FieldSet>
-        <FieldLegend>{t("EVENT.commonFields")}</FieldLegend>
-        <FieldGroup>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-slug`}>{t("EVENT.slug")}</FieldLabel>
-            <Input id={`${formId}-slug`} name="slug" defaultValue={(input.slug as string) ?? ""} required />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-startAt`}>{t("EVENT.startAt")}</FieldLabel>
-            <Input id={`${formId}-startAt`} name="startAt" type="datetime-local" defaultValue={toDatetimeLocal(input.startAt as string)} required />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-endAt`}>{t("EVENT.endAt")}</FieldLabel>
-            <Input id={`${formId}-endAt`} name="endAt" type="datetime-local" defaultValue={toDatetimeLocal(input.endAt as string)} />
-          </Field>
-          <Field>
-            <FieldLabel htmlFor={`${formId}-registrationUrl`}>{t("EVENT.registrationUrl")}</FieldLabel>
-            <Input id={`${formId}-registrationUrl`} name="registrationUrl" type="url" defaultValue={(input.registrationUrl as string) ?? ""} />
-          </Field>
-          <Field orientation="horizontal">
-            <Checkbox id={`${formId}-published`} checked={isPublished} onCheckedChange={(c) => setIsPublished(c === true)} />
-            <FieldLabel htmlFor={`${formId}-published`}>{t("EVENT.isPublished")}</FieldLabel>
-          </Field>
-        </FieldGroup>
-      </FieldSet>
+      <AdminFormLayout
+        main={
+          <FieldSet>
+            <FieldLegend>{t("translations")}</FieldLegend>
+            <div role="tablist" aria-label={t("localeTabs")} className="flex gap-1">
+              {localeTabs}
+            </div>
 
-      <FieldSet>
-        <FieldLegend>{t("translations")}</FieldLegend>
-        <div role="tablist" aria-label={t("localeTabs")} className="flex gap-1">
-          {localeTabs}
-        </div>
+            <FieldGroup>
+              {locale === "id" && (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-id-title`}>{t("EVENT.title")} (ID) *</FieldLabel>
+                    <Input id={`${formId}-id-title`} name="id.title" defaultValue={idTr.title} required />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-id-description`}>{t("EVENT.description")} (ID)</FieldLabel>
+                    <Textarea id={`${formId}-id-description`} name="id.description" defaultValue={idTr.description} rows={4} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-id-location`}>{t("EVENT.location")} (ID)</FieldLabel>
+                    <Input id={`${formId}-id-location`} name="id.location" defaultValue={idTr.location} />
+                  </Field>
+                </>
+              )}
+              {locale === "en" && (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-en-title`}>{t("EVENT.title")} (EN)</FieldLabel>
+                    <Input id={`${formId}-en-title`} name="en.title" defaultValue={enTr.title} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-en-description`}>{t("EVENT.description")} (EN)</FieldLabel>
+                    <Textarea id={`${formId}-en-description`} name="en.description" defaultValue={enTr.description} rows={4} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-en-location`}>{t("EVENT.location")} (EN)</FieldLabel>
+                    <Input id={`${formId}-en-location`} name="en.location" defaultValue={enTr.location} />
+                  </Field>
+                </>
+              )}
+              {locale === "ar" && (
+                <>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-ar-title`}>{t("EVENT.title")} (AR)</FieldLabel>
+                    <Input id={`${formId}-ar-title`} name="ar.title" defaultValue={arTr.title} dir="rtl" />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-ar-description`}>{t("EVENT.description")} (AR)</FieldLabel>
+                    <Textarea id={`${formId}-ar-description`} name="ar.description" defaultValue={arTr.description} rows={4} dir="rtl" />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-ar-location`}>{t("EVENT.location")} (AR)</FieldLabel>
+                    <Input id={`${formId}-ar-location`} name="ar.location" defaultValue={arTr.location} dir="rtl" />
+                  </Field>
+                </>
+              )}
+            </FieldGroup>
+          </FieldSet>
+        }
+        sidebar={
+          <div className="flex flex-col gap-4">
+            <Card>
+              <CardContent className="flex items-center gap-3">
+                <Button type="submit" disabled={submitting}>
+                  {submitting && <Spinner className="mr-1" />}
+                  {mode === "create" ? t("createAction") : t("updateAction")}
+                </Button>
+                <Button type="button" variant="outline" onClick={() => router.push(listHref)} disabled={submitting}>
+                  {t("cancel")}
+                </Button>
+              </CardContent>
+            </Card>
 
-        <FieldGroup>
-          {locale === "id" && (
-            <>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-id-title`}>{t("EVENT.title")} (ID) *</FieldLabel>
-                <Input id={`${formId}-id-title`} name="id.title" defaultValue={idTr.title} required />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-id-description`}>{t("EVENT.description")} (ID)</FieldLabel>
-                <Textarea id={`${formId}-id-description`} name="id.description" defaultValue={idTr.description} rows={4} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-id-location`}>{t("EVENT.location")} (ID)</FieldLabel>
-                <Input id={`${formId}-id-location`} name="id.location" defaultValue={idTr.location} />
-              </Field>
-            </>
-          )}
-          {locale === "en" && (
-            <>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-en-title`}>{t("EVENT.title")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-title`} name="en.title" defaultValue={enTr.title} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-en-description`}>{t("EVENT.description")} (EN)</FieldLabel>
-                <Textarea id={`${formId}-en-description`} name="en.description" defaultValue={enTr.description} rows={4} />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-en-location`}>{t("EVENT.location")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-location`} name="en.location" defaultValue={enTr.location} />
-              </Field>
-            </>
-          )}
-          {locale === "ar" && (
-            <>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-ar-title`}>{t("EVENT.title")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-title`} name="ar.title" defaultValue={arTr.title} dir="rtl" />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-ar-description`}>{t("EVENT.description")} (AR)</FieldLabel>
-                <Textarea id={`${formId}-ar-description`} name="ar.description" defaultValue={arTr.description} rows={4} dir="rtl" />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-ar-location`}>{t("EVENT.location")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-location`} name="ar.location" defaultValue={arTr.location} dir="rtl" />
-              </Field>
-            </>
-          )}
-        </FieldGroup>
-      </FieldSet>
-
-      <div className="flex items-center gap-3">
-        <Button type="submit" disabled={submitting}>
-          {submitting && <Spinner className="mr-1" />}
-          {mode === "create" ? t("createAction") : t("updateAction")}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.push(listHref)} disabled={submitting}>
-          {t("cancel")}
-        </Button>
-      </div>
+            <Card>
+              <CardContent>
+                <FieldGroup>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-slug`}>{t("EVENT.slug")}</FieldLabel>
+                    <Input id={`${formId}-slug`} name="slug" defaultValue={(input.slug as string) ?? ""} required />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-startAt`}>{t("EVENT.startAt")}</FieldLabel>
+                    <Input id={`${formId}-startAt`} name="startAt" type="datetime-local" defaultValue={toDatetimeLocal(input.startAt as string)} required />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-endAt`}>{t("EVENT.endAt")}</FieldLabel>
+                    <Input id={`${formId}-endAt`} name="endAt" type="datetime-local" defaultValue={toDatetimeLocal(input.endAt as string)} />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor={`${formId}-registrationUrl`}>{t("EVENT.registrationUrl")}</FieldLabel>
+                    <Input id={`${formId}-registrationUrl`} name="registrationUrl" type="url" defaultValue={(input.registrationUrl as string) ?? ""} />
+                  </Field>
+                  <Field orientation="horizontal">
+                    <Checkbox id={`${formId}-published`} checked={isPublished} onCheckedChange={(c) => setIsPublished(c === true)} />
+                    <FieldLabel htmlFor={`${formId}-published`}>{t("EVENT.isPublished")}</FieldLabel>
+                  </Field>
+                </FieldGroup>
+              </CardContent>
+            </Card>
+          </div>
+        }
+      />
     </form>
   );
 }
