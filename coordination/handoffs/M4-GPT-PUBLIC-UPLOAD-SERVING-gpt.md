@@ -5,7 +5,7 @@
 - Task ID: M4-GPT-PUBLIC-UPLOAD-SERVING
 - Branch: ai/gpt/m4-facility-homepage-admin
 - Base SHA: e951a79
-- Head SHA: PENDING
+- Head SHA: 96738fb
 - Status: review
 
 ## Summary
