@@ -218,6 +218,24 @@
     "altLabel": "Teks alternatif: {alt}",
     "uploadedBy": "Diunggah oleh {name}",
     "loading": "Memuat pustaka media…",
+    "delete": {
+      "action": "Hapus",
+      "pending": "Menghapus…",
+      "confirmTitle": "Hapus media ini?",
+      "confirmDescription": "Media {name} akan dihapus dari pustaka bila tidak sedang digunakan di konten lain.",
+      "confirmAction": "Hapus media",
+      "cancel": "Batal",
+      "error": {
+        "SESSION_INVALID": "Sesi Anda telah berakhir. Masuk kembali lalu coba lagi.",
+        "CSRF_INVALID": "Permintaan tidak dapat diverifikasi. Muat ulang halaman lalu coba lagi.",
+        "REQUEST_INVALID": "Permintaan tidak dapat diproses. Muat ulang halaman lalu coba lagi.",
+        "VALIDATION_FAILED": "Media tidak dapat dihapus karena data tidak valid.",
+        "NOT_FOUND": "Media tidak ditemukan atau Anda tidak memiliki akses.",
+        "MEDIA_IN_USE": "Media masih digunakan di konten lain, jadi belum bisa dihapus.",
+        "UPLOAD_FAILED": "Media tidak dapat dihapus saat ini. Coba lagi.",
+        "UNAVAILABLE": "Media tidak dapat dihapus saat ini. Coba lagi beberapa saat lagi."
+      }
+    },
     "pagination": {
       "ariaLabel": "Navigasi halaman pustaka media",
       "previous": "Halaman sebelumnya",

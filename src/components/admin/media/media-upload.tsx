@@ -16,6 +16,8 @@ export const MAX_PDF_BYTES = 20_971_520;
 export const MAX_IMAGE_COUNT = 20;
 export const ACCEPTED_IMAGE_TYPE = "image/webp";
 export const ACCEPTED_PDF_TYPE = "application/pdf";
+const ACCEPTED_IMAGE_INPUT = `${ACCEPTED_IMAGE_TYPE},.webp`;
+const FALLBACK_WEBP_BROWSER_TYPES = new Set(["", "application/octet-stream"]);
 
 export type UploadPolicy = "CMS_IMAGE" | "PUBLIC_PDF";
 
@@ -39,6 +41,26 @@ export function uploadFailureKey(code: unknown): string {
     : "error.UNAVAILABLE";
 }
 
+export function isAcceptedImageFile(file: Pick<File, "name" | "type">): boolean {
+  const mimeType = file.type.trim().toLowerCase();
+  if (mimeType === ACCEPTED_IMAGE_TYPE) return true;
+  return FALLBACK_WEBP_BROWSER_TYPES.has(mimeType) && file.name.trim().toLowerCase().endsWith(".webp");
+}
+
+export function toSafeImageUploadName(name: string): string {
+  const normalized = name.normalize("NFKC").trim();
+  const lower = normalized.toLowerCase();
+  const stem = lower.endsWith(".webp")
+    ? normalized.slice(0, -".webp".length)
+    : normalized.replace(/\.[^.]*$/u, "");
+  const safeStem = stem
+    .replace(/[^\p{L}\p{N} _()-]+/gu, "-")
+    .replace(/\s+/gu, " ")
+    .replace(/-+/gu, "-")
+    .replace(/^[- ]+|[- ]+$/gu, "");
+  return `${safeStem || "media"}.webp`;
+}
+
 export type BatchValidation =
   | { ok: true }
   | {
@@ -53,7 +75,7 @@ export function validateImageBatch(rows: readonly ImageUploadRow[]): BatchValida
   if (rows.length > MAX_IMAGE_COUNT) return { ok: false, index: null, reason: "count" };
   for (let index = 0; index < rows.length; index += 1) {
     const { file, alt, isDecorative } = rows[index];
-    if (file.type !== ACCEPTED_IMAGE_TYPE) return { ok: false, index, reason: "type" };
+    if (!isAcceptedImageFile(file)) return { ok: false, index, reason: "type" };
     if (file.size > MAX_IMAGE_BYTES) return { ok: false, index, reason: "size" };
     if (isDecorative && alt.trim().length > 0) return { ok: false, index, reason: "altNotEmpty" };
     if (!isDecorative && alt.trim().length === 0) return { ok: false, index, reason: "altRequired" };
@@ -82,7 +104,7 @@ export function buildImageBatchFormData(rows: readonly ImageUploadRow[]): FormDa
   };
   const form = new FormData();
   form.append("metadata", JSON.stringify(metadata));
-  for (const row of rows) form.append("files", row.file);
+  for (const row of rows) form.append("files", row.file, toSafeImageUploadName(row.file.name));
   return form;
 }
 
@@ -234,7 +256,7 @@ export function MediaUpload() {
               id={`${formId}-images`}
               ref={imageInputRef}
               type="file"
-              accept={ACCEPTED_IMAGE_TYPE}
+              accept={ACCEPTED_IMAGE_INPUT}
               multiple
               onChange={(event) => {
                 const files = [...(event.target.files ?? [])];

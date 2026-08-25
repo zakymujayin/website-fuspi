@@ -21,6 +21,7 @@ const MAX_MULTIPART_OVERHEAD = 1_048_576;
 const MAX_MULTIPART_BODY_BYTES =
   ADMIN_MEDIA_IMAGE_UPLOAD_LIMIT * MAX_IMAGE_BYTES + MAX_MULTIPART_OVERHEAD;
 const MAX_METADATA_BYTES = 65_536;
+const FALLBACK_WEBP_BROWSER_TYPES = new Set(["", "application/octet-stream"]);
 
 function json(value: unknown, status = 200) {
   return Response.json(value, {status, headers: {"Cache-Control": "no-store"}});
@@ -91,6 +92,14 @@ function parseMultipart(formData: FormData) {
   }
 }
 
+function normalizeUploadMimeType(file: File): string {
+  const mimeType = file.type.trim().toLowerCase();
+  if (FALLBACK_WEBP_BROWSER_TYPES.has(mimeType) && file.name.trim().toLowerCase().endsWith(".webp")) {
+    return "image/webp";
+  }
+  return mimeType;
+}
+
 export async function POST(request: Request) {
   if (!isSameOriginRequest(request.headers)) {
     const result = failure("CSRF_INVALID");
@@ -120,7 +129,7 @@ export async function POST(request: Request) {
     }
     files.push({
       name: file.name,
-      mimeType: file.type,
+      mimeType: normalizeUploadMimeType(file),
       bytes: new Uint8Array(await file.arrayBuffer()),
     });
   }

@@ -218,6 +218,24 @@
     "altLabel": "Alternative text: {alt}",
     "uploadedBy": "Uploaded by {name}",
     "loading": "Loading media library…",
+    "delete": {
+      "action": "Delete",
+      "pending": "Deleting…",
+      "confirmTitle": "Delete this media?",
+      "confirmDescription": "Media {name} will be removed from the library if it is not used by other content.",
+      "confirmAction": "Delete media",
+      "cancel": "Cancel",
+      "error": {
+        "SESSION_INVALID": "Your session has ended. Sign in again and retry.",
+        "CSRF_INVALID": "The request could not be verified. Reload the page and try again.",
+        "REQUEST_INVALID": "The request could not be processed. Reload the page and try again.",
+        "VALIDATION_FAILED": "The media cannot be deleted because its data is invalid.",
+        "NOT_FOUND": "The media was not found or you do not have access.",
+        "MEDIA_IN_USE": "The media is still used by other content, so it cannot be deleted yet.",
+        "UPLOAD_FAILED": "The media cannot be deleted right now. Try again.",
+        "UNAVAILABLE": "The media cannot be deleted right now. Please try again shortly."
+      }
+    },
     "pagination": {
       "ariaLabel": "Media library page navigation",
       "previous": "Previous page",

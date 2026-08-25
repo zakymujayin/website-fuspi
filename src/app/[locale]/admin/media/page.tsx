@@ -38,7 +38,7 @@ export default async function AdminMediaPage({ params, searchParams }: AdminMedi
   const { page, kind } = normalizeAdminMediaQuery(rawSearchParams);
 
   const t = await getTranslations("AdminMediaLibrary");
-  const uploadPublicUrl = process.env.UPLOAD_PUBLIC_URL ?? "";
+  const uploadPublicUrl = process.env.UPLOAD_PUBLIC_URL ?? "/uploads";
 
   const result = await loadAdminMediaSafely(() =>
     listAdminMedia(
@@ -82,6 +82,22 @@ export default async function AdminMediaPage({ params, searchParams }: AdminMedi
                 decorative: t("decorative"),
                 altLabel: (alt: string) => t("altLabel", { alt }),
                 uploadedByLabel: (name: string) => t("uploadedBy", { name }),
+                deleteAction: t("delete.action"),
+                deletePending: t("delete.pending"),
+                deleteConfirmTitle: t("delete.confirmTitle"),
+                deleteConfirmDescription: (name: string) => t("delete.confirmDescription", { name }),
+                deleteConfirmAction: t("delete.confirmAction"),
+                deleteCancel: t("delete.cancel"),
+                deleteErrors: {
+                  SESSION_INVALID: t("delete.error.SESSION_INVALID"),
+                  CSRF_INVALID: t("delete.error.CSRF_INVALID"),
+                  REQUEST_INVALID: t("delete.error.REQUEST_INVALID"),
+                  VALIDATION_FAILED: t("delete.error.VALIDATION_FAILED"),
+                  NOT_FOUND: t("delete.error.NOT_FOUND"),
+                  MEDIA_IN_USE: t("delete.error.MEDIA_IN_USE"),
+                  UPLOAD_FAILED: t("delete.error.UPLOAD_FAILED"),
+                  UNAVAILABLE: t("delete.error.UNAVAILABLE"),
+                },
               }}
             />
           ) : (

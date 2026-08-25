@@ -1,6 +1,10 @@
 import type { AdminMediaItem } from "@/contracts/media-admin";
 import type { AppLocale } from "@/i18n/routing";
 
+import {
+  AdminMediaDeleteAction,
+  type AdminMediaDeleteErrorLabels,
+} from "./media-delete-action";
 import { formatAdminMediaBytes, formatAdminMediaCreatedAt, formatAdminMediaDimensions } from "./media-format";
 import { AdminMediaThumbnail } from "./media-thumbnail";
 import { resolveAdminMediaThumbnail } from "./media-thumbnail-resolver";
@@ -11,6 +15,13 @@ export type AdminMediaItemCardLabels = {
   decorative: string;
   altLabel: (alt: string) => string;
   uploadedByLabel: (name: string) => string;
+  deleteAction: string;
+  deletePending: string;
+  deleteConfirmTitle: string;
+  deleteConfirmDescription: (name: string) => string;
+  deleteConfirmAction: string;
+  deleteCancel: string;
+  deleteErrors: AdminMediaDeleteErrorLabels;
 };
 
 type AdminMediaItemCardProps = {
@@ -48,9 +59,23 @@ export function AdminMediaItemCard({ item, locale, uploadPublicUrl, labels }: Ad
         {item.uploaderName ? (
           <p className="text-xs text-slate-500">{labels.uploadedByLabel(item.uploaderName)}</p>
         ) : null}
-        <time dateTime={item.createdAt} className="mt-auto text-xs text-slate-500">
-          {formatAdminMediaCreatedAt(item.createdAt, locale)}
-        </time>
+        <div className="mt-auto flex flex-col gap-2 pt-2">
+          <time dateTime={item.createdAt} className="text-xs text-slate-500">
+            {formatAdminMediaCreatedAt(item.createdAt, locale)}
+          </time>
+          <AdminMediaDeleteAction
+            mediaId={item.id}
+            labels={{
+              action: labels.deleteAction,
+              pending: labels.deletePending,
+              confirmTitle: labels.deleteConfirmTitle,
+              confirmDescription: labels.deleteConfirmDescription(item.originalName),
+              confirmAction: labels.deleteConfirmAction,
+              cancel: labels.deleteCancel,
+              errors: labels.deleteErrors,
+            }}
+          />
+        </div>
       </div>
     </li>
   );

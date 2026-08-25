@@ -12,8 +12,10 @@ vi.mock("@/i18n/navigation", () => ({
 const {
   validateImageBatch,
   validatePdf,
+  isAcceptedImageFile,
   buildImageBatchFormData,
   buildPdfFormData,
+  toSafeImageUploadName,
   uploadFailureKey,
   MAX_IMAGE_BYTES,
   MAX_PDF_BYTES,
@@ -34,6 +36,14 @@ const img = (alt: string, isDecorative = false, bytes = 100) => ({
 describe("validateImageBatch", () => {
   it("accepts a batch of informative and decorative images", () => {
     expect(validateImageBatch([img("a"), img("", true), img("c")])).toEqual({ ok: true });
+  });
+
+  it("accepts .webp files when the browser reports an empty or octet-stream MIME", () => {
+    for (const type of ["", "application/octet-stream"]) {
+      const file = new File([new Uint8Array(100)], "WhatsApp-Image-2026-08-10-at-19.00.12.jpeg.webp", { type });
+      expect(isAcceptedImageFile(file)).toBe(true);
+      expect(validateImageBatch([{ file, alt: "Foto Acara FUSPI", isDecorative: false }])).toEqual({ ok: true });
+    }
   });
 
   it("rejects an empty batch", () => {
@@ -103,6 +113,18 @@ describe("buildImageBatchFormData", () => {
     const form = buildImageBatchFormData([img("leftover", true)]);
     expect(JSON.parse(form.get("metadata") as string).intents[0].alt).toBe("");
   });
+
+  it("submits a storage-validator-safe WebP filename for browser/WhatsApp names with extra dots", () => {
+    const unsafeName = "WhatsApp-Image-2026-08-10-at-19.00.12.jpeg.webp";
+    const form = buildImageBatchFormData([{
+      file: new File([new Uint8Array(100)], unsafeName, { type: "" }),
+      alt: "Foto Acara FUSPI",
+      isDecorative: false,
+    }]);
+    const [file] = form.getAll("files") as File[];
+    expect(toSafeImageUploadName(unsafeName)).toBe("WhatsApp-Image-2026-08-10-at-19-00-12-jpeg.webp");
+    expect(file?.name).toBe("WhatsApp-Image-2026-08-10-at-19-00-12-jpeg.webp");
+  });
 });
 
 describe("buildPdfFormData", () => {
@@ -130,17 +152,27 @@ describe("component wiring and i18n", () => {
     path.join(process.cwd(), "src/components/admin/media/media-upload.tsx"),
     "utf8",
   );
+  const uploadRouteSource = readFileSync(
+    path.join(process.cwd(), "src/app/api/admin/media/upload/route.ts"),
+    "utf8",
+  );
 
   it("posts multipart to the upload route same-origin, with image and pdf policies", () => {
     expect(source).toContain('"/api/admin/media/upload"');
     expect(source).toContain('credentials: "same-origin"');
-    expect(source).toContain('accept={ACCEPTED_IMAGE_TYPE}');
+    expect(source).toContain('accept={ACCEPTED_IMAGE_INPUT}');
     expect(source).toContain('accept={ACCEPTED_PDF_TYPE}');
     expect(source).toContain("multiple");
   });
 
   it("refreshes the grid on success", () => {
     expect(source).toContain("router.refresh()");
+  });
+
+  it("normalizes browser-empty WebP MIME before the server storage validator", () => {
+    expect(uploadRouteSource).toContain("normalizeUploadMimeType(file)");
+    expect(uploadRouteSource).toContain('file.name.trim().toLowerCase().endsWith(".webp")');
+    expect(uploadRouteSource).toContain('return "image/webp"');
   });
 
   it("uses no physical-direction utility", () => {

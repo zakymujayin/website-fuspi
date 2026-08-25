@@ -10,6 +10,7 @@ vi.mock("@/i18n/navigation", () => ({
       {children}
     </a>
   ),
+  useRouter: () => ({ refresh: () => {} }),
 }));
 
 vi.mock("next/image", () => ({
@@ -58,6 +59,22 @@ const SAMPLE_LABELS = {
   decorative: "Dekoratif (tanpa teks alternatif)",
   altLabel: (alt: string) => `Teks alternatif: ${alt}`,
   uploadedByLabel: (name: string) => `Diunggah oleh ${name}`,
+  deleteAction: "Hapus",
+  deletePending: "Menghapus...",
+  deleteConfirmTitle: "Hapus media ini?",
+  deleteConfirmDescription: (name: string) => `Media ${name} akan dihapus dari pustaka bila tidak sedang digunakan di konten lain.`,
+  deleteConfirmAction: "Hapus media",
+  deleteCancel: "Batal",
+  deleteErrors: {
+    SESSION_INVALID: "Sesi Anda telah berakhir.",
+    CSRF_INVALID: "Permintaan tidak dapat diverifikasi.",
+    REQUEST_INVALID: "Permintaan tidak dapat diproses.",
+    VALIDATION_FAILED: "Media tidak valid.",
+    NOT_FOUND: "Media tidak ditemukan.",
+    MEDIA_IN_USE: "Media masih digunakan.",
+    UPLOAD_FAILED: "Media tidak dapat dihapus.",
+    UNAVAILABLE: "Media tidak dapat dihapus saat ini.",
+  },
 };
 
 const CANONICAL_DEFAULT = { page: 1, kind: "ALL", pageSize: 24 } as const;
@@ -294,6 +311,14 @@ describe("safe local thumbnail conversion versus intentional placeholder", () =>
     expect(resolved).toEqual({ kind: "placeholder" });
   });
 
+  it("uses the local /uploads fallback when the admin page has no public upload URL env", () => {
+    const pageContents = readFileSync(
+      path.join(process.cwd(), "src/app/[locale]/admin/media/page.tsx"),
+      "utf8",
+    );
+    expect(pageContents).toContain('process.env.UPLOAD_PUBLIC_URL ?? "/uploads"');
+  });
+
   it("resolves a PDF to its own intentional placeholder, never next/image", () => {
     const resolved = resolveAdminMediaThumbnail(
       {
@@ -382,6 +407,22 @@ describe("accessible Media Library item semantics", () => {
     const container = markupToContainer(markup);
     expect(container.querySelector('ul[aria-label="Daftar item media"]')).not.toBeNull();
     expect(container.querySelectorAll("li")).toHaveLength(2);
+  });
+
+  it("renders a delete action for each media item", () => {
+    const markup = renderToStaticMarkup(
+      <AdminMediaGrid
+        items={[SAMPLE_ITEM]}
+        locale="id"
+        uploadPublicUrl="https://fuspi.uinbanten.ac.id/uploads"
+        ariaLabel="Daftar item media"
+        labels={SAMPLE_LABELS}
+      />,
+    );
+    const container = markupToContainer(markup);
+    const deleteButton = Array.from(container.querySelectorAll("button"))
+      .find((button) => button.textContent?.includes("Hapus"));
+    expect(deleteButton).not.toBeUndefined();
   });
 
   it("shows the alt text for an informative image and hides the decorative label", () => {
