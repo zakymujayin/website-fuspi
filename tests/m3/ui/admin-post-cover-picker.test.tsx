@@ -81,6 +81,26 @@ describe("PostCoverPicker component wiring", () => {
     expect(source).toContain('credentials: "same-origin"');
   });
 
+  it("post create/edit pages pass the stable uploads fallback to the picker", () => {
+    const pages = [
+      "src/app/[locale]/admin/posts/new/page.tsx",
+      "src/app/[locale]/admin/posts/[postId]/edit/page.tsx",
+    ].map((relativePath) => readFileSync(path.join(process.cwd(), relativePath), "utf8"));
+    for (const page of pages) {
+      expect(page).toContain('process.env.UPLOAD_PUBLIC_URL ?? "/uploads"');
+      expect(page).not.toContain('process.env.UPLOAD_PUBLIC_URL ?? ""');
+    }
+  });
+
+  it("admin media API falls back to the public uploads route when listing picker images", () => {
+    const route = readFileSync(
+      path.join(process.cwd(), "src/app/api/admin/media/route.ts"),
+      "utf8",
+    );
+    expect(route).toContain('process.env.UPLOAD_PUBLIC_URL ?? "/uploads"');
+    expect(route).not.toContain('process.env.UPLOAD_PUBLIC_URL ?? ""');
+  });
+
   it("select sets the id and clear sets null via onChange", () => {
     expect(source).toContain("onChange(item.id)");
     expect(source).toContain("onChange(null)");

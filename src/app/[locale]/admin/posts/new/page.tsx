@@ -29,6 +29,7 @@ export default async function NewPostPage({ params }: NewPostPageProps) {
 
   const t = await getTranslations("AdminPostEditor");
   const prisma = getPrismaClient();
+  const uploadPublicUrl = process.env.UPLOAD_PUBLIC_URL ?? "/uploads";
   const taxonomyOptions = await loadPostTaxonomyOptions(
     prisma,
     session.ok ? session.session : null,
@@ -47,7 +48,7 @@ export default async function NewPostPage({ params }: NewPostPageProps) {
         mode="create"
         listHref="/admin/posts"
         taxonomyOptions={taxonomyOptions}
-        uploadPublicUrl={process.env.UPLOAD_PUBLIC_URL ?? ""}
+        uploadPublicUrl={uploadPublicUrl}
       />
     </section>
   );

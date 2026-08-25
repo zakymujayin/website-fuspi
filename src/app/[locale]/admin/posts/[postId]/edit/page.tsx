@@ -37,13 +37,14 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
 
   const t = await getTranslations("AdminPostEditor");
   const prisma = getPrismaClient();
+  const uploadPublicUrl = process.env.UPLOAD_PUBLIC_URL ?? "/uploads";
 
   const result = await loadAdminPostsSafely(() =>
     getAdminPostEditor(
       prisma,
       session.ok ? session.session : null,
       postId,
-      process.env.UPLOAD_PUBLIC_URL ?? "",
+      uploadPublicUrl,
     ),
   );
 
@@ -91,7 +92,7 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
         taxonomyOptions={taxonomyOptions}
         initialCover={view.cover}
         initialGalleryPreviews={Object.fromEntries(view.images.map((image) => [image.media.id, image.media]))}
-        uploadPublicUrl={process.env.UPLOAD_PUBLIC_URL ?? ""}
+        uploadPublicUrl={uploadPublicUrl}
         listHref="/admin/posts"
         publicationState={view.publicationState}
         capabilities={{

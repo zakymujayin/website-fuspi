@@ -72,7 +72,7 @@ export async function GET(request: Request) {
     getPrismaClient(),
     session.ok ? session.session : null,
     normalized.data,
-    process.env.UPLOAD_PUBLIC_URL ?? "",
+    process.env.UPLOAD_PUBLIC_URL ?? "/uploads",
   );
   return json(result.ok ? result.data : result, adminMediaHttpStatus(result));
 }
