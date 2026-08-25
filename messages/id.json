@@ -510,14 +510,14 @@
   },
   "AdminMediaUpload": {
     "title": "Unggah media",
-    "description": "Unggah gambar WebP (hingga 20) atau satu berkas PDF ke Pustaka Media.",
+    "description": "Unggah gambar JPG, PNG, atau WebP (hingga 20) atau satu berkas PDF ke Pustaka Media.",
     "policyLabel": "Jenis unggahan",
     "policy": {
       "CMS_IMAGE": "Gambar",
       "PUBLIC_PDF": "PDF"
     },
     "images": "Berkas gambar",
-    "imagesHint": "Format WebP, maksimal {max} berkas, masing-masing 5 MB.",
+    "imagesHint": "Format JPG, PNG, atau WebP, maksimal {max} berkas, masing-masing 5 MB.",
     "pdf": "Berkas PDF",
     "pdfHint": "Satu berkas PDF, maksimal 20 MB.",
     "alt": "Teks alternatif",

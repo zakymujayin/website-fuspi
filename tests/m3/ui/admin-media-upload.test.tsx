@@ -24,6 +24,10 @@ const {
 
 const webp = (bytes: number, name = "x.webp"): File =>
   new File([new Uint8Array(bytes)], name, { type: "image/webp" });
+const jpeg = (bytes: number, name = "x.jpg"): File =>
+  new File([new Uint8Array(bytes)], name, { type: "image/jpeg" });
+const png = (bytes: number, name = "x.png"): File =>
+  new File([new Uint8Array(bytes)], name, { type: "image/png" });
 const pdf = (bytes: number): File =>
   new File([new Uint8Array(bytes)], "d.pdf", { type: "application/pdf" });
 
@@ -46,6 +50,13 @@ describe("validateImageBatch", () => {
     }
   });
 
+  it("accepts JPEG, JPG, PNG, and WebP files before server-side conversion to WebP", () => {
+    for (const file of [jpeg(100), jpeg(100, "x.jpeg"), png(100), webp(100)]) {
+      expect(isAcceptedImageFile(file)).toBe(true);
+      expect(validateImageBatch([{ file, alt: "Foto Acara FUSPI", isDecorative: false }])).toEqual({ ok: true });
+    }
+  });
+
   it("rejects an empty batch", () => {
     expect(validateImageBatch([])).toEqual({ ok: false, index: null, reason: "missing" });
   });
@@ -55,9 +66,9 @@ describe("validateImageBatch", () => {
     expect(validateImageBatch(rows)).toEqual({ ok: false, index: null, reason: "count" });
   });
 
-  it("reports the offending index for a non-webp file", () => {
-    const png = { file: new File([new Uint8Array(1)], "x.png", { type: "image/png" }), alt: "a", isDecorative: false };
-    expect(validateImageBatch([img("a"), png])).toEqual({ ok: false, index: 1, reason: "type" });
+  it("reports the offending index for a non-image file", () => {
+    const svg = { file: new File([new Uint8Array(1)], "x.svg", { type: "image/svg+xml" }), alt: "a", isDecorative: false };
+    expect(validateImageBatch([img("a"), svg])).toEqual({ ok: false, index: 1, reason: "type" });
   });
 
   it("reports the offending index for an oversized file", () => {
@@ -122,8 +133,14 @@ describe("buildImageBatchFormData", () => {
       isDecorative: false,
     }]);
     const [file] = form.getAll("files") as File[];
-    expect(toSafeImageUploadName(unsafeName)).toBe("WhatsApp-Image-2026-08-10-at-19-00-12-jpeg.webp");
+    expect(toSafeImageUploadName({ name: unsafeName, type: "" })).toBe("WhatsApp-Image-2026-08-10-at-19-00-12-jpeg.webp");
     expect(file?.name).toBe("WhatsApp-Image-2026-08-10-at-19-00-12-jpeg.webp");
+  });
+
+  it("keeps the safe image extension aligned with the original upload type", () => {
+    expect(toSafeImageUploadName(jpeg(100, "Rapat.Pimpinan.jpeg"))).toBe("Rapat-Pimpinan.jpeg");
+    expect(toSafeImageUploadName(png(100, "Foto.Kegiatan.png"))).toBe("Foto-Kegiatan.png");
+    expect(toSafeImageUploadName(webp(100, "Foto.Kegiatan.webp"))).toBe("Foto-Kegiatan.webp");
   });
 });
 
@@ -169,10 +186,11 @@ describe("component wiring and i18n", () => {
     expect(source).toContain("router.refresh()");
   });
 
-  it("normalizes browser-empty WebP MIME before the server storage validator", () => {
+  it("normalizes browser-empty image MIME before the server storage validator", () => {
     expect(uploadRouteSource).toContain("normalizeUploadMimeType(file)");
-    expect(uploadRouteSource).toContain('file.name.trim().toLowerCase().endsWith(".webp")');
-    expect(uploadRouteSource).toContain('return "image/webp"');
+    expect(uploadRouteSource).toContain('[".jpg", "image/jpeg"]');
+    expect(uploadRouteSource).toContain('[".png", "image/png"]');
+    expect(uploadRouteSource).toContain('[".webp", "image/webp"]');
   });
 
   it("uses no physical-direction utility", () => {

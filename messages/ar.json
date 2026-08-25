@@ -510,14 +510,14 @@
   },
   "AdminMediaUpload": {
     "title": "رفع وسائط",
-    "description": "ارفع صور WebP (حتى 20) أو ملف PDF واحد إلى مكتبة الوسائط.",
+    "description": "ارفع صور JPG أو PNG أو WebP (حتى 20) أو ملف PDF واحد إلى مكتبة الوسائط.",
     "policyLabel": "نوع الرفع",
     "policy": {
       "CMS_IMAGE": "صور",
       "PUBLIC_PDF": "PDF"
     },
     "images": "ملفات الصور",
-    "imagesHint": "صيغة WebP، حتى {max} ملفات، 5 ميغابايت لكل ملف.",
+    "imagesHint": "صيغة JPG أو PNG أو WebP، حتى {max} ملفات، 5 ميغابايت لكل ملف.",
     "pdf": "ملف PDF",
     "pdfHint": "ملف PDF واحد، حتى 20 ميغابايت.",
     "alt": "النص البديل",

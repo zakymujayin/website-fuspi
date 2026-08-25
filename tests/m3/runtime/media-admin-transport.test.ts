@@ -99,6 +99,53 @@ describe("M3 Media admin transport runtime", () => {
     }));
   });
 
+  it("keeps listing valid media when a legacy row has invalid public metadata", async () => {
+    const findMany = vi.fn().mockResolvedValue([
+      {
+        id: "legacy-pdf",
+        storageKey: "documents/old.pdf",
+        originalName: "old.pdf",
+        mimeType: "application/pdf",
+        size: 12_000,
+        alt: "Legacy PDF",
+        isDecorative: false,
+        width: null,
+        height: null,
+        createdAt: NOW,
+        uploader: {name: "Editor FUSPI"},
+      },
+      {
+        id: "media-1",
+        storageKey: KEY,
+        originalName: "kegiatan-fuspi.webp",
+        mimeType: "image/webp",
+        size: 12_000,
+        alt: "Kegiatan FUSPI",
+        isDecorative: false,
+        width: 640,
+        height: 480,
+        createdAt: NOW,
+        uploader: {name: "Editor FUSPI"},
+      },
+    ]);
+    const count = vi.fn().mockResolvedValue(2);
+    const database = {
+      media: {findMany, count},
+      $transaction: vi.fn(async (operations: Array<Promise<unknown>>) => Promise.all(operations)),
+    } as unknown as AdminMediaTransportDatabase;
+
+    await expect(listAdminMedia(
+      database,
+      session(),
+      {page: 1, pageSize: 24, kind: "ALL"},
+      "/uploads",
+      () => NOW,
+    )).resolves.toMatchObject({
+      ok: true,
+      data: {items: [{id: "media-1"}], total: 2},
+    });
+  });
+
   it("updates only an owned public image with strict accessibility metadata", async () => {
     const findFirst = vi.fn().mockResolvedValue({
       id: "media-1",

@@ -510,14 +510,14 @@
   },
   "AdminMediaUpload": {
     "title": "Upload media",
-    "description": "Upload WebP images (up to 20) or a single PDF to the Media Library.",
+    "description": "Upload JPG, PNG, or WebP images (up to 20) or a single PDF to the Media Library.",
     "policyLabel": "Upload type",
     "policy": {
       "CMS_IMAGE": "Images",
       "PUBLIC_PDF": "PDF"
     },
     "images": "Image files",
-    "imagesHint": "WebP format, up to {max} files, 5 MB each.",
+    "imagesHint": "JPG, PNG, or WebP format, up to {max} files, 5 MB each.",
     "pdf": "PDF file",
     "pdfHint": "One PDF file, up to 20 MB.",
     "alt": "Alternative text",

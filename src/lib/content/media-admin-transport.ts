@@ -8,6 +8,7 @@ import {
 import {
   AdminMediaListQuerySchema,
   AdminMediaListResultSchema,
+  AdminMediaItemSchema,
   AdminMediaListSearchParamsSchema,
   AdminMediaMutationResponseSchema,
   AdminMediaTransportCommandSchema,
@@ -185,12 +186,12 @@ export async function listAdminMedia(
       }),
       database.media.count({where}),
     ]);
-    const parsed = AdminMediaListResultSchema.safeParse({
-      items: rows.map((row) => ({
+    const items = rows.flatMap((row) => {
+      const storageKey = StorageKeySchema.safeParse(row.storageKey);
+      if (!storageKey.success) return [];
+      const item = AdminMediaItemSchema.safeParse({
         id: row.id,
-        url: StorageKeySchema.safeParse(row.storageKey).success
-          ? `${uploadBase}/${row.storageKey}`
-          : "",
+        url: `${uploadBase}/${storageKey.data}`,
         mimeType: row.mimeType,
         size: row.size,
         alt: row.alt,
@@ -200,7 +201,11 @@ export async function listAdminMedia(
         originalName: row.originalName,
         createdAt: row.createdAt.toISOString(),
         uploaderName: row.uploader?.name ?? null,
-      })),
+      });
+      return item.success ? [item.data] : [];
+    });
+    const parsed = AdminMediaListResultSchema.safeParse({
+      items,
       page: query.data.page,
       pageSize: query.data.pageSize,
       total,

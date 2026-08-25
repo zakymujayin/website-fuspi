@@ -21,7 +21,13 @@ const MAX_MULTIPART_OVERHEAD = 1_048_576;
 const MAX_MULTIPART_BODY_BYTES =
   ADMIN_MEDIA_IMAGE_UPLOAD_LIMIT * MAX_IMAGE_BYTES + MAX_MULTIPART_OVERHEAD;
 const MAX_METADATA_BYTES = 65_536;
-const FALLBACK_WEBP_BROWSER_TYPES = new Set(["", "application/octet-stream"]);
+const FALLBACK_BROWSER_IMAGE_TYPES = new Set(["", "application/octet-stream"]);
+const MIME_BY_IMAGE_EXTENSION = new Map([
+  [".jpg", "image/jpeg"],
+  [".jpeg", "image/jpeg"],
+  [".png", "image/png"],
+  [".webp", "image/webp"],
+]);
 
 function json(value: unknown, status = 200) {
   return Response.json(value, {status, headers: {"Cache-Control": "no-store"}});
@@ -94,8 +100,11 @@ function parseMultipart(formData: FormData) {
 
 function normalizeUploadMimeType(file: File): string {
   const mimeType = file.type.trim().toLowerCase();
-  if (FALLBACK_WEBP_BROWSER_TYPES.has(mimeType) && file.name.trim().toLowerCase().endsWith(".webp")) {
-    return "image/webp";
+  if (FALLBACK_BROWSER_IMAGE_TYPES.has(mimeType)) {
+    const name = file.name.trim().toLowerCase();
+    for (const [extension, normalizedMimeType] of MIME_BY_IMAGE_EXTENSION) {
+      if (name.endsWith(extension)) return normalizedMimeType;
+    }
   }
   return mimeType;
 }
