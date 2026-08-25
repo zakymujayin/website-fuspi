@@ -59,6 +59,16 @@ Fourth follow-up cleanup in the same branch:
 - Added admin breadcrumb/menu labels for the `kolom` route segment so admin UI
   shows Sorotan Akademik instead of the raw route name.
 
+Fifth follow-up bug fix in the same branch:
+
+- Added pagination support to admin image pickers so older Media Library images
+  can be selected instead of only the first 24 newest images.
+- Covered Berita cover/gallery pickers, page hero picker, and the shared home
+  media picker used by homepage slider, homepage sections, homepage settings,
+  and facility forms.
+- Added ID/EN/AR `loadMore` labels and regression coverage for the shared
+  picker pagination helper.
+
 ## Files changed
 
 - Added `FACILITY` home section key, migration, seed copy, and contract max
@@ -86,6 +96,9 @@ Fourth follow-up cleanup in the same branch:
 - Extended shared Post admin UI components to support `KOLOM` mode while
   preserving the existing Berita defaults.
 - Removed the two old Sorotan Akademik demo rows from `prisma/seed.ts`.
+- Added `src/components/admin/media/media-picker-pagination.ts` and wired it
+  into admin image pickers for Berita, pages, homepage settings/slider/sections,
+  and facilities.
 
 ## Contract/schema/migration impact
 
@@ -107,6 +120,9 @@ Fourth follow-up cleanup in the same branch:
 - New admin command actions:
   `CREATE_COLUMN`, `UPDATE_COLUMN`, `AUTOSAVE_COLUMN`, `PUBLICATION_COLUMN`,
   and `DELETE_COLUMN`.
+- No schema/API contract change for media pagination; existing
+  `/api/admin/media` `page`, `pageSize`, and `hasNextPage` response fields are
+  now consumed by the admin picker UI.
 
 ## Verification
 
@@ -175,6 +191,18 @@ Fourth follow-up cleanup verification:
 | `npm run test` | Passed, 96 files / 1181 tests |
 | `git diff --check` | Passed |
 | `npm run build` | Passed |
+
+Fifth follow-up media picker pagination verification:
+
+| Command | Result |
+|---|---|
+| `npx vitest run tests/m4/ui/admin-media-picker-pagination.test.ts tests/m3/ui/admin-post-cover-picker.test.tsx` | Passed, 2 files / 17 tests |
+| `npm run lint` | Passed |
+| `npm run typecheck` | Passed |
+| `npm run prisma:validate` | Passed |
+| `npm run build` | Passed |
+| `npm run test` | Initially failed when run in parallel with `npm run build` due Vitest worker/test timeouts; rerun separately passed, 97 files / 1186 tests |
+| `TASK_MANIFEST=coordination/tasks/M4-GPT-FACILITY-HOMEPAGE-ADMIN.md TASK_BASE=HEAD~1 npm run check:scope` | Passed, 16 changed files within lease |
 
 ## Untested areas
 

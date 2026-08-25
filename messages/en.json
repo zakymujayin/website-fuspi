@@ -556,6 +556,7 @@
     "selectLabel": "Select {name} as the cover",
     "loading": "Loading images…",
     "loadError": "Could not load images. Try again.",
+    "loadMore": "Load older images",
     "empty": "No images in the Media Library yet."
   },
   "AdminPostGalleryPicker": {
@@ -571,6 +572,7 @@
     "maxReached": "Maximum 20 photos per post.",
     "loading": "Loading images…",
     "loadError": "Could not load images. Try again.",
+    "loadMore": "Load older images",
     "libraryEmpty": "No images in the Media Library yet."
   },
   "AdminMediaUpload": {
@@ -786,6 +788,7 @@
     "selectLabel": "Pick {name} as hero image",
     "loading": "Loading images…",
     "loadError": "Failed to load images. Please try again.",
+    "loadMore": "Load older images",
     "empty": "No images in the Media Library yet."
   },
   "AdminPageRichText": {
@@ -1320,7 +1323,8 @@
       "loading": "Loading images…",
       "loadError": "Could not load images. Try again.",
       "empty": "No images in the Media Library yet.",
-      "listLabel": "Image list"
+      "listLabel": "Image list",
+      "loadMore": "Load older images"
     },
     "errors": {
       "SESSION_INVALID": "Admin session is invalid.",
@@ -1369,7 +1373,8 @@
       "loading": "Loading images…",
       "loadError": "Failed to load images. Try again.",
       "empty": "No images in Media Library yet.",
-      "listLabel": "Image list"
+      "listLabel": "Image list",
+      "loadMore": "Load older images"
     },
     "errors": {
       "imageRequired": "An image is required.",

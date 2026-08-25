@@ -148,6 +148,7 @@ export function HomeSectionEditorForm({ listHref, pageId, initialData, initialBa
         loadErrorLabel={t("picker.loadError")}
         emptyLabel={t("picker.empty")}
         listLabel={t("picker.listLabel")}
+        loadMoreLabel={t("picker.loadMore")}
       />
 
       <FieldSet>

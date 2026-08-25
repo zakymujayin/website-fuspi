@@ -249,6 +249,7 @@ export function SiteSettingEditorForm({ listHref, initialData, initialVersion, i
             loadErrorLabel={t("picker.loadError")}
             emptyLabel={t("picker.empty")}
             listLabel={t("picker.listLabel")}
+            loadMoreLabel={t("picker.loadMore")}
           />
         </FieldGroup>
       </FieldSet>
@@ -276,6 +277,7 @@ export function SiteSettingEditorForm({ listHref, initialData, initialVersion, i
             loadErrorLabel={t("picker.loadError")}
             emptyLabel={t("picker.empty")}
             listLabel={t("picker.listLabel")}
+            loadMoreLabel={t("picker.loadMore")}
           />
         </FieldGroup>
       </FieldSet>

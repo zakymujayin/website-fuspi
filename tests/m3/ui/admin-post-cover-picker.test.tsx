@@ -77,7 +77,13 @@ describe("PostCoverPicker component wiring", () => {
   );
 
   it("reads images from the Media Library API, same-origin, images only", () => {
-    expect(source).toContain('"/api/admin/media?kind=IMAGE"');
+    const helper = readFileSync(
+      path.join(process.cwd(), "src/components/admin/media/media-picker-pagination.ts"),
+      "utf8",
+    );
+    expect(source).toContain("buildAdminImagePickerHref");
+    expect(helper).toContain('kind: "IMAGE"');
+    expect(helper).toContain('pageSize: String(ADMIN_IMAGE_PICKER_PAGE_SIZE)');
     expect(source).toContain('credentials: "same-origin"');
   });
 

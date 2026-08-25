@@ -183,6 +183,7 @@ export function FacilityEditorForm({
         loadErrorLabel={t("picker.loadError")}
         emptyLabel={t("picker.empty")}
         listLabel={t("picker.listLabel")}
+        loadMoreLabel={t("picker.loadMore")}
       />
 
       <FieldSet>

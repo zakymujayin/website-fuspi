@@ -556,6 +556,7 @@
     "selectLabel": "Pilih {name} sebagai sampul",
     "loading": "Memuat gambar…",
     "loadError": "Gagal memuat gambar. Coba lagi.",
+    "loadMore": "Muat gambar lama",
     "empty": "Belum ada gambar di Pustaka Media."
   },
   "AdminPostGalleryPicker": {
@@ -571,6 +572,7 @@
     "maxReached": "Maksimal 20 foto per berita.",
     "loading": "Memuat gambar…",
     "loadError": "Gagal memuat gambar. Coba lagi.",
+    "loadMore": "Muat gambar lama",
     "libraryEmpty": "Belum ada gambar di Pustaka Media."
   },
   "AdminMediaUpload": {
@@ -786,6 +788,7 @@
     "selectLabel": "Pilih {name} sebagai gambar hero",
     "loading": "Memuat gambar…",
     "loadError": "Gagal memuat gambar. Coba lagi.",
+    "loadMore": "Muat gambar lama",
     "empty": "Belum ada gambar di Pustaka Media."
   },
   "AdminPageRichText": {
@@ -1320,7 +1323,8 @@
       "loading": "Memuat gambar…",
       "loadError": "Gagal memuat gambar. Coba lagi.",
       "empty": "Belum ada gambar di Pustaka Media.",
-      "listLabel": "Daftar gambar"
+      "listLabel": "Daftar gambar",
+      "loadMore": "Muat gambar lama"
     },
     "errors": {
       "SESSION_INVALID": "Sesi admin tidak valid.",
@@ -1369,7 +1373,8 @@
       "loading": "Memuat gambar…",
       "loadError": "Gagal memuat gambar. Coba lagi.",
       "empty": "Belum ada gambar di Pustaka Media.",
-      "listLabel": "Daftar gambar"
+      "listLabel": "Daftar gambar",
+      "loadMore": "Muat gambar lama"
     },
     "errors": {
       "imageRequired": "Gambar wajib dipilih.",

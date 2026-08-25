@@ -132,6 +132,7 @@ export function HomeSliderEditorForm({ mode, listHref, initialData, initialImage
         loadErrorLabel={t("picker.loadError")}
         emptyLabel={t("picker.empty")}
         listLabel={t("picker.listLabel")}
+        loadMoreLabel={t("picker.loadMore")}
       />
 
       <FieldSet>
