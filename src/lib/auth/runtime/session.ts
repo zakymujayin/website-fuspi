@@ -1,5 +1,6 @@
 import {randomBytes} from "node:crypto";
 
+import type {Prisma} from "@/generated/prisma/client";
 import type {ActiveDatabaseSession, SessionInvalidResult} from "@/contracts/auth";
 import {ActiveDatabaseSessionSchema} from "@/contracts/auth";
 import {SESSION_MAX_AGE_SECONDS} from "@/lib/auth/runtime/config";
@@ -7,6 +8,7 @@ import {createSessionCookieDefinition} from "@/lib/auth/runtime/cookie";
 import type {createPrismaClient} from "@/lib/db/client";
 
 type PrismaClient = ReturnType<typeof createPrismaClient>;
+type PrismaSessionClient = PrismaClient | Prisma.TransactionClient;
 const SESSION_INVALID: SessionInvalidResult = Object.freeze({
   ok: false,
   code: "SESSION_INVALID",
@@ -17,7 +19,7 @@ export type SessionValidationResult =
   | SessionInvalidResult;
 
 export async function createDatabaseSession(
-  prisma: PrismaClient,
+  prisma: PrismaSessionClient,
   userId: string,
   options: Readonly<{
     now?: Date;

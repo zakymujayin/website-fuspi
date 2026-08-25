@@ -12,6 +12,12 @@ import {authorize} from "@/lib/auth/runtime/authorization";
 import type {createPrismaClient} from "@/lib/db/client";
 
 type PrismaClient = ReturnType<typeof createPrismaClient>;
+type ChangeOwnPasswordOptions = Readonly<{
+  afterSessionRevocation?: (
+    tx: Prisma.TransactionClient,
+    userId: string,
+  ) => Promise<void>;
+}>;
 
 const COMMON_PASSWORDS = new Set([
   "password1234",
@@ -85,6 +91,7 @@ export async function changeOwnPassword(
   prisma: PrismaClient,
   actorSessionToken: string,
   rawInput: unknown,
+  options: ChangeOwnPasswordOptions = {},
 ): Promise<SecurityMutationResult> {
   const parsed = PasswordChangeInputSchema.safeParse(rawInput);
   if (!parsed.success) return {ok: false, code: "PASSWORD_POLICY"};
@@ -115,6 +122,7 @@ export async function changeOwnPassword(
         data: {passwordHash, mustChangePassword: false},
       });
       await tx.session.deleteMany({where: {userId: actor.userId}});
+      await options.afterSessionRevocation?.(tx, actor.userId);
       return {ok: true} as const;
     });
   } catch {

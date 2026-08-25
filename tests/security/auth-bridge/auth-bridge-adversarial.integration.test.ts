@@ -151,10 +151,12 @@ suite("M2 auth bridge adversarial on MariaDB", () => {
     const payload = await response.json();
     expect(payload).toEqual({
       ok: true,
-      redirectTo: "/id/login?next=%2Fid%2Fadmin",
+      redirectTo: "/id/admin",
     });
-    expect(response.headers.get("set-cookie")).toContain("Max-Age=0");
-    expect(await prisma.session.count({where: {userId}})).toBe(0);
+    expect(response.headers.get("set-cookie")).toContain("authjs.session-token=");
+    expect(response.headers.get("set-cookie")).toContain("Max-Age=28800");
+    expect(await prisma.session.findUnique({where: {sessionToken: `${marker}-actor`}})).toBeNull();
+    expect(await prisma.session.count({where: {userId}})).toBe(1);
   });
 
   // -----------------------------------------------------------------------

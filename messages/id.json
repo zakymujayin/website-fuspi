@@ -26,7 +26,7 @@
   "PasswordChange": {
     "metaTitle": "Ubah kata sandi",
     "title": "Perbarui kata sandi Anda",
-    "description": "Gunakan sedikitnya 12 karakter. Demi keamanan, sesi aktif akan diakhiri setelah kata sandi berhasil diperbarui.",
+    "description": "Gunakan sedikitnya 12 karakter. Demi keamanan, sesi lama akan diakhiri dan sesi baru akan diterbitkan setelah kata sandi berhasil diperbarui.",
     "currentPasswordLabel": "Kata sandi saat ini",
     "newPasswordLabel": "Kata sandi baru",
     "confirmPasswordLabel": "Konfirmasi kata sandi baru",
@@ -49,9 +49,38 @@
   "AdminLanding": {
     "metaTitle": "Panel pengelola",
     "title": "Panel pengelola FUSPI",
-    "description": "Sesi Anda telah diverifikasi. Modul pengelolaan konten akan muncul di sini sesuai tahap implementasi berikutnya.",
-    "securityNote": "Setiap halaman dan tindakan tetap memeriksa sesi serta izin di server. Halaman ini tidak memberikan izin ke modul lain.",
-    "changePassword": "Ubah kata sandi"
+    "description": "Kelola konten utama website dari satu tempat: beranda, berita, sorotan akademik, media, halaman, dan fasilitas.",
+    "quickActionsTitle": "Akses cepat",
+    "quickActionsDescription": "Pilih modul yang ingin dikelola tanpa mencari ulang di sidebar.",
+    "openModule": "Buka modul",
+    "securityNote": "Setiap halaman dan tindakan tetap memeriksa sesi serta izin di server. Jika kata sandi baru saja diperbarui, sesi lama sudah dicabut dan sesi baru aktif di browser ini.",
+    "changePassword": "Ubah kata sandi",
+    "modules": {
+      "home": {
+        "title": "Beranda",
+        "description": "Atur pengaturan beranda, logo header, dan bagian utama website."
+      },
+      "news": {
+        "title": "Berita",
+        "description": "Tulis, sunting, dan publikasikan berita fakultas."
+      },
+      "spotlight": {
+        "title": "Sorotan Akademik",
+        "description": "Kelola tulisan dekan, dosen, mahasiswa, dan artikel akademik."
+      },
+      "media": {
+        "title": "Media",
+        "description": "Cari dan pilih gambar lama maupun unggahan baru."
+      },
+      "pages": {
+        "title": "Halaman",
+        "description": "Kelola halaman profil, akademik, layanan, dan konten statis."
+      },
+      "facilities": {
+        "title": "Fasilitas",
+        "description": "Kelola daftar fasilitas yang tampil di website."
+      }
+    }
   },
   "Nav": {
     "skipToContent": "Lompat ke konten utama",

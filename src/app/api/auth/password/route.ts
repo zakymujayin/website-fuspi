@@ -7,11 +7,10 @@ import {
 import {getSessionCookieName} from "@/lib/auth/runtime/cookie";
 import {isSameOriginRequest} from "@/lib/auth/runtime/csrf";
 import {changeOwnPassword} from "@/lib/auth/runtime/password";
-import {
-  createPostPasswordLoginRedirect,
-  parseAppLocale,
-} from "@/lib/auth/runtime/redirect";
+import {normalizeAuthRedirect, parseAppLocale} from "@/lib/auth/runtime/redirect";
+import {createDatabaseSession} from "@/lib/auth/runtime/session";
 import {getPrismaClient} from "@/lib/db/client";
+import type {SessionCookieDefinition} from "@/lib/auth/runtime/cookie";
 
 async function readInput(request: Request): Promise<unknown> {
   const contentType = request.headers.get("content-type") ?? "";
@@ -62,19 +61,27 @@ export async function POST(request: NextRequest) {
     input = null;
   }
 
-  const result = await changeOwnPassword(getPrismaClient(), sessionToken, input);
+  const prisma = getPrismaClient();
+  let issuedCookie: SessionCookieDefinition | undefined;
+  const result = await changeOwnPassword(prisma, sessionToken, input, {
+    async afterSessionRevocation(tx, userId) {
+      const issued = await createDatabaseSession(tx, userId);
+      issuedCookie = issued.cookie;
+    },
+  });
   if (result.ok) {
     const response = createResponse(
       {
         ok: true,
-        redirectTo: createPostPasswordLoginRedirect(
-          locale,
+        redirectTo: normalizeAuthRedirect(
           requestUrl.searchParams.get("redirectTo"),
+          locale,
         ),
       },
       200,
     );
-    clearSessionCookie(response);
+    if (!issuedCookie) return createResponse(publicFailure("AUTH_UNAVAILABLE"), 503);
+    response.cookies.set(issuedCookie.name, issuedCookie.value, issuedCookie.options);
     return response;
   }
 

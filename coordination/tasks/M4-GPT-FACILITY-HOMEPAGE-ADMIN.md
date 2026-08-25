@@ -28,8 +28,12 @@ allowed_paths:
   - "src/features/home-nav/admin-detail.ts"
   - "src/lib/content/post-admin-transport.ts"
   - "src/lib/content/media-admin-transport.ts"
+  - "src/lib/auth/runtime/password.ts"
+  - "src/lib/auth/runtime/session.ts"
   - "src/app/[locale]/admin/kolom/**"
   - "src/app/[locale]/admin/layout.tsx"
+  - "src/app/[locale]/admin/page.tsx"
+  - "src/app/api/auth/password/route.ts"
   - "src/app/api/admin/posts/route.ts"
   - "src/app/api/admin/posts/[postId]/route.ts"
   - "src/app/[locale]/(public)/page.tsx"
@@ -73,6 +77,8 @@ allowed_paths:
   - "tests/m4/ui/admin-legacy-media-preview.test.ts"
   - "tests/m4/ui/home-slider-editor-form.test.ts"
   - "tests/m4/ui/site-logo-header.test.ts"
+  - "tests/platform/auth-bridge/auth-bridge.integration.test.ts"
+  - "tests/security/auth-bridge/auth-bridge-adversarial.integration.test.ts"
 contracts:
   - src/contracts/facility.ts
   - src/contracts/home-nav.ts

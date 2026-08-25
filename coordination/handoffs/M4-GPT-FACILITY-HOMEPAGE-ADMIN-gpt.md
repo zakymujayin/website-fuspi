@@ -289,6 +289,19 @@ Eighth follow-up admin sidebar label verification:
 | `git diff --check` | Passed |
 | `TASK_MANIFEST=coordination/tasks/M4-GPT-FACILITY-HOMEPAGE-ADMIN.md TASK_BASE=HEAD~1 npm run check:scope` | Passed, 5 changed files within lease |
 
+Ninth follow-up admin dashboard and password-change session verification:
+
+| Command | Result |
+|---|---|
+| `node -e "for (const f of ['messages/id.json','messages/en.json','messages/ar.json']) JSON.parse(...)"` | Passed |
+| `npm run typecheck` | Passed |
+| `npm run lint` | Passed |
+| `npx vitest run tests/platform/auth-bridge/auth-bridge.test.ts tests/platform/auth-bridge/auth-bridge.integration.test.ts tests/security/auth-bridge/auth-bridge-adversarial.integration.test.ts` | Passed, 1 active file / 12 tests; DB integration suites skipped without `RUN_PLATFORM_DB_TESTS=true` |
+| `npm run prisma:validate` | Passed |
+| `npm run test` | Passed, 98 files / 1190 tests |
+| `npm run build` | Passed |
+| `git diff --check` | Passed |
+
 ## Untested areas
 
 - Browser-level admin CRUD flow was not run with Playwright.
@@ -304,6 +317,9 @@ Eighth follow-up admin sidebar label verification:
 - Browser-level sidebar rendering after the `columns` to `Sorotan Akademik`
   label fix was not manually run; coverage is source assertion plus full
   production build.
+- Browser-level password-change flow was not manually run; route integration
+  assertions were updated for the replacement-session behavior but DB
+  integration suites were skipped in the default test environment.
 
 ## Risks and follow-ups
 

@@ -123,10 +123,11 @@ suite("M2 auth bridge on PostgreSQL", () => {
     expect(response.headers.get("set-cookie")).toBeNull();
   });
 
-  it("changes the password, revokes every session, and returns only a safe locale redirect", async () => {
+  it("changes the password, revokes old sessions, issues a new session, and returns only a safe locale redirect", async () => {
     const actorToken = `${marker}-password-actor`;
+    const secondToken = `${marker}-second-session`;
     await prisma.session.createMany({
-      data: [actorToken, `${marker}-second-session`].map((sessionToken) => ({
+      data: [actorToken, secondToken].map((sessionToken) => ({
         sessionToken,
         userId,
         expires: new Date(Date.now() + 60_000),
@@ -156,12 +157,30 @@ suite("M2 auth bridge on PostgreSQL", () => {
     const payload = await response.json();
     expect(payload).toEqual({
       ok: true,
-      redirectTo: "/ar/login?next=%2Far%2Fadmin%2Fberita",
+      redirectTo: "/ar/admin/berita",
     });
     expect(response.headers.get("cache-control")).toBe("no-store");
     expect(response.headers.get("set-cookie")).toContain("authjs.session-token=");
-    expect(response.headers.get("set-cookie")).toContain("Max-Age=0");
-    expect(await prisma.session.count({where: {userId}})).toBe(0);
+    expect(response.headers.get("set-cookie")).toContain("Max-Age=28800");
+    expect(await prisma.session.findUnique({where: {sessionToken: actorToken}})).toBeNull();
+    expect(await prisma.session.findUnique({where: {sessionToken: secondToken}})).toBeNull();
+    const replacement = await prisma.session.findFirstOrThrow({
+      where: {userId},
+      select: {sessionToken: true},
+    });
+    expect(replacement.sessionToken).not.toBe(actorToken);
+    expect(
+      await validateRequestSession(
+        prisma,
+        {
+          get: (name: string) =>
+            name === getSessionCookieName(false)
+              ? {value: replacement.sessionToken}
+              : undefined,
+        },
+        false,
+      ),
+    ).toMatchObject({ok: true, session: {mustChangePassword: false}});
 
     const user = await prisma.user.findUniqueOrThrow({where: {id: userId}});
     expect(user.mustChangePassword).toBe(false);

@@ -26,7 +26,7 @@
   "PasswordChange": {
     "metaTitle": "Change password",
     "title": "Update your password",
-    "description": "Use at least 12 characters. For your security, all active sessions will end after a successful password change.",
+    "description": "Use at least 12 characters. For your security, old sessions will end and a new session will be issued after a successful password change.",
     "currentPasswordLabel": "Current password",
     "newPasswordLabel": "New password",
     "confirmPasswordLabel": "Confirm new password",
@@ -49,9 +49,38 @@
   "AdminLanding": {
     "metaTitle": "Admin panel",
     "title": "FUSPI admin panel",
-    "description": "Your session has been verified. Content-management modules will appear here in the next implementation stage.",
-    "securityNote": "Every page and action still checks the session and permissions on the server. This landing page grants no access to other modules.",
-    "changePassword": "Change password"
+    "description": "Manage the website's main content from one place: homepage, news, academic spotlight, media, pages, and facilities.",
+    "quickActionsTitle": "Quick access",
+    "quickActionsDescription": "Choose the module you want to manage without searching the sidebar again.",
+    "openModule": "Open module",
+    "securityNote": "Every page and action still checks the session and permissions on the server. If the password was just updated, old sessions have been revoked and a new session is active in this browser.",
+    "changePassword": "Change password",
+    "modules": {
+      "home": {
+        "title": "Homepage",
+        "description": "Manage homepage settings, header logos, and main website sections."
+      },
+      "news": {
+        "title": "News",
+        "description": "Write, edit, and publish faculty news."
+      },
+      "spotlight": {
+        "title": "Academic Spotlight",
+        "description": "Manage dean, lecturer, student, and academic articles."
+      },
+      "media": {
+        "title": "Media",
+        "description": "Find and select old images or new uploads."
+      },
+      "pages": {
+        "title": "Pages",
+        "description": "Manage profile, academic, service, and static content pages."
+      },
+      "facilities": {
+        "title": "Facilities",
+        "description": "Manage the facility list shown on the website."
+      }
+    }
   },
   "Nav": {
     "skipToContent": "Skip to main content",
