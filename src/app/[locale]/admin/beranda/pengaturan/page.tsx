@@ -43,6 +43,8 @@ export default async function AdminSiteSettingPage({ params }: Props) {
           initialDeanPhoto={result.data.media}
           initialVideoPoster={result.data.secondaryMedia}
           initialLogo={result.data.logoMedia ?? null}
+          initialAccreditationLogo={result.data.accreditationLogoMedia ?? null}
+          initialBluLogo={result.data.bluLogoMedia ?? null}
           uploadPublicUrl={process.env.UPLOAD_PUBLIC_URL ?? ""}
         />
       ) : (

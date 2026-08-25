@@ -293,7 +293,9 @@ export async function getHomeNavDetail(
   try {
     if (resource === "SITE_SETTING") {
       const row = await prisma.siteSetting.findUnique({where: {id: "singleton"},
-        include: {translations: true, deanPhoto: {select: MEDIA_SELECT}, videoPoster: {select: MEDIA_SELECT}, logoMedia: {select: MEDIA_SELECT}, faviconMedia: {select: MEDIA_SELECT}}});
+        include: {translations: true, deanPhoto: {select: MEDIA_SELECT}, videoPoster: {select: MEDIA_SELECT},
+          logoMedia: {select: MEDIA_SELECT}, accreditationLogoMedia: {select: MEDIA_SELECT},
+          bluLogoMedia: {select: MEDIA_SELECT}, faviconMedia: {select: MEDIA_SELECT}}});
       if (!row) return {ok: false as const, code: "NOT_FOUND" as const};
       const assets: {kind: string; media: NonNullable<ReturnType<typeof publicMedia>>}[] = [];
       const dp = publicMedia(row.deanPhoto as unknown as MediaRow, rawUploadBase);
@@ -302,6 +304,10 @@ export async function getHomeNavDetail(
       if (vp) assets.push({kind: "MEDIA", media: vp});
       const lg = publicMedia(row.logoMedia as unknown as MediaRow, rawUploadBase);
       if (lg) assets.push({kind: "MEDIA", media: lg});
+      const al = publicMedia(row.accreditationLogoMedia as unknown as MediaRow, rawUploadBase);
+      if (al) assets.push({kind: "MEDIA", media: al});
+      const bl = publicMedia(row.bluLogoMedia as unknown as MediaRow, rawUploadBase);
+      if (bl) assets.push({kind: "MEDIA", media: bl});
       const fv = publicMedia(row.faviconMedia as unknown as MediaRow, rawUploadBase);
       if (fv) assets.push({kind: "MEDIA", media: fv});
       return {ok: true as const, data: HomeNavAdminDetailSchema.parse({
@@ -311,7 +317,10 @@ export async function getHomeNavDetail(
           deanName: row.deanName, deanPhotoMediaId: row.deanPhotoId, videoUrl: row.videoUrl,
           videoPosterMediaId: row.videoPosterMediaId, email: row.email, phone: row.phone,
           facebookUrl: row.facebookUrl, instagramUrl: row.instagramUrl, youtubeUrl: row.youtubeUrl,
-          xUrl: row.xUrl, logoMediaId: row.logoMediaId, faviconMediaId: row.faviconMediaId,
+          xUrl: row.xUrl, logoMediaId: row.logoMediaId,
+          accreditationLogoMediaId: row.accreditationLogoMediaId,
+          bluLogoMediaId: row.bluLogoMediaId,
+          faviconMediaId: row.faviconMediaId,
           contentOwnerId: row.contentOwnerId,
           expiresAt: row.expiresAt?.toISOString() ?? null,
           translations: Object.fromEntries(row.translations.map(t => [t.locale, {
@@ -663,6 +672,8 @@ async function updateSiteSetting(tx: Prisma.TransactionClient, input: z.infer<ty
   if (!await validateImageMedia(tx, input.deanPhotoMediaId)) return {ok: false, code: "MEDIA_INVALID"} as const;
   if (!await validateImageMedia(tx, input.videoPosterMediaId)) return {ok: false, code: "MEDIA_INVALID"} as const;
   if (!await validateImageMedia(tx, input.logoMediaId)) return {ok: false, code: "MEDIA_INVALID"} as const;
+  if (!await validateImageMedia(tx, input.accreditationLogoMediaId)) return {ok: false, code: "MEDIA_INVALID"} as const;
+  if (!await validateImageMedia(tx, input.bluLogoMediaId)) return {ok: false, code: "MEDIA_INVALID"} as const;
   if (!await validateImageMedia(tx, input.faviconMediaId)) return {ok: false, code: "MEDIA_INVALID"} as const;
   const current = await tx.siteSetting.findUnique({where: {id: "singleton"}, select: {version: true}});
   if (!current) return {ok: false, code: "NOT_FOUND"} as const;
@@ -674,7 +685,10 @@ async function updateSiteSetting(tx: Prisma.TransactionClient, input: z.infer<ty
     email: input.email, phone: input.phone,
     facebookUrl: input.facebookUrl, instagramUrl: input.instagramUrl,
     youtubeUrl: input.youtubeUrl, xUrl: input.xUrl,
-    logoMediaId: input.logoMediaId, faviconMediaId: input.faviconMediaId,
+    logoMediaId: input.logoMediaId,
+    accreditationLogoMediaId: input.accreditationLogoMediaId,
+    bluLogoMediaId: input.bluLogoMediaId,
+    faviconMediaId: input.faviconMediaId,
     contentOwnerId: input.contentOwnerId, expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
     version: newVersion,
   }});
@@ -881,7 +895,8 @@ export async function getPublicHomeSnapshot(
       prisma.siteSetting.findUnique({where: {id: "singleton"},
         include: {translations: {where: {status: "PUBLISHED", locale: {in: locale === "id" ? ["id"] : [locale, "id"]}}},
           deanPhoto: {select: MEDIA_SELECT}, videoPoster: {select: MEDIA_SELECT},
-          logoMedia: {select: MEDIA_SELECT}, faviconMedia: {select: MEDIA_SELECT}}}),
+          logoMedia: {select: MEDIA_SELECT}, accreditationLogoMedia: {select: MEDIA_SELECT},
+          bluLogoMedia: {select: MEDIA_SELECT}, faviconMedia: {select: MEDIA_SELECT}}}),
 
       prisma.homeSlider.findMany({where: {isVisible: true},
         orderBy: [{order: "asc"}, {id: "asc"}], take: 12,
@@ -963,12 +978,14 @@ export async function getPublicHomeSnapshot(
           poster: publicMedia(siteSettingRaw.videoPoster as unknown as MediaRow, base),
           title: st.videoTitle ?? "", description: st.videoDesc ?? null} : null;
         const logo = publicMedia(siteSettingRaw.logoMedia as unknown as MediaRow, base);
+        const accreditationLogo = publicMedia(siteSettingRaw.accreditationLogoMedia as unknown as MediaRow, base);
+        const bluLogo = publicMedia(siteSettingRaw.bluLogoMedia as unknown as MediaRow, base);
         const favicon = publicMedia(siteSettingRaw.faviconMedia as unknown as MediaRow, base);
         siteSetting = {
           facultyName: st.facultyName, tagline: st.tagline ?? null,
           addresses: [st.address1, st.address2].filter(Boolean),
           dean, video,
-          logo, favicon,
+          logo, accreditationLogo, bluLogo, favicon,
           email: siteSettingRaw.email, phone: siteSettingRaw.phone,
           socialLinks: {facebook: siteSettingRaw.facebookUrl, instagram: siteSettingRaw.instagramUrl,
             youtube: siteSettingRaw.youtubeUrl, x: siteSettingRaw.xUrl},

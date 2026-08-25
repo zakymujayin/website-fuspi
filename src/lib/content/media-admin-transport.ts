@@ -279,6 +279,13 @@ export async function executeAdminMediaCommand(
             testimonialPhotos: true,
             activityImages: true,
             deanPhotos: true,
+            siteVideoPosters: true,
+            siteLogos: true,
+            siteAccreditationLogos: true,
+            siteBluLogos: true,
+            siteFavicons: true,
+            facilityCovers: true,
+            postImages: true,
           }},
         },
       });

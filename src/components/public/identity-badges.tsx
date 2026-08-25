@@ -5,7 +5,33 @@ import {ImageWithFallback} from "@/components/public/image-with-fallback";
 
 type IdentityBadgesProps = {
   logo?: PublicSiteSetting["logo"] | null;
+  accreditationLogo?: PublicSiteSetting["accreditationLogo"] | null;
+  bluLogo?: PublicSiteSetting["bluLogo"] | null;
 };
+
+function BadgeImage({
+  media,
+  className,
+  sizes,
+  priority = false,
+}: {
+  media: NonNullable<PublicSiteSetting["logo"]>;
+  className: string;
+  sizes: string;
+  priority?: boolean;
+}) {
+  return (
+    <span className={className}>
+      <ImageWithFallback
+        src={media.url}
+        alt={media.isDecorative ? "" : media.alt}
+        className="object-contain"
+        sizes={sizes}
+        priority={priority}
+      />
+    </span>
+  );
+}
 
 /**
  * Three placeholder marks for the header identity cluster: the university
@@ -24,19 +50,15 @@ type IdentityBadgesProps = {
  * round seal it just looks clipped. Contained and proportional is the
  * correct call here.
  */
-export function IdentityBadges({logo = null}: IdentityBadgesProps) {
+export function IdentityBadges({
+  logo = null,
+  accreditationLogo = null,
+  bluLogo = null,
+}: IdentityBadgesProps) {
   return (
     <Link href="/" className="flex shrink-0 items-center gap-3" dir="ltr">
       {logo ? (
-        <span className="relative block size-[76px] shrink-0">
-          <ImageWithFallback
-            src={logo.url}
-            alt={logo.isDecorative ? "" : logo.alt}
-            className="object-contain"
-            sizes="76px"
-            priority
-          />
-        </span>
+        <BadgeImage media={logo} className="relative block size-[76px] shrink-0" sizes="76px" priority />
       ) : (
         <svg viewBox="0 0 160 160" width="76" height="76" aria-hidden className="shrink-0">
         <defs>
@@ -64,9 +86,11 @@ export function IdentityBadges({logo = null}: IdentityBadgesProps) {
         </svg>
       )}
 
-      {!logo ? (
-        <span className="flex items-center gap-2">
-        <svg viewBox="0 0 160 160" width="50" height="50" aria-hidden>
+      <span className="flex items-center gap-2">
+        {accreditationLogo ? (
+          <BadgeImage media={accreditationLogo} className="relative block size-[50px] shrink-0" sizes="50px" />
+        ) : (
+          <svg viewBox="0 0 160 160" width="50" height="50" aria-hidden>
           <defs>
             <linearGradient id="idbg-acc" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stopColor="#e7c77c" />
@@ -80,8 +104,12 @@ export function IdentityBadges({logo = null}: IdentityBadgesProps) {
           <text x="80" y="98" textAnchor="middle" fontSize="26" fontWeight="800" fill="#5c4013">
             UNGGUL
           </text>
-        </svg>
-        <svg viewBox="0 0 160 160" width="50" height="50" aria-hidden>
+          </svg>
+        )}
+        {bluLogo ? (
+          <BadgeImage media={bluLogo} className="relative block size-[50px] shrink-0" sizes="50px" />
+        ) : (
+          <svg viewBox="0 0 160 160" width="50" height="50" aria-hidden>
           <defs>
             <linearGradient id="idbg-blu" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stopColor="#17a599" />
@@ -92,9 +120,9 @@ export function IdentityBadges({logo = null}: IdentityBadgesProps) {
           <text x="80" y="94" textAnchor="middle" fontSize="34" fontWeight="800" fill="#ffffff">
             BLU
           </text>
-        </svg>
-        </span>
-      ) : null}
+          </svg>
+        )}
+      </span>
 
       <span className="sr-only">{institution.name}</span>
     </Link>

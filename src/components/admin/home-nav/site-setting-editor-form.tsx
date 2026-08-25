@@ -30,6 +30,8 @@ type Props = {
   initialDeanPhoto: CoverPreview | null;
   initialVideoPoster: CoverPreview | null;
   initialLogo: CoverPreview | null;
+  initialAccreditationLogo: CoverPreview | null;
+  initialBluLogo: CoverPreview | null;
   uploadPublicUrl: string;
 };
 
@@ -67,6 +69,8 @@ export function SiteSettingEditorForm({
   initialDeanPhoto,
   initialVideoPoster,
   initialLogo,
+  initialAccreditationLogo,
+  initialBluLogo,
   uploadPublicUrl,
 }: Props) {
   const t = useTranslations("AdminHomeNav");
@@ -96,6 +100,12 @@ export function SiteSettingEditorForm({
   const [deanPhotoId, setDeanPhotoId] = useState<string | null>((initialData.deanPhotoMediaId as string) ?? null);
   const [videoPosterId, setVideoPosterId] = useState<string | null>((initialData.videoPosterMediaId as string) ?? null);
   const [logoId, setLogoId] = useState<string | null>((initialData.logoMediaId as string | null | undefined) ?? null);
+  const [accreditationLogoId, setAccreditationLogoId] = useState<string | null>(
+    (initialData.accreditationLogoMediaId as string | null | undefined) ?? null,
+  );
+  const [bluLogoId, setBluLogoId] = useState<string | null>(
+    (initialData.bluLogoMediaId as string | null | undefined) ?? null,
+  );
 
   const idTr = translationValues.id;
   const enTr = translationValues.en;
@@ -160,6 +170,8 @@ export function SiteSettingEditorForm({
       youtubeUrl: nullableText(contact.youtubeUrl),
       xUrl: nullableText(contact.xUrl),
       logoMediaId: logoId,
+      accreditationLogoMediaId: accreditationLogoId,
+      bluLogoMediaId: bluLogoId,
       faviconMediaId: (initialData.faviconMediaId as string | null | undefined) ?? null,
       contentOwnerId: null, expiresAt: null,
       translations: (() => {
@@ -216,6 +228,42 @@ export function SiteSettingEditorForm({
             uploadPublicUrl={uploadPublicUrl}
             label={t("settings.logo")}
             description={t("settings.logoDescription")}
+            chooseLabel={t("picker.choose")}
+            changeLabel={t("picker.change")}
+            clearLabel={t("picker.clear")}
+            selectedLabel={t("picker.selected")}
+            noneLabel={t("picker.none")}
+            loadingLabel={t("picker.loading")}
+            loadErrorLabel={t("picker.loadError")}
+            emptyLabel={t("picker.empty")}
+            listLabel={t("picker.listLabel")}
+            loadMoreLabel={t("picker.loadMore")}
+          />
+          <HomeMediaPicker
+            value={accreditationLogoId}
+            onChange={setAccreditationLogoId}
+            initialMedia={initialAccreditationLogo}
+            uploadPublicUrl={uploadPublicUrl}
+            label={t("settings.accreditationLogo")}
+            description={t("settings.accreditationLogoDescription")}
+            chooseLabel={t("picker.choose")}
+            changeLabel={t("picker.change")}
+            clearLabel={t("picker.clear")}
+            selectedLabel={t("picker.selected")}
+            noneLabel={t("picker.none")}
+            loadingLabel={t("picker.loading")}
+            loadErrorLabel={t("picker.loadError")}
+            emptyLabel={t("picker.empty")}
+            listLabel={t("picker.listLabel")}
+            loadMoreLabel={t("picker.loadMore")}
+          />
+          <HomeMediaPicker
+            value={bluLogoId}
+            onChange={setBluLogoId}
+            initialMedia={initialBluLogo}
+            uploadPublicUrl={uploadPublicUrl}
+            label={t("settings.bluLogo")}
+            description={t("settings.bluLogoDescription")}
             chooseLabel={t("picker.choose")}
             changeLabel={t("picker.change")}
             clearLabel={t("picker.clear")}

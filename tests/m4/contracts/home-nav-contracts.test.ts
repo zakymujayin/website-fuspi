@@ -20,7 +20,8 @@ const emptySnapshot = {
   locale: "en", generatedAt: "2026-08-04T03:00:00.000Z",
   navigation: {contentBar: [], topbar: [], header: [], footer: []}, externalLinks: [], sections: [], sliders: [],
   quickLinks: [], statistics: [], homeVideos: [], siteSetting: {facultyName: "Fakultas", tagline: null, addresses: [], dean: null,
-    video: null, logo: null, favicon: null, email: null, phone: null, socialLinks: {facebook: null, instagram: null, youtube: null, x: null},
+    video: null, logo: null, accreditationLogo: null, bluLogo: null, favicon: null,
+    email: null, phone: null, socialLinks: {facebook: null, instagram: null, youtube: null, x: null},
     translation: resolution},
   content: {studyPrograms: [], news: [], announcements: [], columns: [], services: [], partnerships: [], events: [], testimonials: []},
 };
@@ -65,7 +66,8 @@ describe("home and navigation frozen contracts", () => {
   it("requires complete dean and video asset pairs with safe public URLs", () => {
     const setting = {deanName: null, deanPhotoMediaId: null, videoUrl: null, videoPosterMediaId: null,
       email: null, phone: null, facebookUrl: null, instagramUrl: null, youtubeUrl: null, xUrl: null,
-      logoMediaId: null, faviconMediaId: null, contentOwnerId: null, expiresAt: null,
+      logoMediaId: null, accreditationLogoMediaId: null, bluLogoMediaId: null,
+      faviconMediaId: null, contentOwnerId: null, expiresAt: null,
       translations: {id: {facultyName: "Fakultas", tagline: null, address1: null, address2: null,
         deanPosition: null, deanMessage: null, videoTitle: null, videoDesc: null}}};
     expect(SiteSettingInputSchema.safeParse(setting).success).toBe(true);
@@ -81,18 +83,28 @@ describe("home and navigation frozen contracts", () => {
 
     expect(formSource).toContain("logoMediaId:");
     expect(formSource).toContain("const [logoId, setLogoId]");
+    expect(formSource).toContain("const [accreditationLogoId, setAccreditationLogoId]");
+    expect(formSource).toContain("const [bluLogoId, setBluLogoId]");
     expect(formSource).toContain("logoMediaId: logoId");
+    expect(formSource).toContain("accreditationLogoMediaId: accreditationLogoId");
+    expect(formSource).toContain("bluLogoMediaId: bluLogoId");
     expect(formSource).toContain("initialMedia={initialLogo}");
+    expect(formSource).toContain("initialMedia={initialAccreditationLogo}");
+    expect(formSource).toContain("initialMedia={initialBluLogo}");
     expect(formSource).toContain("faviconMediaId:");
     expect(detailSource).toContain("logoMediaId: row.logoMediaId");
     expect(detailSource).toContain("logoMedia: true");
     expect(detailSource).toContain("logoMedia: adminImageMediaPreview(row.logoMedia)");
+    expect(detailSource).toContain("accreditationLogoMediaId: row.accreditationLogoMediaId");
+    expect(detailSource).toContain("bluLogoMediaId: row.bluLogoMediaId");
     expect(detailSource).toContain("faviconMediaId: row.faviconMediaId");
     expect(formSource).not.toContain("defaultValue=");
     expect(formSource).toContain("value={idTr.videoTitle}");
     expect(formSource).toContain("onChange={updateTranslation(\"id\", \"videoTitle\")}");
     expect(pageSource).toContain("key={`site-setting-${result.data.version ?? 0}`}");
     expect(pageSource).toContain("initialLogo={result.data.logoMedia ?? null}");
+    expect(pageSource).toContain("initialAccreditationLogo={result.data.accreditationLogoMedia ?? null}");
+    expect(pageSource).toContain("initialBluLogo={result.data.bluLogoMedia ?? null}");
   });
 
   it("defines translated AdminHomeNav mutation failures in every locale", () => {

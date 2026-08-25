@@ -202,6 +202,10 @@ async function mutateSiteSetting(
   if (!mutation || mutation.id !== "singleton") return {ok: false, code: "VALIDATION_FAILED"};
   if (!await validImage(tx, input.deanPhotoMediaId)) return {ok: false, code: "MEDIA_INVALID"};
   if (!await validImage(tx, input.videoPosterMediaId)) return {ok: false, code: "MEDIA_INVALID"};
+  if (!await validImage(tx, input.logoMediaId)) return {ok: false, code: "MEDIA_INVALID"};
+  if (!await validImage(tx, input.accreditationLogoMediaId)) return {ok: false, code: "MEDIA_INVALID"};
+  if (!await validImage(tx, input.bluLogoMediaId)) return {ok: false, code: "MEDIA_INVALID"};
+  if (!await validImage(tx, input.faviconMediaId)) return {ok: false, code: "MEDIA_INVALID"};
   const claim = await tx.siteSetting.updateMany({
     where: {id: "singleton", version: mutation.expectedVersion},
     data: {version: {increment: 1}},
@@ -212,6 +216,10 @@ async function mutateSiteSetting(
     deanName: input.deanName, deanPhotoId: input.deanPhotoMediaId, videoUrl: input.videoUrl,
     videoPosterMediaId: input.videoPosterMediaId, email: input.email, phone: input.phone,
     facebookUrl: input.facebookUrl, instagramUrl: input.instagramUrl, youtubeUrl: input.youtubeUrl, xUrl: input.xUrl,
+    logoMediaId: input.logoMediaId,
+    accreditationLogoMediaId: input.accreditationLogoMediaId,
+    bluLogoMediaId: input.bluLogoMediaId,
+    faviconMediaId: input.faviconMediaId,
     contentOwnerId: input.contentOwnerId,
     expiresAt: input.expiresAt ? new Date(input.expiresAt) : null,
     translations: {deleteMany: {}, create: translationRows<Prisma.SiteSettingTranslationCreateWithoutSiteSettingInput>(input, true, actorId, now, version)},

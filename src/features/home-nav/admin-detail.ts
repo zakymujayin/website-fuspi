@@ -22,7 +22,8 @@ export type HomeNavAdminDetailResult =
   | {ok: true; data: {
       input: Record<string, unknown>; version: number | null;
       media: HomeNavMediaPreview | null; secondaryMedia: HomeNavMediaPreview | null;
-      logoMedia?: HomeNavMediaPreview | null; faviconMedia?: HomeNavMediaPreview | null;
+      logoMedia?: HomeNavMediaPreview | null; accreditationLogoMedia?: HomeNavMediaPreview | null;
+      bluLogoMedia?: HomeNavMediaPreview | null; faviconMedia?: HomeNavMediaPreview | null;
     }}
   | {ok: false; code: "SESSION_INVALID" | "NOT_FOUND" | "UNAVAILABLE"};
 
@@ -84,7 +85,8 @@ export async function getHomeNavAdminDetail(
       }};
     }
     const row = await prisma.siteSetting.findUnique({where: {id: "singleton"}, include: {
-      translations: true, deanPhoto: true, videoPoster: true, logoMedia: true, faviconMedia: true,
+      translations: true, deanPhoto: true, videoPoster: true, logoMedia: true,
+      accreditationLogoMedia: true, bluLogoMedia: true, faviconMedia: true,
     }});
     if (!row) return {ok: false, code: "NOT_FOUND"};
     return {ok: true, data: {
@@ -92,12 +94,15 @@ export async function getHomeNavAdminDetail(
       media: adminImageMediaPreview(row.deanPhoto),
       secondaryMedia: adminImageMediaPreview(row.videoPoster),
       logoMedia: adminImageMediaPreview(row.logoMedia),
+      accreditationLogoMedia: adminImageMediaPreview(row.accreditationLogoMedia),
+      bluLogoMedia: adminImageMediaPreview(row.bluLogoMedia),
       faviconMedia: adminImageMediaPreview(row.faviconMedia),
       input: {
         deanName: row.deanName, deanPhotoMediaId: row.deanPhotoId, videoUrl: row.videoUrl,
         videoPosterMediaId: row.videoPosterMediaId, email: row.email, phone: row.phone,
         facebookUrl: row.facebookUrl, instagramUrl: row.instagramUrl, youtubeUrl: row.youtubeUrl, xUrl: row.xUrl,
-        logoMediaId: row.logoMediaId, faviconMediaId: row.faviconMediaId,
+        logoMediaId: row.logoMediaId, accreditationLogoMediaId: row.accreditationLogoMediaId,
+        bluLogoMediaId: row.bluLogoMediaId, faviconMediaId: row.faviconMediaId,
         contentOwnerId: row.contentOwnerId, expiresAt: row.expiresAt?.toISOString() ?? null,
         translations: localizedInput(row.translations, [
           "facultyName", "tagline", "address1", "address2", "deanPosition", "deanMessage", "videoTitle", "videoDesc",

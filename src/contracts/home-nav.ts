@@ -119,7 +119,8 @@ export const SiteSettingInputSchema = z.object({
   videoPosterMediaId: CmsIdentifierSchema.nullable(), email: ContactEmailSchema, phone: ContactPhoneSchema,
   facebookUrl: CmsHttpsExternalUrlSchema.nullable(), instagramUrl: CmsHttpsExternalUrlSchema.nullable(),
   youtubeUrl: CmsHttpsExternalUrlSchema.nullable(), xUrl: CmsHttpsExternalUrlSchema.nullable(),
-  logoMediaId: CmsIdentifierSchema.nullable(), faviconMediaId: CmsIdentifierSchema.nullable(),
+  logoMediaId: CmsIdentifierSchema.nullable(), accreditationLogoMediaId: CmsIdentifierSchema.nullable(),
+  bluLogoMediaId: CmsIdentifierSchema.nullable(), faviconMediaId: CmsIdentifierSchema.nullable(),
   contentOwnerId: CmsIdentifierSchema.nullable(), expiresAt: DateTimeSchema.nullable(),
   translations: localizedInput(SiteSettingTranslationInputSchema),
 }).strict().superRefine((value, context) => {
@@ -164,7 +165,7 @@ export const HomeNavAdminDetailQuerySchema = z.object({resource: HomeNavResource
 
 const AdminDetailBaseSchema = z.object({
   id: CmsIdentifierSchema, version: VersionSchema.nullable(), translationWorkflow: z.array(CmsTranslationWorkflowSchema).min(1).max(3),
-  governance: CmsGovernanceSummarySchema.nullable(), assets: z.array(CmsPublicAssetReferenceSchema).max(3),
+  governance: CmsGovernanceSummarySchema.nullable(), assets: z.array(CmsPublicAssetReferenceSchema).max(6),
 }).strict();
 export const HomeNavAdminDetailSchema = z.discriminatedUnion("resource", inputByResource.map(([resource, input]) =>
   AdminDetailBaseSchema.extend({resource: z.literal(resource), input}).strict()) as unknown as [z.ZodObject, z.ZodObject, z.ZodObject, z.ZodObject, z.ZodObject, z.ZodObject, z.ZodObject]);
@@ -237,7 +238,8 @@ const PublicVideoSchema = z.object({url: CmsHttpsExternalUrlSchema, poster: Publ
 export const PublicSiteSettingSchema = z.object({
   facultyName: RequiredText(500), tagline: OptionalText(500), addresses: z.array(RequiredText(5_000)).max(2),
   dean: PublicDeanSchema.nullable(), video: PublicVideoSchema.nullable(), email: ContactEmailSchema, phone: ContactPhoneSchema,
-  logo: PublicMediaViewSchema.nullable(), favicon: PublicMediaViewSchema.nullable(),
+  logo: PublicMediaViewSchema.nullable(), accreditationLogo: PublicMediaViewSchema.nullable(),
+  bluLogo: PublicMediaViewSchema.nullable(), favicon: PublicMediaViewSchema.nullable(),
   socialLinks: z.object({facebook: CmsHttpsExternalUrlSchema.nullable(), instagram: CmsHttpsExternalUrlSchema.nullable(),
     youtube: CmsHttpsExternalUrlSchema.nullable(), x: CmsHttpsExternalUrlSchema.nullable()}).strict(),
   translation: CmsTranslationResolutionSchema,

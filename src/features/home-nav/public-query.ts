@@ -55,7 +55,8 @@ export type PublicSiteSetting = {
   facultyName: string; tagline: string | null; addresses: string[]; email: string | null; phone: string | null;
   socialLinks: {facebook: string | null; instagram: string | null; youtube: string | null; x: string | null};
   dean: PublicDean | null; video: PublicHomeVideo | null;
-  logo: PublicSiteMedia | null; favicon: PublicSiteMedia | null;
+  logo: PublicSiteMedia | null; accreditationLogo: PublicSiteMedia | null;
+  bluLogo: PublicSiteMedia | null; favicon: PublicSiteMedia | null;
 };
 
 export async function getPublicSiteSetting(
@@ -65,7 +66,10 @@ export async function getPublicSiteSetting(
 ): Promise<PublicSiteSetting | null> {
   const row = await prisma.siteSetting.findUnique({
     where: {id: "singleton"},
-    include: {translations: true, deanPhoto: true, videoPoster: true, logoMedia: true, faviconMedia: true},
+    include: {
+      translations: true, deanPhoto: true, videoPoster: true, logoMedia: true,
+      accreditationLogoMedia: true, bluLogoMedia: true, faviconMedia: true,
+    },
   });
   if (!row) return null;
   const text = resolve(row.translations, locale);
@@ -88,6 +92,8 @@ export async function getPublicSiteSetting(
     socialLinks: {facebook: row.facebookUrl, instagram: row.instagramUrl, youtube: row.youtubeUrl, x: row.xUrl},
     dean, video,
     logo: mediaView(row.logoMedia, uploadBase),
+    accreditationLogo: mediaView(row.accreditationLogoMedia, uploadBase),
+    bluLogo: mediaView(row.bluLogoMedia, uploadBase),
     favicon: mediaView(row.faviconMedia, uploadBase),
   };
 }

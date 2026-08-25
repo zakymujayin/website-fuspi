@@ -81,6 +81,19 @@ Sixth follow-up feature in the same branch:
 - The lightweight public site-setting loader now returns `logo` and `favicon`,
   matching the existing public contract shape.
 
+Seventh follow-up feature in the same branch:
+
+- Split the header identity cluster into three independently managed logo
+  slots: Logo Utama, Logo Akreditasi, and Logo BLU.
+- Added nullable `SiteSetting.accreditationLogoMediaId` and
+  `SiteSetting.bluLogoMediaId` fields with Media foreign keys.
+- Fixed both home-nav mutation paths so `logoMediaId`, accreditation logo, BLU
+  logo, and favicon media ids are validated and persisted.
+- Header rendering now falls back per slot: missing Logo Utama, Akreditasi, or
+  BLU each keeps its own placeholder instead of forcing one combined image.
+- Media deletion guard now treats SiteSetting video/logo/favicon/facility/post
+  image relations as in-use references.
+
 ## Files changed
 
 - Added `FACILITY` home section key, migration, seed copy, and contract max
@@ -116,6 +129,10 @@ Sixth follow-up feature in the same branch:
   `src/features/home-nav/admin-detail.ts`, `src/features/home-nav/public-query.ts`,
   `src/components/public/site-header.tsx`, and
   `src/components/public/identity-badges.tsx`.
+- Added separate header badge logo management through the same files plus
+  `prisma/migrations/20260825153000_add_site_setting_header_badges/migration.sql`,
+  `src/features/home-nav/administration.ts`, `src/features/home-nav/domain.ts`,
+  and `src/lib/content/media-admin-transport.ts`.
 
 ## Contract/schema/migration impact
 
@@ -142,6 +159,13 @@ Sixth follow-up feature in the same branch:
   now consumed by the admin picker UI.
 - No migration or new schema field for Header Logo; it uses the existing
   `SiteSetting.logoMediaId` relation and existing public `logo` contract field.
+- New migration:
+  `prisma/migrations/20260825153000_add_site_setting_header_badges/migration.sql`
+  adds `accreditationLogoMediaId` and `bluLogoMediaId` to `SiteSetting`.
+- `SiteSettingInputSchema` and `PublicSiteSettingSchema` now include
+  `accreditationLogo`/`bluLogo` public fields and their admin media ids.
+- `HomeNavAdminDetailSchema.assets` max increased from 3 to 6 for the expanded
+  site identity media set.
 
 ## Verification
 
@@ -237,6 +261,21 @@ Sixth follow-up Header Logo verification:
 | `npm run build` | Passed |
 | `TASK_MANIFEST=coordination/tasks/M4-GPT-FACILITY-HOMEPAGE-ADMIN.md TASK_BASE=HEAD~1 npm run check:scope` | Passed after adding `tests/m4/contracts/home-nav-contracts.test.ts` to the lease, 13 changed files within lease |
 
+Seventh follow-up separate header logos verification:
+
+| Command | Result |
+|---|---|
+| `npm run prisma:validate` | Passed |
+| `npm run prisma:generate` | Passed |
+| `npx vitest run tests/m4/ui/site-logo-header.test.ts tests/m4/contracts/home-nav-contracts.test.ts` | Passed, 2 files / 15 tests |
+| `npm run typecheck` | Passed |
+| `npm run lint` | Passed |
+| `npm run test` | Passed, 98 files / 1190 tests |
+| `npm run build` | First run failed because local `fuspi_dev` DB did not yet have `SiteSetting.accreditationLogoMediaId`; after `npx prisma migrate deploy`, rerun passed |
+| `npx prisma migrate deploy` | Applied `20260825153000_add_site_setting_header_badges` to local `fuspi_dev` |
+| `git diff --check` | Passed |
+| `TASK_MANIFEST=coordination/tasks/M4-GPT-FACILITY-HOMEPAGE-ADMIN.md TASK_BASE=HEAD~1 npm run check:scope` | Passed, 19 changed files within lease |
+
 ## Untested areas
 
 - Browser-level admin CRUD flow was not run with Playwright.
@@ -247,6 +286,8 @@ Sixth follow-up Header Logo verification:
   with Playwright; coverage is contract/source tests plus production build.
 - Browser-level logo replacement in the public header was not manually run;
   coverage is source/contract tests plus production build.
+- Browser-level editing of all three separate header logo fields was not
+  manually run; coverage is source/contract tests plus production build.
 
 ## Risks and follow-ups
 

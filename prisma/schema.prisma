@@ -564,6 +564,8 @@ model Media {
   deanPhotos         SiteSetting[]   @relation("DeanPhoto")
   siteVideoPosters   SiteSetting[]   @relation("SiteVideoPoster")
   siteLogos          SiteSetting[]   @relation("SiteLogo")
+  siteAccreditationLogos SiteSetting[] @relation("SiteAccreditationLogo")
+  siteBluLogos       SiteSetting[]   @relation("SiteBluLogo")
   siteFavicons       SiteSetting[]   @relation("SiteFavicon")
   facilityCovers     Facility[]      @relation("FacilityCover")
   postImages         PostImage[]     @relation("PostImageMedia")
@@ -1306,13 +1308,19 @@ model SiteSetting {
   deanPhoto        Media?                   @relation("DeanPhoto", fields: [deanPhotoId], references: [id], onDelete: Restrict)
   videoPoster      Media?                   @relation("SiteVideoPoster", fields: [videoPosterMediaId], references: [id], onDelete: Restrict)
   logoMediaId      String?
+  accreditationLogoMediaId String?
+  bluLogoMediaId   String?
   faviconMediaId   String?
   logoMedia        Media?                   @relation("SiteLogo", fields: [logoMediaId], references: [id], onDelete: Restrict)
+  accreditationLogoMedia Media?             @relation("SiteAccreditationLogo", fields: [accreditationLogoMediaId], references: [id], onDelete: Restrict)
+  bluLogoMedia     Media?                   @relation("SiteBluLogo", fields: [bluLogoMediaId], references: [id], onDelete: Restrict)
   faviconMedia     Media?                   @relation("SiteFavicon", fields: [faviconMediaId], references: [id], onDelete: Restrict)
   translations     SiteSettingTranslation[]
 
   @@index([contentOwnerId, reviewDueAt])
   @@index([videoPosterMediaId])
+  @@index([accreditationLogoMediaId])
+  @@index([bluLogoMediaId])
 }
 
 model SiteSettingTranslation {
