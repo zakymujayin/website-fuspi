@@ -259,6 +259,7 @@ Sixth follow-up Header Logo verification:
 | `npm run prisma:validate` | Passed |
 | `npm run test` | Passed, 98 files / 1190 tests |
 | `npm run build` | Passed |
+| `TASK_MANIFEST=coordination/tasks/M4-GPT-FACILITY-HOMEPAGE-ADMIN.md TASK_BASE=HEAD~1 npm run check:scope` | Passed, 3 changed files within lease |
 | `TASK_MANIFEST=coordination/tasks/M4-GPT-FACILITY-HOMEPAGE-ADMIN.md TASK_BASE=HEAD~1 npm run check:scope` | Passed after adding `tests/m4/contracts/home-nav-contracts.test.ts` to the lease, 13 changed files within lease |
 
 Seventh follow-up separate header logos verification:
@@ -302,6 +303,17 @@ Ninth follow-up admin dashboard and password-change session verification:
 | `npm run build` | Passed |
 | `git diff --check` | Passed |
 
+Tenth follow-up public header accreditation logo sizing verification:
+
+| Command | Result |
+|---|---|
+| `npx vitest run tests/m4/ui/site-logo-header.test.ts` | Passed, 1 file / 4 tests |
+| `npm run lint` | Passed |
+| `npm run typecheck` | Passed |
+| `npm run prisma:validate` | Passed |
+| `npm run test` | Passed, 98 files / 1190 tests |
+| `npm run build` | Passed |
+
 ## Untested areas
 
 - Browser-level admin CRUD flow was not run with Playwright.
@@ -320,6 +332,8 @@ Ninth follow-up admin dashboard and password-change session verification:
 - Browser-level password-change flow was not manually run; route integration
   assertions were updated for the replacement-session behavior but DB
   integration suites were skipped in the default test environment.
+- Browser-level visual screenshot for the header logo balance was not run; the
+  sizing change is covered by source assertion plus production build.
 
 ## Risks and follow-ups
 

@@ -50,6 +50,8 @@ describe("site header logo management", () => {
     expect(badges).toContain("accreditationLogo?: PublicSiteSetting[\"accreditationLogo\"] | null");
     expect(badges).toContain("bluLogo?: PublicSiteSetting[\"bluLogo\"] | null");
     expect(badges).toContain("<ImageWithFallback");
+    expect(badges).toContain("className=\"relative block size-[58px] shrink-0\"");
+    expect(badges).toContain("className=\"relative block size-[50px] shrink-0\"");
     expect(badges).toContain("accreditationLogo ? (");
     expect(badges).toContain("bluLogo ? (");
   });

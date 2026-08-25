@@ -88,9 +88,9 @@ export function IdentityBadges({
 
       <span className="flex items-center gap-2">
         {accreditationLogo ? (
-          <BadgeImage media={accreditationLogo} className="relative block size-[50px] shrink-0" sizes="50px" />
+          <BadgeImage media={accreditationLogo} className="relative block size-[58px] shrink-0" sizes="58px" />
         ) : (
-          <svg viewBox="0 0 160 160" width="50" height="50" aria-hidden>
+          <svg viewBox="0 0 160 160" width="58" height="58" aria-hidden>
           <defs>
             <linearGradient id="idbg-acc" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stopColor="#e7c77c" />
