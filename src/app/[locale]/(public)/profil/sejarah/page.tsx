@@ -46,19 +46,6 @@ const MILESTONES = [
     },
   },
   {
-    year: "2021",
-    title: {
-      id: "Genap Lima Program Studi",
-      en: "Five Study Programs Complete",
-      ar: "اكتمال خمسة برامج دراسية",
-    },
-    description: {
-      id: "Program Studi Agama-Agama dan Tasawuf dan Psikoterapi dibuka, melengkapi lima program studi FUSPI yang berjalan hingga saat ini.",
-      en: "The Religious Studies and Sufism and Psychotherapy programs opened, completing the five study programs FUSPI offers today.",
-      ar: "افتُتح برنامجا دراسات الأديان والتصوف والعلاج النفسي، لتكتمل بذلك البرامج الدراسية الخمسة التي تقدمها الكلية حتى اليوم.",
-    },
-  },
-  {
     year: "2023",
     title: {
       id: "Transformasi Layanan Digital",

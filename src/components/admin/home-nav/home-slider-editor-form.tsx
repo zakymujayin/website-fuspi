@@ -1,4 +1,5 @@
 "use client";
+import { formText } from "@/components/admin/form-text";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
@@ -64,19 +65,19 @@ export function HomeSliderEditorForm({ mode, listHref, initialData, initialImage
       isVisible,
       translations: {
         id: {
-          title: (fd.get("id.title") as string).trim() || null,
-          subtitle: (fd.get("id.subtitle") as string).trim() || null,
-          ctaLabel: href ? (fd.get("id.ctaLabel") as string).trim() || null : null,
+          title: formText(fd, "id.title") || null,
+          subtitle: formText(fd, "id.subtitle") || null,
+          ctaLabel: href ? formText(fd, "id.ctaLabel") || null : null,
         },
         en: {
-          title: (fd.get("en.title") as string).trim() || null,
-          subtitle: (fd.get("en.subtitle") as string).trim() || null,
-          ctaLabel: href ? (fd.get("en.ctaLabel") as string).trim() || null : null,
+          title: formText(fd, "en.title") || null,
+          subtitle: formText(fd, "en.subtitle") || null,
+          ctaLabel: href ? formText(fd, "en.ctaLabel") || null : null,
         },
         ar: {
-          title: (fd.get("ar.title") as string).trim() || null,
-          subtitle: (fd.get("ar.subtitle") as string).trim() || null,
-          ctaLabel: href ? (fd.get("ar.ctaLabel") as string).trim() || null : null,
+          title: formText(fd, "ar.title") || null,
+          subtitle: formText(fd, "ar.subtitle") || null,
+          ctaLabel: href ? formText(fd, "ar.ctaLabel") || null : null,
         },
       },
     };

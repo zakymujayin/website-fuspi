@@ -1,8 +1,8 @@
 import { ArrowRight } from "lucide-react";
-import NextImage from "next/image";
 import { getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/ui/container";
+import { ImageWithFallback } from "@/components/public/image-with-fallback";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import type { PublicPostView } from "@/contracts/post";
@@ -18,7 +18,7 @@ export async function NewsSection({ items, locale }: NewsSectionProps) {
   if (!featured) return null;
 
   return (
-    <section className="bg-white py-12 md:py-16">
+    <section className="border-t border-slate-200 bg-gradient-to-b from-white to-royal-50/60 py-12 md:py-16">
       <Container>
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
           <h2 className="font-display text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
@@ -39,17 +39,13 @@ export async function NewsSection({ items, locale }: NewsSectionProps) {
             className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md lg:col-span-3"
           >
             <div className="relative aspect-[16/9] overflow-hidden bg-slate-100">
-              {featured.cover ? (
-                <NextImage
-                  src={featured.cover.url}
-                  alt={featured.cover.isDecorative ? "" : featured.cover.alt}
-                  fill
-                  priority
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  sizes="(min-width: 1024px) 60vw, 100vw"
-                  unoptimized
-                />
-              ) : null}
+              <ImageWithFallback
+                src={featured.cover?.url}
+                alt={featured.cover?.isDecorative ? "" : (featured.cover?.alt ?? featured.translation.value.title)}
+                priority
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                sizes="(min-width: 1024px) 60vw, 100vw"
+              />
             </div>
             <div className="flex flex-1 flex-col p-6">
               <h3 className="font-display text-xl font-semibold leading-snug text-slate-900 group-hover:text-royal-700">
@@ -72,16 +68,12 @@ export async function NewsSection({ items, locale }: NewsSectionProps) {
                 className="group flex gap-4 rounded-xl border border-slate-100 bg-white p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
               >
                 <div className="relative size-20 shrink-0 overflow-hidden rounded-lg bg-slate-100">
-                  {news.cover ? (
-                    <NextImage
-                      src={news.cover.url}
-                      alt={news.cover.isDecorative ? "" : news.cover.alt}
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      sizes="80px"
-                      unoptimized
-                    />
-                  ) : null}
+                  <ImageWithFallback
+                    src={news.cover?.url}
+                    alt={news.cover?.isDecorative ? "" : (news.cover?.alt ?? news.translation.value.title)}
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                    sizes="80px"
+                  />
                 </div>
                 <div className="flex flex-col justify-center">
                   <h3 className="line-clamp-2 font-display text-sm font-semibold text-slate-900 group-hover:text-royal-700">

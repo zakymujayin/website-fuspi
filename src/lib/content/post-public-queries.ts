@@ -43,6 +43,21 @@ type PublicPostRow = {
     width: number | null;
     height: number | null;
   } | null;
+  images: Array<{
+    id: string;
+    caption: string | null;
+    media: {
+      id: string;
+      storageKey: string;
+      storageClass: "PUBLIC" | "PRIVATE" | "PPKS_PRIVATE";
+      mimeType: string;
+      size: number;
+      alt: string | null;
+      isDecorative: boolean;
+      width: number | null;
+      height: number | null;
+    };
+  }>;
   translations: Array<{
     locale: "id" | "en" | "ar";
     title: string;
@@ -76,6 +91,19 @@ const PUBLIC_POST_SELECT = {
       isDecorative: true,
       width: true,
       height: true,
+    },
+  },
+  images: {
+    orderBy: {order: "asc" as const},
+    select: {
+      id: true,
+      caption: true,
+      media: {
+        select: {
+          id: true, storageKey: true, storageClass: true, mimeType: true, size: true,
+          alt: true, isDecorative: true, width: true, height: true,
+        },
+      },
     },
   },
 } as const;
@@ -190,6 +218,10 @@ function projectPost(
     authorName: row.author?.name ?? null,
     categorySlug: row.category?.slug ?? null,
     cover: publicMediaView(row.coverMedia, uploadBase),
+    images: row.images.flatMap((image) => {
+      const media = publicMediaView(image.media, uploadBase);
+      return media ? [{id: image.id, media, caption: image.caption}] : [];
+    }),
     translation,
   });
   return parsed.success ? parsed.data : null;
@@ -338,6 +370,50 @@ export async function getPublicPostDetail(
   } catch {
     return {ok: false, code: "NOT_FOUND"};
   }
+}
+
+export async function getPostsByStudyProgram(
+  database: PublicPostQueryDatabase,
+  studyProgramId: string,
+  requestedLocale: "id" | "en" | "ar",
+  publicUploadBaseUrl: string,
+  limit = 3,
+): Promise<RelatedPostCard[]> {
+  const uploadBase = normalizeUploadBase(publicUploadBaseUrl);
+  if (!uploadBase) return [];
+
+  const now = new Date();
+  const rows = await database.post.findMany({
+    where: {
+      status: "PUBLISHED",
+      publishedAt: {not: null, lte: now},
+      translations: {some: {locale: "id", status: "PUBLISHED"}},
+      studyPrograms: {some: {studyProgramId}},
+    },
+    orderBy: {publishedAt: "desc"},
+    take: limit,
+    select: {
+      ...PUBLIC_POST_SELECT,
+      translations: {
+        where: translationWhere(requestedLocale),
+        select: {locale: true, title: true, excerpt: true},
+      },
+    },
+  });
+
+  return rows.map((row): RelatedPostCard => {
+    const translation = row.translations.find(({locale}) => locale === requestedLocale) ?? row.translations[0];
+    return {
+      id: row.id,
+      type: row.type,
+      slug: row.slug,
+      publishedAt: row.publishedAt!,
+      translation: translation
+        ? {locale: translation.locale, title: translation.title, excerpt: translation.excerpt}
+        : {locale: "id", title: "", excerpt: null},
+      cover: publicMediaView(row.coverMedia, uploadBase),
+    };
+  });
 }
 
 export async function incrementPostViewCount(

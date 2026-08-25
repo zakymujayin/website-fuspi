@@ -63,6 +63,7 @@ describe("coverMediaId flows through the editable draft", () => {
       categoryId: null,
       coverMediaId: COVER_ID,
       tagIds: [],
+      images: [],
       translations: { id: { title: "T", excerpt: null, content: "<p>x</p>" } },
     };
     expect(draftFromEditorView(view as never).coverMediaId).toBe(COVER_ID);

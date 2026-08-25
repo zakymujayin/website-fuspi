@@ -32,7 +32,7 @@ type FacilityInput = z.infer<typeof FacilityInputSchema>;
 export type PublicHomeFacility = {
   id: string;
   slug: string;
-  image: NonNullable<ReturnType<typeof publicMedia>>;
+  image: ReturnType<typeof publicMedia>;
   caption: string;
   description: string | null;
 };
@@ -439,16 +439,13 @@ export async function listPublicHomeFacilities(
     active: "ACTIVE",
   }, rawUploadBase, locale);
   if (!result.ok) return [];
-  return result.data.items.flatMap((item) => {
-    if (!item.cover) return [];
-    return [{
-      id: item.id,
-      slug: item.slug,
-      image: item.cover,
-      caption: item.translation.name,
-      description: item.translation.description,
-    }];
-  }).slice(0, safeLimit);
+  return result.data.items.map((item) => ({
+    id: item.id,
+    slug: item.slug,
+    image: item.cover,
+    caption: item.translation.name,
+    description: item.translation.description,
+  })).slice(0, safeLimit);
 }
 
 export function facilityHttpStatus(result: {ok: boolean; code?: string}) {

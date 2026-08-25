@@ -18,6 +18,7 @@ import {
   SlidersHorizontalIcon,
   TrophyIcon,
   UsersIcon,
+  VideoIcon,
 } from "lucide-react";
 
 export const SIDEBAR_MENU_GROUPS = [
@@ -48,6 +49,11 @@ export const SIDEBAR_MENU_GROUPS = [
         href: "/admin/beranda/bagian",
         icon: LayoutPanelTopIcon,
         labelKey: "homeSection",
+      },
+      {
+        href: "/admin/beranda/video",
+        icon: VideoIcon,
+        labelKey: "homeVideo",
       },
       {
         href: "/admin/beranda/pengaturan",

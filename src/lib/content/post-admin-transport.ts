@@ -152,7 +152,27 @@ const POST_SELECT = {
     metaDesc: true, coverCaption: true,
   }},
   tags: {select: {tagId: true}},
+  images: {
+    orderBy: {order: "asc" as const},
+    select: {
+      id: true, caption: true,
+      media: {select: {
+        id: true, storageKey: true, storageClass: true, mimeType: true, size: true,
+        alt: true, isDecorative: true, width: true, height: true,
+      }},
+    },
+  },
 } as const;
+
+function safeGalleryImages(
+  images: ReadonlyArray<{id: string; caption: string | null; media: Parameters<typeof safeCover>[0]}>,
+  uploadBase: string,
+) {
+  return images.flatMap((image) => {
+    const media = safeCover(image.media, uploadBase);
+    return media ? [{id: image.id, media, caption: image.caption}] : [];
+  });
+}
 
 export async function listAdminPosts(
   database: AdminPostTransportDatabase,
@@ -303,6 +323,7 @@ export async function getAdminPostEditor(
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
       cover: safeCover(row.coverMedia, uploadBase),
+      images: safeGalleryImages(row.images, uploadBase),
       capabilities: capabilities(actor, row.contentOwnerId ?? row.authorId),
     });
     return result.success ? {ok: true, data: result.data} : {ok: false, code: "NOT_FOUND"};

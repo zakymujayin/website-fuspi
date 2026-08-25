@@ -1,4 +1,5 @@
 "use client";
+import { formText } from "@/components/admin/form-text";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
@@ -49,20 +50,20 @@ export function DocumentEditorForm({ mode, listHref, initialData, pageId, expect
 
     const fd = new FormData(event.currentTarget);
 
-    const enTitle = (fd.get("en.title") as string).trim();
-    const arTitle = (fd.get("ar.title") as string).trim();
+    const enTitle = formText(fd, "en.title");
+    const arTitle = formText(fd, "ar.title");
 
     const payload: Record<string, unknown> = {
-      slug: (fd.get("slug") as string).trim(),
-      publicPdfMediaId: (fd.get("publicPdfMediaId") as string).trim(),
+      slug: formText(fd, "slug"),
+      publicPdfMediaId: formText(fd, "publicPdfMediaId"),
       isPublished,
       translations: {
         id: {
-          title: (fd.get("id.title") as string).trim(),
-          category: (fd.get("id.category") as string).trim() || null,
+          title: formText(fd, "id.title"),
+          category: formText(fd, "id.category") || null,
         },
-        ...(enTitle ? { en: { title: enTitle, category: (fd.get("en.category") as string).trim() || null } } : {}),
-        ...(arTitle ? { ar: { title: arTitle, category: (fd.get("ar.category") as string).trim() || null } } : {}),
+        ...(enTitle ? { en: { title: enTitle, category: formText(fd, "en.category") || null } } : {}),
+        ...(arTitle ? { ar: { title: arTitle, category: formText(fd, "ar.category") || null } } : {}),
       },
     };
 

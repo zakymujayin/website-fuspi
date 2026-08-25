@@ -55,6 +55,7 @@
   },
   "Nav": {
     "skipToContent": "Lompat ke konten utama",
+    "breadcrumbLabel": "Breadcrumb",
     "menu": "Menu",
     "openMenu": "Buka menu",
     "closeMenu": "Tutup menu",
@@ -135,7 +136,7 @@
   },
   "StudyPrograms": {
     "title": "Program Studi",
-    "description": "Lima program studi sarjana di Fakultas Ushuluddin dan Pemikiran Islam, dari kajian Al-Qur’an dan hadis hingga tasawuf dan psikoterapi.",
+    "description": "Tiga program studi sarjana di Fakultas Ushuluddin dan Pemikiran Islam: Ilmu Al-Qur’an dan Tafsir, Ilmu Hadis, serta Aqidah dan Filsafat Islam.",
     "readMore": "Selengkapnya",
     "breadcrumbLabel": "Breadcrumb",
     "aboutProgram": "Tentang Program Studi",
@@ -148,13 +149,16 @@
     "degree": "Gelar",
     "moreInfo": "Informasi Lanjut",
     "externalSite": "Website Resmi Prodi",
-    "accreditation": "Akreditasi"
+    "accreditation": "Akreditasi",
+    "accreditationValidUntil": "berlaku s.d.",
+    "relatedNews": "Berita & Kolom Terkait"
   },
   "Post": {
     "breadcrumbHome": "Beranda",
     "readMore": "Selengkapnya",
     "fallbackNotice": "Konten ini belum tersedia dalam bahasa yang dipilih. Menampilkan versi Bahasa Indonesia.",
     "readingTime": "{minutes} menit baca",
+    "galleryHeading": "Foto Kegiatan",
     "loading": "Memuat berita…",
     "sidebar": {
       "latestTitle": "Berita Terbaru",
@@ -301,6 +305,19 @@
     "excerpt": "Ringkasan",
     "content": "Isi",
     "contentDescription": "Isi berita. Gunakan bilah alat untuk pemformatan dasar.",
+    "translateSectionTitle": "Terjemahan Otomatis",
+    "translateSectionDescription": "Versi Bahasa Inggris dan Arab dibuat otomatis dari konten Bahasa Indonesia di atas — tidak perlu diketik manual.",
+    "translateButton": "Terjemahkan ke {locale}",
+    "translateRetryButton": "Terjemahkan ulang ke {locale}",
+    "translateLoading": "Menerjemahkan…",
+    "translateDone": "Sudah diterjemahkan ke {locale}",
+    "translateErrors": {
+      "NOT_CONFIGURED": "Fitur terjemahan otomatis belum dikonfigurasi. Hubungi administrator sistem untuk mengatur provider terjemahan.",
+      "PROVIDER_ERROR": "Gagal menghubungi layanan terjemahan. Coba lagi beberapa saat lagi.",
+      "UNSUPPORTED_LANGUAGE": "Layanan terjemahan yang digunakan belum mendukung bahasa ini.",
+      "VALIDATION_FAILED": "Isi judul dan konten Bahasa Indonesia terlebih dahulu sebelum menerjemahkan.",
+      "SESSION_INVALID": "Sesi Anda berakhir. Muat ulang halaman dan masuk kembali."
+    },
     "submitCreate": "Simpan draf",
     "submitUpdate": "Simpan perubahan",
     "submitting": "Menyimpan…",
@@ -457,6 +474,21 @@
     "loading": "Memuat gambar…",
     "loadError": "Gagal memuat gambar. Coba lagi.",
     "empty": "Belum ada gambar di Pustaka Media."
+  },
+  "AdminPostGalleryPicker": {
+    "label": "Foto Kegiatan",
+    "description": "Lampirkan beberapa foto dokumentasi kegiatan untuk berita ini (opsional).",
+    "addLabel": "Tambah Foto",
+    "listLabel": "Daftar gambar untuk galeri",
+    "selectLabel": "Tambahkan {name} ke galeri",
+    "removeLabel": "Hapus foto ini dari galeri",
+    "captionLabel": "Keterangan foto (opsional)",
+    "captionPlaceholder": "Contoh: Suasana acara di Aula FUSPI",
+    "empty": "Belum ada foto di galeri.",
+    "maxReached": "Maksimal 20 foto per berita.",
+    "loading": "Memuat gambar…",
+    "loadError": "Gagal memuat gambar. Coba lagi.",
+    "libraryEmpty": "Belum ada gambar di Pustaka Media."
   },
   "AdminMediaUpload": {
     "title": "Unggah media",
@@ -792,6 +824,7 @@
     "testimonials": "Testimoni",
     "homeSlider": "Slider Beranda",
     "homeStatistic": "Statistik",
+    "homeVideo": "Video Beranda",
     "homeSection": "Bagian Beranda",
     "homeSettings": "Pengaturan Beranda",
     "facilities": "Fasilitas"
@@ -823,6 +856,7 @@
       "testimonials": "Testimoni",
       "homeSlider": "Slider Beranda",
       "homeStatistic": "Statistik",
+    "homeVideo": "Video Beranda",
       "homeSection": "Bagian Beranda",
       "homeSettings": "Pengaturan Beranda",
       "facilities": "Fasilitas",
@@ -956,6 +990,7 @@
     "videosDescription": "Kenali suasana kuliah, kegiatan, dan lingkungan kampus FUSPI lewat video.",
     "videoTourBadge": "Video Tour Kampus",
     "watchVideo": "Tonton Video",
+    "videoGalleryTitle": "Video Lainnya",
     "video": {
       "tour": {
         "title": "Tur Kampus FUSPI",
@@ -972,12 +1007,19 @@
       }
     },
     "columnsEyebrow": "Kolom",
-    "columnsTitle": "Gagasan dari Sivitas Akademika",
+    "achievementsEyebrow": "Mahasiswa Kami",
+    "columnsTitle": "Sorotan Akademik",
     "columnsDescription": "Tulisan opini dan pemikiran dari dekan, dosen, dan mahasiswa FUSPI.",
     "columnRole": {
       "dean": "Dekan",
       "lecturer": "Dosen",
       "student": "Mahasiswa"
+    },
+    "achievementLevel": {
+      "internasional": "Internasional",
+      "nasional": "Nasional",
+      "regional": "Regional",
+      "lokal": "Lokal"
     },
     "partnersTitle": "Kerja Sama",
     "partnersDescription": "Jaringan kemitraan FUSPI dengan perguruan tinggi dan lembaga keislaman nasional.",
@@ -1005,13 +1047,13 @@
     "statsPartners": "Mitra Kerja Sama",
     "introLabel": "Tentang FUSPI",
     "introTitle": "Mengembangkan Kajian Keislaman yang Kredibel dan Kontekstual",
-    "introDescription": "Fakultas Ushuluddin dan Pemikiran Islam (FUSPI) UIN Sultan Maulana Hasanuddin Banten hadir sebagai pusat pengembangan keilmuan Islam yang integratif. Dengan lima program studi unggulan, FUSPI berkomitmen menghasilkan lulusan yang mendalam dalam ilmu keislaman sekaligus tanggap terhadap dinamika zaman.",
+    "introDescription": "Fakultas Ushuluddin dan Pemikiran Islam (FUSPI) UIN Sultan Maulana Hasanuddin Banten hadir sebagai pusat pengembangan keilmuan Islam yang integratif. Dengan tiga program studi unggulan, FUSPI berkomitmen menghasilkan lulusan yang mendalam dalam ilmu keislaman sekaligus tanggap terhadap dinamika zaman.",
     "introCtaProfile": "Profil Lengkap",
     "introCtaPrograms": "Program Studi",
     "introCardVision": "Visi & Misi",
     "introCardVisionDesc": "Arah pengembangan fakultas",
     "introCardPrograms": "Program Studi",
-    "introCardProgramsDesc": "Lima program unggulan",
+    "introCardProgramsDesc": "Tiga program unggulan",
     "introCardLecturers": "Dosen",
     "introCardLecturersDesc": "Tenaga pengajar berkualitas",
     "introCardContact": "Kontak",
@@ -1024,6 +1066,7 @@
     "facilitiesTitle": "Sarana dan Prasarana",
     "programsEyebrow": "Jenjang Pendidikan",
     "ctaEyebrow": "Bergabung",
+    "ctaSlogan": "Critically Locally Globally",
     "advantage": {
       "quran": {
         "title": "Kajian Al-Qur'an & Tafsir",
@@ -1099,7 +1142,7 @@
     "quickFacts": "Informasi Singkat",
     "prospectiveStudentTitle": "Calon Mahasiswa",
     "prospectiveStudentDesc": "Temukan informasi lengkap untuk memulai perjalanan akademik Anda di FUSPI.",
-    "studyProgramsDesc": "Lihat lima program studi yang tersedia.",
+    "studyProgramsDesc": "Lihat tiga program studi yang tersedia.",
     "pmbPortal": "Portal PMB",
     "pmbPortalDesc": "Akses pendaftaran mahasiswa baru UIN Banten.",
     "scholarships": "Beasiswa",
@@ -1273,6 +1316,16 @@
       "suffix": "Akhiran (mis. +)",
       "icon": "Ikon (nama lucide-react, opsional)",
       "label": "Label"
+    },
+    "homeVideo": {
+      "title": "Video Beranda",
+      "description": "Kelola daftar video tambahan yang tampil di samping Video Profil pada beranda.",
+      "createTitle": "Tambah Video",
+      "editTitle": "Sunting Video",
+      "listAriaLabel": "Daftar video beranda",
+      "commonFields": "Pengaturan Video",
+      "youtubeUrl": "Tautan YouTube",
+      "videoTitle": "Judul Video"
     },
     "section": {
       "title": "Bagian Beranda",

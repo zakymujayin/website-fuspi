@@ -1,13 +1,14 @@
-import {ArrowRight, BookOpen, Globe, GraduationCap} from "lucide-react";
+import {BookOpen, Globe, GraduationCap} from "lucide-react";
 import Image from "next/image";
 import {notFound} from "next/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import type {Metadata} from "next";
 
+import {Breadcrumb} from "@/components/public/breadcrumb";
 import {SectionHeading} from "@/components/public/section-heading";
 import {Container} from "@/components/ui/container";
 import {Link} from "@/i18n/navigation";
-import {createPrismaClient} from "@/lib/db/client";
+import {getPrismaClient} from "@/lib/db/client";
 import type {AppLocale} from "@/i18n/routing";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fuspi.uinbanten.ac.id";
@@ -46,7 +47,7 @@ function resolveLocale<T extends {locale: string}>(items: ReadonlyArray<T>, loca
 
 async function getLecturer(slug: string): Promise<Row | null> {
   try {
-    const prisma = createPrismaClient();
+    const prisma = getPrismaClient();
     const rows = await prisma.lecturer.findMany({where: {slug, isActive: true}, select: LECTURER_DETAIL_SELECT}) as Row[];
     return rows[0] ?? null;
   } catch { return null; }
@@ -65,13 +66,15 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
 
   return (
     <Container className="py-12 md:py-20">
-      <nav aria-label="Breadcrumb" className="mb-8 flex items-center gap-2 text-sm text-slate-500">
-        <Link href="/" className="transition-colors hover:text-royal-600">{tNav("home")}</Link>
-        <ArrowRight aria-hidden className="size-3 rtl:rotate-180" strokeWidth={1.5} />
-        <Link href="/dosen" className="transition-colors hover:text-royal-600">{tNav("lecturers")}</Link>
-        <ArrowRight aria-hidden className="size-3 rtl:rotate-180" strokeWidth={1.5} />
-        <span className="text-slate-800">{lecturer.name}</span>
-      </nav>
+      <Breadcrumb
+        ariaLabel={tNav("breadcrumbLabel")}
+        className="mb-8"
+        items={[
+          {label: tNav("home"), href: "/"},
+          {label: tNav("lecturers"), href: "/dosen"},
+          {label: lecturer.name},
+        ]}
+      />
 
       <div className="grid gap-10 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-8">

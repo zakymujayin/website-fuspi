@@ -24,6 +24,7 @@ import { PostMetaRow } from "@/components/public/post/post-meta-row";
 import { PostCoverImage } from "@/components/public/post/post-cover-image";
 import { PostFallbackBanner } from "@/components/public/post/post-fallback-banner";
 import { PostArticleBody } from "@/components/public/post/post-article-body";
+import { PostImageGallery } from "@/components/public/post/post-image-gallery";
 import { PostStateNotice } from "@/components/public/post/post-state-notice";
 import { PostSidebarLatest, type PostSidebarItem } from "@/components/public/post/post-sidebar-latest";
 
@@ -210,25 +211,23 @@ export default async function ColumnDetailPage({ params }: PageProps) {
             }
           />
 
-          {cover.kind === "image" ? (
-            <figure>
-              <PostCoverImage
-                cover={cover}
-                sizes="(min-width: 1024px) 66vw, 100vw"
-                priority
-                className="aspect-video w-full rounded-xl"
-              />
-              {post.translation.value.coverCaption ? (
-                <figcaption
-                  lang={post.translation.resolvedLocale}
-                  dir={contentDir}
-                  className="mt-2 text-[13px] break-words text-slate-500 italic"
-                >
-                  {post.translation.value.coverCaption}
-                </figcaption>
-              ) : null}
-            </figure>
-          ) : null}
+          <figure>
+            <PostCoverImage
+              cover={cover}
+              sizes="(min-width: 1024px) 66vw, 100vw"
+              priority
+              className="aspect-video w-full rounded-xl"
+            />
+            {cover.kind === "image" && post.translation.value.coverCaption ? (
+              <figcaption
+                lang={post.translation.resolvedLocale}
+                dir={contentDir}
+                className="mt-2 text-[13px] break-words text-slate-500 italic"
+              >
+                {post.translation.value.coverCaption}
+              </figcaption>
+            ) : null}
+          </figure>
 
           {sanitizedContent ? (
             <PostArticleBody html={sanitizedContent} resolvedLocale={post.translation.resolvedLocale} />
@@ -240,6 +239,8 @@ export default async function ColumnDetailPage({ params }: PageProps) {
               description={t("unavailable.description")}
             />
           )}
+
+          <PostImageGallery images={post.images} heading={t("galleryHeading")} />
         </article>
 
         <div className="min-w-0 lg:col-span-4">

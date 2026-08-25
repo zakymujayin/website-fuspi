@@ -16,6 +16,7 @@ export async function executeHomeNavAdminCommand(rawCommand: unknown): Promise<H
   if (result.ok) {
     const paths: Record<string, string> = {
       HOME_SLIDER: "slider", STATISTIC: "statistik", HOME_SECTION: "bagian", SITE_SETTING: "pengaturan",
+      HOME_VIDEO: "video",
     };
     const segment = paths[result.resource] ?? result.resource.toLowerCase();
     for (const locale of ["id", "en", "ar"] as const) {

@@ -28,6 +28,7 @@ const MUTABLE_FIELDS = {
   categoryId: "category-1",
   coverMediaId: null,
   tagIds: ["tag-1", "tag-2"],
+  images: [],
   translations: {
     id: ID_TRANSLATION,
     ar: {...ID_TRANSLATION, title: "دراسة القرآن والمجتمع", excerpt: null},

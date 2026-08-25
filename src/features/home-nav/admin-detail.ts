@@ -1,6 +1,6 @@
 import {actorOrNull, configuredLink, mediaView, type PublicContentDatabase} from "@/features/public-content/shared";
 
-export type HomeNavDetailResource = "HOME_SLIDER" | "STATISTIC" | "HOME_SECTION" | "SITE_SETTING";
+export type HomeNavDetailResource = "HOME_SLIDER" | "STATISTIC" | "HOME_SECTION" | "SITE_SETTING" | "HOME_VIDEO";
 
 type TranslationMap = Record<string, Record<string, unknown>>;
 
@@ -62,6 +62,17 @@ export async function getHomeNavAdminDetail(
           key: row.key, isVisible: row.isVisible, order: row.order, itemLimit: row.itemLimit,
           cta: configuredLink(row.ctaUrl) ?? null, backgroundMediaId: row.backgroundMediaId,
           translations: localizedInput(row.translations, ["title", "subtitle", "ctaLabel"]),
+        },
+      }};
+    }
+    if (resource === "HOME_VIDEO") {
+      const row = await prisma.homeVideo.findUnique({where: {id}, include: {translations: true}});
+      if (!row) return {ok: false, code: "NOT_FOUND"};
+      return {ok: true, data: {
+        version: null, media: null, secondaryMedia: null,
+        input: {
+          youtubeUrl: row.youtubeUrl, order: row.order, isVisible: row.isVisible,
+          translations: localizedInput(row.translations, ["title"]),
         },
       }};
     }

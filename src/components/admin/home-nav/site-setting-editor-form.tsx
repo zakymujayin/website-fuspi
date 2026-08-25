@@ -1,4 +1,5 @@
 "use client";
+import { formText } from "@/components/admin/form-text";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
@@ -53,8 +54,8 @@ export function SiteSettingEditorForm({ listHref, initialData, initialVersion, i
     setErrors([]);
 
     const fd = new FormData(event.currentTarget);
-    const deanName = (fd.get("deanName") as string).trim() || null;
-    const videoUrl = (fd.get("videoUrl") as string).trim() || null;
+    const deanName = formText(fd, "deanName") || null;
+    const videoUrl = formText(fd, "videoUrl") || null;
 
     if ((deanName === null) !== (deanPhotoId === null)) {
       setErrors([t("errors.deanIncomplete")]);
@@ -68,28 +69,28 @@ export function SiteSettingEditorForm({ listHref, initialData, initialVersion, i
     }
 
     const localized = (prefix: "id" | "en" | "ar", required: boolean): SiteSettingTranslation | null => {
-      const facultyName = (fd.get(`${prefix}.facultyName`) as string).trim();
+      const facultyName = formText(fd, `${prefix}.facultyName`);
       if (!facultyName && !required) return null;
       return {
         facultyName,
-        tagline: (fd.get(`${prefix}.tagline`) as string).trim() || null as unknown as string,
-        address1: (fd.get(`${prefix}.address1`) as string).trim() || null as unknown as string,
-        address2: (fd.get(`${prefix}.address2`) as string).trim() || null as unknown as string,
-        deanPosition: deanName ? (fd.get(`${prefix}.deanPosition`) as string).trim() : null as unknown as string,
-        deanMessage: deanName ? (fd.get(`${prefix}.deanMessage`) as string).trim() : null as unknown as string,
-        videoTitle: videoUrl ? (fd.get(`${prefix}.videoTitle`) as string).trim() : null as unknown as string,
-        videoDesc: (fd.get(`${prefix}.videoDesc`) as string).trim() || null as unknown as string,
+        tagline: formText(fd, `${prefix}.tagline`) || null as unknown as string,
+        address1: formText(fd, `${prefix}.address1`) || null as unknown as string,
+        address2: formText(fd, `${prefix}.address2`) || null as unknown as string,
+        deanPosition: deanName ? formText(fd, `${prefix}.deanPosition`) : null as unknown as string,
+        deanMessage: deanName ? formText(fd, `${prefix}.deanMessage`) : null as unknown as string,
+        videoTitle: videoUrl ? formText(fd, `${prefix}.videoTitle`) : null as unknown as string,
+        videoDesc: formText(fd, `${prefix}.videoDesc`) || null as unknown as string,
       };
     };
 
     const payload: Record<string, unknown> = {
       deanName, deanPhotoMediaId: deanPhotoId, videoUrl, videoPosterMediaId: videoPosterId,
-      email: (fd.get("email") as string).trim() || null,
-      phone: (fd.get("phone") as string).trim() || null,
-      facebookUrl: (fd.get("facebookUrl") as string).trim() || null,
-      instagramUrl: (fd.get("instagramUrl") as string).trim() || null,
-      youtubeUrl: (fd.get("youtubeUrl") as string).trim() || null,
-      xUrl: (fd.get("xUrl") as string).trim() || null,
+      email: formText(fd, "email") || null,
+      phone: formText(fd, "phone") || null,
+      facebookUrl: formText(fd, "facebookUrl") || null,
+      instagramUrl: formText(fd, "instagramUrl") || null,
+      youtubeUrl: formText(fd, "youtubeUrl") || null,
+      xUrl: formText(fd, "xUrl") || null,
       contentOwnerId: null, expiresAt: null,
       translations: (() => {
         const en = localized("en", false);

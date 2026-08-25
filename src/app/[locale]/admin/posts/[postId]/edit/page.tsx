@@ -90,6 +90,7 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
         initialDraft={draftFromEditorView(view)}
         taxonomyOptions={taxonomyOptions}
         initialCover={view.cover}
+        initialGalleryPreviews={Object.fromEntries(view.images.map((image) => [image.media.id, image.media]))}
         uploadPublicUrl={process.env.UPLOAD_PUBLIC_URL ?? ""}
         listHref="/admin/posts"
         publicationState={view.publicationState}

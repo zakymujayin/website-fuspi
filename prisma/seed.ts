@@ -107,6 +107,13 @@ const SECTIONS: SectionCopy[] = [
     ctaUrl: "/kolom", itemLimit: 4,
   },
   {
+    key: "ACHIEVEMENT",
+    id: { title: "Prestasi dan Inspirasi", subtitle: "Capaian membanggakan mahasiswa FUSPI di berbagai ajang.", ctaLabel: "Semua Prestasi" },
+    en: { title: "Achievements and Inspiration", subtitle: "Proud milestones from FUSPI students across competitions and events.", ctaLabel: "All Achievements" },
+    ar: { title: "الإنجازات والإلهام", subtitle: "إنجازات مفخرة لطلاب الكلية في مختلف الفعاليات والمسابقات.", ctaLabel: "جميع الإنجازات" },
+    ctaUrl: "/prestasi", itemLimit: 4,
+  },
+  {
     key: "CTA",
     id: { title: "Punya Pertanyaan?", ctaLabel: "Hubungi Kami" },
     en: { title: "Have a Question?", ctaLabel: "Contact Us" },
@@ -462,8 +469,8 @@ async function main() {
       slug: "fuspi-buka-pendaftaran-mahasiswa-baru-2026",
       authorId: admin.id,
       id_title: "FUSPI Buka Pendaftaran Mahasiswa Baru Tahun Akademik 2026/2027",
-      id_excerpt: "Pendaftaran mahasiswa baru untuk lima program studi FUSPI resmi dibuka mulai awal tahun ajaran.",
-      id_content: "<p>Fakultas Ushuluddin dan Pemikiran Islam membuka pendaftaran mahasiswa baru untuk lima program studi: Ilmu Al-Qur'an dan Tafsir, Ilmu Hadis, Aqidah dan Filsafat Islam, Studi Agama-Agama, serta Tasawuf dan Psikoterapi.</p>",
+      id_excerpt: "Pendaftaran mahasiswa baru untuk tiga program studi FUSPI resmi dibuka mulai awal tahun ajaran.",
+      id_content: "<p>Fakultas Ushuluddin dan Pemikiran Islam membuka pendaftaran mahasiswa baru untuk tiga program studi yang saat ini aktif: Ilmu Al-Qur'an dan Tafsir, Ilmu Hadis, dan Aqidah dan Filsafat Islam.</p>",
     },
     {
       slug: "seminar-nasional-moderasi-beragama",

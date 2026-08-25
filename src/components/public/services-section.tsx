@@ -2,7 +2,9 @@ import { ArrowRight, BookMarked, CalendarClock, LayoutDashboard, MessageSquareWa
 import { getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/ui/container";
+import { Reveal } from "@/components/public/reveal";
 import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
 
 type ServiceCard = {
   key: "sila" | "complaints" | "booking" | "ejournal";
@@ -10,6 +12,19 @@ type ServiceCard = {
   href: string;
   external: boolean;
 };
+
+/**
+ * A tonal family, not four unrelated hues: every card sits on the same
+ * royal-50 field, the accent cycles within the two locked identity colors
+ * (royal blue, brass gold). Brass keeps navy-900 text/icon — white on
+ * brass-500 fails WCAG AA (2.45:1).
+ */
+const ACCENT = [
+  { chip: "bg-gradient-to-br from-royal-500 to-royal-600 text-white", ring: "bg-royal-500" },
+  { chip: "bg-gradient-to-br from-royal-700 to-royal-800 text-white", ring: "bg-royal-700" },
+  { chip: "bg-gradient-to-br from-brass-400 to-brass-500 text-navy-900", ring: "bg-brass-500" },
+  { chip: "bg-gradient-to-br from-navy-800 to-navy-900 text-white", ring: "bg-navy-900" },
+] as const;
 
 /**
  * SILA has no configured public URL yet (`NEXT_PUBLIC_SILA_URL` is unset) and
@@ -36,9 +51,9 @@ export async function ServicesSection() {
   const services = buildServices();
 
   return (
-    <section className="bg-slate-50 py-12 md:py-16">
+    <section className="border-t border-slate-200 bg-gradient-to-b from-white to-royal-50/30 py-10 md:py-14">
       <Container>
-        <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <span className="text-xs font-medium tracking-wide text-royal-600 uppercase">
               {t("servicesEyebrow")}
@@ -57,20 +72,27 @@ export async function ServicesSection() {
           </Link>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {services.map((service) => {
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {services.map((service, index) => {
+            const accent = ACCENT[index % ACCENT.length];
             const title = t(`service.${service.key}.title`);
             const description = t(`service.${service.key}.description`);
             const cardContent = (
               <>
-                <span className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-royal-50 text-royal-600 transition-colors group-hover:bg-royal-100">
+                {/* Directional cue, not decoration: the rule only appears on
+                    hover/focus, pointing at "this is the active item." */}
+                <span
+                  aria-hidden
+                  className={cn("absolute inset-x-0 top-0 h-1 origin-left scale-x-0 transition-transform duration-200 group-hover:scale-x-100", accent.ring)}
+                />
+                <span className={cn("flex size-12 shrink-0 items-center justify-center rounded-lg", accent.chip)}>
                   <service.icon aria-hidden className="size-5" strokeWidth={1.5} />
                 </span>
-                <div className="mt-4 flex-1">
+                <div className="mt-5 flex-1">
                   <h3 className="font-display text-base font-semibold leading-snug text-slate-900">
                     {title}
                   </h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{description}</p>
+                  <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{description}</p>
                 </div>
                 <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-royal-600 transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5">
                   {t("serviceCta")}
@@ -83,22 +105,20 @@ export async function ServicesSection() {
               </>
             );
             const cardClass =
-              "group flex flex-col rounded-xl border border-t-4 border-slate-200 border-t-royal-500 bg-white p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-royal-200 hover:border-t-royal-500 hover:shadow-md";
+              "group relative flex w-full flex-1 flex-col overflow-hidden rounded-xl border border-royal-100 bg-royal-50 p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-royal-200 hover:shadow-md";
 
-            return service.external ? (
-              <a
-                key={service.key}
-                href={service.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={cardClass}
-              >
-                {cardContent}
-              </a>
-            ) : (
-              <Link key={service.key} href={service.href} className={cardClass}>
-                {cardContent}
-              </Link>
+            return (
+              <Reveal key={service.key} index={index}>
+                {service.external ? (
+                  <a href={service.href} target="_blank" rel="noopener noreferrer" className={cardClass}>
+                    {cardContent}
+                  </a>
+                ) : (
+                  <Link href={service.href} className={cardClass}>
+                    {cardContent}
+                  </Link>
+                )}
+              </Reveal>
             );
           })}
         </div>

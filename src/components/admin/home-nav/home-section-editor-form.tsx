@@ -1,4 +1,5 @@
 "use client";
+import { formText } from "@/components/admin/form-text";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
@@ -56,19 +57,19 @@ export function HomeSectionEditorForm({ listHref, pageId, initialData, initialBa
       backgroundMediaId: backgroundId,
       translations: {
         id: {
-          title: (fd.get("id.title") as string).trim(),
-          subtitle: (fd.get("id.subtitle") as string).trim() || null,
-          ctaLabel: href ? (fd.get("id.ctaLabel") as string).trim() || null : null,
+          title: formText(fd, "id.title"),
+          subtitle: formText(fd, "id.subtitle") || null,
+          ctaLabel: href ? formText(fd, "id.ctaLabel") || null : null,
         },
         en: {
-          title: (fd.get("en.title") as string).trim() || (fd.get("id.title") as string).trim(),
-          subtitle: (fd.get("en.subtitle") as string).trim() || null,
-          ctaLabel: href ? (fd.get("en.ctaLabel") as string).trim() || null : null,
+          title: formText(fd, "en.title") || formText(fd, "id.title"),
+          subtitle: formText(fd, "en.subtitle") || null,
+          ctaLabel: href ? formText(fd, "en.ctaLabel") || null : null,
         },
         ar: {
-          title: (fd.get("ar.title") as string).trim() || (fd.get("id.title") as string).trim(),
-          subtitle: (fd.get("ar.subtitle") as string).trim() || null,
-          ctaLabel: href ? (fd.get("ar.ctaLabel") as string).trim() || null : null,
+          title: formText(fd, "ar.title") || formText(fd, "id.title"),
+          subtitle: formText(fd, "ar.subtitle") || null,
+          ctaLabel: href ? formText(fd, "ar.ctaLabel") || null : null,
         },
       },
     };

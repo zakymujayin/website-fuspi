@@ -5,7 +5,7 @@ import {SectionHeading} from "@/components/public/section-heading";
 import {Container} from "@/components/ui/container";
 import {PostCardHorizontal} from "@/components/public/post/post-card-horizontal";
 import type {ResolvedCoverImage} from "@/components/public/post/cover-image";
-import {createPrismaClient} from "@/lib/db/client";
+import {getPrismaClient} from "@/lib/db/client";
 import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
 import {ArrowRight} from "lucide-react";
@@ -52,7 +52,7 @@ export default async function AnnouncementsPage({params}: {params: Promise<{loca
 
   let rows: Row[] = [];
   try {
-    const prisma = createPrismaClient();
+    const prisma = getPrismaClient();
     rows = await prisma.post.findMany({where: {status: "PUBLISHED", type: "PENGUMUMAN"}, orderBy: {publishedAt: "desc"}, take: 20, select: POST_SELECT}) as Row[];
   } catch {}
 

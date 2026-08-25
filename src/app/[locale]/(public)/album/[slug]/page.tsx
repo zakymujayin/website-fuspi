@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 
+import { Breadcrumb } from "@/components/public/breadcrumb";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/public/section-heading";
 import { PublicContentStateNotice } from "@/components/admin/public-content/public-content-state-notice";
@@ -46,6 +47,7 @@ export default async function AlbumDetailPage({
   const locale = rawLocale as "id" | "en" | "ar";
   setRequestLocale(locale);
   const t = await getTranslations("PublicContent");
+  const tNav = await getTranslations("Nav");
 
   const prisma = getPrismaClient();
   const result = await getPublicContentDetail(prisma, {
@@ -72,6 +74,15 @@ export default async function AlbumDetailPage({
 
   return (
     <Container className="py-12 md:py-20">
+      <Breadcrumb
+        ariaLabel={tNav("breadcrumbLabel")}
+        className="mx-auto mb-6 max-w-5xl"
+        items={[
+          {label: tNav("home"), href: "/"},
+          {label: t("album.listTitle"), href: "/album"},
+          {label: album.translation.title, resolvedLocale: album.translation.resolvedLocale},
+        ]}
+      />
       <article
         lang={album.translation.resolvedLocale}
         dir={contentDir}

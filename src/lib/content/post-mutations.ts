@@ -50,6 +50,7 @@ type MutablePostInput = Pick<
   | "categoryId"
   | "coverMediaId"
   | "tagIds"
+  | "images"
 >;
 type ExistingPost = {
   id: string;
@@ -70,6 +71,7 @@ type ExistingPost = {
     sourceVersion: number;
   }>;
   tags: Array<{tagId: string}>;
+  images: Array<{mediaId: string; caption: string | null}>;
 };
 
 const SYSTEM_CLOCK: PostMutationClock = () => new Date();
@@ -218,6 +220,18 @@ async function validateReferences(
     }
   }
 
+  if (input.images.length > 0) {
+    const mediaIds = input.images.map((image) => image.mediaId);
+    const media = await transaction.media.findMany({
+      where: {id: {in: mediaIds}},
+      select: {id: true, storageClass: true, uploaderId: true},
+    });
+    if (media.length !== mediaIds.length) return "MEDIA_NOT_FOUND";
+    const forbidden = media.some((item) =>
+      item.storageClass !== "PUBLIC" || (actor.role === "EDITOR" && item.uploaderId !== actor.userId));
+    if (forbidden) return "MEDIA_FORBIDDEN";
+  }
+
   return null;
 }
 
@@ -238,6 +252,7 @@ function rootSnapshot(options: {
     categoryId: options.input.categoryId,
     coverMediaId: options.input.coverMediaId,
     tagIds: [...options.input.tagIds],
+    images: options.input.images.map((image) => ({...image})),
   };
 }
 
@@ -348,6 +363,21 @@ async function replaceTags(
   }
 }
 
+async function replaceImages(
+  transaction: Prisma.TransactionClient,
+  postId: string,
+  images: readonly {mediaId: string; caption?: string | null}[],
+) {
+  await transaction.postImage.deleteMany({where: {postId}});
+  if (images.length > 0) {
+    await transaction.postImage.createMany({
+      data: images.map((image, order) => ({
+        postId, mediaId: image.mediaId, caption: image.caption ?? null, order,
+      })),
+    });
+  }
+}
+
 async function readOwnedPost(
   transaction: Prisma.TransactionClient,
   actor: Actor,
@@ -382,6 +412,7 @@ async function readOwnedPost(
         },
       },
       tags: {select: {tagId: true}},
+      images: {select: {mediaId: true, caption: true}, orderBy: {order: "asc"}},
     },
   });
 }
@@ -415,6 +446,7 @@ function mutableInputFromExisting(post: ExistingPost): MutablePostInput {
     categoryId: post.categoryId,
     coverMediaId: post.coverMediaId,
     tagIds: post.tags.map(({tagId}) => tagId),
+    images: post.images.map(({mediaId, caption}) => ({mediaId, caption})),
   };
 }
 
@@ -490,6 +522,11 @@ export async function createPost(
           tags: {
             create: parsed.data.tagIds.map((tagId) => ({tagId})),
           },
+          images: {
+            create: parsed.data.images.map((image, order) => ({
+              mediaId: image.mediaId, caption: image.caption ?? null, order,
+            })),
+          },
         },
       });
       await createRevisions(transaction, {
@@ -561,6 +598,7 @@ async function writeExistingPost(
         claim.nextVersion,
       );
       await replaceTags(transaction, existing.id, input.tagIds);
+      await replaceImages(transaction, existing.id, input.images);
       await createRevisions(transaction, {
         postId: existing.id,
         actorId: actor.userId,

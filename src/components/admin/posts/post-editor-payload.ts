@@ -14,6 +14,8 @@ export type PostEditorTranslationDraft = {
   content: string;
 };
 
+export type PostEditorImageDraft = { mediaId: string; caption: string };
+
 export type PostEditorDraft = {
   slug: string;
   isFeatured: boolean;
@@ -21,6 +23,8 @@ export type PostEditorDraft = {
   tagIds: readonly string[];
   /** Editable via the cover picker; null means no cover. */
   coverMediaId: string | null;
+  /** Gallery photos, in display order; editable via the gallery picker. */
+  images: readonly PostEditorImageDraft[];
   translations: Record<PostEditorLocale, PostEditorTranslationDraft>;
 };
 
@@ -46,6 +50,7 @@ export function emptyDraft(): PostEditorDraft {
     categoryId: null,
     tagIds: [],
     coverMediaId: null,
+    images: [],
     translations: {
       id: { ...EMPTY_TRANSLATION },
       en: { ...EMPTY_TRANSLATION },
@@ -71,6 +76,13 @@ function toTranslationInput(draft: PostEditorTranslationDraft) {
   };
 }
 
+function toImagesInput(draft: PostEditorDraft) {
+  return draft.images.map((image) => {
+    const caption = image.caption.trim();
+    return { mediaId: image.mediaId, caption: caption.length > 0 ? caption : null };
+  });
+}
+
 function toTranslationsInput(draft: PostEditorDraft) {
   const translations: Record<string, ReturnType<typeof toTranslationInput>> = {
     id: toTranslationInput(draft.translations.id),
@@ -91,6 +103,7 @@ export function buildCreatePayload(draft: PostEditorDraft) {
     categoryId: draft.categoryId,
     coverMediaId: draft.coverMediaId,
     tagIds: [...draft.tagIds],
+    images: toImagesInput(draft),
     translations: toTranslationsInput(draft),
     publication: { intent: "SAVE_DRAFT" },
   });
@@ -110,6 +123,7 @@ export function buildUpdatePayload(
     categoryId: draft.categoryId,
     coverMediaId: draft.coverMediaId,
     tagIds: [...draft.tagIds],
+    images: toImagesInput(draft),
     translations: toTranslationsInput(draft),
   });
 }
@@ -133,6 +147,7 @@ export function buildAutosavePayload(
     categoryId: draft.categoryId,
     coverMediaId: draft.coverMediaId,
     tagIds: [...draft.tagIds],
+    images: toImagesInput(draft),
     translations: toTranslationsInput(draft),
   });
 }

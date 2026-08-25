@@ -12,6 +12,7 @@ import {
   PostStatusSchema,
   PostTranslationsInputSchema,
   PostUpdateInputSchema,
+  PublicPostImageSchema,
   type PostAutosaveInput,
   type PostCreateInput,
   type PostMutationFailureCode,
@@ -202,6 +203,7 @@ export const AdminPostEditorViewSchema = z.object({
   createdAt: z.iso.datetime({offset: true}),
   updatedAt: z.iso.datetime({offset: true}),
   cover: PublicMediaViewSchema.nullable(),
+  images: z.array(PublicPostImageSchema).max(20),
   capabilities: AdminPostCapabilitiesSchema,
 }).strict().superRefine((value, context) => {
   validatePublicationState(value, context);
@@ -219,6 +221,7 @@ const AdminPostMutableFieldsShape = {
   categoryId: PostCreateInputSchema.shape.categoryId,
   coverMediaId: PostCreateInputSchema.shape.coverMediaId,
   tagIds: PostCreateInputSchema.shape.tagIds,
+  images: PostCreateInputSchema.shape.images,
   translations: PostCreateInputSchema.shape.translations,
 } as const;
 

@@ -1,14 +1,16 @@
 export type LeadershipMember = {
   initials: string;
   name: string;
+  photoUrl?: string;
   position: {id: string; en: string; ar: string};
   bio?: {id: string; en: string; ar: string};
 };
 
 export const viceDeans: readonly LeadershipMember[] = [
   {
-    initials: "RH",
-    name: "Dr. Rahmawati Husna, M.A.",
+    initials: "MM",
+    name: "Dr. H. Masrukhin Muhsin, Lc, M.A.",
+    photoUrl: "/images/leadership/wd1-masrukhin.webp",
     position: {
       id: "Wakil Dekan I — Bidang Akademik",
       en: "Vice Dean I — Academic Affairs",
@@ -21,8 +23,9 @@ export const viceDeans: readonly LeadershipMember[] = [
     },
   },
   {
-    initials: "IS",
-    name: "Dr. H. Imron Supriyadi, M.Pd.",
+    initials: "ES",
+    name: "Dr. H. Endang Saeful Anwar, Lc, M.A.",
+    photoUrl: "/images/leadership/wd2-endang.webp",
     position: {
       id: "Wakil Dekan II — Administrasi Umum dan Keuangan",
       en: "Vice Dean II — General Administration and Finance",
@@ -35,8 +38,8 @@ export const viceDeans: readonly LeadershipMember[] = [
     },
   },
   {
-    initials: "NF",
-    name: "Dr. Nur Fadhilah, M.Si.",
+    initials: "AF",
+    name: "Dr. Ade Fakih Kurniawan, S.Th.I., M.Ud",
     position: {
       id: "Wakil Dekan III — Kemahasiswaan dan Kerja Sama",
       en: "Vice Dean III — Student Affairs and Partnerships",
@@ -51,11 +54,18 @@ export const viceDeans: readonly LeadershipMember[] = [
 ] as const;
 
 export const headOfAdmin: LeadershipMember = {
-  initials: "TU",
-  name: "Wahyu Setiawan, S.A.P.",
+  initials: "SS",
+  name: "Slamet Sucipto, S.E",
   position: {
     id: "Kepala Bagian Tata Usaha",
     en: "Head of General Affairs",
     ar: "رئيس الشؤون الإدارية",
   },
+};
+
+/** Ketua Program Studi per program code, for the org-structure chart. */
+export const studyProgramChairs: Readonly<Record<string, string>> = {
+  IAT: "Hikmatul Luthfi, MA.Hum",
+  IH: "Dr. Andi Rosa, M.A",
+  AFI: "Mus'idul Millah, S.Th.I., M.Ag.",
 };

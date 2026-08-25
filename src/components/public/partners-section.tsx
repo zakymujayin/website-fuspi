@@ -15,7 +15,7 @@ export async function PartnersSection({ partners }: PartnersSectionProps) {
   if (partners.length === 0) return null;
 
   return (
-    <section className="bg-slate-50 py-12 md:py-16">
+    <section className="border-t border-slate-200 bg-white py-16 md:py-20">
       <Container>
         <div className="text-center">
           <h2 className="font-display text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">

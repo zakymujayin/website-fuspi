@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { Breadcrumb } from "@/components/public/breadcrumb";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/public/section-heading";
 import { PublicContentStateNotice } from "@/components/admin/public-content/public-content-state-notice";
@@ -37,6 +38,7 @@ export default async function FaqPage({
   const locale = rawLocale as "id" | "en" | "ar";
   setRequestLocale(locale);
   const t = await getTranslations("PublicContent");
+  const tNav = await getTranslations("Nav");
 
   const prisma = getPrismaClient();
   const listResult = await listPublicContent(prisma, {
@@ -92,10 +94,18 @@ export default async function FaqPage({
   return (
     <Container className="py-12 md:py-20">
       <div className="mx-auto max-w-3xl">
+        <Breadcrumb
+          ariaLabel={tNav("breadcrumbLabel")}
+          className="mb-6"
+          items={[
+            {label: tNav("home"), href: "/"},
+            {label: t("faq.listTitle")},
+          ]}
+        />
         <SectionHeading
           as="h1"
           title={t("faq.listTitle")}
-          description={t("faq.description")}
+          description={t("faq.listDescription")}
         />
 
         {faqs.length === 0 ? (

@@ -55,6 +55,7 @@
   },
   "Nav": {
     "skipToContent": "Skip to main content",
+    "breadcrumbLabel": "Breadcrumb",
     "menu": "Menu",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
@@ -135,7 +136,7 @@
   },
   "StudyPrograms": {
     "title": "Study Programs",
-    "description": "Five undergraduate programs at the Faculty of Ushuluddin and Islamic Thought, from Qur’an and hadith studies to Sufism and psychotherapy.",
+    "description": "Three undergraduate programs at the Faculty of Ushuluddin and Islamic Thought: Qur'anic Sciences and Tafsir, Hadith Studies, and Aqidah and Islamic Philosophy.",
     "readMore": "Read more",
     "breadcrumbLabel": "Breadcrumb",
     "aboutProgram": "About the Program",
@@ -148,13 +149,16 @@
     "degree": "Degree",
     "moreInfo": "More Information",
     "externalSite": "Official Program Website",
-    "accreditation": "Accreditation"
+    "accreditation": "Accreditation",
+    "accreditationValidUntil": "valid until",
+    "relatedNews": "Related News & Columns"
   },
   "Post": {
     "breadcrumbHome": "Home",
     "readMore": "Read more",
     "fallbackNotice": "This content is not yet available in the selected language. Showing the Indonesian version.",
     "readingTime": "{minutes} min read",
+    "galleryHeading": "Activity Photos",
     "loading": "Loading news…",
     "sidebar": {
       "latestTitle": "Latest News",
@@ -301,6 +305,19 @@
     "excerpt": "Excerpt",
     "content": "Body",
     "contentDescription": "The news body. Use the toolbar for basic formatting.",
+    "translateSectionTitle": "Automatic Translation",
+    "translateSectionDescription": "English and Arabic versions are generated automatically from the Indonesian content above — no manual typing needed.",
+    "translateButton": "Translate to {locale}",
+    "translateRetryButton": "Re-translate to {locale}",
+    "translateLoading": "Translating…",
+    "translateDone": "Translated to {locale}",
+    "translateErrors": {
+      "NOT_CONFIGURED": "Automatic translation is not configured yet. Contact your system administrator to set up a translation provider.",
+      "PROVIDER_ERROR": "Could not reach the translation service. Try again shortly.",
+      "UNSUPPORTED_LANGUAGE": "The configured translation service does not support this language yet.",
+      "VALIDATION_FAILED": "Fill in the Indonesian title and content first, then translate.",
+      "SESSION_INVALID": "Your session expired. Reload the page and sign in again."
+    },
     "submitCreate": "Save draft",
     "submitUpdate": "Save changes",
     "submitting": "Saving…",
@@ -457,6 +474,21 @@
     "loading": "Loading images…",
     "loadError": "Could not load images. Try again.",
     "empty": "No images in the Media Library yet."
+  },
+  "AdminPostGalleryPicker": {
+    "label": "Activity Photos",
+    "description": "Attach a few documentation photos for this news item (optional).",
+    "addLabel": "Add Photo",
+    "listLabel": "Images available for the gallery",
+    "selectLabel": "Add {name} to the gallery",
+    "removeLabel": "Remove this photo from the gallery",
+    "captionLabel": "Photo caption (optional)",
+    "captionPlaceholder": "e.g. Event atmosphere at FUSPI Hall",
+    "empty": "No gallery photos yet.",
+    "maxReached": "Maximum 20 photos per post.",
+    "loading": "Loading images…",
+    "loadError": "Could not load images. Try again.",
+    "libraryEmpty": "No images in the Media Library yet."
   },
   "AdminMediaUpload": {
     "title": "Upload media",
@@ -792,6 +824,7 @@
     "testimonials": "Testimonials",
     "homeSlider": "Home Slider",
     "homeStatistic": "Statistics",
+    "homeVideo": "Home Videos",
     "homeSection": "Home Sections",
     "homeSettings": "Home Settings",
     "facilities": "Facilities"
@@ -823,6 +856,7 @@
       "testimonials": "Testimonials",
       "homeSlider": "Home Slider",
       "homeStatistic": "Statistics",
+    "homeVideo": "Home Videos",
       "homeSection": "Home Sections",
       "homeSettings": "Home Settings",
       "facilities": "Facilities",
@@ -956,6 +990,7 @@
     "videosDescription": "See campus life, activities, and the FUSPI environment through video.",
     "videoTourBadge": "Campus Video Tour",
     "watchVideo": "Watch Video",
+    "videoGalleryTitle": "More Videos",
     "video": {
       "tour": {
         "title": "FUSPI Campus Tour",
@@ -972,12 +1007,19 @@
       }
     },
     "columnsEyebrow": "Columns",
-    "columnsTitle": "Ideas from the Academic Community",
+    "achievementsEyebrow": "Our Students",
+    "columnsTitle": "Academic Spotlight",
     "columnsDescription": "Opinion pieces and reflections from FUSPI's dean, lecturers, and students.",
     "columnRole": {
       "dean": "Dean",
       "lecturer": "Lecturer",
       "student": "Student"
+    },
+    "achievementLevel": {
+      "internasional": "International",
+      "nasional": "National",
+      "regional": "Regional",
+      "lokal": "Local"
     },
     "partnersTitle": "Partnerships",
     "partnersDescription": "FUSPI's partnership network with universities and national Islamic institutions.",
@@ -1005,13 +1047,13 @@
     "statsPartners": "Partners",
     "introLabel": "About FUSPI",
     "introTitle": "Developing Credible and Contextual Islamic Studies",
-    "introDescription": "The Faculty of Ushuluddin and Islamic Thought (FUSPI) at UIN Sultan Maulana Hasanuddin Banten serves as a center for integrative Islamic scholarship. With five excellent study programs, FUSPI is committed to producing graduates who are profound in Islamic sciences while responsive to contemporary dynamics.",
+    "introDescription": "The Faculty of Ushuluddin and Islamic Thought (FUSPI) at UIN Sultan Maulana Hasanuddin Banten serves as a center for integrative Islamic scholarship. With three excellent study programs, FUSPI is committed to producing graduates who are profound in Islamic sciences while responsive to contemporary dynamics.",
     "introCtaProfile": "Full Profile",
     "introCtaPrograms": "Study Programs",
     "introCardVision": "Vision & Mission",
     "introCardVisionDesc": "Faculty development direction",
     "introCardPrograms": "Study Programs",
-    "introCardProgramsDesc": "Five excellent programs",
+    "introCardProgramsDesc": "Three excellent programs",
     "introCardLecturers": "Lecturers",
     "introCardLecturersDesc": "Qualified teaching staff",
     "introCardContact": "Contact",
@@ -1024,6 +1066,7 @@
     "facilitiesTitle": "Infrastructure",
     "programsEyebrow": "Academic Programs",
     "ctaEyebrow": "Join",
+    "ctaSlogan": "Critically Locally Globally",
     "advantage": {
       "quran": {
         "title": "Qur'an & Tafsir Studies",
@@ -1099,7 +1142,7 @@
     "quickFacts": "Quick Facts",
     "prospectiveStudentTitle": "Prospective Students",
     "prospectiveStudentDesc": "Find everything you need to start your academic journey at FUSPI.",
-    "studyProgramsDesc": "Explore our five study programs.",
+    "studyProgramsDesc": "Explore our three study programs.",
     "pmbPortal": "Admission Portal",
     "pmbPortalDesc": "Access UIN Banten new student registration.",
     "scholarships": "Scholarships",
@@ -1273,6 +1316,16 @@
       "suffix": "Suffix (e.g. +)",
       "icon": "Icon (lucide-react name, optional)",
       "label": "Label"
+    },
+    "homeVideo": {
+      "title": "Home Videos",
+      "description": "Manage the extra videos shown alongside the Profile Video on the homepage.",
+      "createTitle": "Add Video",
+      "editTitle": "Edit Video",
+      "listAriaLabel": "Home video list",
+      "commonFields": "Video Settings",
+      "youtubeUrl": "YouTube URL",
+      "videoTitle": "Video Title"
     },
     "section": {
       "title": "Homepage Sections",

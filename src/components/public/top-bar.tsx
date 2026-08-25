@@ -5,7 +5,7 @@ import { LanguageSwitcher } from "@/components/public/language-switcher";
 import { utilityLinks } from "@/components/public/nav-items";
 import { UtilityLink } from "@/components/public/shell/utility-link";
 
-const CONTACT_EMAIL = "surat@uinbanten.ac.id";
+const CONTACT_EMAIL = "fuspi@uinbanten.ac.id";
 
 export async function TopBar() {
   const t = await getTranslations("Nav");

@@ -1,7 +1,7 @@
 import type {Metadata} from "next";
-import NextImage from "next/image";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
+import {ImageWithFallback} from "@/components/public/image-with-fallback";
 import {SectionHeading} from "@/components/public/section-heading";
 import {Container} from "@/components/ui/container";
 import {listPublicFacilities} from "@/features/facility/domain";
@@ -41,18 +41,14 @@ export default async function FacilitiesPage({params}: {params: Promise<{locale:
               key={facility.id}
               className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
             >
-              {facility.cover ? (
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <NextImage
-                    src={facility.cover.url}
-                    alt={facility.cover.isDecorative ? "" : facility.cover.alt}
-                    fill
-                    className="object-cover"
-                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    unoptimized
-                  />
-                </div>
-              ) : null}
+              <div className="relative aspect-[4/3] overflow-hidden">
+                <ImageWithFallback
+                  src={facility.cover?.url}
+                  alt={facility.cover?.isDecorative ? "" : (facility.cover?.alt ?? title)}
+                  className="object-cover"
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                />
+              </div>
               <div className="p-5">
                 <h2 className="font-display text-base font-semibold text-slate-900">{title}</h2>
                 {description ? <p className="mt-1.5 text-sm leading-relaxed text-slate-500">{description}</p> : null}

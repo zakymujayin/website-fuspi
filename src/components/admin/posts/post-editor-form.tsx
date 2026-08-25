@@ -22,11 +22,14 @@ import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
 import type { PostTaxonomyOptions } from "@/components/admin/taxonomy/taxonomy-options";
 
+import { LanguagesIcon } from "lucide-react";
+
 import { PostCoverPicker, type CoverPreview } from "./post-cover-picker";
+import { PostGalleryPicker } from "./post-gallery-picker";
 import { RichTextField } from "./post-rich-text-field";
+import { translatePostDraft } from "./post-translate-server-action";
 import { FIELD_SCOPED_FAILURES, failureMessageKey, isFailureCode } from "./post-editor-errors";
 import {
-  POST_EDITOR_LOCALES,
   buildAutosavePayload,
   buildCreatePayload,
   buildUpdatePayload,
@@ -46,6 +49,8 @@ type PostEditorFormProps = {
   taxonomyOptions?: PostTaxonomyOptions;
   /** Current cover (edit mode) so the picker shows it without a refetch. */
   initialCover?: CoverPreview | null;
+  /** Previews for already-attached gallery images (edit mode) so they render without a refetch. */
+  initialGalleryPreviews?: Record<string, CoverPreview>;
   uploadPublicUrl: string;
   mutationBusy?: boolean;
   beginMutation?: () => { token: number; version: number } | null;
@@ -69,6 +74,7 @@ export function PostEditorForm({
   expectedVersion,
   taxonomyOptions = EMPTY_TAXONOMY_OPTIONS,
   initialCover = null,
+  initialGalleryPreviews = {},
   uploadPublicUrl,
   mutationBusy = false,
   beginMutation,
@@ -184,6 +190,39 @@ export function PostEditorForm({
         [locale]: { ...current.translations[locale], [key]: value },
       },
     }));
+  }
+
+  const [translateStatus, setTranslateStatus] = useState<Record<"en" | "ar", "idle" | "loading" | "done" | "error">>({
+    en: "idle", ar: "idle",
+  });
+  const [translateError, setTranslateError] = useState<Record<"en" | "ar", string | null>>({ en: null, ar: null });
+
+  async function handleTranslate(locale: "en" | "ar") {
+    setTranslateStatus((current) => ({ ...current, [locale]: "loading" }));
+    setTranslateError((current) => ({ ...current, [locale]: null }));
+
+    const result = await translatePostDraft(locale, {
+      title: draft.translations.id.title,
+      excerpt: draft.translations.id.excerpt,
+      content: draft.translations.id.content,
+    });
+
+    if (result.ok) {
+      setDraft((current) => ({
+        ...current,
+        translations: {
+          ...current.translations,
+          [locale]: { title: result.title, excerpt: result.excerpt, content: result.content },
+        },
+      }));
+      setTranslateStatus((current) => ({ ...current, [locale]: "done" }));
+    } else {
+      setTranslateStatus((current) => ({ ...current, [locale]: "error" }));
+      setTranslateError((current) => ({
+        ...current,
+        [locale]: t(`translateErrors.${result.code}`, { fallback: result.code }),
+      }));
+    }
   }
 
   function toggleTag(tagId: string, selected: boolean) {
@@ -319,6 +358,13 @@ export function PostEditorForm({
         uploadPublicUrl={uploadPublicUrl}
       />
 
+      <PostGalleryPicker
+        value={draft.images}
+        onChange={(images) => setDraft((c) => ({ ...c, images }))}
+        initialPreviews={initialGalleryPreviews}
+        uploadPublicUrl={uploadPublicUrl}
+      />
+
       <FieldSet>
         <FieldLegend>{t("taxonomyLegend")}</FieldLegend>
         <FieldDescription>{t("taxonomyDescription")}</FieldDescription>
@@ -370,70 +416,81 @@ export function PostEditorForm({
         </FieldGroup>
       </FieldSet>
 
-      {POST_EDITOR_LOCALES.map((locale) => {
-        const required = locale === "id";
-        const translation = draft.translations[locale];
-        return (
-          <FieldSet key={locale}>
-            <FieldLegend>
-              {t("localeLegend", { locale: t(`locale.${locale}`) })}
-              {required ? null : (
-                <span className="ms-2 text-sm font-normal text-muted-foreground">
-                  {t("localeOptional")}
-                </span>
-              )}
-            </FieldLegend>
-            <FieldGroup>
-              <Field>
-                <FieldLabel htmlFor={`${formId}-${locale}-title`}>{t("title")}</FieldLabel>
-                <Input
-                  id={`${formId}-${locale}-title`}
-                  value={translation.title}
-                  onChange={(event) => updateTranslation(locale, "title", event.target.value)}
-                  aria-invalid={fieldErrors[`translations.${locale}.title`] ? true : undefined}
-                  // Arabic content must be authored right-to-left from the first implementation.
-                  dir={locale === "ar" ? "rtl" : undefined}
-                  autoComplete="off"
-                />
-                {fieldErrors[`translations.${locale}.title`] ? (
-                  <FieldError>{fieldErrors[`translations.${locale}.title`]}</FieldError>
-                ) : null}
-              </Field>
+      <FieldSet>
+        <FieldLegend>{t("localeLegend", { locale: t("locale.id") })}</FieldLegend>
+        <FieldGroup>
+          <Field>
+            <FieldLabel htmlFor={`${formId}-id-title`}>{t("title")}</FieldLabel>
+            <Input
+              id={`${formId}-id-title`}
+              value={draft.translations.id.title}
+              onChange={(event) => updateTranslation("id", "title", event.target.value)}
+              aria-invalid={fieldErrors["translations.id.title"] ? true : undefined}
+              autoComplete="off"
+            />
+            {fieldErrors["translations.id.title"] ? (
+              <FieldError>{fieldErrors["translations.id.title"]}</FieldError>
+            ) : null}
+          </Field>
 
-              <Field>
-                <FieldLabel htmlFor={`${formId}-${locale}-excerpt`}>{t("excerpt")}</FieldLabel>
-                <Textarea
-                  id={`${formId}-${locale}-excerpt`}
-                  rows={2}
-                  value={translation.excerpt}
-                  onChange={(event) => updateTranslation(locale, "excerpt", event.target.value)}
-                  aria-invalid={fieldErrors[`translations.${locale}.excerpt`] ? true : undefined}
-                  dir={locale === "ar" ? "rtl" : undefined}
-                />
-                {fieldErrors[`translations.${locale}.excerpt`] ? (
-                  <FieldError>{fieldErrors[`translations.${locale}.excerpt`]}</FieldError>
-                ) : null}
-              </Field>
+          <Field>
+            <FieldLabel htmlFor={`${formId}-id-excerpt`}>{t("excerpt")}</FieldLabel>
+            <Textarea
+              id={`${formId}-id-excerpt`}
+              rows={2}
+              value={draft.translations.id.excerpt}
+              onChange={(event) => updateTranslation("id", "excerpt", event.target.value)}
+              aria-invalid={fieldErrors["translations.id.excerpt"] ? true : undefined}
+            />
+            {fieldErrors["translations.id.excerpt"] ? (
+              <FieldError>{fieldErrors["translations.id.excerpt"]}</FieldError>
+            ) : null}
+          </Field>
 
-              <Field>
-                <span id={`${formId}-${locale}-content-label`} className="text-sm font-medium">
-                  {t("content")}
-                </span>
-                <RichTextField
-                  value={translation.content}
-                  onChange={(html) => updateTranslation(locale, "content", html)}
-                  ariaLabel={t("content")}
-                  dir={locale === "ar" ? "rtl" : undefined}
-                />
-                <FieldDescription>{t("contentDescription")}</FieldDescription>
-                {fieldErrors[`translations.${locale}.content`] ? (
-                  <FieldError>{fieldErrors[`translations.${locale}.content`]}</FieldError>
-                ) : null}
-              </Field>
-            </FieldGroup>
-          </FieldSet>
-        );
-      })}
+          <Field>
+            <span id={`${formId}-id-content-label`} className="text-sm font-medium">
+              {t("content")}
+            </span>
+            <RichTextField
+              value={draft.translations.id.content}
+              onChange={(html) => updateTranslation("id", "content", html)}
+              ariaLabel={t("content")}
+            />
+            <FieldDescription>{t("contentDescription")}</FieldDescription>
+            {fieldErrors["translations.id.content"] ? (
+              <FieldError>{fieldErrors["translations.id.content"]}</FieldError>
+            ) : null}
+          </Field>
+        </FieldGroup>
+      </FieldSet>
+
+      <FieldSet>
+        <FieldLegend>{t("translateSectionTitle")}</FieldLegend>
+        <FieldDescription>{t("translateSectionDescription")}</FieldDescription>
+        <FieldGroup>
+          {(["en", "ar"] as const).map((locale) => (
+            <Field key={locale} orientation="horizontal" className="flex-wrap gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void handleTranslate(locale)}
+                disabled={translateStatus[locale] === "loading"}
+              >
+                {translateStatus[locale] === "loading" ? <Spinner data-icon /> : <LanguagesIcon data-icon aria-hidden strokeWidth={1.5} />}
+                {translateStatus[locale] === "loading"
+                  ? t("translateLoading")
+                  : t(draft.translations[locale].title ? "translateRetryButton" : "translateButton", { locale: t(`locale.${locale}`) })}
+              </Button>
+              {translateStatus[locale] === "done" ? (
+                <span className="text-sm text-muted-foreground">{t("translateDone", { locale: t(`locale.${locale}`) })}</span>
+              ) : null}
+              {translateStatus[locale] === "error" && translateError[locale] ? (
+                <span role="alert" className="text-sm text-destructive">{translateError[locale]}</span>
+              ) : null}
+            </Field>
+          ))}
+        </FieldGroup>
+      </FieldSet>
 
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" disabled={submitting || mutationBusy}>

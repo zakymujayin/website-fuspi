@@ -293,6 +293,20 @@ html[dir="rtl"] :is(h1, h2, h3, h4) {
   max-width: 72ch;
 }
 
+/* Motif signature: girih (8-point star tessellation, classic Islamic
+   geometric ornament) as a very quiet background texture — opacity is baked
+   in deliberately low (0.09) so it reads as grain, not pattern. Deliberately
+   used in exactly one signature spot (the hero) — repeating it across every
+   section is what turns texture into "pattern" (docs redesign brief, round
+   6). Never conveys information: always mark the host element aria-hidden.
+   The hex value is a literal copy of the token above — SVG data-URIs cannot
+   reference CSS custom properties. */
+@utility motif-girih-white {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Crect x='18' y='18' width='36' height='36' fill='none' stroke='%23ffffff' stroke-width='1' stroke-opacity='0.09'/%3E%3Crect x='18' y='18' width='36' height='36' transform='rotate(45 36 36)' fill='none' stroke='%23ffffff' stroke-width='1' stroke-opacity='0.09'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 72px 72px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

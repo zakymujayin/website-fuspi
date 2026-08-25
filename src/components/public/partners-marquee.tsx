@@ -13,6 +13,33 @@ function monogram(name: string) {
   return letters.join("").toUpperCase();
 }
 
+/** Missing logo and a failed load both resolve to the same monogram chip —
+ * never a broken-image glyph. */
+function PartnerMark({ partner }: { partner: PartnerCard }) {
+  const [errored, setErrored] = useState(false);
+
+  if (!partner.media || errored) {
+    return (
+      <span className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-royal-50 text-lg font-bold text-royal-700 transition-colors group-hover:bg-royal-100">
+        {monogram(partner.title)}
+      </span>
+    );
+  }
+
+  return (
+    <span className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-royal-50">
+      <Image
+        src={partner.media.url}
+        alt=""
+        fill
+        className="object-contain p-1.5"
+        onError={() => setErrored(true)}
+        unoptimized
+      />
+    </span>
+  );
+}
+
 type PartnersMarqueeProps = { partners: readonly PartnerCard[] };
 
 /**
@@ -33,8 +60,8 @@ export function PartnersMarquee({ partners }: PartnersMarqueeProps) {
       onFocusCapture={() => setPaused(true)}
       onBlurCapture={() => setPaused(false)}
     >
-      <div className="pointer-events-none absolute inset-y-0 start-0 z-10 w-16 bg-gradient-to-r from-slate-50 to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 end-0 z-10 w-16 bg-gradient-to-l from-slate-50 to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 start-0 z-10 w-16 bg-gradient-to-r from-white to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 end-0 z-10 w-16 bg-gradient-to-l from-white to-transparent" />
 
       <div
         className="fuspi-marquee-track flex w-max gap-4"
@@ -47,21 +74,13 @@ export function PartnersMarquee({ partners }: PartnersMarqueeProps) {
           const href = partner.link?.href;
           const content = (
             <>
-              {partner.media ? (
-                <span className="relative flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-royal-50">
-                  <Image src={partner.media.url} alt="" fill className="object-contain p-1.5" unoptimized />
-                </span>
-              ) : (
-                <span className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-royal-50 text-lg font-bold text-royal-700 transition-colors group-hover:bg-royal-100">
-                  {monogram(partner.title)}
-                </span>
-              )}
+              <PartnerMark partner={partner} />
               <span className="line-clamp-2 text-sm font-medium text-slate-600 group-hover:text-royal-700">
                 {partner.title}
               </span>
             </>
           );
-          const className = "group flex h-28 w-80 shrink-0 items-center gap-4 rounded-xl border border-slate-200 bg-white px-5 transition-all duration-200 hover:-translate-y-0.5 hover:border-royal-200 hover:shadow-sm";
+          const className = "group flex h-28 w-80 shrink-0 items-center gap-4 rounded-xl border border-slate-200 bg-white px-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-royal-200 hover:shadow-md";
           return href ? (
             <a
               key={`${partner.id}-${index}`}

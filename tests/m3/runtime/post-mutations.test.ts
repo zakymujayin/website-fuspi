@@ -45,6 +45,7 @@ function createInput(overrides: Record<string, unknown> = {}) {
     categoryId: null,
     coverMediaId: null,
     tagIds: [],
+    images: [],
     translations: {
       id: translation("Berita FUSPI"),
       en: translation("FUSPI News"),

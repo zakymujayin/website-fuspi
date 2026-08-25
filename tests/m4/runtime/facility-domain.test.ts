@@ -80,7 +80,7 @@ describe("facility domain", () => {
     expect(database.album.findUnique).not.toHaveBeenCalled();
   });
 
-  it("maps homepage facilities from Facility rows with images only", async () => {
+  it("maps homepage facilities from Facility rows, keeping items without a cover image", async () => {
     const database = {
       $transaction: vi.fn(async (queries) => Promise.all(queries)),
       facility: {
@@ -107,6 +107,9 @@ describe("facility domain", () => {
     } as unknown as FacilityDatabase;
 
     await expect(listPublicHomeFacilities(database, "id", 4, "/uploads"))
-      .resolves.toEqual([{id: "facility-1", slug: "aula-fuspi", image: expect.objectContaining({id: "media-1"}), caption: "Aula FUSPI", description: null}]);
+      .resolves.toEqual([
+        {id: "facility-1", slug: "aula-fuspi", image: expect.objectContaining({id: "media-1"}), caption: "Aula FUSPI", description: null},
+        {id: "facility-2", slug: "tanpa-gambar", image: null, caption: "Tanpa Gambar", description: null},
+      ]);
   });
 });

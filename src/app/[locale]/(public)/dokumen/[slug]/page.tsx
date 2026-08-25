@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 
+import { Breadcrumb } from "@/components/public/breadcrumb";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/public/section-heading";
 import { PublicContentStateNotice } from "@/components/admin/public-content/public-content-state-notice";
@@ -52,6 +53,7 @@ export default async function DocumentDetailPage({
   const locale = rawLocale as "id" | "en" | "ar";
   setRequestLocale(locale);
   const t = await getTranslations("PublicContent");
+  const tNav = await getTranslations("Nav");
 
   const prisma = getPrismaClient();
   const result = await getPublicContentDetail(prisma, {
@@ -78,6 +80,15 @@ export default async function DocumentDetailPage({
 
   return (
     <Container className="py-12 md:py-20">
+      <Breadcrumb
+        ariaLabel={tNav("breadcrumbLabel")}
+        className="mx-auto mb-6 max-w-3xl"
+        items={[
+          {label: tNav("home"), href: "/"},
+          {label: t("document.listTitle"), href: "/dokumen"},
+          {label: doc.translation.title, resolvedLocale: doc.translation.resolvedLocale},
+        ]}
+      />
       <article
         lang={doc.translation.resolvedLocale}
         dir={contentDir}

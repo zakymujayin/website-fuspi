@@ -2,9 +2,10 @@ import type {Metadata} from "next";
 import Image from "next/image";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
+import {Breadcrumb} from "@/components/public/breadcrumb";
 import {SectionHeading} from "@/components/public/section-heading";
 import {Container} from "@/components/ui/container";
-import {createPrismaClient} from "@/lib/db/client";
+import {getPrismaClient} from "@/lib/db/client";
 import type {AppLocale} from "@/i18n/routing";
 
 const STAFF_SELECT = {
@@ -33,7 +34,7 @@ export default async function StaffPage({params}: {params: Promise<{locale: AppL
 
   let rows: StaffRow[] = [];
   try {
-    const prisma = createPrismaClient();
+    const prisma = getPrismaClient();
     rows = await prisma.staff.findMany({where: {isActive: true}, orderBy: {order: "asc"}, select: STAFF_SELECT}) as StaffRow[];
   } catch {}
 
@@ -42,6 +43,14 @@ export default async function StaffPage({params}: {params: Promise<{locale: AppL
 
   return (
     <Container className="py-12 md:py-20">
+      <Breadcrumb
+        ariaLabel={tNav("breadcrumbLabel")}
+        className="mb-6"
+        items={[
+          {label: tNav("home"), href: "/"},
+          {label: tNav("staff")},
+        ]}
+      />
       <SectionHeading as="h1" title={tNav("staff")} description={t("staffDescription")} />
       {rows.length > 0 ? (
         <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

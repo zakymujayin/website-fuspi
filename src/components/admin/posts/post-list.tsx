@@ -74,9 +74,9 @@ export function AdminPostList({ items, locale, ariaLabel, labels }: AdminPostLis
                 <Link
                   href={`/admin/posts/${item.id}/edit`}
                   aria-label={labels.editLabelFor(item.title)}
-                  className="inline-flex h-10 items-center gap-1.5 rounded-lg border border-slate-300 px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100"
+                  className="inline-flex h-10 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-700"
                 >
-                  <PencilLineIcon aria-hidden data-icon strokeWidth={1.5} />
+                  <PencilLineIcon aria-hidden data-icon className="size-3.5" strokeWidth={1.5} />
                   {labels.edit}
                 </Link>
               ) : null}

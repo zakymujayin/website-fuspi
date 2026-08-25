@@ -1,4 +1,5 @@
 "use client";
+import { formText } from "@/components/admin/form-text";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
@@ -50,21 +51,21 @@ export function TestimonialEditorForm({ mode, listHref, initialData, pageId, exp
 
     const fd = new FormData(event.currentTarget);
 
-    const enQuote = (fd.get("en.quote") as string).trim();
-    const arQuote = (fd.get("ar.quote") as string).trim();
+    const enQuote = formText(fd, "en.quote");
+    const arQuote = formText(fd, "ar.quote");
 
     const payload: Record<string, unknown> = {
-      name: (fd.get("name") as string).trim(),
+      name: formText(fd, "name"),
       graduationYear: (fd.get("graduationYear") as string) ? Number(fd.get("graduationYear")) : null,
       order: Number(fd.get("order")),
       isVisible,
       translations: {
         id: {
-          currentRole: (fd.get("id.currentRole") as string).trim() || null,
-          quote: (fd.get("id.quote") as string).trim(),
+          currentRole: formText(fd, "id.currentRole") || null,
+          quote: formText(fd, "id.quote"),
         },
-        ...(enQuote ? { en: { currentRole: (fd.get("en.currentRole") as string).trim() || null, quote: enQuote } } : {}),
-        ...(arQuote ? { ar: { currentRole: (fd.get("ar.currentRole") as string).trim() || null, quote: arQuote } } : {}),
+        ...(enQuote ? { en: { currentRole: formText(fd, "en.currentRole") || null, quote: enQuote } } : {}),
+        ...(arQuote ? { ar: { currentRole: formText(fd, "ar.currentRole") || null, quote: arQuote } } : {}),
       },
     };
 

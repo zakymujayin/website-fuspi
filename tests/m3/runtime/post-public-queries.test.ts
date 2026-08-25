@@ -43,6 +43,7 @@ function row(overrides: Record<string, unknown> = {}) {
       width: 320,
       height: 240,
     },
+    images: [],
     translations: [translation("id", "Berita Indonesia")],
     ...overrides,
   };

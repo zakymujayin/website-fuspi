@@ -42,6 +42,11 @@ export const PostTranslationsInputSchema = z.object({
   ar: PostTranslationInputSchema.optional(),
 }).strict();
 
+export const PostImageInputSchema = z.object({
+  mediaId: PostIdSchema,
+  caption: OptionalTextSchema(500),
+}).strict();
+
 const PostMutableFieldsShape = {
   type: PostTypeSchema,
   columnType: ColumnTypeSchema.nullable().optional(),
@@ -51,6 +56,8 @@ const PostMutableFieldsShape = {
   coverMediaId: PostIdSchema.nullable(),
   tagIds: z.array(PostIdSchema).max(30)
     .refine((values) => new Set(values).size === values.length, "Duplicate tag identifier."),
+  images: z.array(PostImageInputSchema).max(20)
+    .refine((values) => new Set(values.map((value) => value.mediaId)).size === values.length, "Duplicate gallery image."),
   translations: PostTranslationsInputSchema,
 } as const;
 
@@ -225,6 +232,12 @@ export const ResolvedPostTranslationSchema = z.object({
   }
 });
 
+export const PublicPostImageSchema = z.object({
+  id: PostIdSchema,
+  media: PublicMediaViewSchema,
+  caption: z.string().trim().min(1).max(500).nullable(),
+}).strict();
+
 export const PublicPostViewSchema = z.object({
   id: PostIdSchema,
   type: PostTypeSchema,
@@ -235,6 +248,7 @@ export const PublicPostViewSchema = z.object({
   authorName: z.string().trim().min(1).max(191).nullable(),
   categorySlug: PostSlugSchema.nullable(),
   cover: PublicMediaViewSchema.nullable(),
+  images: z.array(PublicPostImageSchema).max(20),
   translation: ResolvedPostTranslationSchema,
 }).strict().superRefine(validatePostType);
 
@@ -292,6 +306,7 @@ export type PublicPostListQuery = z.input<typeof PublicPostListQuerySchema>;
 export type PublicPostDetailQuery = z.infer<typeof PublicPostDetailQuerySchema>;
 export type PublicPostVisibility = z.infer<typeof PublicPostVisibilitySchema>;
 export type ResolvedPostTranslation = z.infer<typeof ResolvedPostTranslationSchema>;
+export type PublicPostImage = z.infer<typeof PublicPostImageSchema>;
 export type PublicPostView = z.infer<typeof PublicPostViewSchema>;
 export type PublicPostListResult = z.infer<typeof PublicPostListResultSchema>;
 export type PostMutationFailureCode = z.infer<typeof PostMutationFailureCodeSchema>;

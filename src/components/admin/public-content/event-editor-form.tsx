@@ -1,4 +1,5 @@
 "use client";
+import { formText } from "@/components/admin/form-text";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
@@ -55,23 +56,23 @@ export function EventEditorForm({ mode, listHref, initialData, pageId, expectedV
 
     const fd = new FormData(event.currentTarget);
 
-    const enTitle = (fd.get("en.title") as string).trim();
-    const arTitle = (fd.get("ar.title") as string).trim();
+    const enTitle = formText(fd, "en.title");
+    const arTitle = formText(fd, "ar.title");
 
     const payload: Record<string, unknown> = {
-      slug: (fd.get("slug") as string).trim(),
+      slug: formText(fd, "slug"),
       startAt: new Date(fd.get("startAt") as string).toISOString(),
       endAt: (fd.get("endAt") as string) ? new Date(fd.get("endAt") as string).toISOString() : null,
-      registrationUrl: (fd.get("registrationUrl") as string).trim() || null,
+      registrationUrl: formText(fd, "registrationUrl") || null,
       isPublished,
       translations: {
         id: {
-          title: (fd.get("id.title") as string).trim(),
-          description: (fd.get("id.description") as string).trim() || null,
-          location: (fd.get("id.location") as string).trim() || null,
+          title: formText(fd, "id.title"),
+          description: formText(fd, "id.description") || null,
+          location: formText(fd, "id.location") || null,
         },
-        ...(enTitle ? { en: { title: enTitle, description: (fd.get("en.description") as string).trim() || null, location: (fd.get("en.location") as string).trim() || null } } : {}),
-        ...(arTitle ? { ar: { title: arTitle, description: (fd.get("ar.description") as string).trim() || null, location: (fd.get("ar.location") as string).trim() || null } } : {}),
+        ...(enTitle ? { en: { title: enTitle, description: formText(fd, "en.description") || null, location: formText(fd, "en.location") || null } } : {}),
+        ...(arTitle ? { ar: { title: arTitle, description: formText(fd, "ar.description") || null, location: formText(fd, "ar.location") || null } } : {}),
       },
     };
 

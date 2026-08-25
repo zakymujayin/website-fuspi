@@ -2,6 +2,7 @@ import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 import React from "react";
 
+import {Breadcrumb} from "@/components/public/breadcrumb";
 import {SectionHeading} from "@/components/public/section-heading";
 import {PublicContentCard, type PublicContentCardData} from "@/components/public/public-content-card";
 import {PublicContentPagination} from "@/components/admin/public-content/public-content-pagination";
@@ -14,7 +15,7 @@ import {getPrismaClient} from "@/lib/db/client";
 
 import {PUBLIC_CONTENT_LABEL_KEYS, PUBLIC_CONTENT_SLUG_MAP} from "@/components/admin/public-content/public-content-query";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 10;
 
 export type PublicContentListPageConfig = {
   resource: PublicContentResource;
@@ -58,6 +59,7 @@ export async function PublicContentListPage({config, params, searchParams}: Publ
   const {locale} = await params;
   setRequestLocale(locale);
   const t = await getTranslations("PublicContent");
+  const tNav = await getTranslations("Nav");
   const {page: rawPage} = await searchParams;
   const page = resolvePage(rawPage);
   const labelKey = PUBLIC_CONTENT_LABEL_KEYS[config.resource];
@@ -84,6 +86,14 @@ export async function PublicContentListPage({config, params, searchParams}: Publ
 
   return (
     <Container className="py-12 md:py-20">
+      <Breadcrumb
+        ariaLabel={tNav("breadcrumbLabel")}
+        className="mb-6"
+        items={[
+          {label: tNav("home"), href: "/"},
+          {label: title},
+        ]}
+      />
       <SectionHeading as="h1" title={title} description={description} />
 
       <div className="mt-10">

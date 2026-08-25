@@ -33,7 +33,9 @@ function localizedInput<T extends z.ZodType>(translation: T) {
 const TranslationWorkflowViewSchema = CmsTranslationWorkflowSchema;
 
 export const StudyProgramCodeSchema = z.enum(["IAT", "IH", "AFI", "SAA", "TASPI"]);
-const studyProgramIdentity = new Map(institution.studyPrograms.map((program, order) => [program.code, {...program, order}]));
+const studyProgramIdentity = new Map<string, {code: string; slug: string; name: string; order: number}>(
+  institution.studyPrograms.map((program, order) => [program.code, {...program, order}]),
+);
 
 const StudyProgramTranslationInputSchema = z.object({
   name: RequiredText(255),

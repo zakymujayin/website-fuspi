@@ -1,15 +1,20 @@
 import { ArrowRight } from "lucide-react";
-import NextImage from "next/image";
 import { getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/ui/container";
+import { ImageWithFallback } from "@/components/public/image-with-fallback";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import type { PublicPostView } from "@/contracts/post";
 import { formatJakartaPublishedDate } from "@/components/public/post/format";
 
+/* Full class per role (bg + text), not a shared hardcoded text-white: brass
+   is light enough that white text on it fails WCAG AA (2.45:1), so DEKAN
+   needs dark text while the other two stay white-on-dark. */
 const ROLE_BADGE_CLASS: Record<string, string> = {
-  DEKAN: "bg-brass-500", DOSEN: "bg-royal-600", MAHASISWA: "bg-navy-800",
+  DEKAN: "bg-gradient-to-r from-brass-500 to-brass-400 text-navy-900",
+  DOSEN: "bg-gradient-to-r from-royal-600 to-royal-500 text-white",
+  MAHASISWA: "bg-gradient-to-r from-navy-800 to-navy-900 text-white",
 };
 const ROLE_MESSAGE_KEY: Record<string, string> = {
   DEKAN: "dean", DOSEN: "lecturer", MAHASISWA: "student",
@@ -23,7 +28,7 @@ export async function ColumnsSection({ items, locale }: ColumnsSectionProps) {
   if (items.length === 0) return null;
 
   return (
-    <section className="bg-white py-12 md:py-16">
+    <section className="border-t border-slate-200 bg-gradient-to-b from-white to-royal-50/40 py-12 md:py-16">
       <Container>
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -50,19 +55,15 @@ export async function ColumnsSection({ items, locale }: ColumnsSectionProps) {
               className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
             >
               <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
-                {column.cover ? (
-                  <NextImage
-                    src={column.cover.url}
-                    alt=""
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                    unoptimized
-                  />
-                ) : null}
+                <ImageWithFallback
+                  src={column.cover?.url}
+                  alt=""
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                />
                 {column.columnType ? (
                   <span
-                    className={`absolute start-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-semibold text-white ${ROLE_BADGE_CLASS[column.columnType]}`}
+                    className={`absolute start-3 top-3 rounded-full px-2.5 py-1 text-[10px] font-semibold ${ROLE_BADGE_CLASS[column.columnType] ?? ROLE_BADGE_CLASS.MAHASISWA}`}
                   >
                     {t(`columnRole.${ROLE_MESSAGE_KEY[column.columnType] ?? "dean"}`)}
                   </span>

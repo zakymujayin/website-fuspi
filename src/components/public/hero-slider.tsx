@@ -1,10 +1,10 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import NextImage from "next/image";
 import { useCallback, useEffect, useState } from "react";
 
 import { Container } from "@/components/ui/container";
+import { ImageWithFallback } from "@/components/public/image-with-fallback";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { PublicHomeSlide } from "@/features/home-nav/public-query";
@@ -39,7 +39,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
     <section
       aria-roledescription="carousel"
       aria-label="Hero"
-      className="relative min-h-[520px] overflow-hidden md:min-h-[620px]"
+      className="relative min-h-[540px] overflow-hidden md:min-h-[640px]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -52,20 +52,36 @@ export function HeroSlider({ slides }: HeroSliderProps) {
             index === active ? "opacity-100" : "opacity-0",
           )}
         >
-          <NextImage
-            src={slide.image.url}
-            alt={slide.image.isDecorative ? "" : slide.image.alt}
-            fill
+          <ImageWithFallback
+            src={slide.image?.url}
+            alt={slide.image?.isDecorative ? "" : (slide.image?.alt ?? slide.title)}
             priority={index === 0}
             className="object-cover"
             sizes="100vw"
-            unoptimized
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-navy-900/80 via-navy-900/50 to-navy-900/30" />
+          <div className="absolute inset-0 bg-gradient-to-r from-navy-900/85 via-navy-900/55 to-navy-900/25" />
         </div>
       ))}
 
-      <Container className="relative z-10 flex h-full min-h-[520px] flex-col justify-center py-16 md:min-h-[620px] md:py-24">
+      {/* Ornament, not pattern: opacity is baked very low (see globals.css) so
+          it reads as texture, never competes with the photo or the text. */}
+      <div aria-hidden className="motif-girih-white pointer-events-none absolute inset-0" />
+
+      {/* Signature seam: a full-width wave, not a single corner cut — reads
+          as deliberate at any hero width. A thin royal-blue line (the locked
+          brand accent, not gold) rides the crest so it isn't just a flat
+          color shape. */}
+      <svg
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-14 w-full text-background md:h-20"
+        viewBox="0 0 1440 120"
+        preserveAspectRatio="none"
+      >
+        <path d="M0,60 C480,120 960,0 1440,60 L1440,120 L0,120 Z" fill="currentColor" />
+        <path d="M0,60 C480,120 960,0 1440,60" fill="none" stroke="#728eef" strokeWidth="4" />
+      </svg>
+
+      <Container className="relative z-10 flex h-full min-h-[540px] flex-col justify-center py-16 md:min-h-[640px] md:py-24">
         {slides.map((slide, index) => (
           <div
             key={slide.id}
@@ -77,7 +93,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
           >
             {index === active ? (
               <>
-                <h1 className="font-display text-3xl font-bold tracking-tight text-white md:text-5xl md:leading-tight">
+                <h1 className="font-display text-4xl font-extrabold tracking-tight text-white text-balance md:text-6xl md:leading-[1.05]">
                   {slide.title}
                 </h1>
                 {slide.subtitle ? (
@@ -115,7 +131,9 @@ export function HeroSlider({ slides }: HeroSliderProps) {
             <ChevronRight aria-hidden className="size-5" strokeWidth={1.5} />
           </button>
 
-          <div className="absolute bottom-6 start-1/2 z-20 flex -translate-x-1/2 gap-2" role="tablist">
+          {/* Cleared above the wave divider (h-14/h-20) with margin, so the
+              dots never sit on top of the curve. */}
+          <div className="absolute bottom-20 start-1/2 z-20 flex -translate-x-1/2 gap-2 md:bottom-28" role="tablist">
             {slides.map((slide, index) => (
               <button
                 key={slide.id}
@@ -126,7 +144,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
                 onClick={() => setActive(index)}
                 className={cn(
                   "h-1.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50",
-                  index === active ? "w-8 bg-white" : "w-1.5 bg-white/40 hover:bg-white/60",
+                  index === active ? "w-8 bg-brass-400" : "w-1.5 bg-white/40 hover:bg-white/60",
                 )}
               />
             ))}
@@ -139,7 +157,7 @@ export function HeroSlider({ slides }: HeroSliderProps) {
 
 function CTA({ href, children }: { href: string; children: React.ReactNode }) {
   const isExternal = href.startsWith("http");
-  const className = "inline-flex h-11 items-center justify-center rounded-lg bg-royal-500 px-5 text-sm font-medium text-white transition-all duration-200 hover:bg-royal-600 active:scale-[0.98]";
+  const className = "inline-flex h-11 items-center justify-center rounded-lg bg-gradient-to-r from-brass-500 to-brass-400 px-5 text-sm font-semibold text-navy-900 transition-all duration-200 hover:from-brass-400 hover:to-brass-400 active:scale-[0.98]";
 
   if (isExternal) {
     return (

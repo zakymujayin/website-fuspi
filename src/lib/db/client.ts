@@ -18,10 +18,6 @@ const globalForPrisma = globalThis as typeof globalThis & {
 
 export function getPrismaClient() {
   const client = globalForPrisma.prisma ?? createPrismaClient();
-
-  if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.prisma = client;
-  }
-
+  globalForPrisma.prisma = client;
   return client;
 }

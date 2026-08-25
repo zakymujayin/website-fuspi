@@ -237,6 +237,7 @@ describe("draftFromEditorView", () => {
     categoryId: TAXONOMY.categoryId,
     coverMediaId: null,
     tagIds: TAXONOMY.tagIds,
+    images: [],
     translations: {
       id: { title: "Judul", excerpt: null, content: "<p>isi</p>" },
     },
@@ -303,12 +304,16 @@ describe("direction safety and message parity", () => {
     }
   });
 
-  it("authors Arabic fields right-to-left from the first implementation", () => {
+  it("never authors English or Arabic by hand — both are produced by the translate action", () => {
     const form = readFileSync(
       path.join(process.cwd(), "src/components/admin/posts/post-editor-form.tsx"),
       "utf8",
     );
-    expect(form).toMatch(/dir=\{locale === "ar" \? "rtl" : undefined\}/);
+    // The editor only takes manual Indonesian input; en/ar come from handleTranslate,
+    // which the public site then renders with the correct lang/dir per docs/12.
+    expect(form).not.toMatch(/name="en\.title"|name="ar\.title"/);
+    expect(form).toContain('(["en", "ar"] as const).map((locale) =>');
+    expect(form).toContain("handleTranslate(locale)");
   });
 
   it("submits same-origin so the server CSRF check can succeed", () => {

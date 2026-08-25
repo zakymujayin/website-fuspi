@@ -6,7 +6,7 @@ import {Container} from "@/components/ui/container";
 import {institution} from "@/config/institution";
 import type {AppLocale} from "@/i18n/routing";
 import {deanProfile} from "@/lib/data/dummy-dean";
-import {headOfAdmin, viceDeans} from "@/lib/data/dummy-leadership";
+import {headOfAdmin, studyProgramChairs, viceDeans} from "@/lib/data/dummy-leadership";
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
@@ -92,8 +92,8 @@ export default async function StructurePage({params}: {params: Promise<{locale: 
             <OrgCard
               key={program.code}
               initials={program.code.slice(0, 2)}
-              name={tNav(`program.${program.code}`)}
-              position={t("kaprodi")}
+              name={studyProgramChairs[program.code] ?? tNav(`program.${program.code}`)}
+              position={`${t("kaprodi")} ${tNav(`program.${program.code}`)}`}
             />
           ))}
         </div>

@@ -1,4 +1,5 @@
 "use client";
+import {formText} from "@/components/admin/form-text";
 
 import {useTranslations} from "next-intl";
 import {useId, useState, type FormEvent} from "react";
@@ -54,8 +55,8 @@ export function FacilityEditorForm({
   const arTr = translations.ar ?? EMPTY_TRANSLATION;
 
   function translationPayload(formData: FormData, prefix: "id" | "en" | "ar", required: boolean) {
-    const name = (formData.get(`${prefix}.name`) as string).trim();
-    const description = (formData.get(`${prefix}.description`) as string).trim();
+    const name = formText(formData, `${prefix}.name`);
+    const description = formText(formData, `${prefix}.description`);
     if (!name && !required) return null;
     return {name, description: description || null};
   }
@@ -71,7 +72,7 @@ export function FacilityEditorForm({
     const ar = translationPayload(fd, "ar", false);
 
     const payload: Record<string, unknown> = {
-      slug: (fd.get("slug") as string).trim(),
+      slug: formText(fd, "slug"),
       type: fd.get("type"),
       isActive,
       order: Number(fd.get("order")),

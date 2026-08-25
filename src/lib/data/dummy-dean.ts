@@ -1,14 +1,16 @@
 export type DeanProfile = {
   name: string;
   initials: string;
+  photoUrl?: string;
   position: {id: string; en: string; ar: string};
   message: {id: string; en: string; ar: string};
   slug: string;
 };
 
 export const deanProfile: DeanProfile = {
-  name: "Prof. Dr. H. Ahmad Fauzi, M.Ag.",
-  initials: "AF",
+  name: "Dr. Masykur, M.Hum.",
+  initials: "M",
+  photoUrl: "/images/leadership/dekan-masykur.webp",
   position: {
     id: "Dekan Fakultas Ushuluddin dan Pemikiran Islam",
     en: "Dean of the Faculty of Ushuluddin and Islamic Thought",

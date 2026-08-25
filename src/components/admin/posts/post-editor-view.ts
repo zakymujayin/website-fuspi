@@ -16,6 +16,7 @@ export function draftFromEditorView(view: AdminPostEditorView): PostEditorDraft 
     categoryId: view.categoryId,
     tagIds: view.tagIds,
     coverMediaId: view.coverMediaId,
+    images: view.images.map((image) => ({ mediaId: image.media.id, caption: image.caption ?? "" })),
     translations: {
       id: {
         title: translations.id.title,

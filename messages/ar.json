@@ -55,6 +55,7 @@
   },
   "Nav": {
     "skipToContent": "تخطَّ إلى المحتوى الرئيسي",
+    "breadcrumbLabel": "مسار التنقل",
     "menu": "القائمة",
     "openMenu": "فتح القائمة",
     "closeMenu": "إغلاق القائمة",
@@ -135,7 +136,7 @@
   },
   "StudyPrograms": {
     "title": "البرامج الدراسية",
-    "description": "خمسة برامج بكالوريوس في كلية أصول الدين والفكر الإسلامي، من علوم القرآن والحديث إلى التصوف والعلاج النفسي.",
+    "description": "ثلاثة برامج بكالوريوس في كلية أصول الدين والفكر الإسلامي: علوم القرآن والتفسير، وعلوم الحديث، والعقيدة والفلسفة الإسلامية.",
     "readMore": "اقرأ المزيد",
     "breadcrumbLabel": "مسار التنقل",
     "aboutProgram": "عن البرنامج",
@@ -148,13 +149,16 @@
     "degree": "الدرجة",
     "moreInfo": "مزيد من المعلومات",
     "externalSite": "الموقع الرسمي للبرنامج",
-    "accreditation": "الاعتماد"
+    "accreditation": "الاعتماد",
+    "accreditationValidUntil": "صالح حتى",
+    "relatedNews": "أخبار ومقالات ذات صلة"
   },
   "Post": {
     "breadcrumbHome": "الرئيسية",
     "readMore": "اقرأ المزيد",
     "fallbackNotice": "هذا المحتوى غير متوفر بعد باللغة المختارة. يتم عرض النسخة باللغة الإندونيسية.",
     "readingTime": "مدة القراءة {minutes} دقيقة",
+    "galleryHeading": "صور الفعالية",
     "loading": "جارٍ تحميل الأخبار…",
     "sidebar": {
       "latestTitle": "أحدث الأخبار",
@@ -301,6 +305,19 @@
     "excerpt": "المُلخّص",
     "content": "المحتوى",
     "contentDescription": "نص الخبر. استخدم شريط الأدوات للتنسيق الأساسي.",
+    "translateSectionTitle": "الترجمة التلقائية",
+    "translateSectionDescription": "يتم إنشاء النسختين الإنجليزية والعربية تلقائياً من المحتوى الإندونيسي أعلاه — لا حاجة للكتابة يدوياً.",
+    "translateButton": "ترجمة إلى {locale}",
+    "translateRetryButton": "إعادة الترجمة إلى {locale}",
+    "translateLoading": "جارٍ الترجمة…",
+    "translateDone": "تمت الترجمة إلى {locale}",
+    "translateErrors": {
+      "NOT_CONFIGURED": "لم يتم تفعيل الترجمة التلقائية بعد. تواصل مع مسؤول النظام لإعداد مزود الترجمة.",
+      "PROVIDER_ERROR": "تعذّر الاتصال بخدمة الترجمة. حاول مرة أخرى بعد قليل.",
+      "UNSUPPORTED_LANGUAGE": "خدمة الترجمة المُفعّلة لا تدعم هذه اللغة بعد.",
+      "VALIDATION_FAILED": "أدخل العنوان والمحتوى بالإندونيسية أولاً، ثم ترجم.",
+      "SESSION_INVALID": "انتهت جلستك. أعد تحميل الصفحة وسجّل الدخول مجدداً."
+    },
     "submitCreate": "حفظ المسودة",
     "submitUpdate": "حفظ التغييرات",
     "submitting": "جارٍ الحفظ…",
@@ -457,6 +474,21 @@
     "loading": "جارٍ تحميل الصور…",
     "loadError": "تعذّر تحميل الصور. حاول مرة أخرى.",
     "empty": "لا توجد صور في مكتبة الوسائط بعد."
+  },
+  "AdminPostGalleryPicker": {
+    "label": "صور الفعالية",
+    "description": "أرفق بضع صور توثيقية لهذا الخبر (اختياري).",
+    "addLabel": "إضافة صورة",
+    "listLabel": "الصور المتاحة للمعرض",
+    "selectLabel": "إضافة {name} إلى المعرض",
+    "removeLabel": "إزالة هذه الصورة من المعرض",
+    "captionLabel": "وصف الصورة (اختياري)",
+    "captionPlaceholder": "مثال: أجواء الفعالية في قاعة الكلية",
+    "empty": "لا توجد صور في المعرض بعد.",
+    "maxReached": "الحد الأقصى 20 صورة لكل خبر.",
+    "loading": "جارٍ تحميل الصور…",
+    "loadError": "تعذّر تحميل الصور. حاول مرة أخرى.",
+    "libraryEmpty": "لا توجد صور في مكتبة الوسائط بعد."
   },
   "AdminMediaUpload": {
     "title": "رفع وسائط",
@@ -792,6 +824,7 @@
     "testimonials": "الشهادات",
     "homeSlider": "شريحة الرئيسية",
     "homeStatistic": "الإحصائيات",
+    "homeVideo": "فيديوهات الرئيسية",
     "homeSection": "أقسام الرئيسية",
     "homeSettings": "إعدادات الرئيسية",
     "facilities": "المرافق"
@@ -823,6 +856,7 @@
       "testimonials": "الشهادات",
       "homeSlider": "شريحة الرئيسية",
       "homeStatistic": "الإحصائيات",
+    "homeVideo": "فيديوهات الرئيسية",
       "homeSection": "أقسام الرئيسية",
       "homeSettings": "إعدادات الرئيسية",
       "facilities": "المرافق",
@@ -956,6 +990,7 @@
     "videosDescription": "تعرّف على أجواء المحاضرات والأنشطة وبيئة حرم الكلية من خلال الفيديو.",
     "videoTourBadge": "جولة فيديو في الحرم الجامعي",
     "watchVideo": "شاهد الفيديو",
+    "videoGalleryTitle": "فيديوهات أخرى",
     "video": {
       "tour": {
         "title": "جولة في حرم الكلية",
@@ -972,12 +1007,19 @@
       }
     },
     "columnsEyebrow": "المقالات",
-    "columnsTitle": "أفكار من المجتمع الأكاديمي",
+    "achievementsEyebrow": "طلابنا",
+    "columnsTitle": "أضواء أكاديمية",
     "columnsDescription": "مقالات رأي وتأملات من عميد الكلية وأساتذتها وطلابها.",
     "columnRole": {
       "dean": "العميد",
       "lecturer": "أستاذ",
       "student": "طالب"
+    },
+    "achievementLevel": {
+      "internasional": "دولي",
+      "nasional": "وطني",
+      "regional": "إقليمي",
+      "lokal": "محلي"
     },
     "partnersTitle": "الشراكات",
     "partnersDescription": "شبكة شراكات الكلية مع الجامعات والمؤسسات الإسلامية الوطنية.",
@@ -1005,13 +1047,13 @@
     "statsPartners": "شركاء",
     "introLabel": "عن الكلية",
     "introTitle": "تطوير الدراسات الإسلامية الموثوقة والسياقية",
-    "introDescription": "تقدم كلية أصول الدين والفكر الإسلامي بجامعة السلطان مولانا حسن الدين بانتين كمركز لتطوير الدراسات الإسلامية التكاملية. من خلال خمسة برامج دراسية متميزة، تلتزم الكلية بتخريج طلاب متعمقين في العلوم الإسلامية ومتجاوبين مع ديناميكيات العصر.",
+    "introDescription": "تقدم كلية أصول الدين والفكر الإسلامي بجامعة السلطان مولانا حسن الدين بانتين كمركز لتطوير الدراسات الإسلامية التكاملية. من خلال ثلاثة برامج دراسية متميزة، تلتزم الكلية بتخريج طلاب متعمقين في العلوم الإسلامية ومتجاوبين مع ديناميكيات العصر.",
     "introCtaProfile": "الملف الكامل",
     "introCtaPrograms": "البرامج الدراسية",
     "introCardVision": "الرؤية والرسالة",
     "introCardVisionDesc": "اتجاه تطوير الكلية",
     "introCardPrograms": "البرامج الدراسية",
-    "introCardProgramsDesc": "خمسة برامج متميزة",
+    "introCardProgramsDesc": "ثلاثة برامج متميزة",
     "introCardLecturers": "المحاضرون",
     "introCardLecturersDesc": "هيئة تدريس مؤهلة",
     "introCardContact": "اتصل بنا",
@@ -1024,6 +1066,7 @@
     "facilitiesTitle": "المرافق والبنية التحتية",
     "programsEyebrow": "البرامج الأكاديمية",
     "ctaEyebrow": "انضم",
+    "ctaSlogan": "Critically Locally Globally",
     "advantage": {
       "quran": {
         "title": "دراسات القرآن والتفسير",
@@ -1099,7 +1142,7 @@
     "quickFacts": "معلومات سريعة",
     "prospectiveStudentTitle": "الطلاب المحتملون",
     "prospectiveStudentDesc": "اعثر على كل ما تحتاجه لبدء رحلتك الأكاديمية في الكلية.",
-    "studyProgramsDesc": "استكشف برامجنا الدراسية الخمسة.",
+    "studyProgramsDesc": "استكشف برامجنا الدراسية الثلاثة.",
     "pmbPortal": "بوابة القبول",
     "pmbPortalDesc": "الوصول إلى تسجيل الطلاب الجدد.",
     "scholarships": "المنح الدراسية",
@@ -1273,6 +1316,16 @@
       "suffix": "اللاحقة (مثل +)",
       "icon": "الأيقونة (اسم lucide-react، اختياري)",
       "label": "التسمية"
+    },
+    "homeVideo": {
+      "title": "فيديوهات الرئيسية",
+      "description": "إدارة الفيديوهات الإضافية التي تظهر بجانب الفيديو التعريفي في الصفحة الرئيسية.",
+      "createTitle": "إضافة فيديو",
+      "editTitle": "تعديل الفيديو",
+      "listAriaLabel": "قائمة فيديوهات الرئيسية",
+      "commonFields": "إعدادات الفيديو",
+      "youtubeUrl": "رابط يوتيوب",
+      "videoTitle": "عنوان الفيديو"
     },
     "section": {
       "title": "أقسام الصفحة الرئيسية",

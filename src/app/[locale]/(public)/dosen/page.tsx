@@ -2,10 +2,11 @@ import type {Metadata} from "next";
 import Image from "next/image";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
+import {Breadcrumb} from "@/components/public/breadcrumb";
 import {SectionHeading} from "@/components/public/section-heading";
 import {Container} from "@/components/ui/container";
 import {Link} from "@/i18n/navigation";
-import {createPrismaClient} from "@/lib/db/client";
+import {getPrismaClient} from "@/lib/db/client";
 import type {AppLocale} from "@/i18n/routing";
 
 const LECTURER_SELECT = {
@@ -36,7 +37,7 @@ export default async function DosenPage({params}: {params: Promise<{locale: AppL
 
   let rows: LecturerRow[] = [];
   try {
-    const prisma = createPrismaClient();
+    const prisma = getPrismaClient();
     rows = await prisma.lecturer.findMany({
       where: {isActive: true},
       orderBy: {order: "asc"},
@@ -49,6 +50,14 @@ export default async function DosenPage({params}: {params: Promise<{locale: AppL
 
   return (
     <Container className="py-12 md:py-20">
+      <Breadcrumb
+        ariaLabel={tNav("breadcrumbLabel")}
+        className="mb-6"
+        items={[
+          {label: tNav("home"), href: "/"},
+          {label: tNav("lecturers")},
+        ]}
+      />
       <SectionHeading as="h1" title={tNav("lecturers")} description={t("lecturersDesc")} />
       {rows.length > 0 ? (
         <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">

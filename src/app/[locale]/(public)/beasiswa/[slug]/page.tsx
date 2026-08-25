@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 
+import { Breadcrumb } from "@/components/public/breadcrumb";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/public/section-heading";
 import { PublicContentStateNotice } from "@/components/admin/public-content/public-content-state-notice";
@@ -35,6 +36,7 @@ export default async function ScholarshipDetailPage({ params }: PageProps) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("PublicContent");
+  const tNav = await getTranslations("Nav");
 
   const result = await getPublicContentDetail(getPrismaClient(), { resource: RESOURCE, slug, locale });
 
@@ -55,19 +57,15 @@ export default async function ScholarshipDetailPage({ params }: PageProps) {
 
   return (
     <Container className="py-12 md:py-20">
-      <nav aria-label={t("breadcrumb")} className="mb-6 text-sm text-slate-500">
-        <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
-          <li>
-            <a href={`/${locale}`} className="hover:text-royal-500 transition-colors">{t("breadcrumbHome")}</a>
-          </li>
-          <li aria-hidden>/</li>
-          <li>
-            <a href={`/${locale}${LIST_PATH}`} className="hover:text-royal-500 transition-colors">{t("publicContent.scholarship.listTitle")}</a>
-          </li>
-          <li aria-hidden>/</li>
-          <li className="truncate text-slate-700">{scholarship.translation.title}</li>
-        </ol>
-      </nav>
+      <Breadcrumb
+        ariaLabel={tNav("breadcrumbLabel")}
+        className="mb-6"
+        items={[
+          {label: tNav("home"), href: "/"},
+          {label: t("scholarship.listTitle"), href: LIST_PATH},
+          {label: scholarship.translation.title, resolvedLocale: scholarship.translation.resolvedLocale},
+        ]}
+      />
 
       <article>
         <header className="mb-8">

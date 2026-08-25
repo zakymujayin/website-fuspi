@@ -80,10 +80,11 @@ describe("editor form wiring and i18n", () => {
     "utf8",
   );
 
-  it("uses RichTextField for content and passes RTL for Arabic", () => {
+  it("uses RichTextField for the Indonesian content the editor authors by hand", () => {
+    // Only Indonesian is authored manually (LTR); en/ar are machine-translated
+    // and rendered RTL-correct on the public site, not edited here.
     expect(form).toContain("<RichTextField");
-    expect(form).toContain('dir={locale === "ar" ? "rtl" : undefined}');
-    expect(form).toContain("updateTranslation(locale, \"content\", html)");
+    expect(form).toContain('updateTranslation("id", "content", html)');
   });
 
   it("defines the same AdminPostRichText keys in id, en, ar with real Arabic", () => {

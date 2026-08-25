@@ -1,4 +1,5 @@
 "use client";
+import { formText } from "@/components/admin/form-text";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
@@ -50,20 +51,20 @@ export function FaqEditorForm({ mode, listHref, initialData, pageId, expectedVer
 
     const fd = new FormData(event.currentTarget);
 
-    const enQuestion = (fd.get("en.question") as string).trim();
-    const arQuestion = (fd.get("ar.question") as string).trim();
+    const enQuestion = formText(fd, "en.question");
+    const arQuestion = formText(fd, "ar.question");
 
     const payload: Record<string, unknown> = {
       order: Number(fd.get("order")),
       isVisible,
       translations: {
         id: {
-          category: (fd.get("id.category") as string).trim() || null,
-          question: (fd.get("id.question") as string).trim(),
-          answer: (fd.get("id.answer") as string).trim(),
+          category: formText(fd, "id.category") || null,
+          question: formText(fd, "id.question"),
+          answer: formText(fd, "id.answer"),
         },
-        ...(enQuestion ? { en: { category: (fd.get("en.category") as string).trim() || null, question: enQuestion, answer: (fd.get("en.answer") as string).trim() } } : {}),
-        ...(arQuestion ? { ar: { category: (fd.get("ar.category") as string).trim() || null, question: arQuestion, answer: (fd.get("ar.answer") as string).trim() } } : {}),
+        ...(enQuestion ? { en: { category: formText(fd, "en.category") || null, question: enQuestion, answer: formText(fd, "en.answer") } } : {}),
+        ...(arQuestion ? { ar: { category: formText(fd, "ar.category") || null, question: arQuestion, answer: formText(fd, "ar.answer") } } : {}),
       },
     };
 

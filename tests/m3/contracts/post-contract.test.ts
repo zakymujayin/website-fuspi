@@ -32,6 +32,7 @@ const POST_FIELDS = {
   categoryId: "category-1",
   coverMediaId: "media-1",
   tagIds: ["tag-1", "tag-2"],
+  images: [],
   translations: {
     id: ID_TRANSLATION,
     ar: {...ID_TRANSLATION, title: "دراسة القرآن والمجتمع", excerpt: null},
@@ -201,6 +202,7 @@ describe("M3 Post public-read contracts", () => {
     authorName: "Editor FUSPI",
     categorySlug: "akademik",
     cover: null,
+    images: [],
     translation: {
       requestedLocale: "en" as const,
       resolvedLocale: "id" as const,

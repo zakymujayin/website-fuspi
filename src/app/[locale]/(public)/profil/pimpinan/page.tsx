@@ -1,4 +1,5 @@
 import type {Metadata} from "next";
+import Image from "next/image";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {DeanAvatarPlate} from "@/components/public/dean-avatar-plate";
@@ -27,7 +28,13 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
 
       <div className="mt-12 grid items-center gap-10 lg:grid-cols-5">
         <div className="mx-auto w-full max-w-xs lg:col-span-2">
-          <DeanAvatarPlate initials={deanProfile.initials} name={deanProfile.name} />
+          {deanProfile.photoUrl ? (
+            <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
+              <Image src={deanProfile.photoUrl} alt={deanProfile.name} fill sizes="320px" className="object-cover" priority />
+            </div>
+          ) : (
+            <DeanAvatarPlate initials={deanProfile.initials} name={deanProfile.name} />
+          )}
         </div>
         <div className="lg:col-span-3">
           <span className="text-xs font-medium tracking-wide text-royal-600 uppercase">
@@ -47,7 +54,13 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
           {viceDeans.map((vd) => (
             <div key={vd.initials} className="flex flex-col">
               <div className="max-w-[220px]">
-                <DeanAvatarPlate initials={vd.initials} name={vd.name} />
+                {vd.photoUrl ? (
+                  <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
+                    <Image src={vd.photoUrl} alt={vd.name} fill sizes="220px" className="object-cover" />
+                  </div>
+                ) : (
+                  <DeanAvatarPlate initials={vd.initials} name={vd.name} />
+                )}
               </div>
               <p className="mt-4 font-display text-sm font-semibold text-slate-900">{vd.name}</p>
               <p className="mt-0.5 text-xs text-slate-500">{vd.position[locale] ?? vd.position.id}</p>

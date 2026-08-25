@@ -32,7 +32,7 @@ export async function AnnouncementsAgendaSection({ locale, announcements, events
   if (announcements.length === 0 && events.length === 0) return null;
 
   return (
-    <section className="bg-slate-50 py-12 md:py-16">
+    <section className="border-t border-slate-200 bg-gradient-to-br from-slate-50 via-slate-50 to-royal-50/60 py-12 md:py-16">
       <Container>
         <div className="grid gap-12 lg:grid-cols-2">
           {announcements.length > 0 && (
@@ -54,9 +54,9 @@ export async function AnnouncementsAgendaSection({ locale, announcements, events
                     href={`/pengumuman/${item.slug}`}
                     className="group flex items-center gap-4 rounded-xl border border-slate-100 bg-white p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                   >
-                    <time className="flex shrink-0 flex-col items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-center">
-                      <span className="text-xs font-medium uppercase text-slate-400">{monthShort(item.publishedAt, locale)}</span>
-                      <span className="font-display text-lg font-bold text-slate-700">{dayNumber(item.publishedAt)}</span>
+                    <time className="flex shrink-0 flex-col items-center justify-center rounded-lg border border-royal-100 bg-gradient-to-b from-royal-50 to-white px-3 py-2 text-center">
+                      <span className="text-xs font-medium uppercase text-royal-500">{monthShort(item.publishedAt, locale)}</span>
+                      <span className="font-display text-lg font-bold text-royal-700">{dayNumber(item.publishedAt)}</span>
                     </time>
                     <h3 className="line-clamp-2 text-sm font-medium text-slate-700 group-hover:text-royal-700">
                       {item.translation.value.title}
@@ -89,9 +89,9 @@ export async function AnnouncementsAgendaSection({ locale, announcements, events
                       className="group flex items-start gap-4 rounded-xl border border-slate-100 bg-white p-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
                     >
                       {startsAt ? (
-                        <time className="flex shrink-0 flex-col items-center justify-center rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-center">
-                          <span className="text-xs font-medium uppercase text-slate-400">{monthShort(startsAt, locale)}</span>
-                          <span className="font-display text-lg font-bold text-slate-700">{dayNumber(startsAt)}</span>
+                        <time className="flex shrink-0 flex-col items-center justify-center rounded-lg border border-royal-100 bg-gradient-to-b from-royal-50 to-white px-3 py-2 text-center">
+                          <span className="text-xs font-medium uppercase text-royal-500">{monthShort(startsAt, locale)}</span>
+                          <span className="font-display text-lg font-bold text-royal-700">{dayNumber(startsAt)}</span>
                         </time>
                       ) : null}
                       <div>

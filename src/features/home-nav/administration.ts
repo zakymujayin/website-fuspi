@@ -4,6 +4,7 @@ import {
   HomeNavAdminCommandSchema,
   HomeSectionInputSchema,
   HomeSliderInputSchema,
+  HomeVideoInputSchema,
   SiteSettingInputSchema,
   StatisticInputSchema,
   type HomeNavAdminCommand,
@@ -27,16 +28,18 @@ type HomeSliderInput = z.infer<typeof HomeSliderInputSchema>;
 type HomeSectionInput = z.infer<typeof HomeSectionInputSchema>;
 type StatisticInput = z.infer<typeof StatisticInputSchema>;
 type SiteSettingInput = z.infer<typeof SiteSettingInputSchema>;
+type HomeVideoInput = z.infer<typeof HomeVideoInputSchema>;
 
-type SanitizableResource = "HOME_SLIDER" | "HOME_SECTION" | "STATISTIC" | "SITE_SETTING";
+type SanitizableResource = "HOME_SLIDER" | "HOME_SECTION" | "STATISTIC" | "SITE_SETTING" | "HOME_VIDEO";
 
 const RICH_FIELDS: Record<SanitizableResource, string[]> = {
-  HOME_SLIDER: [], HOME_SECTION: [], STATISTIC: [], SITE_SETTING: ["deanMessage", "videoDesc"],
+  HOME_SLIDER: [], HOME_SECTION: [], STATISTIC: [], SITE_SETTING: ["deanMessage", "videoDesc"], HOME_VIDEO: [],
 };
 
 const SCHEMA_BY_RESOURCE = {
   HOME_SLIDER: HomeSliderInputSchema, HOME_SECTION: HomeSectionInputSchema,
   STATISTIC: StatisticInputSchema, SITE_SETTING: SiteSettingInputSchema,
+  HOME_VIDEO: HomeVideoInputSchema,
 } as const satisfies Record<SanitizableResource, z.ZodType>;
 
 function sanitizePayload(resource: SanitizableResource, payload: unknown) {
@@ -137,6 +140,35 @@ async function mutateStatistic(
   }
   await audit(tx, actorId, action, "Statistic", id);
   return {ok: true, id, resource: "STATISTIC", version: null};
+}
+
+async function mutateHomeVideo(
+  tx: Prisma.TransactionClient,
+  action: "CREATE" | "UPDATE",
+  input: HomeVideoInput,
+  mutation: {id: string} | null,
+  actorId: string,
+  now: Date,
+): Promise<HomeNavMutationResult> {
+  const data = {youtubeUrl: input.youtubeUrl, order: input.order, isVisible: input.isVisible};
+  let id: string;
+  if (action === "CREATE") {
+    id = (await tx.homeVideo.create({data: {
+      ...data,
+      translations: {create: translationRows<Prisma.HomeVideoTranslationCreateWithoutHomeVideoInput>(input, input.isVisible, actorId, now)},
+    }})).id;
+  } else {
+    if (!mutation || !await tx.homeVideo.findUnique({where: {id: mutation.id}, select: {id: true}})) {
+      return {ok: false, code: "NOT_FOUND"};
+    }
+    id = mutation.id;
+    await tx.homeVideo.update({where: {id}, data: {
+      ...data,
+      translations: {deleteMany: {}, create: translationRows<Prisma.HomeVideoTranslationCreateWithoutHomeVideoInput>(input, input.isVisible, actorId, now)},
+    }});
+  }
+  await audit(tx, actorId, action, "HomeVideo", id);
+  return {ok: true, id, resource: "HOME_VIDEO", version: null};
 }
 
 async function mutateHomeSection(
@@ -255,6 +287,10 @@ export async function executeHomeNavCommand(
       if (command.resource === "STATISTIC") {
         const input = sanitizePayload("STATISTIC", command.payload) as StatisticInput;
         return mutateStatistic(tx, command.action, input, command.action === "UPDATE" ? {id: command.mutation.id} : null, actor.userId, now);
+      }
+      if (command.resource === "HOME_VIDEO") {
+        const input = sanitizePayload("HOME_VIDEO", command.payload) as HomeVideoInput;
+        return mutateHomeVideo(tx, command.action, input, command.action === "UPDATE" ? {id: command.mutation.id} : null, actor.userId, now);
       }
       if (command.resource === "HOME_SECTION") {
         if (command.action !== "UPDATE") return {ok: false, code: "UNAVAILABLE"};

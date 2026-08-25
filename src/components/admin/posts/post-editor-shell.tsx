@@ -17,6 +17,7 @@ type PostEditorShellProps = {
   initialDraft: PostEditorDraft;
   taxonomyOptions: PostTaxonomyOptions;
   initialCover: CoverPreview | null;
+  initialGalleryPreviews: Record<string, CoverPreview>;
   uploadPublicUrl: string;
   listHref: string;
   publicationState: AdminPostPublicationState;
@@ -35,6 +36,7 @@ export function PostEditorShell({
   initialDraft,
   taxonomyOptions,
   initialCover,
+  initialGalleryPreviews,
   uploadPublicUrl,
   listHref,
   publicationState,
@@ -98,6 +100,7 @@ export function PostEditorShell({
         expectedVersion={version}
         taxonomyOptions={taxonomyOptions}
         initialCover={initialCover}
+        initialGalleryPreviews={initialGalleryPreviews}
         uploadPublicUrl={uploadPublicUrl}
         mutationBusy={mutationBusy}
         beginMutation={beginMutation}

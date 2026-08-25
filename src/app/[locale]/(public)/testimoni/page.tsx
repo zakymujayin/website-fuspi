@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Image from "next/image";
 
+import { Breadcrumb } from "@/components/public/breadcrumb";
 import { Container } from "@/components/ui/container";
 import { SectionHeading } from "@/components/public/section-heading";
 import { PublicContentStateNotice } from "@/components/admin/public-content/public-content-state-notice";
@@ -38,6 +39,7 @@ export default async function TestimonialPage({
   const locale = rawLocale as "id" | "en" | "ar";
   setRequestLocale(locale);
   const t = await getTranslations("PublicContent");
+  const tNav = await getTranslations("Nav");
 
   const prisma = getPrismaClient();
   const listResult = await listPublicContent(prisma, {
@@ -94,6 +96,14 @@ export default async function TestimonialPage({
 
   return (
     <Container className="py-12 md:py-20">
+      <Breadcrumb
+        ariaLabel={tNav("breadcrumbLabel")}
+        className="mb-6"
+        items={[
+          {label: tNav("home"), href: "/"},
+          {label: t("testimonial.listTitle")},
+        ]}
+      />
       <SectionHeading
         as="h1"
         title={t("testimonial.listTitle")}

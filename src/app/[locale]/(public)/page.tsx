@@ -1,6 +1,7 @@
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
+import {AchievementsSection} from "@/components/public/achievements-section";
 import {AnnouncementsAgendaSection} from "@/components/public/announcements-agenda-section";
 import {ColumnsSection} from "@/components/public/columns-section";
 import {DeanWelcomeSection} from "@/components/public/dean-welcome-section";
@@ -17,10 +18,12 @@ import type {AppLocale} from "@/i18n/routing";
 import {getPrismaClient} from "@/lib/db/client";
 import {listPublicPosts} from "@/lib/content/post-public-queries";
 import {listPublicContent} from "@/features/public-content/public-list";
+import {listPublicHomeAchievements} from "@/features/achievement/domain";
 import {listPublicHomeFacilities} from "@/features/facility/domain";
 import {
   getPublicHomeSections,
   getPublicSiteSetting,
+  listPublicHomeGalleryVideos,
   listPublicHomeSliders,
   listPublicStatistics,
 } from "@/features/home-nav/public-query";
@@ -41,6 +44,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 export default async function HomePage({params}: {params: Promise<{locale: AppLocale}>}) {
   const {locale} = await params;
   setRequestLocale(locale);
+  const t = await getTranslations("Home");
 
   const prisma = getPrismaClient();
   const uploadBase = process.env.UPLOAD_PUBLIC_URL ?? "/uploads";
@@ -56,21 +60,28 @@ export default async function HomePage({params}: {params: Promise<{locale: AppLo
     listPublicPosts(prisma, {locale, type: "BERITA", pageSize: 5}, uploadBase),
     listPublicPosts(prisma, {locale, type: "PENGUMUMAN", pageSize: 5}, uploadBase),
     listPublicPosts(prisma, {locale, type: "KOLOM", pageSize: 4}, uploadBase),
-    listPublicContent(prisma, {resource: "PARTNERSHIP", locale, pageSize: 12}),
-    listPublicContent(prisma, {resource: "EVENT", locale, pageSize: 4}),
+    listPublicContent(prisma, {resource: "PARTNERSHIP", locale, pageSize: 10}),
+    listPublicContent(prisma, {resource: "EVENT", locale, pageSize: 10}),
   ]);
 
   const news = newsResult.ok ? newsResult.data.items : [];
   const announcements = announcementResult.ok ? announcementResult.data.items : [];
   const columns = columnResult.ok ? columnResult.data.items : [];
   const partnerships = "ok" in partnershipResult && partnershipResult.ok ? partnershipResult.items : [];
-  const events = "ok" in eventResult && eventResult.ok ? eventResult.items : [];
+  // pageSize is clamped to the shared 10/20/50 contract; the homepage widget
+  // only ever shows the first four upcoming events.
+  const events = "ok" in eventResult && eventResult.ok ? eventResult.items.slice(0, 4) : [];
 
   const isVisible = (key: Parameters<typeof sections.get>[0]) => sections.get(key)?.isVisible ?? false;
   const facilitySection = sections.get("FACILITY");
   const facilityItems = facilitySection?.isVisible
     ? await listPublicHomeFacilities(prisma, locale, facilitySection.itemLimit, uploadBase)
     : [];
+  const achievementSection = sections.get("ACHIEVEMENT");
+  const achievementItems = achievementSection?.isVisible
+    ? await listPublicHomeAchievements(prisma, locale, achievementSection.itemLimit, uploadBase)
+    : [];
+  const galleryVideos = isVisible("VIDEO") ? await listPublicHomeGalleryVideos(prisma, locale) : [];
 
   return (
     <>
@@ -100,9 +111,26 @@ export default async function HomePage({params}: {params: Promise<{locale: AppLo
 
       {isVisible("COLUMN") ? <ColumnsSection items={columns} locale={locale} /> : null}
 
+      {achievementItems.length > 0 ? (
+        <AchievementsSection
+          items={achievementItems}
+          locale={locale}
+          title={achievementSection?.title ?? ""}
+          description={achievementSection?.subtitle ?? null}
+          ctaLabel={achievementSection?.ctaLabel ?? ""}
+        />
+      ) : null}
+
       {facilityItems.length > 0 ? <FacilitiesSection items={facilityItems} /> : null}
 
-      {isVisible("VIDEO") && siteSetting?.video ? <VideosSection video={siteSetting.video} eyebrow={sections.get("VIDEO")?.title ?? ""} /> : null}
+      {isVisible("VIDEO") && siteSetting?.video ? (
+        <VideosSection
+          video={siteSetting.video}
+          eyebrow={sections.get("VIDEO")?.title ?? ""}
+          galleryVideos={galleryVideos}
+          galleryTitle={t("videoGalleryTitle")}
+        />
+      ) : null}
 
       {isVisible("PARTNERSHIP") ? <PartnersSection partners={partnerships} /> : null}
 

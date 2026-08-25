@@ -114,6 +114,7 @@ enum HomeSectionKey {
   AGENDA
   TESTIMONIAL
   COLUMN
+  ACHIEVEMENT
   CTA
 }
 
@@ -389,9 +390,22 @@ model Post {
   tags             PostTag[]
   lecturers        LecturerPost[]
   studyPrograms    StudyProgramPost[]
+  images           PostImage[]
 
   @@index([type, status, publishedAt])
   @@index([contentOwnerId, reviewDueAt])
+}
+
+model PostImage {
+  id      String  @id @default(cuid())
+  postId  String
+  mediaId String
+  caption String?
+  order   Int     @default(0)
+  post    Post    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  media   Media   @relation("PostImageMedia", fields: [mediaId], references: [id], onDelete: Restrict)
+
+  @@unique([postId, mediaId])
 }
 
 model PostTranslation {
@@ -552,6 +566,7 @@ model Media {
   siteLogos          SiteSetting[]   @relation("SiteLogo")
   siteFavicons       SiteSetting[]   @relation("SiteFavicon")
   facilityCovers     Facility[]      @relation("FacilityCover")
+  postImages         PostImage[]     @relation("PostImageMedia")
 }
 
 model StudyProgram {

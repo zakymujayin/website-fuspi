@@ -1,5 +1,3 @@
-"use client";
-
 import {ChevronLeftIcon, ChevronRightIcon} from "lucide-react";
 
 import {Link} from "@/i18n/navigation";

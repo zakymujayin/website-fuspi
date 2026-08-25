@@ -87,6 +87,28 @@ export async function getPublicSiteSetting(
   };
 }
 
+export type PublicHomeGalleryVideo = {id: string; youtubeUrl: string; title: string};
+
+export async function listPublicHomeGalleryVideos(
+  prisma: PublicContentDatabase,
+  locale: Locale,
+  limit?: number,
+): Promise<PublicHomeGalleryVideo[]> {
+  const rows = await prisma.homeVideo.findMany({
+    where: {isVisible: true},
+    orderBy: [{order: "asc"}, {id: "asc"}],
+    include: {translations: true},
+    ...(limit ? {take: limit} : {}),
+  });
+  const items: PublicHomeGalleryVideo[] = [];
+  for (const row of rows) {
+    const text = resolve(row.translations, locale);
+    if (!text) continue;
+    items.push({id: row.id, youtubeUrl: row.youtubeUrl, title: text.title});
+  }
+  return items;
+}
+
 export type PublicHomeSectionMeta = {
   key: HomeSectionKey; isVisible: boolean; order: number; itemLimit: number;
   title: string; subtitle: string | null; cta: ReturnType<typeof configuredLink>; ctaLabel: string | null;

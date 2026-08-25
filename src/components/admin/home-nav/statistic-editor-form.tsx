@@ -1,4 +1,5 @@
 "use client";
+import { formText } from "@/components/admin/form-text";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
@@ -40,17 +41,17 @@ export function StatisticEditorForm({ mode, listHref, initialData, pageId }: Pro
     setErrors([]);
 
     const fd = new FormData(event.currentTarget);
-    const enLabel = (fd.get("en.label") as string).trim();
-    const arLabel = (fd.get("ar.label") as string).trim();
+    const enLabel = formText(fd, "en.label");
+    const arLabel = formText(fd, "ar.label");
 
     const payload: Record<string, unknown> = {
-      value: (fd.get("value") as string).trim(),
-      suffix: (fd.get("suffix") as string).trim() || null,
-      icon: (fd.get("icon") as string).trim() || null,
+      value: formText(fd, "value"),
+      suffix: formText(fd, "suffix") || null,
+      icon: formText(fd, "icon") || null,
       order: Number(fd.get("order")),
       isVisible,
       translations: {
-        id: { label: (fd.get("id.label") as string).trim() },
+        id: { label: formText(fd, "id.label") },
         ...(enLabel ? { en: { label: enLabel } } : {}),
         ...(arLabel ? { ar: { label: arLabel } } : {}),
       },

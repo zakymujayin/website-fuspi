@@ -48,7 +48,7 @@ const SiteSettingTranslationInputSchema = z.object({
 
 export const HomeSectionKeySchema = z.enum([
   "HERO", "QUICKLINK", "DEAN", "STATS", "INTRO", "PRODI", "ANNOUNCEMENT", "SERVICE",
-  "FACILITY", "NEWS", "PARTNERSHIP", "COLUMN", "VIDEO", "AGENDA", "TESTIMONIAL", "CTA",
+  "FACILITY", "NEWS", "PARTNERSHIP", "COLUMN", "ACHIEVEMENT", "VIDEO", "AGENDA", "TESTIMONIAL", "CTA",
 ]);
 export const HomeNavResourceSchema = z.enum([
   "MENU_ITEM", "QUICK_LINK", "EXTERNAL_LINK", "HOME_SLIDER", "HOME_SECTION", "STATISTIC", "SITE_SETTING", "HOME_VIDEO",

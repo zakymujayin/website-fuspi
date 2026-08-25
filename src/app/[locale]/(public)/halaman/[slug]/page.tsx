@@ -1,11 +1,12 @@
 import {notFound} from "next/navigation";
-import {setRequestLocale} from "next-intl/server";
+import {getTranslations, setRequestLocale} from "next-intl/server";
 import type {Metadata} from "next";
 
+import {Breadcrumb} from "@/components/public/breadcrumb";
 import {SectionHeading} from "@/components/public/section-heading";
 import {BreadcrumbJsonLd} from "@/components/public/json-ld";
 import {Container} from "@/components/ui/container";
-import {createPrismaClient} from "@/lib/db/client";
+import {getPrismaClient} from "@/lib/db/client";
 import type {AppLocale} from "@/i18n/routing";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fuspi.uinbanten.ac.id";
@@ -29,7 +30,7 @@ function resolveLocale<T extends {locale: string}>(items: ReadonlyArray<T>, loca
 
 async function getPage(slug: string): Promise<PageRow | null> {
   try {
-    const prisma = createPrismaClient();
+    const prisma = getPrismaClient();
     const rows = await prisma.page.findMany({where: {slug, status: "PUBLISHED"}, select: PAGE_SELECT}) as PageRow[];
     return rows[0] ?? null;
   } catch { return null; }
@@ -59,6 +60,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 export default async function PageDetail({params}: {params: Promise<{locale: AppLocale; slug: string}>}) {
   const {locale, slug} = await params;
   setRequestLocale(locale);
+  const tNav = await getTranslations("Nav");
   const page = await getPage(slug);
   if (!page) notFound();
 
@@ -72,6 +74,14 @@ export default async function PageDetail({params}: {params: Promise<{locale: App
         {name: "FUSPI", url: `${SITE_URL}/${locale}`},
         {name: tl.title, url},
       ]} />
+      <Breadcrumb
+        ariaLabel={tNav("breadcrumbLabel")}
+        className="mx-auto mb-6 max-w-3xl"
+        items={[
+          {label: tNav("home"), href: "/"},
+          {label: tl.title},
+        ]}
+      />
       <article className="mx-auto max-w-3xl">
         <SectionHeading as="h1" title={tl.title} />
         <div

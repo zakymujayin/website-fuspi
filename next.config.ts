@@ -14,6 +14,10 @@ const nextConfig: NextConfig = {
         hostname: "fuspi.uinbanten.ac.id",
         pathname: "/uploads/**",
       },
+      {
+        protocol: "https",
+        hostname: "i.ytimg.com",
+      },
     ],
   },
 };

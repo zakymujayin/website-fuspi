@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+import { Breadcrumb } from "@/components/public/breadcrumb";
 import { SectionHeading } from "@/components/public/section-heading";
 import { Container } from "@/components/ui/container";
 import { institution } from "@/config/institution";
@@ -25,6 +26,14 @@ export default async function StudyProgramsPage({ params }: PageProps) {
 
   return (
     <Container className="py-12 md:py-20">
+      <Breadcrumb
+        ariaLabel={tNav("breadcrumbLabel")}
+        className="mb-6"
+        items={[
+          {label: tNav("home"), href: "/"},
+          {label: t("title")},
+        ]}
+      />
       <SectionHeading
         as="h1"
         id="programs-title"

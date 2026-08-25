@@ -62,10 +62,10 @@ function StatItem({
       )}
       style={{transitionDelay: `${index * 80}ms`}}
     >
-      <span className="mx-auto mb-2 flex items-center justify-center text-royal-300">
+      <span className="mx-auto mb-2 flex items-center justify-center text-brass-400">
         {icon}
       </span>
-      <p className="font-display text-2xl font-bold tracking-tight text-white md:text-3xl">
+      <p className="font-display text-3xl font-extrabold tracking-tight text-brass-400 md:text-4xl">
         {Number.isFinite(numeric) ? value.toLocaleString("id-ID") : item.value}
         {item.suffix}
       </p>
@@ -101,9 +101,9 @@ export function StatsSection({ items }: StatsSectionProps) {
   return (
     <section
       ref={ref}
-      className="relative overflow-hidden bg-navy-900 py-16 md:py-20"
+      className="relative overflow-hidden bg-gradient-to-br from-navy-800 to-navy-950 py-16 md:py-20"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(65,105,225,.14),transparent_55%)]" />
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(65,105,225,.18),transparent_55%)]" />
       <Container className="relative z-10">
         <div className="flex flex-wrap justify-center gap-x-10 gap-y-12 sm:gap-x-16 lg:gap-x-20">
           {items.map((item, index) => (
