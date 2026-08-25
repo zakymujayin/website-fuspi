@@ -4,6 +4,7 @@ import {PublicMediaViewSchema} from "@/contracts/media";
 import {LocaleSchema} from "@/contracts/platform";
 import {
   PostAutosaveInputSchema,
+  ColumnTypeSchema,
   PostCreateInputSchema,
   PostIdSchema,
   PostMutationResultSchema,
@@ -204,8 +205,8 @@ export const AdminPostListResultSchema = z.object({
 
 export const AdminPostEditorViewSchema = z.object({
   id: PostIdSchema,
-  type: z.literal("BERITA"),
-  columnType: z.null(),
+  type: z.enum(["BERITA", "KOLOM"]),
+  columnType: ColumnTypeSchema.nullable(),
   slug: PostSlugSchema,
   isFeatured: z.boolean(),
   categoryId: PostIdSchema.nullable(),
@@ -224,6 +225,12 @@ export const AdminPostEditorViewSchema = z.object({
   capabilities: AdminPostCapabilitiesSchema,
 }).strict().superRefine((value, context) => {
   validatePublicationState(value, context);
+  if (value.type === "BERITA" && value.columnType !== null) {
+    context.addIssue({code: "custom", path: ["columnType"], message: "Berita cannot have a column type."});
+  }
+  if (value.type === "KOLOM" && value.columnType === null) {
+    context.addIssue({code: "custom", path: ["columnType"], message: "Kolom requires a column type."});
+  }
   if (value.cover === null && value.coverMediaId !== null) {
     context.addIssue({code: "custom", path: ["cover"], message: "Missing safe cover view."});
   }
@@ -258,6 +265,28 @@ export const AdminPostAutosavePayloadSchema = z.object({
   ...AdminPostMutableFieldsShape,
 }).strict();
 
+const AdminColumnMutableFieldsShape = {
+  type: z.literal("KOLOM"),
+  columnType: ColumnTypeSchema,
+  ...AdminPostMutableFieldsShape,
+} as const;
+
+export const AdminColumnCreatePayloadSchema = z.object({
+  ...AdminColumnMutableFieldsShape,
+  publication: PostCreateInputSchema.shape.publication,
+}).strict();
+export const AdminColumnUpdatePayloadSchema = z.object({
+  postId: PostUpdateInputSchema.shape.postId,
+  expectedVersion: PostUpdateInputSchema.shape.expectedVersion,
+  ...AdminColumnMutableFieldsShape,
+}).strict();
+export const AdminColumnAutosavePayloadSchema = z.object({
+  intent: PostAutosaveInputSchema.shape.intent,
+  postId: PostAutosaveInputSchema.shape.postId,
+  expectedVersion: PostAutosaveInputSchema.shape.expectedVersion,
+  ...AdminColumnMutableFieldsShape,
+}).strict();
+
 export const AdminPostDeletePayloadSchema = z.object({
   postId: PostIdSchema,
   expectedVersion: z.number().int().positive().max(MAX_VERSION),
@@ -269,6 +298,11 @@ export const AdminPostTransportCommandSchema = z.discriminatedUnion("action", [
   z.object({action: z.literal("AUTOSAVE"), payload: AdminPostAutosavePayloadSchema}).strict(),
   z.object({action: z.literal("PUBLICATION"), payload: PostPublicationMutationInputSchema}).strict(),
   z.object({action: z.literal("DELETE"), payload: AdminPostDeletePayloadSchema}).strict(),
+  z.object({action: z.literal("CREATE_COLUMN"), payload: AdminColumnCreatePayloadSchema}).strict(),
+  z.object({action: z.literal("UPDATE_COLUMN"), payload: AdminColumnUpdatePayloadSchema}).strict(),
+  z.object({action: z.literal("AUTOSAVE_COLUMN"), payload: AdminColumnAutosavePayloadSchema}).strict(),
+  z.object({action: z.literal("PUBLICATION_COLUMN"), payload: PostPublicationMutationInputSchema}).strict(),
+  z.object({action: z.literal("DELETE_COLUMN"), payload: AdminPostDeletePayloadSchema}).strict(),
 ]);
 
 export const AdminPostTransportFailureCodeSchema = z.enum([
@@ -315,6 +349,24 @@ export function toBeritaAutosaveInput(
   value: z.infer<typeof AdminPostAutosavePayloadSchema>,
 ): PostAutosaveInput {
   return PostAutosaveInputSchema.parse({...value, type: "BERITA", columnType: null});
+}
+
+export function toKolomCreateInput(
+  value: z.infer<typeof AdminColumnCreatePayloadSchema>,
+): PostCreateInput {
+  return PostCreateInputSchema.parse(value);
+}
+
+export function toKolomUpdateInput(
+  value: z.infer<typeof AdminColumnUpdatePayloadSchema>,
+): PostUpdateInput {
+  return PostUpdateInputSchema.parse(value);
+}
+
+export function toKolomAutosaveInput(
+  value: z.infer<typeof AdminColumnAutosavePayloadSchema>,
+): PostAutosaveInput {
+  return PostAutosaveInputSchema.parse(value);
 }
 
 const POST_FAILURE_MAPPING = {

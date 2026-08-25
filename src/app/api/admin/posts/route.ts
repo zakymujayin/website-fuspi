@@ -84,9 +84,13 @@ export async function POST(request: Request) {
   );
   if (result.ok) {
     for (const locale of ["id", "en", "ar"] as const) {
+      revalidatePath(`/${locale}`);
       revalidatePath(`/${locale}/berita`);
       revalidatePath(`/${locale}/berita/[slug]`, "page");
-      revalidatePath(`/${locale}/admin/berita`);
+      revalidatePath(`/${locale}/kolom`);
+      revalidatePath(`/${locale}/kolom/[slug]`, "page");
+      revalidatePath(`/${locale}/admin/posts`);
+      revalidatePath(`/${locale}/admin/kolom`);
     }
   }
   return json(result, adminPostHttpStatus(result));

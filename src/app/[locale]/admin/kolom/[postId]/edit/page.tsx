@@ -12,17 +12,17 @@ import { parseAppLocale } from "@/lib/auth/runtime/redirect";
 import { getAdminPostEditor } from "@/lib/content/post-admin-transport";
 import { getPrismaClient } from "@/lib/db/client";
 
-type EditPostPageProps = {
+type EditColumnPageProps = {
   params: Promise<{ locale: string; postId: string }>;
 };
 
-export async function generateMetadata({ params }: EditPostPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: EditColumnPageProps): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "AdminPostEditor" });
+  const t = await getTranslations({ locale, namespace: "AdminColumnEditor" });
   return { title: t("editMetaTitle"), robots: { index: false, follow: false } };
 }
 
-export default async function EditPostPage({ params }: EditPostPageProps) {
+export default async function EditColumnPage({ params }: EditColumnPageProps) {
   const { locale, postId } = await params;
   setRequestLocale(locale);
   const appLocale = parseAppLocale(locale);
@@ -31,11 +31,11 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
   const decision = decideProtectedRoute(
     session,
     appLocale,
-    `/${appLocale}/admin/posts/${postId}/edit`,
+    `/${appLocale}/admin/kolom/${postId}/edit`,
   );
   if (!decision.allow) redirect(decision.redirectTo);
 
-  const t = await getTranslations("AdminPostEditor");
+  const t = await getTranslations("AdminColumnEditor");
   const prisma = getPrismaClient();
   const uploadPublicUrl = process.env.UPLOAD_PUBLIC_URL ?? "/uploads";
 
@@ -45,19 +45,15 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
       session.ok ? session.session : null,
       postId,
       uploadPublicUrl,
+      "KOLOM",
     ),
   );
 
-  // A post the actor may not reach returns NOT_FOUND from the transport; the UI must not
-  // distinguish "missing" from "not yours", so both render the same notice.
   if (!result.ok) {
     return (
-      <section aria-labelledby="admin-post-edit-title" className="flex flex-col gap-6">
+      <section aria-labelledby="admin-column-edit-title" className="flex flex-col gap-6">
         <div>
-          <h1
-            id="admin-post-edit-title"
-            className="section-rule font-display text-2xl text-slate-900"
-          >
+          <h1 id="admin-column-edit-title" className="section-rule font-display text-2xl text-slate-900">
             {t("editTitle")}
           </h1>
         </div>
@@ -77,9 +73,9 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
   );
 
   return (
-    <section aria-labelledby="admin-post-edit-title" className="flex flex-col gap-6">
+    <section aria-labelledby="admin-column-edit-title" className="flex flex-col gap-6">
       <div>
-        <h1 id="admin-post-edit-title" className="section-rule font-display text-2xl text-slate-900">
+        <h1 id="admin-column-edit-title" className="section-rule font-display text-2xl text-slate-900">
           {t("editTitle")}
         </h1>
         <p className="mt-2 max-w-prose text-sm text-slate-500">{t("editDescription")}</p>
@@ -87,14 +83,14 @@ export default async function EditPostPage({ params }: EditPostPageProps) {
 
       <PostEditorShell
         postId={view.id}
-        postType="BERITA"
+        postType="KOLOM"
         initialVersion={view.version}
         initialDraft={draftFromEditorView(view)}
         taxonomyOptions={taxonomyOptions}
         initialCover={view.cover}
         initialGalleryPreviews={Object.fromEntries(view.images.map((image) => [image.media.id, image.media]))}
         uploadPublicUrl={uploadPublicUrl}
-        listHref="/admin/posts"
+        listHref="/admin/kolom"
         publicationState={view.publicationState}
         capabilities={{
           publish: view.capabilities.publish,

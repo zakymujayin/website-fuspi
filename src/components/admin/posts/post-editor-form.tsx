@@ -36,11 +36,13 @@ import {
   collectFieldErrors,
   emptyDraft,
   type PostEditorDraft,
+  type PostEditorType,
   type PostEditorLocale,
 } from "./post-editor-payload";
 
 type PostEditorFormProps = {
   mode: "create" | "edit";
+  postType?: PostEditorType;
   listHref: string;
   initialDraft?: PostEditorDraft;
   /** Present only in edit mode; drives optimistic locking. */
@@ -68,6 +70,7 @@ const EMPTY_TAXONOMY_OPTIONS: PostTaxonomyOptions = {categories: [], tags: []};
 
 export function PostEditorForm({
   mode,
+  postType = "BERITA",
   listHref,
   initialDraft,
   postId,
@@ -85,7 +88,7 @@ export function PostEditorForm({
   const t = useTranslations("AdminPostEditor");
   const router = useRouter();
   const formId = useId();
-  const [draft, setDraft] = useState<PostEditorDraft>(() => initialDraft ?? emptyDraft());
+  const [draft, setDraft] = useState<PostEditorDraft>(() => initialDraft ?? emptyDraft(postType));
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -137,7 +140,10 @@ export function PostEditorForm({
         method: "POST",
         headers: { "content-type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ action: "AUTOSAVE", payload: parsed.data }),
+        body: JSON.stringify({
+          action: current.type === "KOLOM" ? "AUTOSAVE_COLUMN" : "AUTOSAVE",
+          payload: parsed.data,
+        }),
       });
       const result: unknown = await response.json().catch(() => null);
       if (
@@ -263,7 +269,9 @@ export function PostEditorForm({
         // Same-origin so the server's CSRF origin check passes; credentials ride the session cookie.
         credentials: "same-origin",
         body: JSON.stringify({
-          action: mode === "create" ? "CREATE" : "UPDATE",
+          action: draft.type === "KOLOM"
+            ? mode === "create" ? "CREATE_COLUMN" : "UPDATE_COLUMN"
+            : mode === "create" ? "CREATE" : "UPDATE",
           payload: parsed.data,
         }),
       });
@@ -320,6 +328,28 @@ export function PostEditorForm({
       ) : null}
 
       <FieldGroup>
+        {draft.type === "KOLOM" ? (
+          <Field>
+            <FieldLabel htmlFor={`${formId}-column-type`}>{t("columnType")}</FieldLabel>
+            <select
+              id={`${formId}-column-type`}
+              value={draft.columnType ?? ""}
+              onChange={(event) => setDraft((current) => ({
+                ...current,
+                columnType: event.target.value as NonNullable<PostEditorDraft["columnType"]>,
+              }))}
+              aria-invalid={fieldErrors.columnType ? true : undefined}
+              className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            >
+              <option value="DEKAN">{t("columnRole.DEKAN")}</option>
+              <option value="DOSEN">{t("columnRole.DOSEN")}</option>
+              <option value="MAHASISWA">{t("columnRole.MAHASISWA")}</option>
+            </select>
+            <FieldDescription>{t("columnTypeDescription")}</FieldDescription>
+            {fieldErrors.columnType ? <FieldError>{fieldErrors.columnType}</FieldError> : null}
+          </Field>
+        ) : null}
+
         <Field>
           <FieldLabel htmlFor={`${formId}-slug`}>{t("slug")}</FieldLabel>
           <Input

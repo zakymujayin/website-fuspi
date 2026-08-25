@@ -10,7 +10,7 @@ const source = readFileSync(
 
 describe("PostDeleteAction — command wiring", () => {
   it("submits the frozen DELETE command shape same-origin", () => {
-    expect(source).toContain('action: "DELETE"');
+    expect(source).toContain('postType === "KOLOM" ? "DELETE_COLUMN" : "DELETE"');
     expect(source).toContain("payload: { postId, expectedVersion }");
     expect(source).toContain('credentials: "same-origin"');
     expect(source).toContain('"/api/admin/posts"');

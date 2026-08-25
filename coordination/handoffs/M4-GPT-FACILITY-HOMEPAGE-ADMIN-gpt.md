@@ -34,6 +34,18 @@ Second follow-up bug fix in the same branch:
   through a safe local `/uploads/...` path instead of showing the placeholder
   only because dimensions are missing.
 
+Third follow-up feature in the same branch:
+
+- Added a dedicated Sorotan Akademik admin surface at `/admin/kolom`,
+  `/admin/kolom/new`, and `/admin/kolom/[postId]/edit`.
+- Reused the Post editor/runtime with a new `KOLOM` mode, including required
+  source labels for `DEKAN`, `DOSEN`, and `MAHASISWA`.
+- Added column-specific create/update/autosave/publish/delete command envelopes
+  so Kolom mutations cannot accidentally target Berita rows.
+- Added a sidebar item and ID/EN/AR admin copy for Sorotan Akademik.
+- Revalidated homepage, `/kolom`, Berita, and both admin lists after post
+  mutations.
+
 ## Files changed
 
 - Added `FACILITY` home section key, migration, seed copy, and contract max
@@ -57,6 +69,9 @@ Second follow-up bug fix in the same branch:
   `src/features/home-nav/admin-detail.ts`.
 - Updated admin thumbnail regression coverage for legacy media without image
   dimensions.
+- Added Sorotan Akademik admin routes under `src/app/[locale]/admin/kolom/**`.
+- Extended shared Post admin UI components to support `KOLOM` mode while
+  preserving the existing Berita defaults.
 
 ## Contract/schema/migration impact
 
@@ -73,6 +88,11 @@ Second follow-up bug fix in the same branch:
   facility cards for homepage use.
 - `AdminPostEditorViewSchema` now uses an admin-only media preview schema for
   cover/gallery previews. Public post and public media schemas are unchanged.
+- `AdminPostEditorViewSchema` now supports `BERITA` and `KOLOM`; `KOLOM`
+  requires `columnType`.
+- New admin command actions:
+  `CREATE_COLUMN`, `UPDATE_COLUMN`, `AUTOSAVE_COLUMN`, `PUBLICATION_COLUMN`,
+  and `DELETE_COLUMN`.
 
 ## Verification
 
@@ -113,12 +133,28 @@ Second follow-up bug fix verification:
 | `npm run build` | Passed |
 | `TASK_MANIFEST=coordination/tasks/M4-GPT-FACILITY-HOMEPAGE-ADMIN.md TASK_BASE=HEAD~1 npm run check:scope` | Passed after adding `src/lib/content/post-admin-transport.ts` to the lease |
 
+Third follow-up feature verification:
+
+| Command | Result |
+|---|---|
+| `node -e "JSON.parse(...messages/id,en,ar...)"` | Passed |
+| `npx vitest run tests/m3/contracts/post-admin-transport-contract.test.ts tests/m3/ui/admin-post-editor.test.tsx tests/m3/ui/admin-post-list.test.tsx tests/m3/ui/admin-post-autosave.test.tsx tests/m3/ui/admin-post-publication-actions.test.tsx tests/m3/ui/admin-post-delete.test.tsx` | Passed, 6 files / 147 tests |
+| `npm run typecheck` | Passed |
+| `npm run lint` | Passed |
+| `npm run prisma:validate` | Passed |
+| `npm run test` | Passed, 95 files / 1180 tests |
+| `git diff --check` | Passed |
+| `npm run build` | Passed, routes include `/[locale]/admin/kolom`, `/[locale]/admin/kolom/new`, and `/[locale]/admin/kolom/[postId]/edit` |
+| `TASK_MANIFEST=coordination/tasks/M4-GPT-FACILITY-HOMEPAGE-ADMIN.md TASK_BASE=HEAD~1 npm run check:scope` | Passed, 30 changed files within lease |
+
 ## Untested areas
 
 - Browser-level admin CRUD flow was not run with Playwright.
 - Real media picker interaction was not exercised against uploaded files.
 - Real legacy uploaded media was not manually opened in the browser; coverage is
   contract/runtime/unit level plus full production build.
+- Browser-level create/edit/delete flow for `/admin/kolom` was not manually run
+  with Playwright; coverage is contract/source tests plus production build.
 
 ## Risks and follow-ups
 

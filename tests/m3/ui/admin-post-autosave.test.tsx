@@ -110,7 +110,7 @@ describe("shared-version wiring (source contracts)", () => {
   });
 
   it("autosave posts on the contract interval and advances the version before releasing", () => {
-    expect(form).toContain('action: "AUTOSAVE"');
+    expect(form).toContain('current.type === "KOLOM" ? "AUTOSAVE_COLUMN" : "AUTOSAVE"');
     expect(form).toContain("ADMIN_POST_AUTOSAVE_INTERVAL_MS");
     expect(form).toMatch(/finishMutation\(\s*lease\.token,[\s\S]*?nextVersion/);
     // A conflict must stop autosaving so a stale local version can't keep firing.

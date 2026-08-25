@@ -298,6 +298,64 @@
     "edit": "Sunting",
     "editLabelFor": "Sunting berita: {title}"
   },
+  "AdminColumnList": {
+    "metaTitle": "Sorotan Akademik",
+    "title": "Sorotan Akademik",
+    "description": "Kelola tulisan dekan, dosen, dan mahasiswa yang tampil di bagian Sorotan Akademik beranda dan halaman Kolom.",
+    "filterAriaLabel": "Saring sorotan akademik berdasarkan status",
+    "listAriaLabel": "Daftar sorotan akademik",
+    "totalCount": "{count} tulisan",
+    "status": {
+      "all": "Semua",
+      "draft": "Draf",
+      "published": "Terbit",
+      "archived": "Arsip"
+    },
+    "state": {
+      "DRAFT": "Draf",
+      "PUBLISHED": "Terbit",
+      "SCHEDULED": "Terjadwal",
+      "ARCHIVED": "Arsip"
+    },
+    "featured": "Unggulan",
+    "localesLabel": "Bahasa tersedia: {locales}",
+    "uncategorized": "Tanpa kategori",
+    "unknownAuthor": "Penulis tidak diketahui",
+    "byLabel": "Oleh {name}",
+    "publishedAtLabel": "Terbit {instant}",
+    "updatedAtLabel": "Diperbarui {instant}",
+    "loading": "Memuat daftar sorotan akademik…",
+    "pagination": {
+      "ariaLabel": "Navigasi halaman daftar sorotan akademik",
+      "previous": "Halaman sebelumnya",
+      "next": "Halaman berikutnya",
+      "pageStatus": "Hal {page} dari {totalPages}",
+      "goToPage": "Ke halaman {page}"
+    },
+    "empty": {
+      "title": "Belum ada sorotan akademik",
+      "description": "Tulisan dekan, dosen, dan mahasiswa akan tampil di sini setelah dibuat."
+    },
+    "unavailable": {
+      "title": "Daftar sorotan akademik sedang tidak dapat dimuat",
+      "description": "Silakan muat ulang halaman ini beberapa saat lagi."
+    },
+    "createAction": "Tambah sorotan",
+    "edit": "Sunting",
+    "editLabelFor": "Sunting sorotan akademik: {title}"
+  },
+  "AdminColumnEditor": {
+    "createMetaTitle": "Tambah Sorotan Akademik",
+    "createTitle": "Tambah Sorotan Akademik",
+    "createDescription": "Buat tulisan dekan, dosen, atau mahasiswa untuk bagian Sorotan Akademik. Konten disimpan sebagai draf sampai diterbitkan.",
+    "editMetaTitle": "Sunting Sorotan Akademik",
+    "editTitle": "Sunting Sorotan Akademik",
+    "editDescription": "Perbarui tulisan sorotan akademik. Status penerbitan dikelola dari panel status di halaman ini.",
+    "unavailable": {
+      "title": "Sorotan akademik tidak dapat dimuat",
+      "description": "Tulisan tidak ditemukan, bukan milik Anda, atau sedang tidak dapat diakses."
+    }
+  },
   "AdminPostEditor": {
     "createMetaTitle": "Tulis Berita",
     "createTitle": "Tulis Berita",
@@ -309,6 +367,13 @@
     "slugDescription": "Penggal URL berita, contoh: wisuda-fuspi-2026. Gunakan huruf kecil dan tanda hubung.",
     "featured": "Jadikan berita unggulan",
     "featuredDescription": "Berita unggulan dapat ditonjolkan di halaman publik.",
+    "columnType": "Sumber tulisan",
+    "columnTypeDescription": "Pilih asal tulisan untuk label di kartu Sorotan Akademik.",
+    "columnRole": {
+      "DEKAN": "Dekan",
+      "DOSEN": "Dosen",
+      "MAHASISWA": "Mahasiswa"
+    },
     "taxonomyLegend": "Kategori dan tag",
     "taxonomyDescription": "Pilih kategori utama dan tag agar berita mudah ditemukan di arsip publik.",
     "category": "Kategori",
@@ -860,6 +925,7 @@
       "dashboard": "Dashboard",
       "pages": "Halaman",
       "posts": "Berita",
+      "columns": "Sorotan Akademik",
       "media": "Media",
       "taxonomies": "Taksonomi",
       "services": "Layanan",

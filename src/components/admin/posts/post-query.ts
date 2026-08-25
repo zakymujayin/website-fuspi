@@ -54,14 +54,15 @@ export function normalizeAdminPostQuery(raw: RawSearchParams): AdminPostNormaliz
 }
 
 /** Builds the frozen transport query from a normalized UI query. */
-export function toAdminPostTransportQuery(query: AdminPostNormalizedQuery) {
-  return {
+export function toAdminPostTransportQuery(query: AdminPostNormalizedQuery, type?: "BERITA" | "KOLOM") {
+  const transportQuery = {
     page: query.page,
     pageSize: query.pageSize,
     status: query.status,
     search: "",
     sort: ADMIN_POST_SORT,
   } as const;
+  return type ? {...transportQuery, type} : transportQuery;
 }
 
 /** Builds an `/admin/posts` link preserving the active filter; `@/i18n/navigation`'s `Link` adds the locale. */

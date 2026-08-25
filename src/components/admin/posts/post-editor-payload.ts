@@ -1,10 +1,15 @@
 import {
+  AdminColumnAutosavePayloadSchema,
+  AdminColumnCreatePayloadSchema,
+  AdminColumnUpdatePayloadSchema,
   AdminPostAutosavePayloadSchema,
   AdminPostCreatePayloadSchema,
   AdminPostUpdatePayloadSchema,
 } from "@/contracts/post-admin";
 
 export type PostEditorLocale = "id" | "en" | "ar";
+export type PostEditorType = "BERITA" | "KOLOM";
+export type PostEditorColumnType = "DEKAN" | "DOSEN" | "MAHASISWA";
 export const POST_EDITOR_LOCALES: readonly PostEditorLocale[] = ["id", "en", "ar"];
 
 /** One locale's editable text. Kept flat so the form state maps 1:1 onto inputs. */
@@ -17,6 +22,8 @@ export type PostEditorTranslationDraft = {
 export type PostEditorImageDraft = { mediaId: string; caption: string };
 
 export type PostEditorDraft = {
+  type: PostEditorType;
+  columnType: PostEditorColumnType | null;
   slug: string;
   isFeatured: boolean;
   categoryId: string | null;
@@ -43,8 +50,10 @@ export const EMPTY_TRANSLATION: PostEditorTranslationDraft = {
   content: "",
 };
 
-export function emptyDraft(): PostEditorDraft {
+export function emptyDraft(type: PostEditorType = "BERITA"): PostEditorDraft {
   return {
+    type,
+    columnType: type === "KOLOM" ? "DOSEN" : null,
     slug: "",
     isFeatured: false,
     categoryId: null,
@@ -95,9 +104,8 @@ function toTranslationsInput(draft: PostEditorDraft) {
   return translations;
 }
 
-/** Build the frozen CREATE payload. This task only ever saves a draft. */
-export function buildCreatePayload(draft: PostEditorDraft) {
-  return AdminPostCreatePayloadSchema.safeParse({
+function basePayload(draft: PostEditorDraft) {
+  return {
     slug: draft.slug.trim(),
     isFeatured: draft.isFeatured,
     categoryId: draft.categoryId,
@@ -105,8 +113,28 @@ export function buildCreatePayload(draft: PostEditorDraft) {
     tagIds: [...draft.tagIds],
     images: toImagesInput(draft),
     translations: toTranslationsInput(draft),
-    publication: { intent: "SAVE_DRAFT" },
-  });
+  };
+}
+
+function columnBasePayload(draft: PostEditorDraft) {
+  return {
+    ...basePayload(draft),
+    type: "KOLOM" as const,
+    columnType: draft.columnType,
+  };
+}
+
+/** Build the frozen CREATE payload. This task only ever saves a draft. */
+export function buildCreatePayload(draft: PostEditorDraft) {
+  return draft.type === "KOLOM"
+    ? AdminColumnCreatePayloadSchema.safeParse({
+        ...columnBasePayload(draft),
+        publication: { intent: "SAVE_DRAFT" },
+      })
+    : AdminPostCreatePayloadSchema.safeParse({
+        ...basePayload(draft),
+        publication: { intent: "SAVE_DRAFT" },
+      });
 }
 
 /** Build the frozen UPDATE payload. */
@@ -115,17 +143,17 @@ export function buildUpdatePayload(
   postId: string,
   expectedVersion: number,
 ) {
-  return AdminPostUpdatePayloadSchema.safeParse({
-    postId,
-    expectedVersion,
-    slug: draft.slug.trim(),
-    isFeatured: draft.isFeatured,
-    categoryId: draft.categoryId,
-    coverMediaId: draft.coverMediaId,
-    tagIds: [...draft.tagIds],
-    images: toImagesInput(draft),
-    translations: toTranslationsInput(draft),
-  });
+  return draft.type === "KOLOM"
+    ? AdminColumnUpdatePayloadSchema.safeParse({
+        postId,
+        expectedVersion,
+        ...columnBasePayload(draft),
+      })
+    : AdminPostUpdatePayloadSchema.safeParse({
+        postId,
+        expectedVersion,
+        ...basePayload(draft),
+      });
 }
 
 /**
@@ -138,18 +166,19 @@ export function buildAutosavePayload(
   postId: string,
   expectedVersion: number,
 ) {
-  return AdminPostAutosavePayloadSchema.safeParse({
-    intent: "AUTOSAVE_DRAFT",
-    postId,
-    expectedVersion,
-    slug: draft.slug.trim(),
-    isFeatured: draft.isFeatured,
-    categoryId: draft.categoryId,
-    coverMediaId: draft.coverMediaId,
-    tagIds: [...draft.tagIds],
-    images: toImagesInput(draft),
-    translations: toTranslationsInput(draft),
-  });
+  return draft.type === "KOLOM"
+    ? AdminColumnAutosavePayloadSchema.safeParse({
+        intent: "AUTOSAVE_DRAFT",
+        postId,
+        expectedVersion,
+        ...columnBasePayload(draft),
+      })
+    : AdminPostAutosavePayloadSchema.safeParse({
+        intent: "AUTOSAVE_DRAFT",
+        postId,
+        expectedVersion,
+        ...basePayload(draft),
+      });
 }
 
 /** Dotted Zod paths ("translations.id.title") so the form can attach errors to the right control. */

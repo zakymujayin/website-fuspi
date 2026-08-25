@@ -298,6 +298,64 @@
     "edit": "تحرير",
     "editLabelFor": "تحرير الخبر: {title}"
   },
+  "AdminColumnList": {
+    "metaTitle": "إضاءات أكاديمية",
+    "title": "إضاءات أكاديمية",
+    "description": "إدارة كتابات العميد والمحاضرين والطلاب التي تظهر في قسم الإضاءات الأكاديمية في الصفحة الرئيسية وصفحة المقالات.",
+    "filterAriaLabel": "تصفية الإضاءات الأكاديمية بحسب الحالة",
+    "listAriaLabel": "قائمة الإضاءات الأكاديمية",
+    "totalCount": "{count} كتابة",
+    "status": {
+      "all": "الكل",
+      "draft": "مسودة",
+      "published": "منشور",
+      "archived": "مؤرشف"
+    },
+    "state": {
+      "DRAFT": "مسودة",
+      "PUBLISHED": "منشور",
+      "SCHEDULED": "مجدول",
+      "ARCHIVED": "مؤرشف"
+    },
+    "featured": "مميّز",
+    "localesLabel": "اللغات المتاحة: {locales}",
+    "uncategorized": "بدون تصنيف",
+    "unknownAuthor": "كاتب غير معروف",
+    "byLabel": "بقلم {name}",
+    "publishedAtLabel": "نُشر في {instant}",
+    "updatedAtLabel": "حُدِّث في {instant}",
+    "loading": "جارٍ تحميل قائمة الإضاءات الأكاديمية…",
+    "pagination": {
+      "ariaLabel": "تنقّل صفحات قائمة الإضاءات الأكاديمية",
+      "previous": "الصفحة السابقة",
+      "next": "الصفحة التالية",
+      "pageStatus": "صفحة {page} من {totalPages}",
+      "goToPage": "الانتقال إلى الصفحة {page}"
+    },
+    "empty": {
+      "title": "لا توجد إضاءات أكاديمية بعد",
+      "description": "ستظهر كتابات العميد والمحاضرين والطلاب هنا بعد إنشائها."
+    },
+    "unavailable": {
+      "title": "تعذّر تحميل قائمة الإضاءات الأكاديمية الآن",
+      "description": "يرجى إعادة تحميل الصفحة بعد قليل."
+    },
+    "createAction": "إضافة إضاءة",
+    "edit": "تحرير",
+    "editLabelFor": "تحرير الإضاءة الأكاديمية: {title}"
+  },
+  "AdminColumnEditor": {
+    "createMetaTitle": "إضافة إضاءة أكاديمية",
+    "createTitle": "إضافة إضاءة أكاديمية",
+    "createDescription": "أنشئ كتابة للعميد أو المحاضرين أو الطلاب لقسم الإضاءات الأكاديمية. يُحفظ المحتوى كمسودة حتى يتم نشره.",
+    "editMetaTitle": "تحرير إضاءة أكاديمية",
+    "editTitle": "تحرير إضاءة أكاديمية",
+    "editDescription": "حدّث كتابة الإضاءة الأكاديمية. تُدار حالة النشر من لوحة الحالة في هذه الصفحة.",
+    "unavailable": {
+      "title": "تعذّر تحميل هذه الإضاءة الأكاديمية",
+      "description": "لم يُعثر عليها، أو أنها ليست ملكك، أو أنها غير متاحة مؤقتًا."
+    }
+  },
   "AdminPostEditor": {
     "createMetaTitle": "كتابة خبر",
     "createTitle": "كتابة خبر",
@@ -309,6 +367,13 @@
     "slugDescription": "مقطع الرابط، مثل wisuda-fuspi-2026. استخدم حروفًا صغيرة وشرطات.",
     "featured": "تعيينه خبرًا مميّزًا",
     "featuredDescription": "يمكن إبراز الأخبار المميّزة في الصفحات العامة.",
+    "columnType": "مصدر الكتابة",
+    "columnTypeDescription": "اختر مصدر الكتابة الذي يظهر كوسم في بطاقة الإضاءات الأكاديمية.",
+    "columnRole": {
+      "DEKAN": "العميد",
+      "DOSEN": "محاضر",
+      "MAHASISWA": "طالب"
+    },
     "taxonomyLegend": "الفئة والوسوم",
     "taxonomyDescription": "اختر الفئة الرئيسية والوسوم حتى يسهل العثور على الخبر في الأرشيف العام.",
     "category": "الفئة",
@@ -860,6 +925,7 @@
       "dashboard": "لوحة التحكم",
       "pages": "الصفحات",
       "posts": "الأخبار",
+      "columns": "إضاءات أكاديمية",
       "media": "الوسائط",
       "taxonomies": "التصنيفات",
       "services": "الخدمات",

@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { PostDeleteAction } from "./post-delete-action";
 import { PostEditorForm } from "./post-editor-form";
 import type { CoverPreview } from "./post-cover-picker";
-import type { PostEditorDraft } from "./post-editor-payload";
+import type { PostEditorDraft, PostEditorType } from "./post-editor-payload";
 import type { PostTaxonomyOptions } from "@/components/admin/taxonomy/taxonomy-options";
 import { PostPublicationActions } from "./post-publication-actions";
 import type { AdminPostPublicationState } from "./post-status-badge";
@@ -15,6 +15,7 @@ type PostEditorShellProps = {
   /** The server's version at load; the shared source of truth for optimistic locking. */
   initialVersion: number;
   initialDraft: PostEditorDraft;
+  postType?: PostEditorType;
   taxonomyOptions: PostTaxonomyOptions;
   initialCover: CoverPreview | null;
   initialGalleryPreviews: Record<string, CoverPreview>;
@@ -34,6 +35,7 @@ export function PostEditorShell({
   postId,
   initialVersion,
   initialDraft,
+  postType = "BERITA",
   taxonomyOptions,
   initialCover,
   initialGalleryPreviews,
@@ -85,6 +87,7 @@ export function PostEditorShell({
     <>
       <PostPublicationActions
         postId={postId}
+        postType={postType}
         state={publicationState}
         canPublish={capabilities.publish}
         mutationBusy={mutationBusy}
@@ -94,6 +97,7 @@ export function PostEditorShell({
 
       <PostEditorForm
         mode="edit"
+        postType={postType}
         listHref={listHref}
         initialDraft={initialDraft}
         postId={postId}
@@ -109,6 +113,7 @@ export function PostEditorShell({
 
       <PostDeleteAction
         postId={postId}
+        postType={postType}
         canDelete={capabilities.delete}
         listHref={listHref}
         mutationBusy={mutationBusy}

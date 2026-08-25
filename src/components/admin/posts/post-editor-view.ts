@@ -11,6 +11,8 @@ export function draftFromEditorView(view: AdminPostEditorView): PostEditorDraft 
   const translations = view.translations;
 
   return {
+    type: view.type ?? "BERITA",
+    columnType: view.type === "KOLOM" ? view.columnType : null,
     slug: view.slug,
     isFeatured: view.isFeatured,
     categoryId: view.categoryId,

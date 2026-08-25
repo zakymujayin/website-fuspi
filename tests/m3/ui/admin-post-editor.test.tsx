@@ -115,6 +115,21 @@ describe("buildCreatePayload", () => {
     draft.translations.id.content = "";
     expect(buildCreatePayload(draft).success).toBe(false);
   });
+
+  it("builds a KOLOM create payload for academic spotlight writings", () => {
+    const draft = emptyDraft("KOLOM");
+    draft.slug = "refleksi-akademik-dosen";
+    draft.columnType = "DOSEN";
+    draft.translations.id = {
+      title: "Refleksi Akademik Dosen",
+      excerpt: "Tulisan ringkas dosen.",
+      content: "<p>Isi kolom.</p>",
+    };
+    const result = buildCreatePayload(draft);
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data).toMatchObject({type: "KOLOM", columnType: "DOSEN"});
+  });
 });
 
 describe("buildUpdatePayload", () => {
@@ -174,6 +189,25 @@ describe("buildUpdatePayload", () => {
     if (!result.success) return;
     expect(result.data.categoryId).toBeNull();
     expect(result.data.tagIds).toEqual([]);
+  });
+
+  it("builds a KOLOM update payload with the selected role label", () => {
+    const draft = emptyDraft("KOLOM");
+    draft.slug = "catatan-mahasiswa";
+    draft.columnType = "MAHASISWA";
+    draft.translations.id = {
+      title: "Catatan Mahasiswa",
+      excerpt: "",
+      content: "<p>Isi kolom mahasiswa.</p>",
+    };
+    const result = buildUpdatePayload(
+      draft,
+      "44444444-4444-4444-8444-444444444444",
+      2,
+    );
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data).toMatchObject({type: "KOLOM", columnType: "MAHASISWA"});
   });
 });
 
@@ -281,6 +315,16 @@ describe("draftFromEditorView", () => {
     // draftFromEditorView carries the view's cover onto the editable draft.
     expect(result.data.coverMediaId).toBe(baseView.coverMediaId);
   });
+
+  it("preserves KOLOM type and column source from the editor view", () => {
+    const draft = draftFromEditorView({
+      ...baseView,
+      type: "KOLOM",
+      columnType: "DEKAN",
+    } as never);
+    expect(draft.type).toBe("KOLOM");
+    expect(draft.columnType).toBe("DEKAN");
+  });
 });
 
 describe("direction safety and message parity", () => {
@@ -294,6 +338,7 @@ describe("direction safety and message parity", () => {
       ...globSync("src/components/admin/posts/post-editor*.{ts,tsx}", { cwd: process.cwd() }),
       ...globSync("src/app/[locale]/admin/posts/new/*.tsx", { cwd: process.cwd() }),
       ...globSync("src/app/[locale]/admin/posts/[postId]/edit/*.tsx", { cwd: process.cwd() }),
+      ...globSync("src/app/[locale]/admin/kolom/**/*.tsx", { cwd: process.cwd() }),
     ];
     expect(files.length).toBeGreaterThan(3);
     for (const relativePath of files) {
@@ -323,6 +368,45 @@ describe("direction safety and message parity", () => {
     );
     expect(form).toContain('credentials: "same-origin"');
     expect(form).toContain('"/api/admin/posts"');
+  });
+
+  it("wires academic spotlight admin routes and sidebar entry", () => {
+    const sidebar = readFileSync(
+      path.join(process.cwd(), "src/components/admin/admin-sidebar-data.ts"),
+      "utf8",
+    );
+    const form = readFileSync(
+      path.join(process.cwd(), "src/components/admin/posts/post-editor-form.tsx"),
+      "utf8",
+    );
+    const listPage = readFileSync(
+      path.join(process.cwd(), "src/app/[locale]/admin/kolom/page.tsx"),
+      "utf8",
+    );
+
+    expect(sidebar).toContain('href: "/admin/kolom"');
+    expect(sidebar).toContain('labelKey: "columns"');
+    expect(form).toContain('"CREATE_COLUMN"');
+    expect(form).toContain('"UPDATE_COLUMN"');
+    expect(form).toContain('"AUTOSAVE_COLUMN"');
+    expect(listPage).toContain('toAdminPostTransportQuery(query, "KOLOM")');
+    expect(listPage).toContain('editHrefFor={(id) => `/admin/kolom/${id}/edit`}');
+  });
+
+  it("defines the same AdminColumn namespaces in id, en, and ar", () => {
+    const flatten = (value: unknown, prefix = ""): string[] =>
+      typeof value === "object" && value !== null
+        ? Object.entries(value).flatMap(([key, child]) =>
+            flatten(child, prefix ? `${prefix}.${key}` : key))
+        : [prefix];
+    for (const namespace of ["AdminColumnList", "AdminColumnEditor"]) {
+      const [id, en, ar] = ["id", "en", "ar"].map((locale) => {
+        const raw = readFileSync(path.join(process.cwd(), `messages/${locale}.json`), "utf8");
+        return flatten(JSON.parse(raw)[namespace]).sort();
+      });
+      expect(en).toEqual(id);
+      expect(ar).toEqual(id);
+    }
   });
 
   it("defines the same AdminPostEditor keys in id, en, and ar", () => {

@@ -12,6 +12,9 @@ import {
   toBeritaAutosaveInput,
   toBeritaCreateInput,
   toBeritaUpdateInput,
+  toKolomAutosaveInput,
+  toKolomCreateInput,
+  toKolomUpdateInput,
   type AdminPostEditorView,
   type AdminPostListResult,
   type AdminPostMutationResponse,
@@ -31,6 +34,7 @@ export type AdminPostTransportDatabase = ReturnType<typeof createPrismaClient>;
 export type AdminPostTransportClock = () => Date;
 type Actor = ActiveDatabaseSession & {role: "ADMIN" | "EDITOR"};
 type FailureCode = "SESSION_INVALID" | "REQUEST_INVALID" | "NOT_FOUND" | "UNAVAILABLE";
+type EditablePostType = "BERITA" | "KOLOM";
 export type AdminPostListLoadResult =
   | {ok: true; data: AdminPostListResult}
   | {ok: false; code: FailureCode};
@@ -119,6 +123,8 @@ export function normalizeAdminPostSearchParams(params: URLSearchParams) {
 
 const POST_SELECT = {
   id: true,
+  type: true,
+  columnType: true,
   slug: true,
   status: true,
   version: true,
@@ -281,8 +287,11 @@ export async function getAdminPostEditor(
   rawSession: unknown,
   postId: unknown,
   publicUploadBaseUrl: string,
-  clock: AdminPostTransportClock = SYSTEM_CLOCK,
+  clockOrExpectedType: AdminPostTransportClock | EditablePostType = SYSTEM_CLOCK,
+  expectedType: EditablePostType = "BERITA",
 ): Promise<AdminPostEditorLoadResult> {
+  const clock = typeof clockOrExpectedType === "function" ? clockOrExpectedType : SYSTEM_CLOCK;
+  const targetType = typeof clockOrExpectedType === "string" ? clockOrExpectedType : expectedType;
   const now = clock();
   const actor = actorFromSession(rawSession, now);
   const uploadBase = normalizeUploadBase(publicUploadBaseUrl);
@@ -290,15 +299,15 @@ export async function getAdminPostEditor(
   if (typeof postId !== "string" || !uploadBase) return {ok: false, code: "NOT_FOUND"};
   try {
     const row = await database.post.findFirst({
-      where: {id: postId, type: "BERITA", ...ownershipWhere(actor)},
+      where: {id: postId, type: targetType, ...ownershipWhere(actor)},
       select: POST_SELECT,
     });
     if (!row) return {ok: false, code: "NOT_FOUND"};
     const translations = Object.fromEntries(row.translations.map(({locale, ...value}) => [locale, value]));
     const result = AdminPostEditorViewSchema.safeParse({
       id: row.id,
-      type: "BERITA",
-      columnType: null,
+      type: row.type,
+      columnType: row.columnType,
       slug: row.slug,
       isFeatured: row.isFeatured,
       categoryId: row.categoryId,
@@ -327,6 +336,13 @@ function mutationFailure(code: AdminPostFailureResponse["code"]): AdminPostMutat
   return AdminPostMutationResponseSchema.parse({ok: false, code});
 }
 
+function commandPostType(action: string): EditablePostType | null {
+  if (action.endsWith("_COLUMN")) return "KOLOM";
+  if (action === "CREATE" || action === "UPDATE" || action === "AUTOSAVE") return "BERITA";
+  if (action === "PUBLICATION" || action === "DELETE") return "BERITA";
+  return null;
+}
+
 export async function executeAdminPostCommand(
   database: AdminPostTransportDatabase,
   rawSession: unknown,
@@ -340,22 +356,29 @@ export async function executeAdminPostCommand(
   if (!command.success) return mutationFailure("REQUEST_INVALID");
 
   try {
-    if (command.data.action !== "CREATE") {
+    const targetType = commandPostType(command.data.action);
+    if (targetType && command.data.action !== "CREATE" && command.data.action !== "CREATE_COLUMN") {
       const target = await database.post.findFirst({
-        where: {id: command.data.payload.postId, type: "BERITA", ...ownershipWhere(actor)},
+        where: {id: command.data.payload.postId, type: targetType, ...ownershipWhere(actor)},
         select: {id: true},
       });
       if (!target) return mutationFailure("NOT_FOUND");
     }
     const result = command.data.action === "CREATE"
       ? await createPost(database, actor, toBeritaCreateInput(command.data.payload), clock)
-      : command.data.action === "UPDATE"
-        ? await updatePost(database, actor, toBeritaUpdateInput(command.data.payload), clock)
-        : command.data.action === "AUTOSAVE"
-          ? await autosavePost(database, actor, toBeritaAutosaveInput(command.data.payload), clock)
-          : command.data.action === "PUBLICATION"
-            ? await mutatePostPublication(database, actor, command.data.payload, clock)
-            : await deletePost(database, actor, command.data.payload, clock);
+      : command.data.action === "CREATE_COLUMN"
+        ? await createPost(database, actor, toKolomCreateInput(command.data.payload), clock)
+        : command.data.action === "UPDATE"
+          ? await updatePost(database, actor, toBeritaUpdateInput(command.data.payload), clock)
+          : command.data.action === "UPDATE_COLUMN"
+            ? await updatePost(database, actor, toKolomUpdateInput(command.data.payload), clock)
+            : command.data.action === "AUTOSAVE"
+              ? await autosavePost(database, actor, toBeritaAutosaveInput(command.data.payload), clock)
+              : command.data.action === "AUTOSAVE_COLUMN"
+                ? await autosavePost(database, actor, toKolomAutosaveInput(command.data.payload), clock)
+                : command.data.action === "PUBLICATION" || command.data.action === "PUBLICATION_COLUMN"
+                  ? await mutatePostPublication(database, actor, command.data.payload, clock)
+                  : await deletePost(database, actor, command.data.payload, clock);
     return toAdminPostMutationResponse(result);
   } catch {
     return mutationFailure("UNAVAILABLE");

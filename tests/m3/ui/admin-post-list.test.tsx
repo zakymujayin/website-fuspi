@@ -122,6 +122,18 @@ describe("toAdminPostTransportQuery", () => {
       sort: "UPDATED_DESC",
     });
   });
+
+  it("adds a content type only when a type-specific admin route requests it", () => {
+    expect(toAdminPostTransportQuery({ page: 2, status: "DRAFT", pageSize: 20 }, "KOLOM"))
+      .toEqual({
+        page: 2,
+        pageSize: 20,
+        type: "KOLOM",
+        status: "DRAFT",
+        search: "",
+        sort: "UPDATED_DESC",
+      });
+  });
 });
 
 describe("buildAdminPostHref", () => {

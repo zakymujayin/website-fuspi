@@ -8,26 +8,26 @@ import { decideProtectedRoute, getRequestSession } from "@/lib/auth/runtime/requ
 import { parseAppLocale } from "@/lib/auth/runtime/redirect";
 import { getPrismaClient } from "@/lib/db/client";
 
-type NewPostPageProps = {
+type NewColumnPageProps = {
   params: Promise<{ locale: string }>;
 };
 
-export async function generateMetadata({ params }: NewPostPageProps): Promise<Metadata> {
+export async function generateMetadata({ params }: NewColumnPageProps): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "AdminPostEditor" });
+  const t = await getTranslations({ locale, namespace: "AdminColumnEditor" });
   return { title: t("createMetaTitle"), robots: { index: false, follow: false } };
 }
 
-export default async function NewPostPage({ params }: NewPostPageProps) {
+export default async function NewColumnPage({ params }: NewColumnPageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
   const appLocale = parseAppLocale(locale);
 
   const session = await getRequestSession();
-  const decision = decideProtectedRoute(session, appLocale, `/${appLocale}/admin/posts/new`);
+  const decision = decideProtectedRoute(session, appLocale, `/${appLocale}/admin/kolom/new`);
   if (!decision.allow) redirect(decision.redirectTo);
 
-  const t = await getTranslations("AdminPostEditor");
+  const t = await getTranslations("AdminColumnEditor");
   const prisma = getPrismaClient();
   const uploadPublicUrl = process.env.UPLOAD_PUBLIC_URL ?? "/uploads";
   const taxonomyOptions = await loadPostTaxonomyOptions(
@@ -36,9 +36,9 @@ export default async function NewPostPage({ params }: NewPostPageProps) {
   );
 
   return (
-    <section aria-labelledby="admin-post-new-title" className="flex flex-col gap-6">
+    <section aria-labelledby="admin-column-new-title" className="flex flex-col gap-6">
       <div>
-        <h1 id="admin-post-new-title" className="section-rule font-display text-2xl text-slate-900">
+        <h1 id="admin-column-new-title" className="section-rule font-display text-2xl text-slate-900">
           {t("createTitle")}
         </h1>
         <p className="mt-2 max-w-prose text-sm text-slate-500">{t("createDescription")}</p>
@@ -46,8 +46,8 @@ export default async function NewPostPage({ params }: NewPostPageProps) {
 
       <PostEditorForm
         mode="create"
-        postType="BERITA"
-        listHref="/admin/posts"
+        postType="KOLOM"
+        listHref="/admin/kolom"
         taxonomyOptions={taxonomyOptions}
         uploadPublicUrl={uploadPublicUrl}
       />

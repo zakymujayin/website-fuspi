@@ -72,6 +72,7 @@ export const SIDEBAR_MENU_GROUPS = [
     items: [
       { href: "/admin/pages", icon: FileTextIcon, labelKey: "pages" },
       { href: "/admin/posts", icon: NewspaperIcon, labelKey: "posts" },
+      { href: "/admin/kolom", icon: FileTextIcon, labelKey: "columns" },
       { href: "/admin/media", icon: ImageIcon, labelKey: "media" },
       { href: "/admin/taksonomi", icon: ListTreeIcon, labelKey: "taxonomies" },
     ],

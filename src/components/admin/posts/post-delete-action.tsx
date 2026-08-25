@@ -19,9 +19,11 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 
 import { failureMessageKey, isFailureCode } from "./post-editor-errors";
+import type { PostEditorType } from "./post-editor-payload";
 
 type PostDeleteActionProps = {
   postId: string;
+  postType?: PostEditorType;
   canDelete: boolean;
   listHref: string;
   mutationBusy: boolean;
@@ -31,6 +33,7 @@ type PostDeleteActionProps = {
 
 export function PostDeleteAction({
   postId,
+  postType = "BERITA",
   canDelete,
   listHref,
   mutationBusy,
@@ -60,7 +63,7 @@ export function PostDeleteAction({
         headers: { "content-type": "application/json" },
         credentials: "same-origin",
         body: JSON.stringify({
-          action: "DELETE",
+          action: postType === "KOLOM" ? "DELETE_COLUMN" : "DELETE",
           payload: { postId, expectedVersion },
         }),
       });

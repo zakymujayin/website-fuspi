@@ -56,7 +56,7 @@ describe("component wiring and i18n", () => {
   );
 
   it("submits the frozen PUBLICATION command shape same-origin", () => {
-    expect(source).toContain('action: "PUBLICATION"');
+    expect(source).toContain('postType === "KOLOM" ? "PUBLICATION_COLUMN" : "PUBLICATION"');
     expect(source).toContain('credentials: "same-origin"');
     expect(source).toContain('"/api/admin/posts"');
   });

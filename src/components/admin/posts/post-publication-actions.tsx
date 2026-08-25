@@ -14,9 +14,11 @@ import {
   type PostPublicationIntent,
 } from "./post-publication-transitions";
 import { AdminPostStatusBadge, type AdminPostPublicationState } from "./post-status-badge";
+import type { PostEditorType } from "./post-editor-payload";
 
 type PostPublicationActionsProps = {
   postId: string;
+  postType?: PostEditorType;
   state: AdminPostPublicationState;
   canPublish: boolean;
   mutationBusy: boolean;
@@ -26,6 +28,7 @@ type PostPublicationActionsProps = {
 
 export function PostPublicationActions({
   postId,
+  postType = "BERITA",
   state,
   canPublish,
   mutationBusy,
@@ -59,7 +62,10 @@ export function PostPublicationActions({
         method: "POST",
         headers: { "content-type": "application/json" },
         credentials: "same-origin",
-        body: JSON.stringify({ action: "PUBLICATION", payload }),
+        body: JSON.stringify({
+          action: postType === "KOLOM" ? "PUBLICATION_COLUMN" : "PUBLICATION",
+          payload,
+        }),
       });
       const result: unknown = await response.json().catch(() => null);
       if (

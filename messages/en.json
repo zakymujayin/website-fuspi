@@ -298,6 +298,64 @@
     "edit": "Edit",
     "editLabelFor": "Edit news item: {title}"
   },
+  "AdminColumnList": {
+    "metaTitle": "Academic Spotlight",
+    "title": "Academic Spotlight",
+    "description": "Manage dean, lecturer, and student writings shown in the homepage Academic Spotlight and the Columns page.",
+    "filterAriaLabel": "Filter academic spotlight items by status",
+    "listAriaLabel": "Academic spotlight list",
+    "totalCount": "{count} writings",
+    "status": {
+      "all": "All",
+      "draft": "Draft",
+      "published": "Published",
+      "archived": "Archived"
+    },
+    "state": {
+      "DRAFT": "Draft",
+      "PUBLISHED": "Published",
+      "SCHEDULED": "Scheduled",
+      "ARCHIVED": "Archived"
+    },
+    "featured": "Featured",
+    "localesLabel": "Available languages: {locales}",
+    "uncategorized": "Uncategorized",
+    "unknownAuthor": "Unknown author",
+    "byLabel": "By {name}",
+    "publishedAtLabel": "Published {instant}",
+    "updatedAtLabel": "Updated {instant}",
+    "loading": "Loading the academic spotlight list…",
+    "pagination": {
+      "ariaLabel": "Academic spotlight list pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "pageStatus": "Page {page} of {totalPages}",
+      "goToPage": "Go to page {page}"
+    },
+    "empty": {
+      "title": "No academic spotlight items yet",
+      "description": "Dean, lecturer, and student writings will appear here once they are created."
+    },
+    "unavailable": {
+      "title": "The academic spotlight list cannot be loaded right now",
+      "description": "Please reload this page in a moment."
+    },
+    "createAction": "Add spotlight",
+    "edit": "Edit",
+    "editLabelFor": "Edit academic spotlight item: {title}"
+  },
+  "AdminColumnEditor": {
+    "createMetaTitle": "Add Academic Spotlight",
+    "createTitle": "Add Academic Spotlight",
+    "createDescription": "Create dean, lecturer, or student writing for the Academic Spotlight section. Content is saved as a draft until published.",
+    "editMetaTitle": "Edit Academic Spotlight",
+    "editTitle": "Edit Academic Spotlight",
+    "editDescription": "Update the academic spotlight writing. Publication status is managed from the status panel on this page.",
+    "unavailable": {
+      "title": "This academic spotlight item cannot be loaded",
+      "description": "It was not found, is not yours, or is temporarily unavailable."
+    }
+  },
   "AdminPostEditor": {
     "createMetaTitle": "Write News",
     "createTitle": "Write News",
@@ -309,6 +367,13 @@
     "slugDescription": "The URL segment, for example wisuda-fuspi-2026. Use lowercase letters and hyphens.",
     "featured": "Mark as featured",
     "featuredDescription": "Featured news can be highlighted on public pages.",
+    "columnType": "Writing source",
+    "columnTypeDescription": "Choose the writing source shown as the Academic Spotlight card label.",
+    "columnRole": {
+      "DEKAN": "Dean",
+      "DOSEN": "Lecturer",
+      "MAHASISWA": "Student"
+    },
     "taxonomyLegend": "Category and tags",
     "taxonomyDescription": "Choose the main category and tags so news can be found in the public archive.",
     "category": "Category",
@@ -860,6 +925,7 @@
       "dashboard": "Dashboard",
       "pages": "Pages",
       "posts": "Posts",
+      "columns": "Academic Spotlight",
       "media": "Media",
       "taxonomies": "Taxonomies",
       "services": "Services",

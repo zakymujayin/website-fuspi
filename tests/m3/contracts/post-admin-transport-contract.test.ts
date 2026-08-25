@@ -12,6 +12,9 @@ import {
   toBeritaAutosaveInput,
   toBeritaCreateInput,
   toBeritaUpdateInput,
+  toKolomAutosaveInput,
+  toKolomCreateInput,
+  toKolomUpdateInput,
 } from "@/contracts/post-admin";
 
 const ID_TRANSLATION = {
@@ -248,6 +251,48 @@ describe("M3 Berita editor and command transport contract", () => {
     }).success).toBe(false);
     expect(AdminPostTransportCommandSchema.safeParse({
       action: "AUTOSAVE", payload: {...autosavePayload, translations: {fr: ID_TRANSLATION}},
+    }).success).toBe(false);
+  });
+
+  it("accepts dedicated KOLOM commands for academic spotlight writings", () => {
+    const columnFields = {
+      ...MUTABLE_FIELDS,
+      type: "KOLOM" as const,
+      columnType: "DOSEN" as const,
+    };
+    const createPayload = {...columnFields, publication: {intent: "SAVE_DRAFT" as const}};
+    const updatePayload = {postId: "post-1", expectedVersion: 4, ...columnFields};
+    const autosavePayload = {
+      intent: "AUTOSAVE_DRAFT" as const,
+      postId: "post-1",
+      expectedVersion: 4,
+      ...columnFields,
+    };
+
+    expect(AdminPostTransportCommandSchema.safeParse({
+      action: "CREATE_COLUMN", payload: createPayload,
+    }).success).toBe(true);
+    expect(AdminPostTransportCommandSchema.safeParse({
+      action: "UPDATE_COLUMN", payload: updatePayload,
+    }).success).toBe(true);
+    expect(AdminPostTransportCommandSchema.safeParse({
+      action: "AUTOSAVE_COLUMN", payload: autosavePayload,
+    }).success).toBe(true);
+    expect(AdminPostTransportCommandSchema.safeParse({
+      action: "PUBLICATION_COLUMN",
+      payload: {intent: "PUBLISH_NOW", postId: "post-1", expectedVersion: 4},
+    }).success).toBe(true);
+    expect(AdminPostTransportCommandSchema.safeParse({
+      action: "DELETE_COLUMN",
+      payload: {postId: "post-1", expectedVersion: 4},
+    }).success).toBe(true);
+
+    expect(toKolomCreateInput(createPayload)).toMatchObject({type: "KOLOM", columnType: "DOSEN"});
+    expect(toKolomUpdateInput(updatePayload)).toMatchObject({type: "KOLOM", columnType: "DOSEN"});
+    expect(toKolomAutosaveInput(autosavePayload)).toMatchObject({type: "KOLOM", columnType: "DOSEN"});
+    expect(AdminPostTransportCommandSchema.safeParse({
+      action: "CREATE_COLUMN",
+      payload: {...createPayload, columnType: null},
     }).success).toBe(false);
   });
 
