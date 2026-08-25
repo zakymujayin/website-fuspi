@@ -69,6 +69,18 @@ Fifth follow-up bug fix in the same branch:
 - Added ID/EN/AR `loadMore` labels and regression coverage for the shared
   picker pagination helper.
 
+Sixth follow-up feature in the same branch:
+
+- Added a Logo Header picker to `/admin/beranda/pengaturan` using the existing
+  Media Library image picker.
+- Admin site-setting detail now loads preview media for `logoMediaId` and
+  preserves the existing favicon id.
+- The public header now reads `SiteSetting.logoMediaId`; when a logo exists it
+  replaces the placeholder identity badges, otherwise the old placeholder
+  remains as fallback.
+- The lightweight public site-setting loader now returns `logo` and `favicon`,
+  matching the existing public contract shape.
+
 ## Files changed
 
 - Added `FACILITY` home section key, migration, seed copy, and contract max
@@ -99,6 +111,11 @@ Fifth follow-up bug fix in the same branch:
 - Added `src/components/admin/media/media-picker-pagination.ts` and wired it
   into admin image pickers for Berita, pages, homepage settings/slider/sections,
   and facilities.
+- Added Header Logo management through
+  `src/components/admin/home-nav/site-setting-editor-form.tsx`,
+  `src/features/home-nav/admin-detail.ts`, `src/features/home-nav/public-query.ts`,
+  `src/components/public/site-header.tsx`, and
+  `src/components/public/identity-badges.tsx`.
 
 ## Contract/schema/migration impact
 
@@ -123,6 +140,8 @@ Fifth follow-up bug fix in the same branch:
 - No schema/API contract change for media pagination; existing
   `/api/admin/media` `page`, `pageSize`, and `hasNextPage` response fields are
   now consumed by the admin picker UI.
+- No migration or new schema field for Header Logo; it uses the existing
+  `SiteSetting.logoMediaId` relation and existing public `logo` contract field.
 
 ## Verification
 
@@ -204,6 +223,20 @@ Fifth follow-up media picker pagination verification:
 | `npm run test` | Initially failed when run in parallel with `npm run build` due Vitest worker/test timeouts; rerun separately passed, 97 files / 1186 tests |
 | `TASK_MANIFEST=coordination/tasks/M4-GPT-FACILITY-HOMEPAGE-ADMIN.md TASK_BASE=HEAD~1 npm run check:scope` | Passed, 16 changed files within lease |
 
+Sixth follow-up Header Logo verification:
+
+| Command | Result |
+|---|---|
+| `npx shadcn@latest docs button field` | Passed, component docs links resolved |
+| `npx vitest run tests/m4/ui/site-logo-header.test.ts tests/m4/contracts/home-nav-contracts.test.ts` | Passed, 2 files / 15 tests |
+| `npm run typecheck` | Passed |
+| `git diff --check` | Passed |
+| `npm run lint` | Passed |
+| `npm run prisma:validate` | Passed |
+| `npm run test` | Passed, 98 files / 1190 tests |
+| `npm run build` | Passed |
+| `TASK_MANIFEST=coordination/tasks/M4-GPT-FACILITY-HOMEPAGE-ADMIN.md TASK_BASE=HEAD~1 npm run check:scope` | Passed after adding `tests/m4/contracts/home-nav-contracts.test.ts` to the lease, 13 changed files within lease |
+
 ## Untested areas
 
 - Browser-level admin CRUD flow was not run with Playwright.
@@ -212,6 +245,8 @@ Fifth follow-up media picker pagination verification:
   contract/runtime/unit level plus full production build.
 - Browser-level create/edit/delete flow for `/admin/kolom` was not manually run
   with Playwright; coverage is contract/source tests plus production build.
+- Browser-level logo replacement in the public header was not manually run;
+  coverage is source/contract tests plus production build.
 
 ## Risks and follow-ups
 

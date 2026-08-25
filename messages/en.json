@@ -1442,6 +1442,9 @@
     "settings": {
       "title": "Homepage Settings",
       "description": "Faculty identity, dean welcome, profile video, and contact.",
+      "identity": "Site Identity",
+      "logo": "Header logo",
+      "logoDescription": "Logo shown in the site header. Use the official WebP image with a transparent background when available.",
       "contact": "Contact & Social Media",
       "email": "Email",
       "phone": "Phone",

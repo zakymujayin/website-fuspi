@@ -80,13 +80,19 @@ describe("home and navigation frozen contracts", () => {
     const pageSource = readFileSync(path.join(process.cwd(), "src/app/[locale]/admin/beranda/pengaturan/page.tsx"), "utf8");
 
     expect(formSource).toContain("logoMediaId:");
+    expect(formSource).toContain("const [logoId, setLogoId]");
+    expect(formSource).toContain("logoMediaId: logoId");
+    expect(formSource).toContain("initialMedia={initialLogo}");
     expect(formSource).toContain("faviconMediaId:");
     expect(detailSource).toContain("logoMediaId: row.logoMediaId");
+    expect(detailSource).toContain("logoMedia: true");
+    expect(detailSource).toContain("logoMedia: adminImageMediaPreview(row.logoMedia)");
     expect(detailSource).toContain("faviconMediaId: row.faviconMediaId");
     expect(formSource).not.toContain("defaultValue=");
     expect(formSource).toContain("value={idTr.videoTitle}");
     expect(formSource).toContain("onChange={updateTranslation(\"id\", \"videoTitle\")}");
     expect(pageSource).toContain("key={`site-setting-${result.data.version ?? 0}`}");
+    expect(pageSource).toContain("initialLogo={result.data.logoMedia ?? null}");
   });
 
   it("defines translated AdminHomeNav mutation failures in every locale", () => {

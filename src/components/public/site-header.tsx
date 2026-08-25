@@ -6,8 +6,10 @@ import { HeaderSearch } from "@/components/public/shell/header-search";
 import { StickyHeader } from "@/components/public/shell/sticky-header";
 import { UtilityLink } from "@/components/public/shell/utility-link";
 import { TopBar } from "@/components/public/top-bar";
+import {getPublicSiteSetting} from "@/features/home-nav/public-query";
 import { Link } from "@/i18n/navigation";
-import { getTranslations } from "next-intl/server";
+import {getPrismaClient} from "@/lib/db/client";
+import {getLocale, getTranslations} from "next-intl/server";
 
 /**
  * Two-tier header matching the reference pattern: a compact navy top bar for
@@ -16,9 +18,16 @@ import { getTranslations } from "next-intl/server";
  * "Layanan" is not a header entry point — it has its own homepage section.
  */
 export async function SiteHeader() {
+  const locale = await getLocale();
   const t = await getTranslations("Nav");
   const externalHint = t("externalLinkHint");
   const restNav = primaryNav.filter((item) => item.key !== "services");
+  const appLocale = locale === "en" || locale === "ar" ? locale : "id";
+  const siteSetting = await getPublicSiteSetting(
+    getPrismaClient(),
+    appLocale,
+    process.env.UPLOAD_PUBLIC_URL ?? "/uploads",
+  );
 
   return (
     <StickyHeader>
@@ -29,7 +38,7 @@ export async function SiteHeader() {
             reading column does. */}
         <div className="mx-auto h-full w-full max-w-[1440px] px-4 sm:px-6">
           <div className="flex h-full items-center justify-between gap-3">
-            <IdentityBadges />
+            <IdentityBadges logo={siteSetting?.logo ?? null} />
             <DesktopNav primary={restNav} />
             <div className="hidden shrink-0 items-center gap-1 lg:flex">
               <HeaderSearch />

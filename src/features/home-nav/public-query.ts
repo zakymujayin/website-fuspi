@@ -50,10 +50,12 @@ export async function listPublicStatistics(prisma: PublicContentDatabase, locale
 
 export type PublicDean = {name: string; position: string; message: string; photo: NonNullable<ReturnType<typeof mediaView>> | null};
 export type PublicHomeVideo = {url: string; poster: NonNullable<ReturnType<typeof mediaView>>; title: string; description: string | null};
+type PublicSiteMedia = NonNullable<ReturnType<typeof mediaView>>;
 export type PublicSiteSetting = {
   facultyName: string; tagline: string | null; addresses: string[]; email: string | null; phone: string | null;
   socialLinks: {facebook: string | null; instagram: string | null; youtube: string | null; x: string | null};
   dean: PublicDean | null; video: PublicHomeVideo | null;
+  logo: PublicSiteMedia | null; favicon: PublicSiteMedia | null;
 };
 
 export async function getPublicSiteSetting(
@@ -62,7 +64,8 @@ export async function getPublicSiteSetting(
   uploadBase = "/uploads",
 ): Promise<PublicSiteSetting | null> {
   const row = await prisma.siteSetting.findUnique({
-    where: {id: "singleton"}, include: {translations: true, deanPhoto: true, videoPoster: true},
+    where: {id: "singleton"},
+    include: {translations: true, deanPhoto: true, videoPoster: true, logoMedia: true, faviconMedia: true},
   });
   if (!row) return null;
   const text = resolve(row.translations, locale);
@@ -84,6 +87,8 @@ export async function getPublicSiteSetting(
     email: row.email, phone: row.phone,
     socialLinks: {facebook: row.facebookUrl, instagram: row.instagramUrl, youtube: row.youtubeUrl, x: row.xUrl},
     dean, video,
+    logo: mediaView(row.logoMedia, uploadBase),
+    favicon: mediaView(row.faviconMedia, uploadBase),
   };
 }
 

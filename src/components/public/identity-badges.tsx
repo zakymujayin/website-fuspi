@@ -1,5 +1,11 @@
 import { institution } from "@/config/institution";
+import type {PublicSiteSetting} from "@/features/home-nav/public-query";
 import { Link } from "@/i18n/navigation";
+import {ImageWithFallback} from "@/components/public/image-with-fallback";
+
+type IdentityBadgesProps = {
+  logo?: PublicSiteSetting["logo"] | null;
+};
 
 /**
  * Three placeholder marks for the header identity cluster: the university
@@ -18,10 +24,21 @@ import { Link } from "@/i18n/navigation";
  * round seal it just looks clipped. Contained and proportional is the
  * correct call here.
  */
-export function IdentityBadges() {
+export function IdentityBadges({logo = null}: IdentityBadgesProps) {
   return (
     <Link href="/" className="flex shrink-0 items-center gap-3" dir="ltr">
-      <svg viewBox="0 0 160 160" width="76" height="76" aria-hidden className="shrink-0">
+      {logo ? (
+        <span className="relative block size-[76px] shrink-0">
+          <ImageWithFallback
+            src={logo.url}
+            alt={logo.isDecorative ? "" : logo.alt}
+            className="object-contain"
+            sizes="76px"
+            priority
+          />
+        </span>
+      ) : (
+        <svg viewBox="0 0 160 160" width="76" height="76" aria-hidden className="shrink-0">
         <defs>
           <linearGradient id="idbg-uni" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor="#3352c9" />
@@ -44,9 +61,11 @@ export function IdentityBadges() {
         <text x="80" y="90" textAnchor="middle" fontSize="28" fontWeight="800" fill="#ffffff" fontFamily="ui-serif, Georgia, serif">
           FU
         </text>
-      </svg>
+        </svg>
+      )}
 
-      <span className="flex items-center gap-2">
+      {!logo ? (
+        <span className="flex items-center gap-2">
         <svg viewBox="0 0 160 160" width="50" height="50" aria-hidden>
           <defs>
             <linearGradient id="idbg-acc" x1="0" y1="0" x2="1" y2="1">
@@ -74,7 +93,8 @@ export function IdentityBadges() {
             BLU
           </text>
         </svg>
-      </span>
+        </span>
+      ) : null}
 
       <span className="sr-only">{institution.name}</span>
     </Link>

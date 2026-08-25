@@ -31,6 +31,7 @@ allowed_paths:
   - "src/app/[locale]/(public)/page.tsx"
   - "src/app/[locale]/(public)/profil/fasilitas/page.tsx"
   - "src/app/[locale]/admin/fasilitas/**"
+  - "src/app/[locale]/admin/beranda/pengaturan/page.tsx"
   - "src/app/[locale]/admin/posts/page.tsx"
   - "src/app/[locale]/admin/posts/new/page.tsx"
   - "src/app/[locale]/admin/posts/[postId]/edit/page.tsx"
@@ -46,8 +47,11 @@ allowed_paths:
   - "src/components/admin/posts/**"
   - "src/components/admin/home-nav/home-slider-editor-payload.ts"
   - "src/components/admin/home-nav/home-slider-editor-form.tsx"
+  - "src/components/public/brand-mark.tsx"
   - "src/components/public/flow-line.tsx"
+  - "src/components/public/identity-badges.tsx"
   - "src/components/public/facilities-section.tsx"
+  - "src/components/public/site-header.tsx"
   - "messages/**"
   - "tests/m3/contracts/post-admin-transport-contract.test.ts"
   - "tests/m3/ui/admin-media-library-browse.test.tsx"
@@ -58,11 +62,13 @@ allowed_paths:
   - "tests/m3/ui/admin-post-list.test.tsx"
   - "tests/m3/ui/admin-post-publication-actions.test.tsx"
   - "tests/m4/runtime/fuspi-seed-content.test.ts"
+  - "tests/m4/contracts/home-nav-contracts.test.ts"
   - "tests/m4/contracts/facility-contracts.test.ts"
   - "tests/m4/runtime/facility-domain.test.ts"
   - "tests/m4/ui/admin-media-picker-pagination.test.ts"
   - "tests/m4/ui/admin-legacy-media-preview.test.ts"
   - "tests/m4/ui/home-slider-editor-form.test.ts"
+  - "tests/m4/ui/site-logo-header.test.ts"
 contracts:
   - src/contracts/facility.ts
   - src/contracts/home-nav.ts

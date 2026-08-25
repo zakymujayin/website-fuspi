@@ -22,6 +22,7 @@ export type HomeNavAdminDetailResult =
   | {ok: true; data: {
       input: Record<string, unknown>; version: number | null;
       media: HomeNavMediaPreview | null; secondaryMedia: HomeNavMediaPreview | null;
+      logoMedia?: HomeNavMediaPreview | null; faviconMedia?: HomeNavMediaPreview | null;
     }}
   | {ok: false; code: "SESSION_INVALID" | "NOT_FOUND" | "UNAVAILABLE"};
 
@@ -82,10 +83,16 @@ export async function getHomeNavAdminDetail(
         },
       }};
     }
-    const row = await prisma.siteSetting.findUnique({where: {id: "singleton"}, include: {translations: true, deanPhoto: true, videoPoster: true}});
+    const row = await prisma.siteSetting.findUnique({where: {id: "singleton"}, include: {
+      translations: true, deanPhoto: true, videoPoster: true, logoMedia: true, faviconMedia: true,
+    }});
     if (!row) return {ok: false, code: "NOT_FOUND"};
     return {ok: true, data: {
-      version: row.version, media: mediaView(row.deanPhoto), secondaryMedia: mediaView(row.videoPoster),
+      version: row.version,
+      media: adminImageMediaPreview(row.deanPhoto),
+      secondaryMedia: adminImageMediaPreview(row.videoPoster),
+      logoMedia: adminImageMediaPreview(row.logoMedia),
+      faviconMedia: adminImageMediaPreview(row.faviconMedia),
       input: {
         deanName: row.deanName, deanPhotoMediaId: row.deanPhotoId, videoUrl: row.videoUrl,
         videoPosterMediaId: row.videoPosterMediaId, email: row.email, phone: row.phone,

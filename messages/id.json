@@ -1442,6 +1442,9 @@
     "settings": {
       "title": "Pengaturan Beranda",
       "description": "Identitas fakultas, sambutan dekan, video profil, dan kontak.",
+      "identity": "Identitas Situs",
+      "logo": "Logo header",
+      "logoDescription": "Logo yang tampil di header situs. Gunakan gambar WebP resmi dengan latar transparan jika tersedia.",
       "contact": "Kontak & Media Sosial",
       "email": "Email",
       "phone": "Telepon",

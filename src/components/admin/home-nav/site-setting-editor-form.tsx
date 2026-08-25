@@ -29,6 +29,7 @@ type Props = {
   initialVersion: number;
   initialDeanPhoto: CoverPreview | null;
   initialVideoPoster: CoverPreview | null;
+  initialLogo: CoverPreview | null;
   uploadPublicUrl: string;
 };
 
@@ -59,7 +60,15 @@ function translationValue(value: unknown): SiteSettingTranslation {
   };
 }
 
-export function SiteSettingEditorForm({ listHref, initialData, initialVersion, initialDeanPhoto, initialVideoPoster, uploadPublicUrl }: Props) {
+export function SiteSettingEditorForm({
+  listHref,
+  initialData,
+  initialVersion,
+  initialDeanPhoto,
+  initialVideoPoster,
+  initialLogo,
+  uploadPublicUrl,
+}: Props) {
   const t = useTranslations("AdminHomeNav");
   const router = useRouter();
   const formId = useId();
@@ -86,6 +95,7 @@ export function SiteSettingEditorForm({ listHref, initialData, initialVersion, i
 
   const [deanPhotoId, setDeanPhotoId] = useState<string | null>((initialData.deanPhotoMediaId as string) ?? null);
   const [videoPosterId, setVideoPosterId] = useState<string | null>((initialData.videoPosterMediaId as string) ?? null);
+  const [logoId, setLogoId] = useState<string | null>((initialData.logoMediaId as string | null | undefined) ?? null);
 
   const idTr = translationValues.id;
   const enTr = translationValues.en;
@@ -149,7 +159,7 @@ export function SiteSettingEditorForm({ listHref, initialData, initialVersion, i
       instagramUrl: nullableText(contact.instagramUrl),
       youtubeUrl: nullableText(contact.youtubeUrl),
       xUrl: nullableText(contact.xUrl),
-      logoMediaId: (initialData.logoMediaId as string | null | undefined) ?? null,
+      logoMediaId: logoId,
       faviconMediaId: (initialData.faviconMediaId as string | null | undefined) ?? null,
       contentOwnerId: null, expiresAt: null,
       translations: (() => {
@@ -195,6 +205,30 @@ export function SiteSettingEditorForm({ listHref, initialData, initialVersion, i
           {errors.map((e, i) => <p key={i}>{e}</p>)}
         </div>
       )}
+
+      <FieldSet>
+        <FieldLegend>{t("settings.identity")}</FieldLegend>
+        <FieldGroup>
+          <HomeMediaPicker
+            value={logoId}
+            onChange={setLogoId}
+            initialMedia={initialLogo}
+            uploadPublicUrl={uploadPublicUrl}
+            label={t("settings.logo")}
+            description={t("settings.logoDescription")}
+            chooseLabel={t("picker.choose")}
+            changeLabel={t("picker.change")}
+            clearLabel={t("picker.clear")}
+            selectedLabel={t("picker.selected")}
+            noneLabel={t("picker.none")}
+            loadingLabel={t("picker.loading")}
+            loadErrorLabel={t("picker.loadError")}
+            emptyLabel={t("picker.empty")}
+            listLabel={t("picker.listLabel")}
+            loadMoreLabel={t("picker.loadMore")}
+          />
+        </FieldGroup>
+      </FieldSet>
 
       <FieldSet>
         <FieldLegend>{t("settings.contact")}</FieldLegend>
