@@ -29,6 +29,7 @@ allowed_paths:
   - "src/lib/content/post-admin-transport.ts"
   - "src/lib/content/media-admin-transport.ts"
   - "src/app/[locale]/admin/kolom/**"
+  - "src/app/[locale]/admin/layout.tsx"
   - "src/app/api/admin/posts/route.ts"
   - "src/app/api/admin/posts/[postId]/route.ts"
   - "src/app/[locale]/(public)/page.tsx"

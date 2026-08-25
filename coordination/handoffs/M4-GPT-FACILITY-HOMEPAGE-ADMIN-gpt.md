@@ -276,6 +276,19 @@ Seventh follow-up separate header logos verification:
 | `git diff --check` | Passed |
 | `TASK_MANIFEST=coordination/tasks/M4-GPT-FACILITY-HOMEPAGE-ADMIN.md TASK_BASE=HEAD~1 npm run check:scope` | Passed, 19 changed files within lease |
 
+Eighth follow-up admin sidebar label verification:
+
+| Command | Result |
+|---|---|
+| `npx vitest run tests/m3/ui/admin-post-editor.test.tsx` | Passed, 1 file / 47 tests |
+| `npm run lint` | Passed |
+| `npm run typecheck` | Passed |
+| `npm run prisma:validate` | Passed |
+| `npm run test` | Passed, 98 files / 1190 tests |
+| `npm run build` | Passed |
+| `git diff --check` | Passed |
+| `TASK_MANIFEST=coordination/tasks/M4-GPT-FACILITY-HOMEPAGE-ADMIN.md TASK_BASE=HEAD~1 npm run check:scope` | Passed, 5 changed files within lease |
+
 ## Untested areas
 
 - Browser-level admin CRUD flow was not run with Playwright.
@@ -288,6 +301,9 @@ Seventh follow-up separate header logos verification:
   coverage is source/contract tests plus production build.
 - Browser-level editing of all three separate header logo fields was not
   manually run; coverage is source/contract tests plus production build.
+- Browser-level sidebar rendering after the `columns` to `Sorotan Akademik`
+  label fix was not manually run; coverage is source assertion plus full
+  production build.
 
 ## Risks and follow-ups
 

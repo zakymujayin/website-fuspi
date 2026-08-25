@@ -66,6 +66,8 @@ export default async function AdminLayout({
       dashboard: t("items.dashboard"),
       pages: t("items.pages"),
       posts: t("items.posts"),
+      columns: t("items.columns"),
+      kolom: t("items.kolom"),
       media: t("items.media"),
       services: t("items.services"),
       partnerships: t("items.partnerships"),
