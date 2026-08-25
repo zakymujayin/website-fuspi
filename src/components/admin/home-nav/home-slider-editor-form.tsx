@@ -1,5 +1,4 @@
 "use client";
-import { formText } from "@/components/admin/form-text";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
@@ -13,8 +12,14 @@ import { Field, FieldGroup, FieldLabel, FieldLegend, FieldSet } from "@/componen
 import { HomeMediaPicker } from "@/components/admin/home-nav/home-media-picker";
 import type { CoverPreview } from "@/components/admin/posts/post-cover-picker";
 import { executeHomeNavAdminCommand } from "@/components/admin/home-nav/home-nav-server-actions";
-
-type SlideTranslation = { title: string; subtitle: string; ctaLabel: string };
+import {
+  SLIDE_LOCALES,
+  buildHomeSliderEditorPayload,
+  readSliderTranslation,
+  type SlideLocale,
+  type SlideTranslation,
+  type SliderTranslationState,
+} from "@/components/admin/home-nav/home-slider-editor-payload";
 
 type Props = {
   mode: "create" | "edit";
@@ -35,14 +40,23 @@ export function HomeSliderEditorForm({ mode, listHref, initialData, initialImage
 
   const input = (initialData ?? {}) as Record<string, unknown>;
   const translations = (input.translations as Record<string, SlideTranslation | undefined> | undefined) ?? {};
-  const idTr = translations.id ?? { title: "", subtitle: "", ctaLabel: "" };
-  const enTr = translations.en ?? { title: "", subtitle: "", ctaLabel: "" };
-  const arTr = translations.ar ?? { title: "", subtitle: "", ctaLabel: "" };
   const initialCta = input.cta as { href?: string } | null | undefined;
 
   const [imageId, setImageId] = useState<string | null>((input.imageMediaId as string) ?? null);
   const [isVisible, setIsVisible] = useState((input.isVisible as boolean) ?? false);
   const [ctaHref, setCtaHref] = useState(initialCta?.href ?? "");
+  const [translationDraft, setTranslationDraft] = useState<SliderTranslationState>(() => ({
+    id: readSliderTranslation(translations.id),
+    en: readSliderTranslation(translations.en),
+    ar: readSliderTranslation(translations.ar),
+  }));
+
+  function updateTranslation(localeKey: SlideLocale, field: keyof SlideTranslation, value: string) {
+    setTranslationDraft((current) => ({
+      ...current,
+      [localeKey]: {...current[localeKey], [field]: value},
+    }));
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -56,31 +70,13 @@ export function HomeSliderEditorForm({ mode, listHref, initialData, initialImage
     }
 
     const fd = new FormData(event.currentTarget);
-    const href = ctaHref.trim();
-
-    const payload: Record<string, unknown> = {
+    const payload = buildHomeSliderEditorPayload({
       imageMediaId: imageId,
-      cta: href ? { kind: href.startsWith("/") ? "INTERNAL" : "EXTERNAL", href } : null,
+      ctaHref,
       order: Number(fd.get("order")),
       isVisible,
-      translations: {
-        id: {
-          title: formText(fd, "id.title") || null,
-          subtitle: formText(fd, "id.subtitle") || null,
-          ctaLabel: href ? formText(fd, "id.ctaLabel") || null : null,
-        },
-        en: {
-          title: formText(fd, "en.title") || null,
-          subtitle: formText(fd, "en.subtitle") || null,
-          ctaLabel: href ? formText(fd, "en.ctaLabel") || null : null,
-        },
-        ar: {
-          title: formText(fd, "ar.title") || null,
-          subtitle: formText(fd, "ar.subtitle") || null,
-          ctaLabel: href ? formText(fd, "ar.ctaLabel") || null : null,
-        },
-      },
-    };
+      translations: translationDraft,
+    });
 
     const command = mode === "create"
       ? { action: "CREATE", resource: "HOME_SLIDER", payload }
@@ -97,7 +93,7 @@ export function HomeSliderEditorForm({ mode, listHref, initialData, initialImage
     setSubmitting(false);
   }
 
-  const localeTabs = (["id", "en", "ar"] as const).map((lc) => (
+  const localeTabs = SLIDE_LOCALES.map((lc) => (
     <button
       key={lc}
       type="button"
@@ -165,16 +161,32 @@ export function HomeSliderEditorForm({ mode, listHref, initialData, initialImage
             <>
               <Field>
                 <FieldLabel htmlFor={`${formId}-id-title`}>{t("slider.slideTitle")} (ID)</FieldLabel>
-                <Input id={`${formId}-id-title`} name="id.title" defaultValue={idTr.title} required={isVisible} />
+                <Input
+                  id={`${formId}-id-title`}
+                  name="id.title"
+                  value={translationDraft.id.title}
+                  onChange={(event) => updateTranslation("id", "title", event.target.value)}
+                  required={isVisible}
+                />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${formId}-id-subtitle`}>{t("slider.subtitle")} (ID)</FieldLabel>
-                <Input id={`${formId}-id-subtitle`} name="id.subtitle" defaultValue={idTr.subtitle} />
+                <Input
+                  id={`${formId}-id-subtitle`}
+                  name="id.subtitle"
+                  value={translationDraft.id.subtitle}
+                  onChange={(event) => updateTranslation("id", "subtitle", event.target.value)}
+                />
               </Field>
               {ctaHref && (
                 <Field>
                   <FieldLabel htmlFor={`${formId}-id-cta`}>{t("slider.ctaLabel")} (ID)</FieldLabel>
-                  <Input id={`${formId}-id-cta`} name="id.ctaLabel" defaultValue={idTr.ctaLabel} />
+                  <Input
+                    id={`${formId}-id-cta`}
+                    name="id.ctaLabel"
+                    value={translationDraft.id.ctaLabel}
+                    onChange={(event) => updateTranslation("id", "ctaLabel", event.target.value)}
+                  />
                 </Field>
               )}
             </>
@@ -183,16 +195,31 @@ export function HomeSliderEditorForm({ mode, listHref, initialData, initialImage
             <>
               <Field>
                 <FieldLabel htmlFor={`${formId}-en-title`}>{t("slider.slideTitle")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-title`} name="en.title" defaultValue={enTr.title} />
+                <Input
+                  id={`${formId}-en-title`}
+                  name="en.title"
+                  value={translationDraft.en.title}
+                  onChange={(event) => updateTranslation("en", "title", event.target.value)}
+                />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${formId}-en-subtitle`}>{t("slider.subtitle")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-subtitle`} name="en.subtitle" defaultValue={enTr.subtitle} />
+                <Input
+                  id={`${formId}-en-subtitle`}
+                  name="en.subtitle"
+                  value={translationDraft.en.subtitle}
+                  onChange={(event) => updateTranslation("en", "subtitle", event.target.value)}
+                />
               </Field>
               {ctaHref && (
                 <Field>
                   <FieldLabel htmlFor={`${formId}-en-cta`}>{t("slider.ctaLabel")} (EN)</FieldLabel>
-                  <Input id={`${formId}-en-cta`} name="en.ctaLabel" defaultValue={enTr.ctaLabel} />
+                  <Input
+                    id={`${formId}-en-cta`}
+                    name="en.ctaLabel"
+                    value={translationDraft.en.ctaLabel}
+                    onChange={(event) => updateTranslation("en", "ctaLabel", event.target.value)}
+                  />
                 </Field>
               )}
             </>
@@ -201,16 +228,34 @@ export function HomeSliderEditorForm({ mode, listHref, initialData, initialImage
             <>
               <Field>
                 <FieldLabel htmlFor={`${formId}-ar-title`}>{t("slider.slideTitle")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-title`} name="ar.title" defaultValue={arTr.title} dir="rtl" />
+                <Input
+                  id={`${formId}-ar-title`}
+                  name="ar.title"
+                  value={translationDraft.ar.title}
+                  onChange={(event) => updateTranslation("ar", "title", event.target.value)}
+                  dir="rtl"
+                />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${formId}-ar-subtitle`}>{t("slider.subtitle")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-subtitle`} name="ar.subtitle" defaultValue={arTr.subtitle} dir="rtl" />
+                <Input
+                  id={`${formId}-ar-subtitle`}
+                  name="ar.subtitle"
+                  value={translationDraft.ar.subtitle}
+                  onChange={(event) => updateTranslation("ar", "subtitle", event.target.value)}
+                  dir="rtl"
+                />
               </Field>
               {ctaHref && (
                 <Field>
                   <FieldLabel htmlFor={`${formId}-ar-cta`}>{t("slider.ctaLabel")} (AR)</FieldLabel>
-                  <Input id={`${formId}-ar-cta`} name="ar.ctaLabel" defaultValue={arTr.ctaLabel} dir="rtl" />
+                  <Input
+                    id={`${formId}-ar-cta`}
+                    name="ar.ctaLabel"
+                    value={translationDraft.ar.ctaLabel}
+                    onChange={(event) => updateTranslation("ar", "ctaLabel", event.target.value)}
+                    dir="rtl"
+                  />
                 </Field>
               )}
             </>
@@ -220,7 +265,7 @@ export function HomeSliderEditorForm({ mode, listHref, initialData, initialImage
 
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={submitting}>
-          {submitting && <Spinner className="mr-1" />}
+          {submitting && <Spinner data-icon />}
           {mode === "create" ? t("createAction") : t("updateAction")}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.push(listHref)} disabled={submitting}>

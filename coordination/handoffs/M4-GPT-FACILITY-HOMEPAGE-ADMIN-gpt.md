@@ -14,6 +14,16 @@ facility domain service.
 The public facilities profile page also uses the same `Facility` public query,
 so homepage cards and the "Semua Fasilitas" destination no longer diverge.
 
+Follow-up bug fix in the same branch:
+
+- Added the missing `FlowLine` public ornament component referenced by
+  homepage sections, fixing `Module not found: Can't resolve
+  '@/components/public/flow-line'`.
+- Fixed the admin home slider form so changing only the hero image preserves
+  all ID/EN/AR translation state instead of submitting empty hidden-tab
+  fields. The CTA helper now treats bare host names as HTTPS external URLs,
+  while still leaving the server-side public URL validation intact.
+
 ## Files changed
 
 - Added `FACILITY` home section key, migration, seed copy, and contract max
@@ -27,6 +37,10 @@ so homepage cards and the "Semua Fasilitas" destination no longer diverge.
 - Removed the album-specific homepage facility loader from
   `src/features/home-nav/public-query.ts`.
 - Added facility contract/runtime tests.
+- Added `src/components/public/flow-line.tsx`.
+- Added `src/components/admin/home-nav/home-slider-editor-payload.ts` and
+  `tests/m4/ui/home-slider-editor-form.test.ts` for slider payload regression
+  coverage.
 
 ## Contract/schema/migration impact
 
@@ -53,6 +67,19 @@ so homepage cards and the "Semua Fasilitas" destination no longer diverge.
 | `npm run test` | Passed, 90 files / 1146 tests |
 | `git diff --check` | Passed |
 | `npm run build` | Failed after `.next` cleanup because `next/font/google` could not fetch Amiri, IBM Plex Sans Arabic, Inter, and Plus Jakarta Sans from `fonts.googleapis.com` in this environment. A rerun with escalated network permission failed the same way. An earlier build before cache cleanup compiled and generated routes successfully, including `/[locale]/admin/fasilitas`, but the final build cannot be considered passed until Google Fonts fetch or local font caching is available. |
+
+Follow-up bug fix verification:
+
+| Command | Result |
+|---|---|
+| `npx vitest run tests/m4/ui/home-slider-editor-form.test.ts tests/m4/contracts/home-nav-contracts.test.ts` | Passed, 2 files / 14 tests |
+| `npm run typecheck` | Passed |
+| `npm run lint` | Passed |
+| `npm run test` | Passed, 94 files / 1170 tests |
+| `npm run prisma:validate` | Passed |
+| `npm run build` | Passed |
+| `git diff --check` | Passed |
+| `TASK_MANIFEST=coordination/tasks/M4-GPT-FACILITY-HOMEPAGE-ADMIN.md TASK_BASE=HEAD~1 npm run check:scope` | Passed, 6 changed files within lease |
 
 ## Untested areas
 

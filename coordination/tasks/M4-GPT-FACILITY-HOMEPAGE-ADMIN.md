@@ -27,10 +27,14 @@ allowed_paths:
   - "src/app/api/admin/facilities/route.ts"
   - "src/components/admin/admin-nav.tsx"
   - "src/components/admin/facility/**"
+  - "src/components/admin/home-nav/home-slider-editor-payload.ts"
+  - "src/components/admin/home-nav/home-slider-editor-form.tsx"
+  - "src/components/public/flow-line.tsx"
   - "src/components/public/facilities-section.tsx"
   - "messages/**"
   - "tests/m4/contracts/facility-contracts.test.ts"
   - "tests/m4/runtime/facility-domain.test.ts"
+  - "tests/m4/ui/home-slider-editor-form.test.ts"
 contracts:
   - src/contracts/facility.ts
   - src/contracts/home-nav.ts
