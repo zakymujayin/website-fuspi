@@ -523,40 +523,15 @@ async function main() {
     });
   }
 
-  const columns = [
-    {
-      slug: "menumbuhkan-nalar-kritis-mahasiswa",
-      columnType: "DEKAN" as const,
-      authorId: admin.id,
-      id_title: "Menumbuhkan Nalar Kritis Mahasiswa Keislaman",
-      id_excerpt: "Nalar kritis adalah bekal utama mahasiswa dalam merespons dinamika zaman tanpa kehilangan akar keilmuan.",
-      id_content: "<p>Nalar kritis adalah bekal utama mahasiswa dalam merespons dinamika zaman tanpa kehilangan akar keilmuan Islam yang otentik.</p>",
+  await prisma.post.deleteMany({
+    where: {
+      type: "KOLOM",
+      slug: {in: [
+        "menumbuhkan-nalar-kritis-mahasiswa",
+        "tafsir-kontekstual-di-era-digital",
+      ]},
     },
-    {
-      slug: "tafsir-kontekstual-di-era-digital",
-      columnType: "DOSEN" as const,
-      authorId: editor.id,
-      id_title: "Tafsir Kontekstual di Era Digital",
-      id_excerpt: "Bagaimana metode tafsir klasik tetap relevan ketika dihadapkan pada arus informasi digital yang deras.",
-      id_content: "<p>Bagaimana metode tafsir klasik tetap relevan ketika dihadapkan pada arus informasi digital yang deras.</p>",
-    },
-  ];
-  for (const [index, item] of columns.entries()) {
-    await prisma.post.upsert({
-      where: { slug: item.slug },
-      update: {},
-      create: {
-        type: "KOLOM", columnType: item.columnType, slug: item.slug, status: "PUBLISHED",
-        publishedAt: new Date(Date.now() - index * 86_400_000),
-        authorId: item.authorId,
-        translations: {
-          create: {
-            locale: "id", title: item.id_title, excerpt: item.id_excerpt, content: item.id_content, status: "PUBLISHED",
-          },
-        },
-      },
-    });
-  }
+  });
 }
 
 main()

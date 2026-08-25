@@ -386,6 +386,9 @@ describe("direction safety and message parity", () => {
 
     expect(sidebar).toContain('href: "/admin/kolom"');
     expect(sidebar).toContain('labelKey: "columns"');
+    const idMessages = JSON.parse(readFileSync(path.join(process.cwd(), "messages/id.json"), "utf8"));
+    expect(idMessages.AdminSidebar.items.columns).toBe("Sorotan Akademik");
+    expect(idMessages.AdminSidebar.items.kolom).toBe("Sorotan Akademik");
     expect(form).toContain('"CREATE_COLUMN"');
     expect(form).toContain('"UPDATE_COLUMN"');
     expect(form).toContain('"AUTOSAVE_COLUMN"');

@@ -52,6 +52,7 @@ allowed_paths:
   - "tests/m3/ui/admin-post-editor.test.tsx"
   - "tests/m3/ui/admin-post-list.test.tsx"
   - "tests/m3/ui/admin-post-publication-actions.test.tsx"
+  - "tests/m4/runtime/fuspi-seed-content.test.ts"
   - "tests/m4/contracts/facility-contracts.test.ts"
   - "tests/m4/runtime/facility-domain.test.ts"
   - "tests/m4/ui/admin-legacy-media-preview.test.ts"

@@ -46,6 +46,19 @@ Third follow-up feature in the same branch:
 - Revalidated homepage, `/kolom`, Berita, and both admin lists after post
   mutations.
 
+Fourth follow-up cleanup in the same branch:
+
+- Removed the two seeded Sorotan Akademik demo writings shown in the user's
+  screenshot:
+  `menumbuhkan-nalar-kritis-mahasiswa` and
+  `tafsir-kontekstual-di-era-digital`.
+- Added a targeted seed cleanup so those two old demo rows are deleted on the
+  next seed instead of being re-created.
+- Deleted the two matching `KOLOM` rows from the local database; the command
+  reported `{"deleted":2}` and a follow-up query reported `{"remaining":[]}`.
+- Added admin breadcrumb/menu labels for the `kolom` route segment so admin UI
+  shows Sorotan Akademik instead of the raw route name.
+
 ## Files changed
 
 - Added `FACILITY` home section key, migration, seed copy, and contract max
@@ -72,6 +85,7 @@ Third follow-up feature in the same branch:
 - Added Sorotan Akademik admin routes under `src/app/[locale]/admin/kolom/**`.
 - Extended shared Post admin UI components to support `KOLOM` mode while
   preserving the existing Berita defaults.
+- Removed the two old Sorotan Akademik demo rows from `prisma/seed.ts`.
 
 ## Contract/schema/migration impact
 
@@ -146,6 +160,21 @@ Third follow-up feature verification:
 | `git diff --check` | Passed |
 | `npm run build` | Passed, routes include `/[locale]/admin/kolom`, `/[locale]/admin/kolom/new`, and `/[locale]/admin/kolom/[postId]/edit` |
 | `TASK_MANIFEST=coordination/tasks/M4-GPT-FACILITY-HOMEPAGE-ADMIN.md TASK_BASE=HEAD~1 npm run check:scope` | Passed, 30 changed files within lease |
+
+Fourth follow-up cleanup verification:
+
+| Command | Result |
+|---|---|
+| `set -a; source .env; ... prisma.post.deleteMany(...)` | Passed, `{"deleted":2}` |
+| `set -a; source .env; ... prisma.post.findMany(...)` | Passed, `{"remaining":[]}` |
+| `npx vitest run tests/m4/runtime/fuspi-seed-content.test.ts tests/m3/ui/admin-post-editor.test.tsx` | Passed, 2 files / 48 tests |
+| `node -e "JSON.parse(...messages/id,en,ar...)"` | Passed |
+| `npm run lint` | Passed |
+| `npm run typecheck` | Passed |
+| `npm run prisma:validate` | Passed |
+| `npm run test` | Passed, 96 files / 1181 tests |
+| `git diff --check` | Passed |
+| `npm run build` | Passed |
 
 ## Untested areas
 
