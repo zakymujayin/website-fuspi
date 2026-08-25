@@ -36,6 +36,7 @@ export default async function AdminSiteSettingPage({ params }: Props) {
       </div>
       {result.ok ? (
         <SiteSettingEditorForm
+          key={`site-setting-${result.data.version ?? 0}`}
           listHref="/admin/beranda/pengaturan"
           initialData={result.data.input}
           initialVersion={result.data.version ?? 1}

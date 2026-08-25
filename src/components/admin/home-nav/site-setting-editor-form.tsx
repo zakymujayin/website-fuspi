@@ -1,9 +1,8 @@
 "use client";
-import { formText } from "@/components/admin/form-text";
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { useId, useState, type FormEvent } from "react";
+import { useId, useState, type ChangeEvent, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +16,11 @@ import { executeHomeNavAdminCommand } from "@/components/admin/home-nav/home-nav
 type SiteSettingTranslation = {
   facultyName: string; tagline: string; address1: string; address2: string;
   deanPosition: string; deanMessage: string; videoTitle: string; videoDesc: string;
+};
+type SiteSettingLocale = "id" | "en" | "ar";
+type SiteSettingTranslationField = keyof SiteSettingTranslation;
+type ContactFields = {
+  email: string; phone: string; facebookUrl: string; instagramUrl: string; youtubeUrl: string; xUrl: string;
 };
 
 type Props = {
@@ -32,65 +36,119 @@ const EMPTY: SiteSettingTranslation = {
   facultyName: "", tagline: "", address1: "", address2: "", deanPosition: "", deanMessage: "", videoTitle: "", videoDesc: "",
 };
 
+function textValue(value: unknown) {
+  return typeof value === "string" ? value : "";
+}
+
+function nullableText(value: string) {
+  const trimmed = value.trim();
+  return trimmed === "" ? null : trimmed;
+}
+
+function translationValue(value: unknown): SiteSettingTranslation {
+  const source = value && typeof value === "object" ? value as Record<string, unknown> : {};
+  return {
+    facultyName: textValue(source.facultyName),
+    tagline: textValue(source.tagline),
+    address1: textValue(source.address1),
+    address2: textValue(source.address2),
+    deanPosition: textValue(source.deanPosition),
+    deanMessage: textValue(source.deanMessage),
+    videoTitle: textValue(source.videoTitle),
+    videoDesc: textValue(source.videoDesc),
+  };
+}
+
 export function SiteSettingEditorForm({ listHref, initialData, initialVersion, initialDeanPhoto, initialVideoPoster, uploadPublicUrl }: Props) {
   const t = useTranslations("AdminHomeNav");
   const router = useRouter();
   const formId = useId();
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
-  const [locale, setLocale] = useState<"id" | "en" | "ar">("id");
+  const [locale, setLocale] = useState<SiteSettingLocale>("id");
 
-  const translations = (initialData.translations as Record<string, SiteSettingTranslation | undefined> | undefined) ?? {};
-  const idTr = translations.id ?? EMPTY;
-  const enTr = translations.en ?? EMPTY;
-  const arTr = translations.ar ?? EMPTY;
+  const translations = (initialData.translations as Record<string, unknown> | undefined) ?? {};
+  const [contact, setContact] = useState<ContactFields>({
+    email: textValue(initialData.email),
+    phone: textValue(initialData.phone),
+    facebookUrl: textValue(initialData.facebookUrl),
+    instagramUrl: textValue(initialData.instagramUrl),
+    youtubeUrl: textValue(initialData.youtubeUrl),
+    xUrl: textValue(initialData.xUrl),
+  });
+  const [deanName, setDeanName] = useState(textValue(initialData.deanName));
+  const [videoUrl, setVideoUrl] = useState(textValue(initialData.videoUrl));
+  const [translationValues, setTranslationValues] = useState<Record<SiteSettingLocale, SiteSettingTranslation>>({
+    id: translationValue(translations.id ?? EMPTY),
+    en: translationValue(translations.en ?? EMPTY),
+    ar: translationValue(translations.ar ?? EMPTY),
+  });
 
   const [deanPhotoId, setDeanPhotoId] = useState<string | null>((initialData.deanPhotoMediaId as string) ?? null);
   const [videoPosterId, setVideoPosterId] = useState<string | null>((initialData.videoPosterMediaId as string) ?? null);
+
+  const idTr = translationValues.id;
+  const enTr = translationValues.en;
+  const arTr = translationValues.ar;
+
+  function updateContact(field: keyof ContactFields) {
+    return (event: ChangeEvent<HTMLInputElement>) => {
+      setContact((current) => ({...current, [field]: event.target.value}));
+    };
+  }
+
+  function updateTranslation(prefix: SiteSettingLocale, field: SiteSettingTranslationField) {
+    return (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setTranslationValues((current) => ({
+        ...current,
+        [prefix]: {...current[prefix], [field]: event.target.value},
+      }));
+    };
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSubmitting(true);
     setErrors([]);
 
-    const fd = new FormData(event.currentTarget);
-    const deanName = formText(fd, "deanName") || null;
-    const videoUrl = formText(fd, "videoUrl") || null;
+    const deanNamePayload = nullableText(deanName);
+    const videoUrlPayload = nullableText(videoUrl);
 
-    if ((deanName === null) !== (deanPhotoId === null)) {
+    if ((deanNamePayload === null) !== (deanPhotoId === null)) {
       setErrors([t("errors.deanIncomplete")]);
       setSubmitting(false);
       return;
     }
-    if ((videoUrl === null) !== (videoPosterId === null)) {
+    if ((videoUrlPayload === null) !== (videoPosterId === null)) {
       setErrors([t("errors.videoIncomplete")]);
       setSubmitting(false);
       return;
     }
 
-    const localized = (prefix: "id" | "en" | "ar", required: boolean): SiteSettingTranslation | null => {
-      const facultyName = formText(fd, `${prefix}.facultyName`);
+    const localized = (prefix: SiteSettingLocale, required: boolean) => {
+      const values = translationValues[prefix];
+      const facultyName = nullableText(values.facultyName);
       if (!facultyName && !required) return null;
       return {
-        facultyName,
-        tagline: formText(fd, `${prefix}.tagline`) || null as unknown as string,
-        address1: formText(fd, `${prefix}.address1`) || null as unknown as string,
-        address2: formText(fd, `${prefix}.address2`) || null as unknown as string,
-        deanPosition: deanName ? formText(fd, `${prefix}.deanPosition`) : null as unknown as string,
-        deanMessage: deanName ? formText(fd, `${prefix}.deanMessage`) : null as unknown as string,
-        videoTitle: videoUrl ? formText(fd, `${prefix}.videoTitle`) : null as unknown as string,
-        videoDesc: formText(fd, `${prefix}.videoDesc`) || null as unknown as string,
+        facultyName: facultyName ?? "",
+        tagline: nullableText(values.tagline),
+        address1: nullableText(values.address1),
+        address2: nullableText(values.address2),
+        deanPosition: deanNamePayload ? nullableText(values.deanPosition) : null,
+        deanMessage: deanNamePayload ? nullableText(values.deanMessage) : null,
+        videoTitle: videoUrlPayload ? nullableText(values.videoTitle) : null,
+        videoDesc: nullableText(values.videoDesc),
       };
     };
 
     const payload: Record<string, unknown> = {
-      deanName, deanPhotoMediaId: deanPhotoId, videoUrl, videoPosterMediaId: videoPosterId,
-      email: formText(fd, "email") || null,
-      phone: formText(fd, "phone") || null,
-      facebookUrl: formText(fd, "facebookUrl") || null,
-      instagramUrl: formText(fd, "instagramUrl") || null,
-      youtubeUrl: formText(fd, "youtubeUrl") || null,
-      xUrl: formText(fd, "xUrl") || null,
+      deanName: deanNamePayload, deanPhotoMediaId: deanPhotoId, videoUrl: videoUrlPayload, videoPosterMediaId: videoPosterId,
+      email: nullableText(contact.email),
+      phone: nullableText(contact.phone),
+      facebookUrl: nullableText(contact.facebookUrl),
+      instagramUrl: nullableText(contact.instagramUrl),
+      youtubeUrl: nullableText(contact.youtubeUrl),
+      xUrl: nullableText(contact.xUrl),
       logoMediaId: (initialData.logoMediaId as string | null | undefined) ?? null,
       faviconMediaId: (initialData.faviconMediaId as string | null | undefined) ?? null,
       contentOwnerId: null, expiresAt: null,
@@ -143,27 +201,27 @@ export function SiteSettingEditorForm({ listHref, initialData, initialVersion, i
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor={`${formId}-email`}>{t("settings.email")}</FieldLabel>
-            <Input id={`${formId}-email`} name="email" type="email" defaultValue={(initialData.email as string) ?? ""} />
+            <Input id={`${formId}-email`} name="email" type="email" value={contact.email} onChange={updateContact("email")} />
           </Field>
           <Field>
             <FieldLabel htmlFor={`${formId}-phone`}>{t("settings.phone")}</FieldLabel>
-            <Input id={`${formId}-phone`} name="phone" defaultValue={(initialData.phone as string) ?? ""} />
+            <Input id={`${formId}-phone`} name="phone" value={contact.phone} onChange={updateContact("phone")} />
           </Field>
           <Field>
             <FieldLabel htmlFor={`${formId}-facebook`}>Facebook</FieldLabel>
-            <Input id={`${formId}-facebook`} name="facebookUrl" defaultValue={(initialData.facebookUrl as string) ?? ""} />
+            <Input id={`${formId}-facebook`} name="facebookUrl" value={contact.facebookUrl} onChange={updateContact("facebookUrl")} />
           </Field>
           <Field>
             <FieldLabel htmlFor={`${formId}-instagram`}>Instagram</FieldLabel>
-            <Input id={`${formId}-instagram`} name="instagramUrl" defaultValue={(initialData.instagramUrl as string) ?? ""} />
+            <Input id={`${formId}-instagram`} name="instagramUrl" value={contact.instagramUrl} onChange={updateContact("instagramUrl")} />
           </Field>
           <Field>
             <FieldLabel htmlFor={`${formId}-youtube`}>YouTube</FieldLabel>
-            <Input id={`${formId}-youtube`} name="youtubeUrl" defaultValue={(initialData.youtubeUrl as string) ?? ""} />
+            <Input id={`${formId}-youtube`} name="youtubeUrl" value={contact.youtubeUrl} onChange={updateContact("youtubeUrl")} />
           </Field>
           <Field>
             <FieldLabel htmlFor={`${formId}-x`}>X</FieldLabel>
-            <Input id={`${formId}-x`} name="xUrl" defaultValue={(initialData.xUrl as string) ?? ""} />
+            <Input id={`${formId}-x`} name="xUrl" value={contact.xUrl} onChange={updateContact("xUrl")} />
           </Field>
         </FieldGroup>
       </FieldSet>
@@ -173,7 +231,7 @@ export function SiteSettingEditorForm({ listHref, initialData, initialVersion, i
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor={`${formId}-dean-name`}>{t("settings.deanName")}</FieldLabel>
-            <Input id={`${formId}-dean-name`} name="deanName" defaultValue={(initialData.deanName as string) ?? ""} />
+            <Input id={`${formId}-dean-name`} name="deanName" value={deanName} onChange={(event) => setDeanName(event.target.value)} />
           </Field>
           <HomeMediaPicker
             value={deanPhotoId}
@@ -200,7 +258,7 @@ export function SiteSettingEditorForm({ listHref, initialData, initialVersion, i
         <FieldGroup>
           <Field>
             <FieldLabel htmlFor={`${formId}-video-url`}>{t("settings.videoUrl")}</FieldLabel>
-            <Input id={`${formId}-video-url`} name="videoUrl" defaultValue={(initialData.videoUrl as string) ?? ""} placeholder="https://youtube.com/watch?v=..." />
+            <Input id={`${formId}-video-url`} name="videoUrl" value={videoUrl} onChange={(event) => setVideoUrl(event.target.value)} placeholder="https://youtube.com/watch?v=..." />
           </Field>
           <HomeMediaPicker
             value={videoPosterId}
@@ -225,36 +283,36 @@ export function SiteSettingEditorForm({ listHref, initialData, initialVersion, i
       <FieldSet>
         <FieldLegend>{t("translations")}</FieldLegend>
         <div role="tablist" aria-label={t("localeTabs")} className="flex gap-1">{localeTabs}</div>
-        <FieldGroup>
+        <FieldGroup key={locale}>
           {locale === "id" && (
             <>
               <Field>
                 <FieldLabel htmlFor={`${formId}-id-faculty`}>{t("settings.facultyName")} (ID) *</FieldLabel>
-                <Input id={`${formId}-id-faculty`} name="id.facultyName" defaultValue={idTr.facultyName} required />
+                <Input id={`${formId}-id-faculty`} name="id.facultyName" value={idTr.facultyName} onChange={updateTranslation("id", "facultyName")} required />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${formId}-id-tagline`}>{t("settings.tagline")} (ID)</FieldLabel>
-                <Input id={`${formId}-id-tagline`} name="id.tagline" defaultValue={idTr.tagline} />
+                <Input id={`${formId}-id-tagline`} name="id.tagline" value={idTr.tagline} onChange={updateTranslation("id", "tagline")} />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${formId}-id-address1`}>{t("settings.address1")} (ID)</FieldLabel>
-                <Textarea id={`${formId}-id-address1`} name="id.address1" defaultValue={idTr.address1} rows={2} />
+                <Textarea id={`${formId}-id-address1`} name="id.address1" value={idTr.address1} onChange={updateTranslation("id", "address1")} rows={2} />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${formId}-id-dean-position`}>{t("settings.deanPosition")} (ID)</FieldLabel>
-                <Input id={`${formId}-id-dean-position`} name="id.deanPosition" defaultValue={idTr.deanPosition} />
+                <Input id={`${formId}-id-dean-position`} name="id.deanPosition" value={idTr.deanPosition} onChange={updateTranslation("id", "deanPosition")} />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${formId}-id-dean-message`}>{t("settings.deanMessage")} (ID)</FieldLabel>
-                <Textarea id={`${formId}-id-dean-message`} name="id.deanMessage" defaultValue={idTr.deanMessage} rows={6} />
+                <Textarea id={`${formId}-id-dean-message`} name="id.deanMessage" value={idTr.deanMessage} onChange={updateTranslation("id", "deanMessage")} rows={6} />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${formId}-id-video-title`}>{t("settings.videoTitle")} (ID)</FieldLabel>
-                <Input id={`${formId}-id-video-title`} name="id.videoTitle" defaultValue={idTr.videoTitle} />
+                <Input id={`${formId}-id-video-title`} name="id.videoTitle" value={idTr.videoTitle} onChange={updateTranslation("id", "videoTitle")} />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${formId}-id-video-desc`}>{t("settings.videoDesc")} (ID)</FieldLabel>
-                <Textarea id={`${formId}-id-video-desc`} name="id.videoDesc" defaultValue={idTr.videoDesc} rows={3} />
+                <Textarea id={`${formId}-id-video-desc`} name="id.videoDesc" value={idTr.videoDesc} onChange={updateTranslation("id", "videoDesc")} rows={3} />
               </Field>
             </>
           )}
@@ -262,23 +320,23 @@ export function SiteSettingEditorForm({ listHref, initialData, initialVersion, i
             <>
               <Field>
                 <FieldLabel htmlFor={`${formId}-en-faculty`}>{t("settings.facultyName")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-faculty`} name="en.facultyName" defaultValue={enTr.facultyName} />
+                <Input id={`${formId}-en-faculty`} name="en.facultyName" value={enTr.facultyName} onChange={updateTranslation("en", "facultyName")} />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${formId}-en-tagline`}>{t("settings.tagline")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-tagline`} name="en.tagline" defaultValue={enTr.tagline} />
+                <Input id={`${formId}-en-tagline`} name="en.tagline" value={enTr.tagline} onChange={updateTranslation("en", "tagline")} />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${formId}-en-dean-position`}>{t("settings.deanPosition")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-dean-position`} name="en.deanPosition" defaultValue={enTr.deanPosition} />
+                <Input id={`${formId}-en-dean-position`} name="en.deanPosition" value={enTr.deanPosition} onChange={updateTranslation("en", "deanPosition")} />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${formId}-en-dean-message`}>{t("settings.deanMessage")} (EN)</FieldLabel>
-                <Textarea id={`${formId}-en-dean-message`} name="en.deanMessage" defaultValue={enTr.deanMessage} rows={6} />
+                <Textarea id={`${formId}-en-dean-message`} name="en.deanMessage" value={enTr.deanMessage} onChange={updateTranslation("en", "deanMessage")} rows={6} />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${formId}-en-video-title`}>{t("settings.videoTitle")} (EN)</FieldLabel>
-                <Input id={`${formId}-en-video-title`} name="en.videoTitle" defaultValue={enTr.videoTitle} />
+                <Input id={`${formId}-en-video-title`} name="en.videoTitle" value={enTr.videoTitle} onChange={updateTranslation("en", "videoTitle")} />
               </Field>
             </>
           )}
@@ -286,23 +344,23 @@ export function SiteSettingEditorForm({ listHref, initialData, initialVersion, i
             <>
               <Field>
                 <FieldLabel htmlFor={`${formId}-ar-faculty`}>{t("settings.facultyName")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-faculty`} name="ar.facultyName" defaultValue={arTr.facultyName} dir="rtl" />
+                <Input id={`${formId}-ar-faculty`} name="ar.facultyName" value={arTr.facultyName} onChange={updateTranslation("ar", "facultyName")} dir="rtl" />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${formId}-ar-tagline`}>{t("settings.tagline")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-tagline`} name="ar.tagline" defaultValue={arTr.tagline} dir="rtl" />
+                <Input id={`${formId}-ar-tagline`} name="ar.tagline" value={arTr.tagline} onChange={updateTranslation("ar", "tagline")} dir="rtl" />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${formId}-ar-dean-position`}>{t("settings.deanPosition")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-dean-position`} name="ar.deanPosition" defaultValue={arTr.deanPosition} dir="rtl" />
+                <Input id={`${formId}-ar-dean-position`} name="ar.deanPosition" value={arTr.deanPosition} onChange={updateTranslation("ar", "deanPosition")} dir="rtl" />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${formId}-ar-dean-message`}>{t("settings.deanMessage")} (AR)</FieldLabel>
-                <Textarea id={`${formId}-ar-dean-message`} name="ar.deanMessage" defaultValue={arTr.deanMessage} rows={6} dir="rtl" />
+                <Textarea id={`${formId}-ar-dean-message`} name="ar.deanMessage" value={arTr.deanMessage} onChange={updateTranslation("ar", "deanMessage")} rows={6} dir="rtl" />
               </Field>
               <Field>
                 <FieldLabel htmlFor={`${formId}-ar-video-title`}>{t("settings.videoTitle")} (AR)</FieldLabel>
-                <Input id={`${formId}-ar-video-title`} name="ar.videoTitle" defaultValue={arTr.videoTitle} dir="rtl" />
+                <Input id={`${formId}-ar-video-title`} name="ar.videoTitle" value={arTr.videoTitle} onChange={updateTranslation("ar", "videoTitle")} dir="rtl" />
               </Field>
             </>
           )}

@@ -77,11 +77,16 @@ describe("home and navigation frozen contracts", () => {
   it("keeps singleton media identifiers in the admin site setting payload", () => {
     const formSource = readFileSync(path.join(process.cwd(), "src/components/admin/home-nav/site-setting-editor-form.tsx"), "utf8");
     const detailSource = readFileSync(path.join(process.cwd(), "src/features/home-nav/admin-detail.ts"), "utf8");
+    const pageSource = readFileSync(path.join(process.cwd(), "src/app/[locale]/admin/beranda/pengaturan/page.tsx"), "utf8");
 
     expect(formSource).toContain("logoMediaId:");
     expect(formSource).toContain("faviconMediaId:");
     expect(detailSource).toContain("logoMediaId: row.logoMediaId");
     expect(detailSource).toContain("faviconMediaId: row.faviconMediaId");
+    expect(formSource).not.toContain("defaultValue=");
+    expect(formSource).toContain("value={idTr.videoTitle}");
+    expect(formSource).toContain("onChange={updateTranslation(\"id\", \"videoTitle\")}");
+    expect(pageSource).toContain("key={`site-setting-${result.data.version ?? 0}`}");
   });
 
   it("defines translated AdminHomeNav mutation failures in every locale", () => {
