@@ -84,6 +84,7 @@ export async function getHomeNavAdminDetail(
         deanName: row.deanName, deanPhotoMediaId: row.deanPhotoId, videoUrl: row.videoUrl,
         videoPosterMediaId: row.videoPosterMediaId, email: row.email, phone: row.phone,
         facebookUrl: row.facebookUrl, instagramUrl: row.instagramUrl, youtubeUrl: row.youtubeUrl, xUrl: row.xUrl,
+        logoMediaId: row.logoMediaId, faviconMediaId: row.faviconMediaId,
         contentOwnerId: row.contentOwnerId, expiresAt: row.expiresAt?.toISOString() ?? null,
         translations: localizedInput(row.translations, [
           "facultyName", "tagline", "address1", "address2", "deanPosition", "deanMessage", "videoTitle", "videoDesc",

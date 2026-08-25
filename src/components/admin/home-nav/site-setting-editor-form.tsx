@@ -91,6 +91,8 @@ export function SiteSettingEditorForm({ listHref, initialData, initialVersion, i
       instagramUrl: formText(fd, "instagramUrl") || null,
       youtubeUrl: formText(fd, "youtubeUrl") || null,
       xUrl: formText(fd, "xUrl") || null,
+      logoMediaId: (initialData.logoMediaId as string | null | undefined) ?? null,
+      faviconMediaId: (initialData.faviconMediaId as string | null | undefined) ?? null,
       contentOwnerId: null, expiresAt: null,
       translations: (() => {
         const en = localized("en", false);

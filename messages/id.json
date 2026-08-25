@@ -1307,7 +1307,19 @@
     "errors": {
       "imageRequired": "Gambar wajib dipilih.",
       "deanIncomplete": "Nama dekan dan foto dekan harus diisi bersamaan, atau dikosongkan bersamaan.",
-      "videoIncomplete": "URL video dan poster video harus diisi bersamaan, atau dikosongkan bersamaan."
+      "videoIncomplete": "URL video dan poster video harus diisi bersamaan, atau dikosongkan bersamaan.",
+      "SESSION_INVALID": "Sesi Anda telah berakhir. Masuk kembali lalu coba lagi.",
+      "CSRF_INVALID": "Permintaan tidak dapat diverifikasi. Muat ulang halaman lalu coba lagi.",
+      "REQUEST_INVALID": "Permintaan tidak dapat diproses. Periksa isian lalu coba lagi.",
+      "VALIDATION_FAILED": "Ada isian yang belum sesuai. Periksa kembali URL, gambar, dan terjemahan.",
+      "NOT_FOUND": "Data tidak ditemukan.",
+      "VERSION_CONFLICT": "Data sudah berubah di sesi lain. Muat ulang halaman lalu coba lagi.",
+      "INVALID_STATE": "Aksi tidak dapat dilakukan pada status data saat ini.",
+      "URL_INVALID": "URL belum valid.",
+      "MEDIA_INVALID": "Gambar yang dipilih tidak valid atau belum tersedia di Pustaka Media.",
+      "RELATION_INVALID": "Relasi data belum valid.",
+      "IN_USE": "Data masih digunakan oleh konten lain.",
+      "UNAVAILABLE": "Layanan sedang tidak tersedia. Coba lagi beberapa saat lagi."
     },
     "slider": {
       "title": "Hero Slider",

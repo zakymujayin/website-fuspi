@@ -1,3 +1,6 @@
+import {readFileSync} from "node:fs";
+import path from "node:path";
+
 import {describe, expect, it} from "vitest";
 
 import {
@@ -69,6 +72,32 @@ describe("home and navigation frozen contracts", () => {
     expect(SiteSettingInputSchema.safeParse({...setting, deanName: "Nama"}).success).toBe(false);
     expect(SiteSettingInputSchema.safeParse({...setting, videoUrl: "https://video.example.org/watch"}).success).toBe(false);
     expect(SiteSettingInputSchema.safeParse({...setting, facebookUrl: "https://localhost/social"}).success).toBe(false);
+  });
+
+  it("keeps singleton media identifiers in the admin site setting payload", () => {
+    const formSource = readFileSync(path.join(process.cwd(), "src/components/admin/home-nav/site-setting-editor-form.tsx"), "utf8");
+    const detailSource = readFileSync(path.join(process.cwd(), "src/features/home-nav/admin-detail.ts"), "utf8");
+
+    expect(formSource).toContain("logoMediaId:");
+    expect(formSource).toContain("faviconMediaId:");
+    expect(detailSource).toContain("logoMediaId: row.logoMediaId");
+    expect(detailSource).toContain("faviconMediaId: row.faviconMediaId");
+  });
+
+  it("defines translated AdminHomeNav mutation failures in every locale", () => {
+    const codes = [
+      "SESSION_INVALID", "CSRF_INVALID", "REQUEST_INVALID", "VALIDATION_FAILED", "NOT_FOUND", "VERSION_CONFLICT",
+      "INVALID_STATE", "URL_INVALID", "MEDIA_INVALID", "RELATION_INVALID", "IN_USE", "UNAVAILABLE",
+    ];
+
+    for (const locale of ["id", "en", "ar"]) {
+      const messages = JSON.parse(readFileSync(path.join(process.cwd(), "messages", `${locale}.json`), "utf8")) as {
+        AdminHomeNav?: {errors?: Record<string, string>};
+      };
+      for (const code of codes) {
+        expect(messages.AdminHomeNav?.errors?.[code], `${locale} AdminHomeNav.errors.${code}`).toBeTruthy();
+      }
+    }
   });
 
   it("encodes version intent and protects structural singleton resources", () => {

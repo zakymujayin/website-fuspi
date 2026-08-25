@@ -1307,7 +1307,19 @@
     "errors": {
       "imageRequired": "An image is required.",
       "deanIncomplete": "Dean name and dean photo must both be set, or both left empty.",
-      "videoIncomplete": "Video URL and video poster must both be set, or both left empty."
+      "videoIncomplete": "Video URL and video poster must both be set, or both left empty.",
+      "SESSION_INVALID": "Your session has expired. Sign in again and try once more.",
+      "CSRF_INVALID": "The request could not be verified. Reload the page and try again.",
+      "REQUEST_INVALID": "The request could not be processed. Check the fields and try again.",
+      "VALIDATION_FAILED": "Some fields are not valid yet. Check the URL, images, and translations.",
+      "NOT_FOUND": "The data was not found.",
+      "VERSION_CONFLICT": "This data changed in another session. Reload the page and try again.",
+      "INVALID_STATE": "This action cannot be performed for the current data state.",
+      "URL_INVALID": "The URL is not valid yet.",
+      "MEDIA_INVALID": "The selected image is not valid or is not available in Media Library.",
+      "RELATION_INVALID": "The related data is not valid yet.",
+      "IN_USE": "This data is still used by other content.",
+      "UNAVAILABLE": "The service is temporarily unavailable. Try again in a few moments."
     },
     "slider": {
       "title": "Hero Slider",
