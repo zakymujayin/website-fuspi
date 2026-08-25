@@ -2,7 +2,7 @@
 
 - Branch: ai/gpt/m4-facility-homepage-admin
 - Base SHA: 1c3df17ed99cdbe6c04f24b20a30836e3d6f518a
-- Head SHA: see branch HEAD (`git rev-parse HEAD`) after final commit
+- Head SHA: final branch HEAD (`git rev-parse HEAD`)
 
 ## Result
 
@@ -24,6 +24,16 @@ Follow-up bug fix in the same branch:
   fields. The CTA helper now treats bare host names as HTTPS external URLs,
   while still leaving the server-side public URL validation intact.
 
+Second follow-up bug fix in the same branch:
+
+- Fixed legacy media previews in the Berita editor and homepage hero slider
+  editor. Admin edit views now use an admin-only image preview that accepts
+  older public WebP media with missing `alt`, `width`, or `height` metadata,
+  while public media contracts remain strict.
+- Updated the shared admin thumbnail resolver so old image media still renders
+  through a safe local `/uploads/...` path instead of showing the placeholder
+  only because dimensions are missing.
+
 ## Files changed
 
 - Added `FACILITY` home section key, migration, seed copy, and contract max
@@ -41,6 +51,12 @@ Follow-up bug fix in the same branch:
 - Added `src/components/admin/home-nav/home-slider-editor-payload.ts` and
   `tests/m4/ui/home-slider-editor-form.test.ts` for slider payload regression
   coverage.
+- Added admin-only legacy media preview handling in
+  `src/features/public-content/shared.ts`, `src/contracts/post-admin.ts`,
+  `src/lib/content/post-admin-transport.ts`, and
+  `src/features/home-nav/admin-detail.ts`.
+- Updated admin thumbnail regression coverage for legacy media without image
+  dimensions.
 
 ## Contract/schema/migration impact
 
@@ -55,6 +71,8 @@ Follow-up bug fix in the same branch:
   callers keep the old default Indonesian behavior.
 - New `listPublicHomeFacilities` returns only active, published, image-backed
   facility cards for homepage use.
+- `AdminPostEditorViewSchema` now uses an admin-only media preview schema for
+  cover/gallery previews. Public post and public media schemas are unchanged.
 
 ## Verification
 
@@ -81,10 +99,26 @@ Follow-up bug fix verification:
 | `git diff --check` | Passed |
 | `TASK_MANIFEST=coordination/tasks/M4-GPT-FACILITY-HOMEPAGE-ADMIN.md TASK_BASE=HEAD~1 npm run check:scope` | Passed, 6 changed files within lease |
 
+Second follow-up bug fix verification:
+
+| Command | Result |
+|---|---|
+| `npx shadcn@latest info` | Passed |
+| `npx vitest run tests/m4/ui/admin-legacy-media-preview.test.ts tests/m3/ui/admin-media-library-browse.test.tsx tests/m3/contracts/post-admin-transport-contract.test.ts` | Passed, 3 files / 59 tests |
+| `npm run lint` | Passed |
+| `npm run typecheck` | Passed |
+| `npm run prisma:validate` | Passed |
+| `npm run test` | Passed, 95 files / 1173 tests |
+| `git diff --check` | Passed |
+| `npm run build` | Passed |
+| `TASK_MANIFEST=coordination/tasks/M4-GPT-FACILITY-HOMEPAGE-ADMIN.md TASK_BASE=HEAD~1 npm run check:scope` | Passed after adding `src/lib/content/post-admin-transport.ts` to the lease |
+
 ## Untested areas
 
 - Browser-level admin CRUD flow was not run with Playwright.
 - Real media picker interaction was not exercised against uploaded files.
+- Real legacy uploaded media was not manually opened in the browser; coverage is
+  contract/runtime/unit level plus full production build.
 
 ## Risks and follow-ups
 

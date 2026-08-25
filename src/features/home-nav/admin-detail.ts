@@ -1,4 +1,10 @@
-import {actorOrNull, configuredLink, mediaView, type PublicContentDatabase} from "@/features/public-content/shared";
+import {
+  actorOrNull,
+  adminImageMediaPreview,
+  configuredLink,
+  mediaView,
+  type PublicContentDatabase,
+} from "@/features/public-content/shared";
 
 export type HomeNavDetailResource = "HOME_SLIDER" | "STATISTIC" | "HOME_SECTION" | "SITE_SETTING" | "HOME_VIDEO";
 
@@ -34,7 +40,7 @@ export async function getHomeNavAdminDetail(
       if (!row) return {ok: false, code: "NOT_FOUND"};
       return {ok: true, data: {
         version: null,
-        media: mediaView(row.imageMedia), secondaryMedia: null,
+        media: adminImageMediaPreview(row.imageMedia), secondaryMedia: null,
         input: {
           imageMediaId: row.imageMediaId, cta: configuredLink(row.ctaUrl) ?? null,
           order: row.order, isVisible: row.isVisible,

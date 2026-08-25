@@ -3,6 +3,7 @@ import {describe, expect, it} from "vitest";
 import {
   ADMIN_POST_AUTOSAVE_INTERVAL_MS,
   AdminPostEditorViewSchema,
+  AdminPostMediaPreviewSchema,
   AdminPostListResultSchema,
   AdminPostListSearchParamsSchema,
   AdminPostMutationResponseSchema,
@@ -36,6 +37,7 @@ const MUTABLE_FIELDS = {
 };
 
 const CAPABILITIES = {update: true, publish: true, delete: true};
+const LEGACY_STORAGE_KEY = `2026/08/${"b".repeat(64)}.webp`;
 
 const ADMIN_SUMMARY = {
   id: "post-1",
@@ -182,6 +184,26 @@ describe("M3 Berita editor and command transport contract", () => {
     expect(AdminPostEditorViewSchema.safeParse({
       ...editorView, checksumSha256: "a".repeat(64),
     }).success).toBe(false);
+  });
+
+  it("keeps legacy cover media visible in the admin editor without weakening public media rules", () => {
+    const legacyCover = {
+      id: "media-legacy-1",
+      url: `/uploads/${LEGACY_STORAGE_KEY}`,
+      mimeType: "image/webp" as const,
+      size: 245_760,
+      alt: "",
+      isDecorative: true,
+      width: null,
+      height: null,
+    };
+
+    expect(AdminPostMediaPreviewSchema.safeParse(legacyCover).success).toBe(true);
+    expect(AdminPostEditorViewSchema.safeParse({
+      ...editorView,
+      coverMediaId: legacyCover.id,
+      cover: legacyCover,
+    }).success).toBe(true);
   });
 
   it("requires strict action envelopes and keeps actor/resource scope out of input", () => {

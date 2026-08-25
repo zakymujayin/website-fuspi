@@ -99,6 +99,23 @@ const AdminPostAuthorSchema = z.object({
   name: SafePersonNameSchema,
 }).strict();
 
+export const AdminPostMediaPreviewSchema = z.object({
+  id: PublicMediaViewSchema.shape.id,
+  url: PublicMediaViewSchema.shape.url,
+  mimeType: z.literal("image/webp"),
+  size: PublicMediaViewSchema.shape.size,
+  alt: PublicMediaViewSchema.shape.alt,
+  isDecorative: z.boolean(),
+  width: PublicMediaViewSchema.shape.width,
+  height: PublicMediaViewSchema.shape.height,
+}).strict();
+
+const AdminPostGalleryImageSchema = z.object({
+  id: PostIdSchema,
+  media: AdminPostMediaPreviewSchema,
+  caption: PublicPostImageSchema.shape.caption,
+}).strict();
+
 const AvailableLocalesSchema = z.array(LocaleSchema).min(1).max(3)
   .superRefine((locales, context) => {
     if (locales[0] !== "id" || new Set(locales).size !== locales.length) {
@@ -202,8 +219,8 @@ export const AdminPostEditorViewSchema = z.object({
   publishedAt: NullableInstantSchema,
   createdAt: z.iso.datetime({offset: true}),
   updatedAt: z.iso.datetime({offset: true}),
-  cover: PublicMediaViewSchema.nullable(),
-  images: z.array(PublicPostImageSchema).max(20),
+  cover: AdminPostMediaPreviewSchema.nullable(),
+  images: z.array(AdminPostGalleryImageSchema).max(20),
   capabilities: AdminPostCapabilitiesSchema,
 }).strict().superRefine((value, context) => {
   validatePublicationState(value, context);

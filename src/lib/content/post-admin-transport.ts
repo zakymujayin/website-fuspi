@@ -1,7 +1,6 @@
 import {Prisma} from "@/generated/prisma/client";
 
 import {ActiveDatabaseSessionSchema, type ActiveDatabaseSession} from "@/contracts/auth";
-import {PublicMediaViewSchema} from "@/contracts/media";
 import {
   AdminPostEditorViewSchema,
   AdminPostListQuerySchema,
@@ -17,7 +16,7 @@ import {
   type AdminPostListResult,
   type AdminPostMutationResponse,
 } from "@/contracts/post-admin";
-import {StorageKeySchema} from "@/contracts/storage";
+import {adminImageMediaPreview} from "@/features/public-content/shared";
 import {authorize} from "@/lib/auth/runtime/authorization";
 import {createPrismaClient} from "@/lib/db/client";
 import {
@@ -102,17 +101,7 @@ function safeCover(media: {
   width: number | null;
   height: number | null;
 } | null, uploadBase: string) {
-  if (!media || media.storageClass !== "PUBLIC" || media.alt === null || !StorageKeySchema.safeParse(media.storageKey).success) {
-    return null;
-  }
-  // PublicMediaViewSchema is `.strict()` and does not declare storageKey/storageClass; spreading the
-  // whole `media` would fail parsing on those extra keys. Pass only the declared fields.
-  const {id, mimeType, size, alt, isDecorative, width, height} = media;
-  const parsed = PublicMediaViewSchema.safeParse({
-    id, mimeType, size, alt, isDecorative, width, height,
-    url: `${uploadBase}/${media.storageKey}`,
-  });
-  return parsed.success ? parsed.data : null;
+  return adminImageMediaPreview(media, uploadBase);
 }
 
 export function normalizeAdminPostSearchParams(params: URLSearchParams) {

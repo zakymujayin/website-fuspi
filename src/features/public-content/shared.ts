@@ -103,6 +103,34 @@ export function mediaView(media: MediaRow, uploadBase = "/uploads") {
   return parsed.success ? parsed.data : null;
 }
 
+function adminPreviewAlt(value: string | null) {
+  const text = value?.trim() ?? "";
+  return text.length <= 500 && !/[\u0000-\u001f\u007f-\u009f]/u.test(text) ? text : "";
+}
+
+function adminPreviewDimension(value: number | null) {
+  return Number.isInteger(value) && value !== null && value > 0 && value <= 1_600 ? value : null;
+}
+
+export function adminImageMediaPreview(media: MediaRow, uploadBase = "/uploads") {
+  if (
+    !media || media.storageClass !== "PUBLIC" || media.mimeType !== "image/webp"
+    || media.size <= 0 || media.size > 20_971_520
+    || !StorageKeySchema.safeParse(media.storageKey).success
+  ) return null;
+  const alt = adminPreviewAlt(media.alt);
+  return {
+    id: media.id,
+    url: `${uploadRoot(uploadBase)}/${media.storageKey}`,
+    mimeType: "image/webp" as const,
+    size: media.size,
+    alt,
+    isDecorative: alt.length === 0 ? true : media.isDecorative,
+    width: adminPreviewDimension(media.width),
+    height: adminPreviewDimension(media.height),
+  };
+}
+
 export function publicPdfMedia(media: MediaRow) {
   return Boolean(media && media.storageClass === "PUBLIC" && media.mimeType === "application/pdf"
     && media.storageKey.endsWith(".pdf") && StorageKeySchema.safeParse(media.storageKey).success

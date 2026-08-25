@@ -333,12 +333,17 @@ describe("safe local thumbnail conversion versus intentional placeholder", () =>
     expect(resolved).toEqual({ kind: "pdf" });
   });
 
-  it("falls back to a placeholder when image dimensions are missing", () => {
+  it("still renders legacy image media when dimensions are missing", () => {
     const resolved = resolveAdminMediaThumbnail(
       { ...SAMPLE_ITEM, width: null, height: null },
       UPLOAD_PUBLIC_URL,
     );
-    expect(resolved).toEqual({ kind: "placeholder" });
+    expect(resolved).toMatchObject({
+      kind: "image",
+      src: "/uploads/2026/01/cover.webp",
+      width: null,
+      height: null,
+    });
   });
 
   it("constrains a relative local path to the /uploads contract, even when same-origin", () => {

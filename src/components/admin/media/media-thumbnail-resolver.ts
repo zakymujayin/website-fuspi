@@ -1,7 +1,7 @@
 import type { AdminMediaItem } from "@/contracts/media-admin";
 
 export type ResolvedAdminMediaThumbnail =
-  | { kind: "image"; src: string; width: number; height: number; alt: string; isDecorative: boolean }
+  | { kind: "image"; src: string; width: number | null; height: number | null; alt: string; isDecorative: boolean }
   | { kind: "pdf" }
   | { kind: "placeholder" };
 
@@ -29,7 +29,6 @@ export function resolveAdminMediaThumbnail(
   uploadPublicUrl: string,
 ): ResolvedAdminMediaThumbnail {
   if (item.mimeType === "application/pdf") return { kind: "pdf" };
-  if (item.width === null || item.height === null) return { kind: "placeholder" };
 
   const isRelative = item.url.startsWith("/") && !item.url.startsWith("//");
   if (isRelative) {
@@ -39,8 +38,8 @@ export function resolveAdminMediaThumbnail(
           src: item.url,
           width: item.width,
           height: item.height,
-          alt: item.alt,
-          isDecorative: item.isDecorative,
+          alt: item.alt ?? "",
+          isDecorative: item.isDecorative || item.alt === null,
         }
       : { kind: "placeholder" };
   }
@@ -62,7 +61,7 @@ export function resolveAdminMediaThumbnail(
     src: pathname,
     width: item.width,
     height: item.height,
-    alt: item.alt,
-    isDecorative: item.isDecorative,
+    alt: item.alt ?? "",
+    isDecorative: item.isDecorative || item.alt === null,
   };
 }
