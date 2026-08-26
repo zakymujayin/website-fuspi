@@ -14,11 +14,11 @@ export function VideosSection({ video, eyebrow, galleryVideos = [], galleryTitle
   const hasGallery = galleryVideos.length > 0;
 
   return (
-    <section className="border-t border-slate-200 bg-gradient-to-br from-royal-50 via-white to-royal-50 py-12 md:py-16">
+    <section className="border-t border-slate-200 bg-gradient-to-br from-royal-100/70 via-royal-50 to-royal-100/70 py-12 md:py-16">
       <Container>
         <div className="mb-10 text-center">
           <span className="text-xs font-medium tracking-wide text-royal-600 uppercase">{eyebrow}</span>
-          <h2 className="mt-2 font-display text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
+          <h2 className="section-rule mt-2 font-display text-2xl font-bold tracking-tight text-slate-900 md:text-3xl [&::after]:mx-auto">
             {video.title}
           </h2>
           {video.description ? (

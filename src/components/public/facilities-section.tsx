@@ -3,11 +3,18 @@ import { getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/ui/container";
 import { ImageWithFallback } from "@/components/public/image-with-fallback";
+import { toFocalPoint } from "@/components/public/focal-point";
 import { Reveal } from "@/components/public/reveal";
 import { Link } from "@/i18n/navigation";
 import type { PublicHomeFacility } from "@/features/facility/domain";
+import { cn } from "@/lib/utils";
 
 type FacilitiesSectionProps = { items: readonly PublicHomeFacility[] };
+
+/* Cycling aspect ratios, not one size repeated: an organic gallery-wall
+ * rhythm without making any single tile "the big one" - the variation is
+ * per-position, not per-importance. */
+const ASPECT = ["aspect-[3/4]", "aspect-[4/3]", "aspect-square", "aspect-[4/3]"] as const;
 
 export async function FacilitiesSection({ items }: FacilitiesSectionProps) {
   const t = await getTranslations("Home");
@@ -15,14 +22,11 @@ export async function FacilitiesSection({ items }: FacilitiesSectionProps) {
   if (items.length === 0) return null;
 
   return (
-    <section className="border-t border-slate-200 bg-gradient-to-br from-slate-50 to-royal-50/40 py-10 md:py-14">
+    <section className="border-t border-slate-200 bg-gradient-to-br from-royal-50 to-royal-100/50 py-10 md:py-14">
       <Container>
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <span className="text-xs font-medium tracking-wide text-royal-600 uppercase">
-              {t("facilitiesEyebrow")}
-            </span>
-            <h2 className="mt-2 font-display text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
+            <h2 className="section-rule font-display text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
               {t("facilitiesTitle")}
             </h2>
           </div>
@@ -35,23 +39,25 @@ export async function FacilitiesSection({ items }: FacilitiesSectionProps) {
           </Link>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Gapless gallery wall, not spaced-out equal cards: rounded corners
+            live on the outer frame only, tiles butt against each other like
+            a real photo wall, and aspect ratios cycle for rhythm instead of
+            every tile being an identical 4:3 box. */}
+        <div className="grid grid-cols-2 gap-1 overflow-hidden rounded-2xl lg:grid-cols-4">
           {items.map((facility, index) => (
             <Reveal key={facility.id} index={index}>
-              <article className="group flex w-full flex-1 flex-col overflow-hidden rounded-xl shadow-md transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
-                <div className="relative aspect-[4/3] overflow-hidden">
-                  <ImageWithFallback
-                    src={facility.image?.url}
-                    alt={facility.image?.isDecorative ? "" : (facility.image?.alt ?? facility.caption)}
-                    className="object-cover transition-transform duration-500 group-hover:scale-105"
-                    sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-                  />
-                </div>
-                {/* Plaque-style caption: a solid color bar, not a white panel —
-                    keeps color present down to the smallest card. */}
-                <div className="bg-gradient-to-r from-navy-900 to-navy-950 px-4 py-3">
-                  <h3 className="font-display text-sm font-semibold text-white">{facility.caption}</h3>
-                </div>
+              <article className={cn("group relative flex w-full flex-1 overflow-hidden", ASPECT[index % ASPECT.length])}>
+                <ImageWithFallback
+                  src={facility.image?.url}
+                  alt={facility.image?.isDecorative ? "" : (facility.image?.alt ?? facility.caption)}
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
+                  focalPoint={toFocalPoint(facility.image)}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-navy-950/90 via-navy-950/10 to-transparent" />
+                <h3 className="absolute inset-x-0 bottom-0 px-4 py-3 font-display text-sm font-semibold text-white">
+                  {facility.caption}
+                </h3>
               </article>
             </Reveal>
           ))}

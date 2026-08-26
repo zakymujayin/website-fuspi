@@ -1,30 +1,16 @@
-import { ArrowRight, BookMarked, CalendarClock, LayoutDashboard, MessageSquareWarning } from "lucide-react";
+import { ArrowRight, BookOpenText, CalendarCheck2, MessageSquareWarning, MonitorCheck } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/public/reveal";
 import { Link } from "@/i18n/navigation";
-import { cn } from "@/lib/utils";
 
 type ServiceCard = {
   key: "sila" | "complaints" | "booking" | "ejournal";
-  icon: typeof LayoutDashboard;
+  icon: typeof MonitorCheck;
   href: string;
   external: boolean;
 };
-
-/**
- * A tonal family, not four unrelated hues: every card sits on the same
- * royal-50 field, the accent cycles within the two locked identity colors
- * (royal blue, brass gold). Brass keeps navy-900 text/icon — white on
- * brass-500 fails WCAG AA (2.45:1).
- */
-const ACCENT = [
-  { chip: "bg-gradient-to-br from-royal-500 to-royal-600 text-white", ring: "bg-royal-500" },
-  { chip: "bg-gradient-to-br from-royal-700 to-royal-800 text-white", ring: "bg-royal-700" },
-  { chip: "bg-gradient-to-br from-brass-400 to-brass-500 text-navy-900", ring: "bg-brass-500" },
-  { chip: "bg-gradient-to-br from-navy-800 to-navy-900 text-white", ring: "bg-navy-900" },
-] as const;
 
 /**
  * SILA has no configured public URL yet (`NEXT_PUBLIC_SILA_URL` is unset) and
@@ -36,13 +22,13 @@ function buildServices(): readonly ServiceCard[] {
   return [
     {
       key: "sila",
-      icon: LayoutDashboard,
+      icon: MonitorCheck,
       href: silaUrl && silaUrl.length > 0 ? silaUrl : "/layanan",
       external: Boolean(silaUrl && silaUrl.length > 0),
     },
     { key: "complaints", icon: MessageSquareWarning, href: "/pengaduan", external: false },
-    { key: "booking", icon: CalendarClock, href: "/peminjaman", external: false },
-    { key: "ejournal", icon: BookMarked, href: "/layanan", external: false },
+    { key: "booking", icon: CalendarCheck2, href: "/peminjaman", external: false },
+    { key: "ejournal", icon: BookOpenText, href: "/layanan", external: false },
   ] as const;
 }
 
@@ -51,14 +37,21 @@ export async function ServicesSection() {
   const services = buildServices();
 
   return (
-    <section className="border-t border-slate-200 bg-gradient-to-b from-white to-royal-50/30 py-10 md:py-14">
-      <Container>
+    <section className="relative overflow-hidden border-t border-slate-200 bg-gradient-to-b from-royal-50 to-royal-100/60 pt-10 pb-16 md:pt-14 md:pb-20">
+      {/* Soft glow, not a shape: fades to nothing at its own edges, tucked
+          into the top-right corner away from the card grid. */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            "radial-gradient(ellipse 55% 65% at 88% 5%, rgba(65,105,225,0.14), transparent 60%)",
+        }}
+      />
+
+      <Container className="relative">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <span className="text-xs font-medium tracking-wide text-royal-600 uppercase">
-              {t("servicesEyebrow")}
-            </span>
-            <h2 className="mt-2 font-display text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
+            <h2 className="section-rule font-display text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
               {t("servicesTitle")}
             </h2>
             <p className="mt-2 max-w-2xl text-sm text-slate-500">{t("servicesDescription")}</p>
@@ -72,57 +65,65 @@ export async function ServicesSection() {
           </Link>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {services.map((service, index) => {
-            const accent = ACCENT[index % ACCENT.length];
-            const title = t(`service.${service.key}.title`);
-            const description = t(`service.${service.key}.description`);
-            const cardContent = (
-              <>
-                {/* Directional cue, not decoration: the rule only appears on
-                    hover/focus, pointing at "this is the active item." */}
-                <span
-                  aria-hidden
-                  className={cn("absolute inset-x-0 top-0 h-1 origin-left scale-x-0 transition-transform duration-200 group-hover:scale-x-100", accent.ring)}
-                />
-                <span className={cn("flex size-12 shrink-0 items-center justify-center rounded-lg", accent.chip)}>
-                  <service.icon aria-hidden className="size-5" strokeWidth={1.5} />
-                </span>
-                <div className="mt-5 flex-1">
-                  <h3 className="font-display text-base font-semibold leading-snug text-slate-900">
-                    {title}
-                  </h3>
-                  <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{description}</p>
+        {/* One panel split into four, not four repeated tiles: a single
+            shape reads as a directory/toolbar rather than a stack of
+            generic feature cards. The fill runs royal to navy across the
+            panel (both already-locked identity colors) instead of one flat
+            blue, so it isn't just "white on blue" end to end. */}
+        <div className="overflow-hidden rounded-2xl bg-gradient-to-r from-royal-600 via-royal-900 to-navy-950">
+          <div className="grid divide-y divide-white/10 sm:grid-cols-2 sm:divide-y-0 sm:divide-x lg:grid-cols-4">
+            {services.map((service, index) => {
+              const title = t(`service.${service.key}.title`);
+              const description = t(`service.${service.key}.description`);
+              const content = (
+                <div className="group flex h-full flex-col gap-4 p-6 transition-colors duration-200 hover:bg-white/5 md:p-7">
+                  <service.icon aria-hidden className="size-6 text-brass-400" strokeWidth={1.5} />
+                  <div className="flex-1">
+                    <h3 className="font-display text-base font-semibold text-white md:text-lg">{title}</h3>
+                    <p className="mt-1.5 text-xs leading-relaxed text-slate-300 md:text-sm">{description}</p>
+                  </div>
+                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-white/70 transition-colors duration-200 group-hover:text-white">
+                    {t("serviceCta")}
+                    <ArrowRight
+                      aria-hidden
+                      className="size-3.5 transition-transform duration-200 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180"
+                      strokeWidth={1.5}
+                    />
+                  </span>
                 </div>
-                <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-royal-600 transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5">
-                  {t("serviceCta")}
-                  {service.external ? (
-                    <ArrowRight aria-hidden className="size-3 -rotate-45 rtl:scale-x-[-1]" strokeWidth={1.5} />
-                  ) : (
-                    <ArrowRight aria-hidden className="size-3 rtl:rotate-180" strokeWidth={1.5} />
-                  )}
-                </span>
-              </>
-            );
-            const cardClass =
-              "group relative flex w-full flex-1 flex-col overflow-hidden rounded-xl border border-royal-100 bg-royal-50 p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-royal-200 hover:shadow-md";
+              );
 
-            return (
-              <Reveal key={service.key} index={index}>
-                {service.external ? (
-                  <a href={service.href} target="_blank" rel="noopener noreferrer" className={cardClass}>
-                    {cardContent}
-                  </a>
-                ) : (
-                  <Link href={service.href} className={cardClass}>
-                    {cardContent}
-                  </Link>
-                )}
-              </Reveal>
-            );
-          })}
+              return (
+                <Reveal key={service.key} index={index}>
+                  {service.external ? (
+                    <a href={service.href} target="_blank" rel="noopener noreferrer" className="block h-full">
+                      {content}
+                    </a>
+                  ) : (
+                    <Link href={service.href} className="block h-full">
+                      {content}
+                    </Link>
+                  )}
+                </Reveal>
+              );
+            })}
+          </div>
         </div>
       </Container>
+
+      {/* Echoes the hero's signature wave at a smaller scale, so the section
+          flows into News below instead of cutting off on a flat hairline.
+          Fill matches News's own starting background exactly, same formula
+          as the hero-to-dean seam: the curve is the transition, not a gap.
+          No accent line: a soft shadow under the curve instead. */}
+      <svg
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-12 w-full text-white drop-shadow-[0_-4px_12px_rgba(15,23,42,0.10)] md:h-16"
+        viewBox="0 0 1440 100"
+        preserveAspectRatio="none"
+      >
+        <path d="M0,50 C480,100 960,0 1440,50 L1440,100 L0,100 Z" fill="currentColor" />
+      </svg>
     </section>
   );
 }

@@ -3,7 +3,9 @@ import { getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/ui/container";
 import { ImageWithFallback } from "@/components/public/image-with-fallback";
+import { toFocalPoint } from "@/components/public/focal-point";
 import { formatJakartaPublishedDate } from "@/components/public/post/format";
+import { Reveal } from "@/components/public/reveal";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import type { PublicHomeAchievement } from "@/features/achievement/domain";
@@ -31,13 +33,11 @@ type AchievementsSectionProps = {
 };
 
 /**
- * A static, centered grid — not a scroll carousel. At the homepage's 3-4
- * item count a carousel reads as arbitrary rather than deliberate, and a
- * flex scroll-row can't center content without breaking scrolling (it
- * silently reverts to start-aligned once `overflow-x-auto` is present).
- * The plaque-card look (avatar + level badge, dark navy band) is kept as
- * the section's own identity so it still doesn't read as another
- * photo-grid like Facilities/Columns.
+ * Photo-led plaque, not an image-then-text-panel card: the portrait fills
+ * the whole tile and the name/title sit directly on it under a gradient, so
+ * every item stays equal weight (no card enlarged over the others) while
+ * still reading as a different treatment than Columns' image-over-white-
+ * panel cards or Facilities' gallery tiles.
  */
 export async function AchievementsSection({ items, locale, title, description, ctaLabel }: AchievementsSectionProps) {
   const t = await getTranslations("Home");
@@ -45,15 +45,27 @@ export async function AchievementsSection({ items, locale, title, description, c
   if (items.length === 0) return null;
 
   return (
-    <section className="border-t border-slate-200 bg-gradient-to-br from-navy-900 to-navy-950 py-12 md:py-16">
-      <Container>
+    // Royal blue, not navy: docs/03-design-system.md locks royal-500 as the
+    // primary identity color and reserves navy for header/footer depth.
+    <section className="relative overflow-hidden border-t border-slate-200 bg-gradient-to-br from-royal-800 to-royal-950 py-12 md:py-16">
+      {/* Soft glow, not a shape: a radial-gradient blob fades to nothing at
+          its own edges, so there's no hard boundary line cutting across
+          the band. */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            "radial-gradient(ellipse 55% 70% at 90% 10%, rgba(214,180,94,0.22), transparent 60%)",
+        }}
+      />
+      <Container className="relative">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <span className="inline-flex items-center gap-1.5 text-xs font-medium tracking-wide text-brass-400 uppercase">
               <Trophy aria-hidden className="size-3.5" strokeWidth={1.5} />
               {t("achievementsEyebrow")}
             </span>
-            <h2 className="mt-2 font-display text-2xl font-bold tracking-tight text-white md:text-3xl">
+            <h2 className="section-rule mt-2 font-display text-2xl font-bold tracking-tight text-white md:text-3xl">
               {title}
             </h2>
             {description ? <p className="mt-2 max-w-2xl text-sm text-slate-300">{description}</p> : null}
@@ -68,30 +80,30 @@ export async function AchievementsSection({ items, locale, title, description, c
         </div>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {items.map((achievement) => (
-            <Link
-              key={achievement.id}
-              href={`/prestasi/${achievement.slug}`}
-              className="group flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-200 hover:-translate-y-1 hover:border-brass-400/40 hover:bg-white/10"
-            >
-              <div className="relative aspect-[4/3] w-full overflow-hidden">
-                <ImageWithFallback src={achievement.media?.url} alt="" className="object-cover" sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" />
+          {items.map((achievement, index) => (
+            <Reveal key={achievement.id} index={index}>
+              <Link
+                href={`/prestasi/${achievement.slug}`}
+                className="group relative flex aspect-[3/4] w-full flex-1 flex-col justify-end overflow-hidden rounded-2xl border border-white/10 transition-all duration-200 hover:-translate-y-1"
+              >
+                <ImageWithFallback src={achievement.media?.url} alt="" className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw" focalPoint={toFocalPoint(achievement.media)} />
+                <div className="absolute inset-0 bg-gradient-to-t from-navy-950/95 via-navy-950/45 to-transparent" />
                 <span className={cn("absolute start-3 top-3 inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold", LEVEL_BADGE[achievement.level] ?? "bg-navy-800 text-white")}>
                   {t(`achievementLevel.${LEVEL_MESSAGE_KEY[achievement.level] ?? "lokal"}`)}
                 </span>
-              </div>
-              <div className="flex flex-1 flex-col gap-3 p-6">
-                <p className="truncate text-sm font-semibold text-white">{achievement.studentName}</p>
-                <h3 className="flex-1 font-display text-lg font-bold leading-snug text-balance text-white group-hover:text-brass-300">
-                  {achievement.title}
-                </h3>
-                {achievement.achievedAt ? (
-                  <p className="text-xs text-slate-400">
-                    {formatJakartaPublishedDate(new Date(achievement.achievedAt), locale)}
-                  </p>
-                ) : null}
-              </div>
-            </Link>
+                <div className="relative flex flex-col gap-1.5 p-5">
+                  <p className="truncate text-xs font-semibold text-white/80">{achievement.studentName}</p>
+                  <h3 className="font-display text-base font-bold leading-snug text-balance text-white group-hover:text-brass-300">
+                    {achievement.title}
+                  </h3>
+                  {achievement.achievedAt ? (
+                    <p className="text-xs text-slate-300">
+                      {formatJakartaPublishedDate(new Date(achievement.achievedAt), locale)}
+                    </p>
+                  ) : null}
+                </div>
+              </Link>
+            </Reveal>
           ))}
         </div>
       </Container>

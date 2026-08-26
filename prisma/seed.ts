@@ -270,7 +270,7 @@ async function main() {
   }
 
   const statistics = [
-    { id: "stat-1", value: "5", suffix: "", icon: "book-open", id_: "Program Studi", en_: "Study Programs", ar_: "برامج دراسية" },
+    { id: "stat-1", value: "3", suffix: "", icon: "book-open", id_: "Program Studi", en_: "Study Programs", ar_: "برامج دراسية" },
     { id: "stat-2", value: "62", suffix: "+", icon: "users", id_: "Dosen", en_: "Lecturers", ar_: "أعضاء هيئة التدريس" },
     { id: "stat-3", value: "1200", suffix: "+", icon: "graduation-cap", id_: "Mahasiswa", en_: "Students", ar_: "الطلاب" },
     { id: "stat-4", value: "24", suffix: "+", icon: "handshake", id_: "Mitra Kerjasama", en_: "Partners", ar_: "شركاء" },
@@ -323,19 +323,19 @@ async function main() {
     },
     {
       id: "slider-2",
-      label: "5 Program Studi",
-      id_: { title: "Unggul dalam Kajian Keislaman", subtitle: "Lima program studi dirancang untuk membentuk akademisi dan profesional yang berdaya saing.", ctaLabel: "Lihat Program" },
-      en_: { title: "Excellence in Islamic Studies", subtitle: "Five study programs shaping competitive academics and professionals.", ctaLabel: "See Programs" },
-      ar_: { title: "التميز في الدراسات الإسلامية", subtitle: "خمسة برامج دراسية لإعداد أكاديميين ومحترفين تنافسيين.", ctaLabel: "استعرض البرامج" },
+      label: "3 Program Studi",
+      id_: { title: "Unggul dalam Kajian Keislaman", subtitle: "Tiga program studi dirancang untuk membentuk akademisi dan profesional yang berdaya saing.", ctaLabel: "Lihat Program" },
+      en_: { title: "Excellence in Islamic Studies", subtitle: "Three study programs shaping competitive academics and professionals.", ctaLabel: "See Programs" },
+      ar_: { title: "التميز في الدراسات الإسلامية", subtitle: "ثلاثة برامج دراسية لإعداد أكاديميين ومحترفين تنافسيين.", ctaLabel: "استعرض البرامج" },
       ctaUrl: "/prodi",
     },
     {
       id: "slider-3",
       label: "PMB 2026/2027",
-      id_: { title: "Jadi Bagian dari FUSPI", subtitle: "Bergabunglah dengan komunitas pembelajar yang mendalam dalam ilmu keislaman.", ctaLabel: "Hubungi Kami" },
-      en_: { title: "Become Part of FUSPI", subtitle: "Join a community of learners deeply rooted in Islamic knowledge.", ctaLabel: "Contact Us" },
-      ar_: { title: "كن جزءاً من الكلية", subtitle: "انضم إلى مجتمع من المتعلمين المتجذرين في المعرفة الإسلامية.", ctaLabel: "تواصل معنا" },
-      ctaUrl: "/kontak",
+      id_: { title: "Jadi Bagian dari FUSPI", subtitle: "Bergabunglah dengan komunitas pembelajar yang mendalam dalam ilmu keislaman.", ctaLabel: "Daftar PMB" },
+      en_: { title: "Become Part of FUSPI", subtitle: "Join a community of learners deeply rooted in Islamic knowledge.", ctaLabel: "Apply for Admission" },
+      ar_: { title: "كن جزءاً من الكلية", subtitle: "انضم إلى مجتمع من المتعلمين المتجذرين في المعرفة الإسلامية.", ctaLabel: "التقديم للقبول" },
+      ctaUrl: "https://pmb.uinbanten.ac.id",
     },
   ];
   for (const [index, slide] of slides.entries()) {

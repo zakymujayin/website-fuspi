@@ -265,6 +265,24 @@
         "UNAVAILABLE": "Media tidak dapat dihapus saat ini. Coba lagi beberapa saat lagi."
       }
     },
+    "focalPoint": {
+      "action": "Atur titik fokus",
+      "editorLabel": "Klik foto untuk menentukan titik fokus, atau gunakan tombol panah",
+      "hint": "Titik fokus: {x}%, {y}% — bagian ini akan tetap terlihat saat foto dipotong otomatis di berbagai ukuran.",
+      "cancel": "Batal",
+      "save": "Simpan titik fokus",
+      "saving": "Menyimpan…",
+      "error": {
+        "SESSION_INVALID": "Sesi Anda telah berakhir. Masuk kembali lalu coba lagi.",
+        "CSRF_INVALID": "Permintaan tidak dapat diverifikasi. Muat ulang halaman lalu coba lagi.",
+        "REQUEST_INVALID": "Permintaan tidak dapat diproses. Muat ulang halaman lalu coba lagi.",
+        "VALIDATION_FAILED": "Titik fokus tidak valid.",
+        "NOT_FOUND": "Media tidak ditemukan atau Anda tidak memiliki akses.",
+        "MEDIA_IN_USE": "Titik fokus tidak dapat disimpan saat ini.",
+        "UPLOAD_FAILED": "Titik fokus tidak dapat disimpan saat ini. Coba lagi.",
+        "UNAVAILABLE": "Titik fokus tidak dapat disimpan saat ini. Coba lagi beberapa saat lagi."
+      }
+    },
     "pagination": {
       "ariaLabel": "Navigasi halaman pustaka media",
       "previous": "Halaman sebelumnya",
@@ -620,9 +638,39 @@
     "decorative": "Dekoratif (tanpa teks alternatif)",
     "selectedLabel": "Gambar terpilih",
     "removeLabel": "Hapus {name}",
+    "focalPointEditorLabel": "Klik foto untuk menentukan titik fokus, atau gunakan tombol panah",
+    "focalPointHint": "Titik fokus: {x}%, {y}% — bagian ini akan tetap terlihat saat foto dipotong otomatis di berbagai ukuran.",
     "action": "Unggah",
     "uploading": "Mengunggah…",
     "success": "{count} berkas berhasil diunggah.",
+    "validation": {
+      "missing": "Pilih berkas terlebih dahulu.",
+      "count": "Maksimal 20 gambar per unggahan.",
+      "type": "Jenis berkas tidak diperbolehkan.",
+      "size": "Ukuran berkas melebihi batas.",
+      "altRequired": "Isi teks alternatif atau tandai dekoratif.",
+      "altNotEmpty": "Gambar dekoratif tidak boleh memiliki teks alternatif."
+    },
+    "error": {
+      "SESSION_INVALID": "Sesi Anda telah berakhir. Masuk kembali lalu coba lagi.",
+      "CSRF_INVALID": "Permintaan tidak dapat diverifikasi. Muat ulang halaman lalu coba lagi.",
+      "REQUEST_INVALID": "Permintaan tidak dapat diproses. Periksa berkas Anda lalu coba lagi.",
+      "VALIDATION_FAILED": "Berkas atau data tidak valid. Periksa lalu coba lagi.",
+      "NOT_FOUND": "Sumber daya tidak ditemukan.",
+      "MEDIA_IN_USE": "Media sedang digunakan.",
+      "UPLOAD_FAILED": "Unggahan gagal diproses. Coba lagi.",
+      "UNAVAILABLE": "Unggahan tidak dapat diproses saat ini. Coba lagi beberapa saat lagi."
+    }
+  },
+  "AdminMediaPickerUpload": {
+    "title": "Unggah foto baru",
+    "decorative": "Dekoratif (tanpa teks alternatif)",
+    "alt": "Teks alternatif",
+    "focalPointEditorLabel": "Klik foto untuk menentukan titik fokus, atau gunakan tombol panah",
+    "focalPointHint": "Titik fokus: {x}%, {y}%",
+    "action": "Unggah & pilih",
+    "uploading": "Mengunggah…",
+    "cancel": "Batal",
     "validation": {
       "missing": "Pilih berkas terlebih dahulu.",
       "count": "Maksimal 20 gambar per unggahan.",
@@ -1142,7 +1190,7 @@
     "partnersDescription": "Jaringan kemitraan FUSPI dengan perguruan tinggi dan lembaga keislaman nasional.",
     "footerCtaTitle": "Siap bergabung bersama kami?",
     "footerCtaDescription": "Kenali lebih dekat FUSPI dan temukan program studi yang sesuai dengan minat dan bakat Anda.",
-    "footerCtaButton": "Hubungi Kami",
+    "footerCtaButton": "Daftar PMB",
     "deanWelcome": "Sambutan Dekan",
     "deanCta": "Profil Pimpinan",
     "deanFallbackName": "Dekan FUSPI",
@@ -1183,7 +1231,7 @@
     "facilitiesTitle": "Sarana dan Prasarana",
     "programsEyebrow": "Jenjang Pendidikan",
     "ctaEyebrow": "Bergabung",
-    "ctaSlogan": "Critically Locally Globally",
+    "ctaSlogan": "Kritis Berakar Lokal Mendunia",
     "advantage": {
       "quran": {
         "title": "Kajian Al-Qur'an & Tafsir",

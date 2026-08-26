@@ -265,6 +265,24 @@
         "UNAVAILABLE": "The media cannot be deleted right now. Please try again shortly."
       }
     },
+    "focalPoint": {
+      "action": "Set focal point",
+      "editorLabel": "Click the photo to set the focal point, or use the arrow keys",
+      "hint": "Focal point: {x}%, {y}% — this part stays visible when the photo is auto-cropped at different sizes.",
+      "cancel": "Cancel",
+      "save": "Save focal point",
+      "saving": "Saving…",
+      "error": {
+        "SESSION_INVALID": "Your session has ended. Sign in again and retry.",
+        "CSRF_INVALID": "The request could not be verified. Reload the page and try again.",
+        "REQUEST_INVALID": "The request could not be processed. Reload the page and try again.",
+        "VALIDATION_FAILED": "The focal point is invalid.",
+        "NOT_FOUND": "The media was not found or you do not have access.",
+        "MEDIA_IN_USE": "The focal point cannot be saved right now.",
+        "UPLOAD_FAILED": "The focal point cannot be saved right now. Try again.",
+        "UNAVAILABLE": "The focal point cannot be saved right now. Please try again shortly."
+      }
+    },
     "pagination": {
       "ariaLabel": "Media library page navigation",
       "previous": "Previous page",
@@ -620,6 +638,8 @@
     "decorative": "Decorative (no alternative text)",
     "selectedLabel": "Selected images",
     "removeLabel": "Remove {name}",
+    "focalPointEditorLabel": "Click the photo to set the focal point, or use the arrow keys",
+    "focalPointHint": "Focal point: {x}%, {y}% — this part stays visible when the photo is auto-cropped at different sizes.",
     "action": "Upload",
     "uploading": "Uploading…",
     "success": "{count} file(s) uploaded.",
@@ -630,6 +650,34 @@
       "size": "The file exceeds the size limit.",
       "altRequired": "Enter alternative text or mark decorative.",
       "altNotEmpty": "A decorative image must have no alternative text."
+    },
+    "error": {
+      "SESSION_INVALID": "Your session has ended. Sign in again and retry.",
+      "CSRF_INVALID": "The request could not be verified. Reload the page and try again.",
+      "REQUEST_INVALID": "The request could not be processed. Check your file and try again.",
+      "VALIDATION_FAILED": "The file or data is invalid. Check and try again.",
+      "NOT_FOUND": "The resource was not found.",
+      "MEDIA_IN_USE": "The media is in use.",
+      "UPLOAD_FAILED": "The upload could not be processed. Try again.",
+      "UNAVAILABLE": "The upload cannot be processed right now. Please try again shortly."
+    }
+  },
+  "AdminMediaPickerUpload": {
+    "title": "Upload a new photo",
+    "decorative": "Decorative (no alternative text)",
+    "alt": "Alternative text",
+    "focalPointEditorLabel": "Click the photo to set the focal point, or use the arrow keys",
+    "focalPointHint": "Focal point: {x}%, {y}%",
+    "action": "Upload & select",
+    "uploading": "Uploading…",
+    "cancel": "Cancel",
+    "validation": {
+      "missing": "Choose a file first.",
+      "count": "Maximum 20 images per upload.",
+      "type": "That file type is not allowed.",
+      "size": "The file exceeds the size limit.",
+      "altRequired": "Add alternative text or mark it decorative.",
+      "altNotEmpty": "A decorative image cannot have alternative text."
     },
     "error": {
       "SESSION_INVALID": "Your session has ended. Sign in again and retry.",
@@ -1142,7 +1190,7 @@
     "partnersDescription": "FUSPI's partnership network with universities and national Islamic institutions.",
     "footerCtaTitle": "Ready to join us?",
     "footerCtaDescription": "Get to know FUSPI better and find a study program that matches your interests and talents.",
-    "footerCtaButton": "Contact Us",
+    "footerCtaButton": "Apply for Admission",
     "deanWelcome": "Dean's Welcome",
     "deanCta": "Leadership Profile",
     "deanFallbackName": "Dean of FUSPI",
@@ -1183,7 +1231,7 @@
     "facilitiesTitle": "Infrastructure",
     "programsEyebrow": "Academic Programs",
     "ctaEyebrow": "Join",
-    "ctaSlogan": "Critically Locally Globally",
+    "ctaSlogan": "Critical Rooted Local Global",
     "advantage": {
       "quran": {
         "title": "Qur'an & Tafsir Studies",

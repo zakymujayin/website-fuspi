@@ -1,7 +1,7 @@
 import { ArrowRight, Globe2, Handshake } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
-import { Link } from "@/i18n/navigation";
+import { pmbLink } from "@/components/public/nav-items";
 
 export async function HomeCtaSection() {
   const t = await getTranslations("Home");
@@ -9,26 +9,35 @@ export async function HomeCtaSection() {
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-royal-800 to-royal-950">
+      {/* Soft glow, not a shape: a radial-gradient blob fades to nothing at
+          its own edges, so there's no hard boundary line cutting across
+          the band. */}
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          backgroundImage:
+            "radial-gradient(ellipse 55% 80% at 85% 20%, rgba(114,142,239,0.35), transparent 60%)",
+        }}
+      />
       <div className="relative flex flex-col md:flex-row">
         <div className="flex-1 px-6 py-16 md:px-10 md:py-20 lg:px-14">
           <div className="mx-auto flex max-w-2xl flex-col items-start gap-5 text-start">
-            <span className="text-xs font-medium tracking-wide text-royal-300 uppercase">
-              {t("ctaEyebrow")}
-            </span>
-            <h2 className="font-display text-2xl font-bold tracking-tight text-white md:text-3xl">
+            <h2 className="section-rule font-display text-2xl font-bold tracking-tight text-white md:text-3xl">
               {t("footerCtaTitle")}
             </h2>
             <p className="max-w-prose text-base text-slate-300">
               {t("footerCtaDescription")}
             </p>
-            <Link
-              href="/kontak"
-              className="inline-flex h-11 items-center gap-2 rounded-lg bg-gradient-to-r from-brass-500 to-brass-400 px-5 text-sm font-semibold text-navy-900 transition-all duration-200 hover:from-brass-400 hover:to-brass-400 active:scale-[0.98]"
+            <a
+              href={pmbLink.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-11 items-center gap-2 rounded-lg bg-white px-5 text-sm font-semibold text-royal-700 transition-all duration-200 hover:bg-slate-100 active:scale-[0.98]"
             >
               <Handshake aria-hidden className="size-4" strokeWidth={1.5} />
               {t("footerCtaButton")}
               <ArrowRight aria-hidden className="size-4 rtl:rotate-180" strokeWidth={1.5} />
-            </Link>
+            </a>
           </div>
         </div>
         {/* Gold block carries the faculty motto — gradient kept within

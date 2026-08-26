@@ -15,10 +15,10 @@ export async function PartnersSection({ partners }: PartnersSectionProps) {
   if (partners.length === 0) return null;
 
   return (
-    <section className="border-t border-slate-200 bg-white py-16 md:py-20">
+    <section className="border-t border-slate-200 bg-gradient-to-b from-white to-royal-50/50 py-16 md:py-20">
       <Container>
         <div className="text-center">
-          <h2 className="font-display text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
+          <h2 className="section-rule font-display text-2xl font-bold tracking-tight text-slate-900 md:text-3xl [&::after]:mx-auto">
             {t("partnersTitle")}
           </h2>
           <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-500">
