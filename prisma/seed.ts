@@ -72,7 +72,7 @@ const SECTIONS: SectionCopy[] = [
     id: { title: "Sarana dan Prasarana", ctaLabel: "Semua Fasilitas" },
     en: { title: "Facilities", ctaLabel: "All Facilities" },
     ar: { title: "المرافق", ctaLabel: "جميع المرافق" },
-    ctaUrl: "/profil/fasilitas", itemLimit: 4,
+    ctaUrl: "/profil/fasilitas", itemLimit: 5,
   },
   {
     key: "NEWS",

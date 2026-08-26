@@ -4,6 +4,7 @@ import { Play } from "lucide-react";
 import { useState } from "react";
 
 import { ImageWithFallback } from "@/components/public/image-with-fallback";
+import { toFocalPoint } from "@/components/public/focal-point";
 import type { PublicHomeVideo } from "@/features/home-nav/public-query";
 import { cn } from "@/lib/utils";
 
@@ -38,7 +39,7 @@ function PlayButton() {
 type VideoPlayerProps = { video: PublicHomeVideo; className?: string };
 
 /**
- * Isolated client leaf (same pattern as PartnersMarquee): the poster stays
+ * Isolated client leaf (same pattern as PartnersWall): the poster stays
  * server-rendered by the parent's data, this component only owns the
  * click-to-embed interaction so the iframe never loads until asked for.
  */
@@ -67,6 +68,7 @@ export function VideoPlayer({ video, className }: VideoPlayerProps) {
         alt={video.poster?.isDecorative ? "" : (video.poster?.alt ?? video.title)}
         className="object-cover transition-transform duration-500 group-hover:scale-105"
         sizes="(min-width: 1024px) 60vw, 100vw"
+        focalPoint={toFocalPoint(video.poster)}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-navy-950/70 via-navy-950/10 to-transparent" />
       <div className="absolute inset-0 flex items-center justify-center">

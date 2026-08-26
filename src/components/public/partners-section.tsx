@@ -2,7 +2,7 @@ import { getTranslations } from "next-intl/server";
 import type { z } from "zod";
 
 import { Container } from "@/components/ui/container";
-import { PartnersMarquee } from "@/components/public/partners-marquee";
+import { PartnersWall } from "@/components/public/partners-wall";
 import type { PublicContentCardSchema } from "@/contracts/public-content";
 
 type PartnerCard = z.infer<typeof PublicContentCardSchema>;
@@ -25,10 +25,10 @@ export async function PartnersSection({ partners }: PartnersSectionProps) {
             {t("partnersDescription")}
           </p>
         </div>
+        <div className="mt-12">
+          <PartnersWall partners={partners} />
+        </div>
       </Container>
-      <div className="mt-12">
-        <PartnersMarquee partners={partners} />
-      </div>
     </section>
   );
 }

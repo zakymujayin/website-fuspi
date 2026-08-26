@@ -42,8 +42,8 @@ export async function SiteFooter() {
   return (
     <footer className="border-t border-white/10 bg-navy-950 pt-16 text-slate-300">
       <Container>
-        <div className="grid gap-8 pb-12 sm:grid-cols-2 lg:grid-cols-5">
-          <div className="flex flex-col gap-4">
+        <div className="grid gap-8 pb-12 sm:grid-cols-2 lg:grid-cols-6">
+          <div className="flex flex-col gap-4 lg:col-span-2">
             <BrandMark tone="dark" showLabel={false} />
             <address className="text-sm leading-relaxed text-slate-400 not-italic">
               <p className="font-medium text-slate-200">{institution.name}</p>
@@ -56,7 +56,7 @@ export async function SiteFooter() {
                 title={t("mapTitle")}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                className="h-36 w-full grayscale-[55%] contrast-[1.1]"
+                className="h-56 w-full grayscale-[55%] contrast-[1.1]"
                 style={{border: 0}}
               />
             </div>
