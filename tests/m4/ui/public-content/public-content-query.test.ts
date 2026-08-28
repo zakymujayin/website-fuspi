@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 const {
   normalizePublicContentAdminQuery,
+  buildPublicContentAdminHref,
   totalPagesFor,
   buildPaginationItems,
   PUBLIC_CONTENT_SLUG_MAP,
@@ -29,7 +30,7 @@ describe("normalizePublicContentAdminQuery", () => {
       year: 2025,
       search: "profil",
       direction: "desc",
-      pageSize: 20,
+      pageSize: 10,
     });
   });
 
@@ -45,7 +46,7 @@ describe("normalizePublicContentAdminQuery", () => {
       year: null,
       search: "",
       direction: "asc",
-      pageSize: 20,
+      pageSize: 10,
     });
   });
 
@@ -61,7 +62,7 @@ describe("normalizePublicContentAdminQuery", () => {
       year: null,
       search: "",
       direction: "asc",
-      pageSize: 20,
+      pageSize: 10,
     });
   });
 
@@ -77,7 +78,7 @@ describe("normalizePublicContentAdminQuery", () => {
       year: null,
       search: "",
       direction: "asc",
-      pageSize: 20,
+      pageSize: 10,
     });
   });
 
@@ -93,7 +94,7 @@ describe("normalizePublicContentAdminQuery", () => {
       year: null,
       search: "",
       direction: "asc",
-      pageSize: 20,
+      pageSize: 10,
     });
   });
 
@@ -109,7 +110,7 @@ describe("normalizePublicContentAdminQuery", () => {
       year: null,
       search: "",
       direction: "asc",
-      pageSize: 20,
+      pageSize: 10,
     });
   });
 
@@ -125,7 +126,7 @@ describe("normalizePublicContentAdminQuery", () => {
       year: null,
       search: "",
       direction: "asc",
-      pageSize: 20,
+      pageSize: 10,
     });
   });
 
@@ -141,7 +142,7 @@ describe("normalizePublicContentAdminQuery", () => {
       year: null,
       search: "",
       direction: "asc",
-      pageSize: 20,
+      pageSize: 10,
     });
   });
 
@@ -157,7 +158,7 @@ describe("normalizePublicContentAdminQuery", () => {
       year: null,
       search: "",
       direction: "asc",
-      pageSize: 20,
+      pageSize: 10,
     });
   });
 
@@ -174,7 +175,7 @@ describe("normalizePublicContentAdminQuery", () => {
       year: null,
       search: "",
       direction: "asc",
-      pageSize: 20,
+      pageSize: 10,
     });
   });
 
@@ -190,7 +191,7 @@ describe("normalizePublicContentAdminQuery", () => {
       year: null,
       search: "",
       direction: "asc",
-      pageSize: 20,
+      pageSize: 10,
     });
   });
 
@@ -206,7 +207,7 @@ describe("normalizePublicContentAdminQuery", () => {
       year: null,
       search: "",
       direction: "asc",
-      pageSize: 20,
+      pageSize: 10,
     });
   });
 
@@ -222,7 +223,7 @@ describe("normalizePublicContentAdminQuery", () => {
       year: null,
       search: "",
       direction: "asc",
-      pageSize: 20,
+      pageSize: 10,
     });
   });
 
@@ -238,7 +239,7 @@ describe("normalizePublicContentAdminQuery", () => {
       year: null,
       search: "",
       direction: "asc",
-      pageSize: 20,
+      pageSize: 10,
     });
   });
 
@@ -254,7 +255,7 @@ describe("normalizePublicContentAdminQuery", () => {
       year: 2025,
       search: "",
       direction: "asc",
-      pageSize: 20,
+      pageSize: 10,
     });
   });
 
@@ -268,7 +269,7 @@ describe("normalizePublicContentAdminQuery", () => {
       year: null,
       search: "",
       direction: "asc",
-      pageSize: 20,
+      pageSize: 10,
     });
   });
 
@@ -287,7 +288,7 @@ describe("normalizePublicContentAdminQuery", () => {
       year: 2024,
       search: "beasiswa",
       direction: "desc",
-      pageSize: 20,
+      pageSize: 10,
     });
   });
 
@@ -299,6 +300,28 @@ describe("normalizePublicContentAdminQuery", () => {
   it("strips whitespace from category", () => {
     const result = normalizePublicContentAdminQuery({ category: "  umum  " }, RESOURCE);
     expect(result.category).toBe("umum");
+  });
+
+  it("defaults page size to 10 and accepts the enum values", () => {
+    expect(normalizePublicContentAdminQuery({}, RESOURCE).pageSize).toBe(10);
+    expect(normalizePublicContentAdminQuery({ pageSize: "50" }, RESOURCE).pageSize).toBe(50);
+  });
+
+  it("collapses when pageSize is not an allowed literal", () => {
+    expect(normalizePublicContentAdminQuery({ visibility: "PUBLIC", pageSize: "25" }, RESOURCE))
+      .toMatchObject({ visibility: "ALL", pageSize: 10 });
+  });
+});
+
+describe("buildPublicContentAdminHref", () => {
+  it("serializes a non-default page size in the href", () => {
+    expect(buildPublicContentAdminHref("kerjasama", { pageSize: 20 }))
+      .toBe("/admin/kerjasama?pageSize=20");
+  });
+
+  it("omits page size 10 from the href", () => {
+    expect(buildPublicContentAdminHref("kerjasama", { pageSize: 10 }))
+      .toBe("/admin/kerjasama");
   });
 });
 

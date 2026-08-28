@@ -5,10 +5,11 @@ export const PUBLIC_CONTENT_RESOURCES = [
   "DOCUMENT", "ALBUM", "EVENT", "FAQ", "TESTIMONIAL",
 ] as const;
 
-export const PUBLIC_CONTENT_ADMIN_PAGE_SIZE = 20;
+export const PUBLIC_CONTENT_ADMIN_PAGE_SIZE = 10;
 export const PUBLIC_CONTENT_SEARCH_MAX_LENGTH = 100;
 
-const ALLOWED_QUERY_KEYS = new Set(["page", "visibility", "translationStatus", "category", "year", "search", "direction"]);
+const ALLOWED_QUERY_KEYS = new Set(["page", "visibility", "translationStatus", "category", "year", "search", "direction", "pageSize"]);
+const PAGE_SIZE_VALUES = new Set(["10", "20", "50"]);
 
 const STRICT_PAGE_PATTERN = /^(?:[1-9]\d{0,3}|10000)$/;
 const UNSAFE_TEXT_PATTERN = /[\u0000-\u001f\u007f-\u009f]/u;
@@ -33,7 +34,7 @@ const CANONICAL_QUERY = {
   year: null,
   search: "",
   direction: "asc" as const,
-  pageSize: 20 as const,
+  pageSize: 10 as const,
 };
 
 export function normalizePublicContentAdminQuery(
@@ -45,13 +46,14 @@ export function normalizePublicContentAdminQuery(
     if (!ALLOWED_QUERY_KEYS.has(key)) return {...CANONICAL_QUERY, resource};
   }
 
-  const {page: rawPage, visibility: rawVis, translationStatus: rawTs, category: rawCat, year: rawYear, search: rawSearch, direction: rawDir} = raw;
+  const {page: rawPage, visibility: rawVis, translationStatus: rawTs, category: rawCat, year: rawYear, search: rawSearch, direction: rawDir, pageSize: rawPageSize} = raw;
 
-  if (Array.isArray(rawPage) || Array.isArray(rawVis) || Array.isArray(rawTs) || Array.isArray(rawCat) || Array.isArray(rawYear) || Array.isArray(rawSearch) || Array.isArray(rawDir)) {
+  if (Array.isArray(rawPage) || Array.isArray(rawVis) || Array.isArray(rawTs) || Array.isArray(rawCat) || Array.isArray(rawYear) || Array.isArray(rawSearch) || Array.isArray(rawDir) || Array.isArray(rawPageSize)) {
     return {...CANONICAL_QUERY, resource};
   }
 
   if (rawPage !== undefined && !STRICT_PAGE_PATTERN.test(rawPage)) return {...CANONICAL_QUERY, resource};
+  if (rawPageSize !== undefined && !PAGE_SIZE_VALUES.has(rawPageSize)) return {...CANONICAL_QUERY, resource};
   if (rawVis !== undefined && !(["ALL", "PUBLIC", "HIDDEN", "EXPIRED"] as const).includes(rawVis as typeof CANONICAL_QUERY.visibility)) {
     return {...CANONICAL_QUERY, resource};
   }
@@ -78,7 +80,7 @@ export function normalizePublicContentAdminQuery(
     year,
     search,
     direction: (rawDir as "asc" | "desc") ?? "asc",
-    pageSize: 20,
+    pageSize: rawPageSize !== undefined ? (Number(rawPageSize) as 10 | 20 | 50) : 10,
   };
 }
 
@@ -100,17 +102,19 @@ export function toPublicContentAdminTransportQuery(query: PublicContentAdminNorm
 
 export function buildPublicContentAdminHref(
   resource: string,
-  {visibility = "ALL", search = "", direction = "desc", page = 1}: {
+  {visibility = "ALL", search = "", direction = "desc", page = 1, pageSize}: {
     visibility?: string;
     search?: string;
     direction?: string;
     page?: number;
+    pageSize?: 10 | 20 | 50;
   } = {},
 ): string {
   const params = new URLSearchParams();
   if (visibility !== "ALL") params.set("visibility", visibility);
   if (search) params.set("search", search);
   if (direction !== "desc") params.set("direction", direction);
+  if (pageSize && pageSize !== 10) params.set("pageSize", String(pageSize));
   if (page > 1) params.set("page", String(page));
   const query = params.toString();
   return query ? `/admin/${resource}?${query}` : `/admin/${resource}`;
