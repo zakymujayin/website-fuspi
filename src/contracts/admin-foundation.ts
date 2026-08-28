@@ -143,7 +143,7 @@ export function normalizeTaxonomySearchParams(params: URLSearchParams): Taxonomy
   const raw = RawTaxonomyListQuerySchema.parse(collectDuplicateAwareSearchParams(params));
   return TaxonomyListQuerySchema.parse({
     page: raw.page === undefined ? 1 : Number(raw.page),
-    pageSize: raw.pageSize === undefined ? 20 : Number(raw.pageSize),
+    pageSize: raw.pageSize === undefined ? 10 : Number(raw.pageSize),
     search: raw.search ?? "",
     direction: raw.direction ?? "ASC",
     kind: raw.kind ?? "ALL",

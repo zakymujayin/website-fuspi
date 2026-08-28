@@ -618,6 +618,22 @@
     "name": "الاسم",
     "notFound": "لم يتم العثور على التصنيف.",
     "unavailable": "تعذّر تحميل قائمة التصنيفات حاليًا.",
+    "searchPlaceholder": "ابحث في التصنيفات…",
+    "searchAriaLabel": "بحث التصنيفات",
+    "searchAction": "بحث",
+    "searchClear": "مسح",
+    "pageSizeLabel": "صفوف لكل صفحة",
+    "searchEmpty": {
+      "title": "لا توجد نتائج",
+      "description": "لا توجد تصنيفات تطابق بحثك."
+    },
+    "pagination": {
+      "ariaLabel": "التنقل بين صفحات قائمة التصنيفات",
+      "previous": "الصفحة السابقة",
+      "next": "الصفحة التالية",
+      "pageStatus": "صفحة {page} من {totalPages}",
+      "goToPage": "الانتقال إلى صفحة {page}"
+    },
     "kindLabel": {
       "CATEGORY": "فئة",
       "TAG": "وسم"

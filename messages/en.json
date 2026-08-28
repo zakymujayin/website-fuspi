@@ -618,6 +618,22 @@
     "name": "Name",
     "notFound": "Taxonomy not found.",
     "unavailable": "The taxonomy list cannot be loaded right now.",
+    "searchPlaceholder": "Search taxonomies…",
+    "searchAriaLabel": "Search taxonomies",
+    "searchAction": "Search",
+    "searchClear": "Clear",
+    "pageSizeLabel": "Rows per page",
+    "searchEmpty": {
+      "title": "No results",
+      "description": "No taxonomies match your search."
+    },
+    "pagination": {
+      "ariaLabel": "Taxonomy list pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "pageStatus": "Page {page} of {totalPages}",
+      "goToPage": "Go to page {page}"
+    },
     "kindLabel": {
       "CATEGORY": "Category",
       "TAG": "Tag"

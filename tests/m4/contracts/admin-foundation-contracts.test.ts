@@ -68,7 +68,7 @@ describe("Category and Tag contracts", () => {
   });
 
   it("normalizes taxonomy filters and rejects duplicate or Prisma-shaped query input", () => {
-    expect(normalizeTaxonomySearchParams(new URLSearchParams("kind=TAG&search=filsafat"))).toEqual({page: 1, pageSize: 20, search: "filsafat", direction: "ASC", kind: "TAG"});
+    expect(normalizeTaxonomySearchParams(new URLSearchParams("kind=TAG&search=filsafat"))).toEqual({page: 1, pageSize: 10, search: "filsafat", direction: "ASC", kind: "TAG"});
     expect(() => normalizeTaxonomySearchParams(new URLSearchParams("kind=TAG&kind=CATEGORY"))).toThrow();
     expect(() => normalizeTaxonomySearchParams(new URLSearchParams("select=posts"))).toThrow();
   });

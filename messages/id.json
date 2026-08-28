@@ -618,6 +618,22 @@
     "name": "Nama",
     "notFound": "Taksonomi tidak ditemukan.",
     "unavailable": "Daftar taksonomi sedang tidak dapat dimuat.",
+    "searchPlaceholder": "Cari taksonomi…",
+    "searchAriaLabel": "Cari taksonomi",
+    "searchAction": "Cari",
+    "searchClear": "Bersihkan",
+    "pageSizeLabel": "Baris per halaman",
+    "searchEmpty": {
+      "title": "Tidak ada hasil",
+      "description": "Tidak ada taksonomi yang cocok dengan pencarian Anda."
+    },
+    "pagination": {
+      "ariaLabel": "Navigasi halaman daftar taksonomi",
+      "previous": "Halaman sebelumnya",
+      "next": "Halaman berikutnya",
+      "pageStatus": "Hal {page} dari {totalPages}",
+      "goToPage": "Ke halaman {page}"
+    },
     "kindLabel": {
       "CATEGORY": "Kategori",
       "TAG": "Tag"
