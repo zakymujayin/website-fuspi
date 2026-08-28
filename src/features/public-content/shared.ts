@@ -17,12 +17,13 @@ export type Locale = "id" | "en" | "ar";
 
 export const MEDIA_SELECT = {
   id: true, storageKey: true, storageClass: true, mimeType: true, size: true,
-  alt: true, isDecorative: true, width: true, height: true,
+  alt: true, isDecorative: true, width: true, height: true, focalX: true, focalY: true,
 } as const;
 
 export type MediaRow = {
   id: string; storageKey: string; storageClass: string; mimeType: string; size: number;
   alt: string | null; isDecorative: boolean; width: number | null; height: number | null;
+  focalX: number | null; focalY: number | null;
 } | null;
 
 export type DocumentRow = {
@@ -99,6 +100,7 @@ export function mediaView(media: MediaRow, uploadBase = "/uploads") {
     id: media.id, url: `${uploadRoot(uploadBase)}/${media.storageKey}`,
     mimeType: media.mimeType, size: media.size, alt: media.alt,
     isDecorative: media.isDecorative, width: media.width, height: media.height,
+    focalX: media.focalX, focalY: media.focalY,
   });
   return parsed.success ? parsed.data : null;
 }
@@ -128,6 +130,8 @@ export function adminImageMediaPreview(media: MediaRow, uploadBase = "/uploads")
     isDecorative: alt.length === 0 ? true : media.isDecorative,
     width: adminPreviewDimension(media.width),
     height: adminPreviewDimension(media.height),
+    focalX: media.focalX,
+    focalY: media.focalY,
   };
 }
 

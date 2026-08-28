@@ -20,6 +20,8 @@ function item(id: string): AdminMediaItem {
     isDecorative: false,
     width: 1600,
     height: 900,
+    focalX: null,
+    focalY: null,
     originalName: `${id}.webp`,
     createdAt: "2026-08-25T00:00:00.000Z",
     uploaderName: "Admin",

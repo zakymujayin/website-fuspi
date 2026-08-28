@@ -214,7 +214,8 @@ async function mutateSiteSetting(
   const version = mutation.expectedVersion + 1;
   await tx.siteSetting.update({where: {id: "singleton"}, data: {
     deanName: input.deanName, deanPhotoId: input.deanPhotoMediaId, videoUrl: input.videoUrl,
-    videoPosterMediaId: input.videoPosterMediaId, email: input.email, phone: input.phone,
+    videoPosterMediaId: input.videoPosterMediaId, showProfileVideoInGallery: input.showProfileVideoInGallery,
+    email: input.email, phone: input.phone,
     facebookUrl: input.facebookUrl, instagramUrl: input.instagramUrl, youtubeUrl: input.youtubeUrl, xUrl: input.xUrl,
     logoMediaId: input.logoMediaId,
     accreditationLogoMediaId: input.accreditationLogoMediaId,

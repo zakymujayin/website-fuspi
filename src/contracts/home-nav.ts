@@ -48,7 +48,7 @@ const SiteSettingTranslationInputSchema = z.object({
 
 export const HomeSectionKeySchema = z.enum([
   "HERO", "QUICKLINK", "DEAN", "STATS", "INTRO", "PRODI", "ANNOUNCEMENT", "SERVICE",
-  "FACILITY", "NEWS", "PARTNERSHIP", "COLUMN", "ACHIEVEMENT", "VIDEO", "AGENDA", "TESTIMONIAL", "CTA",
+  "FACILITY", "NEWS", "PARTNERSHIP", "COLUMN", "ACHIEVEMENT", "VIDEO", "VIDEO_GALLERY", "AGENDA", "TESTIMONIAL", "CTA",
 ]);
 export const HomeNavResourceSchema = z.enum([
   "MENU_ITEM", "QUICK_LINK", "EXTERNAL_LINK", "HOME_SLIDER", "HOME_SECTION", "STATISTIC", "SITE_SETTING", "HOME_VIDEO",
@@ -116,7 +116,8 @@ export const HomeVideoInputSchema = z.object({
 
 export const SiteSettingInputSchema = z.object({
   deanName: OptionalText(255), deanPhotoMediaId: CmsIdentifierSchema.nullable(), videoUrl: CmsHttpsExternalUrlSchema.nullable(),
-  videoPosterMediaId: CmsIdentifierSchema.nullable(), email: ContactEmailSchema, phone: ContactPhoneSchema,
+  videoPosterMediaId: CmsIdentifierSchema.nullable(), showProfileVideoInGallery: z.boolean(),
+  email: ContactEmailSchema, phone: ContactPhoneSchema,
   facebookUrl: CmsHttpsExternalUrlSchema.nullable(), instagramUrl: CmsHttpsExternalUrlSchema.nullable(),
   youtubeUrl: CmsHttpsExternalUrlSchema.nullable(), xUrl: CmsHttpsExternalUrlSchema.nullable(),
   logoMediaId: CmsIdentifierSchema.nullable(), accreditationLogoMediaId: CmsIdentifierSchema.nullable(),
@@ -237,7 +238,8 @@ const PublicVideoSchema = z.object({url: CmsHttpsExternalUrlSchema, poster: Publ
   title: RequiredText(500), description: OptionalText(100_000)}).strict();
 export const PublicSiteSettingSchema = z.object({
   facultyName: RequiredText(500), tagline: OptionalText(500), addresses: z.array(RequiredText(5_000)).max(2),
-  dean: PublicDeanSchema.nullable(), video: PublicVideoSchema.nullable(), email: ContactEmailSchema, phone: ContactPhoneSchema,
+  dean: PublicDeanSchema.nullable(), video: PublicVideoSchema.nullable(), showProfileVideoInGallery: z.boolean(),
+  email: ContactEmailSchema, phone: ContactPhoneSchema,
   logo: PublicMediaViewSchema.nullable(), accreditationLogo: PublicMediaViewSchema.nullable(),
   bluLogo: PublicMediaViewSchema.nullable(), favicon: PublicMediaViewSchema.nullable(),
   socialLinks: z.object({facebook: CmsHttpsExternalUrlSchema.nullable(), instagram: CmsHttpsExternalUrlSchema.nullable(),
@@ -268,7 +270,7 @@ const PublicColumnCardSchema = PublicHomePostCardSchema.extend({type: z.literal(
 export const PublicHomeSnapshotQuerySchema = z.object({locale: LocaleSchema}).strict();
 export const PublicHomeSnapshotSchema = z.object({
   locale: LocaleSchema, generatedAt: DateTimeSchema, navigation: PublicNavigationSchema,
-  externalLinks: z.array(PublicExternalLinkSchema).max(100), sections: z.array(PublicHomeSectionSchema).max(16),
+  externalLinks: z.array(PublicExternalLinkSchema).max(100), sections: z.array(PublicHomeSectionSchema).max(18),
   sliders: z.array(PublicHomeSliderSchema).max(12), homeVideos: z.array(PublicHomeVideoSchema).max(12), quickLinks: z.array(PublicQuickLinkSchema).max(12),
   statistics: z.array(PublicStatisticSchema).max(12), siteSetting: PublicSiteSettingSchema,
   content: z.object({
@@ -309,8 +311,16 @@ export const PublicHomeSnapshotSchema = z.object({
   if ((sectionMap.has("DEAN") && value.siteSetting.dean === null) || (!sectionMap.has("DEAN") && value.siteSetting.dean !== null)) {
     context.addIssue({code: "custom", path: ["siteSetting", "dean"], message: "Dean content requires a visible dean section."});
   }
-  if ((sectionMap.has("VIDEO") && value.siteSetting.video === null) || (!sectionMap.has("VIDEO") && value.siteSetting.video !== null)) {
-    context.addIssue({code: "custom", path: ["siteSetting", "video"], message: "Video content requires a visible video section."});
+  const profileVideoShown = sectionMap.has("VIDEO")
+    || (sectionMap.has("VIDEO_GALLERY") && value.siteSetting.showProfileVideoInGallery);
+  if (sectionMap.has("VIDEO") && value.siteSetting.video === null) {
+    context.addIssue({code: "custom", path: ["siteSetting", "video"], message: "A visible profile video section requires a configured video."});
+  }
+  if (value.siteSetting.video !== null && !profileVideoShown) {
+    context.addIssue({code: "custom", path: ["siteSetting", "video"], message: "A configured profile video requires a visible video or video gallery section."});
+  }
+  if (value.siteSetting.showProfileVideoInGallery && !sectionMap.has("VIDEO_GALLERY")) {
+    context.addIssue({code: "custom", path: ["siteSetting", "showProfileVideoInGallery"], message: "Showing the profile video in the gallery requires a visible gallery section."});
   }
   if (sectionMap.has("CTA") && sectionMap.get("CTA")!.cta === null) {
     context.addIssue({code: "custom", path: ["sections"], message: "A visible CTA section requires a configured destination."});

@@ -99,7 +99,8 @@ export async function getHomeNavAdminDetail(
       faviconMedia: adminImageMediaPreview(row.faviconMedia),
       input: {
         deanName: row.deanName, deanPhotoMediaId: row.deanPhotoId, videoUrl: row.videoUrl,
-        videoPosterMediaId: row.videoPosterMediaId, email: row.email, phone: row.phone,
+        videoPosterMediaId: row.videoPosterMediaId, showProfileVideoInGallery: row.showProfileVideoInGallery,
+        email: row.email, phone: row.phone,
         facebookUrl: row.facebookUrl, instagramUrl: row.instagramUrl, youtubeUrl: row.youtubeUrl, xUrl: row.xUrl,
         logoMediaId: row.logoMediaId, accreditationLogoMediaId: row.accreditationLogoMediaId,
         bluLogoMediaId: row.bluLogoMediaId, faviconMediaId: row.faviconMediaId,

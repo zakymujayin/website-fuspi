@@ -111,6 +111,7 @@ enum HomeSectionKey {
   PRODI
   PARTNERSHIP
   VIDEO
+  VIDEO_GALLERY
   AGENDA
   TESTIMONIAL
   COLUMN
@@ -542,6 +543,8 @@ model Media {
   isDecorative       Boolean         @default(false)
   width              Int?
   height             Int?
+  focalX             Float?
+  focalY             Float?
   encryptionNonce    String?
   encryptionTag      String?
   keyVersion         Int?
@@ -1290,6 +1293,7 @@ model SiteSetting {
   deanPhotoId      String?
   videoUrl         String?
   videoPosterMediaId String?
+  showProfileVideoInGallery Boolean          @default(false)
   email            String?
   phone            String?
   facebookUrl      String?

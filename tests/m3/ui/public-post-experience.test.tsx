@@ -58,6 +58,8 @@ const SAMPLE_COVER = {
   isDecorative: false,
   width: 320,
   height: 240,
+  focalX: null,
+  focalY: null,
 };
 
 describe("Jakarta-localized date and reading-time presentation", () => {

@@ -34,14 +34,30 @@ function validateAccessibility(
   }
 }
 
+const FocalCoordinateSchema = z.number().min(0).max(100).nullable().optional();
+
+function validateFocalPoint(
+  value: {focalX?: number | null; focalY?: number | null},
+  context: z.RefinementCtx,
+) {
+  const hasX = value.focalX != null;
+  const hasY = value.focalY != null;
+  if (hasX !== hasY) {
+    context.addIssue({code: "custom", path: ["focalY"], message: "Focal point requires both coordinates."});
+  }
+}
+
 export const MediaUploadIntentSchema = z.object({
   policy: UploadPolicySchema.extract(["CMS_IMAGE", "PUBLIC_PDF"]),
   alt: MediaAltSchema,
   isDecorative: z.boolean(),
+  focalX: FocalCoordinateSchema,
+  focalY: FocalCoordinateSchema,
 }).strict().superRefine((value, context) => {
   if (value.policy === "CMS_IMAGE") {
     validateAccessibility(value, context);
-  } else if (value.alt !== "" || value.isDecorative) {
+    validateFocalPoint(value, context);
+  } else if (value.alt !== "" || value.isDecorative || value.focalX != null || value.focalY != null) {
     context.addIssue({code: "custom", message: "Public PDF accessibility metadata is invalid."});
   }
 });
@@ -59,11 +75,14 @@ export const MediaValidatedRecordInputSchema = z.object({
   height: z.number().int().positive().max(1_600).nullable(),
   alt: MediaAltSchema,
   isDecorative: z.boolean(),
+  focalX: z.number().min(0).max(100).nullable(),
+  focalY: z.number().min(0).max(100).nullable(),
 }).strict().superRefine((value, context) => {
   const isImage = value.policy === "CMS_IMAGE";
   if (isImage) {
     validateAccessibility(value, context);
-  } else if (value.alt !== "" || value.isDecorative) {
+    validateFocalPoint(value, context);
+  } else if (value.alt !== "" || value.isDecorative || value.focalX !== null || value.focalY !== null) {
     context.addIssue({code: "custom", message: "Public PDF accessibility metadata is invalid."});
   }
   if (isImage && (
@@ -162,9 +181,12 @@ export const PublicMediaViewSchema = z.object({
   isDecorative: z.boolean(),
   width: z.number().int().positive().max(1_600).nullable(),
   height: z.number().int().positive().max(1_600).nullable(),
+  focalX: z.number().min(0).max(100).nullable(),
+  focalY: z.number().min(0).max(100).nullable(),
 }).strict().superRefine((value, context) => {
   if (value.mimeType === "image/webp") {
     validateAccessibility(value, context);
+    validateFocalPoint(value, context);
     if (value.width === null || value.height === null) {
       context.addIssue({code: "custom", message: "Public image dimensions are required."});
     }
@@ -173,6 +195,8 @@ export const PublicMediaViewSchema = z.object({
     || value.height !== null
     || value.alt !== ""
     || value.isDecorative
+    || value.focalX !== null
+    || value.focalY !== null
   ) {
     context.addIssue({code: "custom", message: "Public PDF metadata is invalid."});
   }

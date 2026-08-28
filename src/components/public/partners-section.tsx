@@ -1,34 +1,31 @@
 import { getTranslations } from "next-intl/server";
 import type { z } from "zod";
 
-import { Container } from "@/components/ui/container";
-import { PartnersWall } from "@/components/public/partners-wall";
+import { PartnersMarquee } from "@/components/public/partners-marquee";
 import type { PublicContentCardSchema } from "@/contracts/public-content";
 
 type PartnerCard = z.infer<typeof PublicContentCardSchema>;
 
 type PartnersSectionProps = { partners: readonly PartnerCard[] };
 
+/**
+ * A single compact strip, not a full section with its own heading: a short
+ * inline label beside a full-bleed logo scroll, matching a plain
+ * institutional "Partner Kami" band rather than a boxed feature section.
+ */
 export async function PartnersSection({ partners }: PartnersSectionProps) {
   const t = await getTranslations("Home");
 
   if (partners.length === 0) return null;
 
   return (
-    <section className="border-t border-slate-200 bg-gradient-to-b from-white to-royal-50/50 py-16 md:py-20">
-      <Container>
-        <div className="text-center">
-          <h2 className="section-rule font-display text-2xl font-bold tracking-tight text-slate-900 md:text-3xl [&::after]:mx-auto">
-            {t("partnersTitle")}
-          </h2>
-          <p className="mx-auto mt-2 max-w-2xl text-sm text-slate-500">
-            {t("partnersDescription")}
-          </p>
-        </div>
-        <div className="mt-12">
-          <PartnersWall partners={partners} />
-        </div>
-      </Container>
+    <section className="border-t-2 border-brass-500 bg-white py-14 md:py-16">
+      <div className="flex items-center gap-10">
+        <span className="shrink-0 whitespace-nowrap ps-4 text-base font-semibold text-slate-900 sm:ps-6 md:text-lg">
+          {t("partnersLabel")}
+        </span>
+        <PartnersMarquee partners={partners} />
+      </div>
     </section>
   );
 }

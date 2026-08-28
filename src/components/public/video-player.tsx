@@ -39,7 +39,7 @@ function PlayButton() {
 type VideoPlayerProps = { video: PublicHomeVideo; className?: string };
 
 /**
- * Isolated client leaf (same pattern as PartnersWall): the poster stays
+ * Isolated client leaf (same pattern as PartnersMarquee): the poster stays
  * server-rendered by the parent's data, this component only owns the
  * click-to-embed interaction so the iframe never loads until asked for.
  */

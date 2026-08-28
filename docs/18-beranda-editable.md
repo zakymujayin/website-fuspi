@@ -21,7 +21,8 @@
 | 9 | **Berita Terbaru** | `Post` (BERITA) | Otomatis 4 terbaru. Judul section & jumlah tampil dapat diatur | otomatis + `/admin/beranda` |
 | 10 | **Logo Kerja Sama** | `Partnership` | **Logo mitra**, urutan, aktif | `/admin/kerjasama` |
 | 11 | **Kolom / Opini** | `Post` (KOLOM) | Otomatis per rubrik | otomatis |
-| 12 | **Video** | `SiteSetting` | URL video, poster, judul, deskripsi | `/admin/beranda/video` |
+| 12a | **Video Profil** (`VIDEO`) | `SiteSetting` | URL video, poster, judul, deskripsi profil | `/admin/beranda/pengaturan` |
+| 12b | **Galeri Video** (`VIDEO_GALLERY`) | `HomeVideo` | Daftar video (YouTube) + judul; opsi tampilkan video profil sebagai kartu utama (`SiteSetting.showProfileVideoInGallery`) | `/admin/beranda/video` + `/admin/beranda/pengaturan` |
 | 13 | **Agenda** | `Event` | Otomatis (agenda mendatang) | `/admin/agenda` |
 | 14 | **Testimoni Alumni** | `Testimonial` | Foto, nama, tahun lulus, pekerjaan, kutipan, izin publikasi | `/admin/testimoni` |
 | 15 | **CTA Akhir** | `HomeSection` | Judul, subjudul, label & URL tombol, gambar latar | `/admin/beranda` |

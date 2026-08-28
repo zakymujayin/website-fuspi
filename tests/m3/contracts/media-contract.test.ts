@@ -24,6 +24,8 @@ const IMAGE_RECORD = {
   height: 800,
   alt: "Mahasiswa FUSPI mengikuti kegiatan akademik",
   isDecorative: false,
+  focalX: null,
+  focalY: null,
 };
 
 describe("M3 Media input contracts", () => {
@@ -120,6 +122,8 @@ describe("M3 Media result contracts", () => {
     isDecorative: false,
     width: IMAGE_RECORD.width,
     height: IMAGE_RECORD.height,
+    focalX: null,
+    focalY: null,
   };
   const publicPdfKey = `2026/07/${"d".repeat(64)}.pdf`;
 
@@ -165,6 +169,8 @@ describe("M3 Media result contracts", () => {
       isDecorative: false,
       width: null,
       height: null,
+      focalX: null,
+      focalY: null,
     }).success).toBe(true);
     expect(PublicMediaViewSchema.safeParse({
       ...publicImage, mimeType: "application/pdf", width: null, height: null,

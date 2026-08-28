@@ -2,7 +2,6 @@
 
 import { ImageOffIcon, PlusIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 
 import {
   buildAdminImagePickerHref,
@@ -11,6 +10,8 @@ import {
 } from "@/components/admin/media/media-picker-pagination";
 import { AdminMediaThumbnail } from "@/components/admin/media/media-thumbnail";
 import { resolveAdminMediaThumbnail } from "@/components/admin/media/media-thumbnail-resolver";
+import { MediaPickerUploadPanel } from "@/components/admin/media/media-picker-upload-panel";
+import { useAdminMediaPickerState } from "@/components/admin/media/use-admin-media-picker-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
@@ -37,13 +38,10 @@ export function PostGalleryPicker({
   uploadPublicUrl,
 }: PostGalleryPickerProps) {
   const t = useTranslations("AdminPostGalleryPicker");
-  const [open, setOpen] = useState(false);
-  const [items, setItems] = useState<readonly AdminMediaItem[] | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [loadError, setLoadError] = useState(false);
-  const [page, setPage] = useState(0);
-  const [hasNextPage, setHasNextPage] = useState(false);
-  const [previews, setPreviews] = useState<Record<string, CoverPreview>>(initialPreviews);
+  const {
+    open, setOpen, items, setItems, loading, setLoading, loadError, setLoadError,
+    page, setPage, hasNextPage, setHasNextPage, previews, setPreviews,
+  } = useAdminMediaPickerState(initialPreviews);
 
   const atLimit = value.length >= MAX_IMAGES;
   const selectedIds = new Set(value.map((image) => image.mediaId));
@@ -172,6 +170,7 @@ export function PostGalleryPicker({
 
       {open ? (
         <div id="admin-post-gallery-list" className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4">
+          {!atLimit ? <MediaPickerUploadPanel onUploaded={(item) => add(item)} /> : null}
           {loading && items === null ? (
             <p role="status" className="flex items-center gap-2 text-sm text-slate-500">
               <Spinner data-icon />

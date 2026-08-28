@@ -42,6 +42,8 @@ type PublicPostRow = {
     isDecorative: boolean;
     width: number | null;
     height: number | null;
+    focalX: number | null;
+    focalY: number | null;
   } | null;
   images: Array<{
     id: string;
@@ -56,6 +58,8 @@ type PublicPostRow = {
       isDecorative: boolean;
       width: number | null;
       height: number | null;
+      focalX: number | null;
+      focalY: number | null;
     };
   }>;
   translations: Array<{
@@ -91,6 +95,8 @@ const PUBLIC_POST_SELECT = {
       isDecorative: true,
       width: true,
       height: true,
+      focalX: true,
+      focalY: true,
     },
   },
   images: {
@@ -101,7 +107,7 @@ const PUBLIC_POST_SELECT = {
       media: {
         select: {
           id: true, storageKey: true, storageClass: true, mimeType: true, size: true,
-          alt: true, isDecorative: true, width: true, height: true,
+          alt: true, isDecorative: true, width: true, height: true, focalX: true, focalY: true,
         },
       },
     },
@@ -159,6 +165,8 @@ function publicMediaView(
     isDecorative: media.isDecorative,
     width: media.width,
     height: media.height,
+    focalX: media.focalX,
+    focalY: media.focalY,
   });
   return parsed.success ? parsed.data : null;
 }
@@ -277,6 +285,9 @@ export async function listPublicPosts(
       : {}),
     ...(query.data.tagSlug
       ? {tags: {some: {tag: {slug: query.data.tagSlug}}}}
+      : {}),
+    ...(query.data.columnType
+      ? {columnType: query.data.columnType}
       : {}),
   };
   const skip = (query.data.page - 1) * query.data.pageSize;

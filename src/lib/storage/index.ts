@@ -1,5 +1,6 @@
 export {PpksAttachmentError, StorageBoundaryError} from "@/lib/storage/error";
 export {
+  committedFileExists,
   removeCommittedFile,
   stageCommittedFileDeletion,
   type StagedCommittedFileDeletion,

@@ -199,6 +199,8 @@ describe("M3 Berita editor and command transport contract", () => {
       isDecorative: true,
       width: null,
       height: null,
+      focalX: null,
+      focalY: null,
     };
 
     expect(AdminPostMediaPreviewSchema.safeParse(legacyCover).success).toBe(true);

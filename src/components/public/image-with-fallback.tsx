@@ -5,6 +5,7 @@ import NextImage from "next/image";
 import { useState } from "react";
 
 import { cn } from "@/lib/utils";
+import type { FocalPoint } from "@/components/public/focal-point";
 
 type ImageWithFallbackProps = {
   src?: string | null;
@@ -12,14 +13,21 @@ type ImageWithFallbackProps = {
   className?: string;
   sizes?: string;
   priority?: boolean;
+  focalPoint?: FocalPoint | null;
 };
 
 /**
  * Fills its (relatively-positioned, sized) parent. Missing src or a failed
  * load both resolve to the same quiet icon placeholder — never the browser's
  * broken-image glyph plus raw alt text.
+ *
+ * `focalPoint`, when given, keeps that point of the source image visible
+ * under `object-cover` regardless of the container's aspect ratio (e.g. a
+ * portrait photo in a wide box no longer crops the subject's head/caption).
+ * Omitted/null falls back to the browser default (`50% 50%`, i.e. today's
+ * unchanged behavior).
  */
-export function ImageWithFallback({ src, alt, className, sizes, priority }: ImageWithFallbackProps) {
+export function ImageWithFallback({ src, alt, className, sizes, priority, focalPoint }: ImageWithFallbackProps) {
   const [errored, setErrored] = useState(false);
 
   if (!src || errored) {
@@ -38,6 +46,7 @@ export function ImageWithFallback({ src, alt, className, sizes, priority }: Imag
       priority={priority}
       sizes={sizes}
       className={className}
+      style={focalPoint ? { objectPosition: `${focalPoint.x}% ${focalPoint.y}%` } : undefined}
       onError={() => setErrored(true)}
       unoptimized
     />

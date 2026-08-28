@@ -8,7 +8,7 @@ export async function HomeCtaSection() {
   const sloganWords = t("ctaSlogan").split(" ").filter(Boolean);
 
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-royal-800 to-royal-950">
+    <section className="grain relative overflow-hidden bg-gradient-to-br from-royal-800 to-royal-950">
       {/* Soft glow, not a shape: a radial-gradient blob fades to nothing at
           its own edges, so there's no hard boundary line cutting across
           the band. */}

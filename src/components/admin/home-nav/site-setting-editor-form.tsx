@@ -5,6 +5,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useId, useState, type ChangeEvent, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
@@ -91,6 +92,9 @@ export function SiteSettingEditorForm({
   });
   const [deanName, setDeanName] = useState(textValue(initialData.deanName));
   const [videoUrl, setVideoUrl] = useState(textValue(initialData.videoUrl));
+  const [showProfileVideoInGallery, setShowProfileVideoInGallery] = useState(
+    initialData.showProfileVideoInGallery === true,
+  );
   const [translationValues, setTranslationValues] = useState<Record<SiteSettingLocale, SiteSettingTranslation>>({
     id: translationValue(translations.id ?? EMPTY),
     en: translationValue(translations.en ?? EMPTY),
@@ -144,6 +148,11 @@ export function SiteSettingEditorForm({
       setSubmitting(false);
       return;
     }
+    if (videoUrlPayload !== null && nullableText(translationValues.id.videoTitle) === null) {
+      setErrors([t("errors.videoTitleRequired")]);
+      setSubmitting(false);
+      return;
+    }
 
     const localized = (prefix: SiteSettingLocale, required: boolean) => {
       const values = translationValues[prefix];
@@ -163,6 +172,7 @@ export function SiteSettingEditorForm({
 
     const payload: Record<string, unknown> = {
       deanName: deanNamePayload, deanPhotoMediaId: deanPhotoId, videoUrl: videoUrlPayload, videoPosterMediaId: videoPosterId,
+      showProfileVideoInGallery,
       email: nullableText(contact.email),
       phone: nullableText(contact.phone),
       facebookUrl: nullableText(contact.facebookUrl),
@@ -361,6 +371,14 @@ export function SiteSettingEditorForm({
             listLabel={t("picker.listLabel")}
             loadMoreLabel={t("picker.loadMore")}
           />
+          <Field orientation="horizontal">
+            <Checkbox
+              id={`${formId}-video-in-gallery`}
+              checked={showProfileVideoInGallery}
+              onCheckedChange={(checked) => setShowProfileVideoInGallery(checked === true)}
+            />
+            <FieldLabel htmlFor={`${formId}-video-in-gallery`}>{t("settings.showProfileVideoInGallery")}</FieldLabel>
+          </Field>
         </FieldGroup>
       </FieldSet>
 

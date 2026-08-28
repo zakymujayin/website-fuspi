@@ -61,22 +61,24 @@ const MEDIA_SELECT = {
   isDecorative: true,
   width: true,
   height: true,
+  focalX: true,
+  focalY: true,
 } as const;
 
 type MediaRow = {
   id: string; storageKey: string; storageClass: string; mimeType: string;
   size: number; alt: string | null; isDecorative: boolean; width: number | null; height: number | null;
+  focalX: number | null; focalY: number | null;
 } | null;
 
 function publicMedia(media: MediaRow, rawUploadBase: string) {
   if (!media || media.storageClass !== "PUBLIC" || media.mimeType !== "image/webp"
     || media.alt === null || !StorageKeySchema.safeParse(media.storageKey).success) return null;
   const url = `${rawUploadBase.replace(/\/+$/u, "") || "/uploads"}/${media.storageKey}`;
-  return PublicMediaViewSchema.safeParse({
-    id: media.id, url, mimeType: media.mimeType, size: media.size, alt: media.alt,
+  const view = {id: media.id, url, mimeType: media.mimeType, size: media.size, alt: media.alt,
     isDecorative: media.isDecorative, width: media.width, height: media.height,
-  }).success ? {id: media.id, url, mimeType: media.mimeType, size: media.size, alt: media.alt,
-    isDecorative: media.isDecorative, width: media.width, height: media.height} : null;
+    focalX: media.focalX, focalY: media.focalY};
+  return PublicMediaViewSchema.safeParse(view).success ? view : null;
 }
 
 function workflow(t: TranslationRow) {
@@ -315,7 +317,8 @@ export async function getHomeNavDetail(
         translationWorkflow: row.translations.map(wf => workflow(wf)), assets,
         input: {
           deanName: row.deanName, deanPhotoMediaId: row.deanPhotoId, videoUrl: row.videoUrl,
-          videoPosterMediaId: row.videoPosterMediaId, email: row.email, phone: row.phone,
+          videoPosterMediaId: row.videoPosterMediaId, showProfileVideoInGallery: row.showProfileVideoInGallery,
+          email: row.email, phone: row.phone,
           facebookUrl: row.facebookUrl, instagramUrl: row.instagramUrl, youtubeUrl: row.youtubeUrl,
           xUrl: row.xUrl, logoMediaId: row.logoMediaId,
           accreditationLogoMediaId: row.accreditationLogoMediaId,
@@ -682,6 +685,7 @@ async function updateSiteSetting(tx: Prisma.TransactionClient, input: z.infer<ty
     deanName: input.deanName, deanPhotoId: input.deanPhotoMediaId,
     videoUrl: input.videoUrl,
     videoPosterMediaId: input.videoPosterMediaId,
+    showProfileVideoInGallery: input.showProfileVideoInGallery,
     email: input.email, phone: input.phone,
     facebookUrl: input.facebookUrl, instagramUrl: input.instagramUrl,
     youtubeUrl: input.youtubeUrl, xUrl: input.xUrl,
@@ -907,7 +911,7 @@ export async function getPublicHomeSnapshot(
         include: {translations: {where: {status: "PUBLISHED", locale: {in: locale === "id" ? ["id"] : [locale, "id"]}}}}}),
 
       prisma.homeSection.findMany({where: {isVisible: true},
-        orderBy: [{order: "asc"}, {id: "asc"}], take: 15,
+        orderBy: [{order: "asc"}, {id: "asc"}], take: 18,
         include: {translations: true, backgroundMedia: {select: MEDIA_SELECT}}}),
 
       prisma.statistic.findMany({where: {isVisible: true},
@@ -984,7 +988,7 @@ export async function getPublicHomeSnapshot(
         siteSetting = {
           facultyName: st.facultyName, tagline: st.tagline ?? null,
           addresses: [st.address1, st.address2].filter(Boolean),
-          dean, video,
+          dean, video, showProfileVideoInGallery: siteSettingRaw.showProfileVideoInGallery,
           logo, accreditationLogo, bluLogo, favicon,
           email: siteSettingRaw.email, phone: siteSettingRaw.phone,
           socialLinks: {facebook: siteSettingRaw.facebookUrl, instagram: siteSettingRaw.instagramUrl,

@@ -110,6 +110,8 @@ export async function persistMediaUpload(
           isDecorative: record.data.isDecorative,
           width: record.data.width,
           height: record.data.height,
+          focalX: record.data.focalX,
+          focalY: record.data.focalY,
           uploaderId: actor.userId,
           createdAt: now,
         },

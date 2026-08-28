@@ -201,6 +201,7 @@ export const PublicPostListQuerySchema = z.object({
   type: PostTypeSchema,
   categorySlug: PostSlugSchema.optional(),
   tagSlug: PostSlugSchema.optional(),
+  columnType: ColumnTypeSchema.optional(),
   ...PublicPaginationShape,
 }).strict();
 

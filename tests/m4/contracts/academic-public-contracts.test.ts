@@ -10,6 +10,7 @@ const resolution = {requestedLocale: "en", resolvedLocale: "id", isFallback: tru
 const photo = {
   id: "media-1", url: `/uploads/2026/08/${"a".repeat(64)}.webp`, mimeType: "image/webp",
   size: 512, alt: "Synthetic portrait", isDecorative: false, width: 320, height: 320,
+  focalX: null, focalY: null,
 };
 
 describe("academic public detail contracts", () => {

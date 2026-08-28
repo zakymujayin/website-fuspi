@@ -196,6 +196,8 @@ describe("M4 Page admin transport", () => {
       isDecorative: false,
       width: 1_600,
       height: 900,
+      focalX: null,
+      focalY: null,
     });
     const database = {
       page: {findUnique},

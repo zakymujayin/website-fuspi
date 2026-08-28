@@ -129,6 +129,33 @@ suite("M3 Media admin transport on PostgreSQL and filesystem", () => {
     await expect(readFile(owned.destination)).rejects.toMatchObject({code: "ENOENT"});
   });
 
+  it("deletes an unreferenced Media row even when its file is already missing from disk", async () => {
+    // Mirrors real data loss (e.g. the storage root getting wiped outside the app):
+    // the DB row survives with no matching file. Deleting it must not be blocked by
+    // that missing file — only actually-referenced Media should be protected.
+    const checksum = createHash("sha256").update(`${marker}-lost-file`).digest("hex");
+    const storageKey = `2026/07/${checksum}.webp`;
+    const lost = await prisma.media.create({data: {
+      storageKey,
+      storageClass: "PUBLIC",
+      checksumSha256: checksum,
+      originalName: `${marker}-lost-file.png`,
+      mimeType: "image/webp",
+      size: 16,
+      alt: "Media tanpa file",
+      isDecorative: false,
+      width: 16,
+      height: 16,
+      uploaderId: editorId,
+      createdAt: now,
+    }});
+
+    await expect(executeAdminMediaCommand(prisma, actor(), {
+      action: "DELETE", payload: {mediaId: lost.id},
+    }, roots, () => now)).resolves.toEqual({ok: true, mediaId: lost.id});
+    await expect(prisma.media.findUnique({where: {id: lost.id}})).resolves.toBeNull();
+  });
+
   it("uploads a validated image and returns only the frozen batch response", async () => {
     const png = await pngFixture();
     const result = await executeAdminMediaUpload(prisma, actor(), {

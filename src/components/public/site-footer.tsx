@@ -8,7 +8,8 @@ import { institution } from "@/config/institution";
 import { Link } from "@/i18n/navigation";
 
 const CURRENT_YEAR = 2026;
-const CAMPUS_ADDRESS = "Jl. Jendral Sudirman No. 30, Ciceri, Kota Serang, Banten 42118";
+const CAMPUS_ADDRESS =
+  "Kampus 2 — Jl. Syekh Nawawi Al-Bantani, Kp. Andamui, Kec. Curug, Kota Serang, Banten 42171";
 const MAP_EMBED_SRC = `https://www.google.com/maps?q=${encodeURIComponent(
   `${CAMPUS_ADDRESS} UIN Sultan Maulana Hasanuddin Banten`,
 )}&output=embed`;

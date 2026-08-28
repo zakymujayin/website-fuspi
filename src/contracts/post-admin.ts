@@ -109,6 +109,8 @@ export const AdminPostMediaPreviewSchema = z.object({
   isDecorative: z.boolean(),
   width: PublicMediaViewSchema.shape.width,
   height: PublicMediaViewSchema.shape.height,
+  focalX: PublicMediaViewSchema.shape.focalX,
+  focalY: PublicMediaViewSchema.shape.focalY,
 }).strict();
 
 const AdminPostGalleryImageSchema = z.object({

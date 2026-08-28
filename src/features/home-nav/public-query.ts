@@ -54,7 +54,7 @@ type PublicSiteMedia = NonNullable<ReturnType<typeof mediaView>>;
 export type PublicSiteSetting = {
   facultyName: string; tagline: string | null; addresses: string[]; email: string | null; phone: string | null;
   socialLinks: {facebook: string | null; instagram: string | null; youtube: string | null; x: string | null};
-  dean: PublicDean | null; video: PublicHomeVideo | null;
+  dean: PublicDean | null; video: PublicHomeVideo | null; showProfileVideoInGallery: boolean;
   logo: PublicSiteMedia | null; accreditationLogo: PublicSiteMedia | null;
   bluLogo: PublicSiteMedia | null; favicon: PublicSiteMedia | null;
 };
@@ -90,7 +90,7 @@ export async function getPublicSiteSetting(
     addresses: [text.address1, text.address2].filter((value): value is string => Boolean(value)),
     email: row.email, phone: row.phone,
     socialLinks: {facebook: row.facebookUrl, instagram: row.instagramUrl, youtube: row.youtubeUrl, x: row.xUrl},
-    dean, video,
+    dean, video, showProfileVideoInGallery: row.showProfileVideoInGallery,
     logo: mediaView(row.logoMedia, uploadBase),
     accreditationLogo: mediaView(row.accreditationLogoMedia, uploadBase),
     bluLogo: mediaView(row.bluLogoMedia, uploadBase),

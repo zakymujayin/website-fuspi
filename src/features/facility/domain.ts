@@ -47,11 +47,14 @@ const MEDIA_SELECT = {
   isDecorative: true,
   width: true,
   height: true,
+  focalX: true,
+  focalY: true,
 } as const;
 
 type MediaRow = {
   id: string; storageKey: string; storageClass: string; mimeType: string;
   size: number; alt: string | null; isDecorative: boolean; width: number | null; height: number | null;
+  focalX: number | null; focalY: number | null;
 } | null;
 
 function actorOrNull(rawActor: unknown, now: Date) {
@@ -63,11 +66,10 @@ function publicMedia(media: MediaRow, rawUploadBase: string) {
   if (!media || media.storageClass !== "PUBLIC" || media.mimeType !== "image/webp"
     || media.alt === null || !StorageKeySchema.safeParse(media.storageKey).success) return null;
   const url = `${rawUploadBase.replace(/\/+$/u, "") || "/uploads"}/${media.storageKey}`;
-  return PublicMediaViewSchema.safeParse({
-    id: media.id, url, mimeType: media.mimeType, size: media.size, alt: media.alt,
+  const view = {id: media.id, url, mimeType: media.mimeType, size: media.size, alt: media.alt,
     isDecorative: media.isDecorative, width: media.width, height: media.height,
-  }).success ? {id: media.id, url, mimeType: media.mimeType, size: media.size, alt: media.alt,
-    isDecorative: media.isDecorative, width: media.width, height: media.height} : null;
+    focalX: media.focalX, focalY: media.focalY};
+  return PublicMediaViewSchema.safeParse(view).success ? view : null;
 }
 
 function pageMetadata(page: number, pageSize: 10 | 20 | 50, total: number) {

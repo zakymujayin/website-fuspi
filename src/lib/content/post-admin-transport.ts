@@ -104,6 +104,8 @@ function safeCover(media: {
   isDecorative: boolean;
   width: number | null;
   height: number | null;
+  focalX: number | null;
+  focalY: number | null;
 } | null, uploadBase: string) {
   return adminImageMediaPreview(media, uploadBase);
 }
@@ -140,7 +142,7 @@ const POST_SELECT = {
   category: {select: {translations: {where: {locale: "id" as const}, select: {name: true}}}},
   coverMedia: {select: {
     id: true, storageKey: true, storageClass: true, mimeType: true, size: true,
-    alt: true, isDecorative: true, width: true, height: true,
+    alt: true, isDecorative: true, width: true, height: true, focalX: true, focalY: true,
   }},
   translations: {select: {
     locale: true, title: true, excerpt: true, content: true, metaTitle: true,
@@ -153,7 +155,7 @@ const POST_SELECT = {
       id: true, caption: true,
       media: {select: {
         id: true, storageKey: true, storageClass: true, mimeType: true, size: true,
-        alt: true, isDecorative: true, width: true, height: true,
+        alt: true, isDecorative: true, width: true, height: true, focalX: true, focalY: true,
       }},
     },
   },

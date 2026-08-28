@@ -16,7 +16,7 @@ type Locale = "id" | "en" | "ar";
 
 const MEDIA_SELECT = {
   id: true, storageKey: true, storageClass: true, mimeType: true, size: true,
-  alt: true, isDecorative: true, width: true, height: true,
+  alt: true, isDecorative: true, width: true, height: true, focalX: true, focalY: true,
 } as const;
 
 function baseUrl(value: string) {
@@ -26,6 +26,7 @@ function baseUrl(value: string) {
 type MediaRow = {
   id: string; storageKey: string; storageClass: string; mimeType: string; size: number;
   alt: string | null; isDecorative: boolean; width: number | null; height: number | null;
+  focalX: number | null; focalY: number | null;
 } | null;
 
 function mediaView(media: MediaRow, uploadBase: string) {
@@ -33,7 +34,7 @@ function mediaView(media: MediaRow, uploadBase: string) {
   const parsed = PublicMediaViewSchema.safeParse({
     id: media.id, url: `${baseUrl(uploadBase)}/${media.storageKey}`, mimeType: media.mimeType,
     size: media.size, alt: media.alt, isDecorative: media.isDecorative,
-    width: media.width, height: media.height,
+    width: media.width, height: media.height, focalX: media.focalX, focalY: media.focalY,
   });
   return parsed.success ? parsed.data : null;
 }

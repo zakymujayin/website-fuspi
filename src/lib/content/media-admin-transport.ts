@@ -28,6 +28,7 @@ import {
   persistMediaUpload,
 } from "@/lib/content/media-persistence";
 import {
+  committedFileExists,
   removeCommittedFile,
   stageCommittedFileDeletion,
   stageUpload,
@@ -177,6 +178,8 @@ export async function listAdminMedia(
           isDecorative: true,
           width: true,
           height: true,
+          focalX: true,
+          focalY: true,
           createdAt: true,
           uploader: {select: {name: true}},
         },
@@ -198,6 +201,8 @@ export async function listAdminMedia(
         isDecorative: row.isDecorative,
         width: row.width,
         height: row.height,
+        focalX: row.focalX,
+        focalY: row.focalY,
         originalName: row.originalName,
         createdAt: row.createdAt.toISOString(),
         uploaderName: row.uploader?.name ?? null,
@@ -298,7 +303,12 @@ export async function executeAdminMediaCommand(
         if (target.mimeType !== "image/webp") return persistenceFailure("VALIDATION_FAILED");
         const updated = await transaction.media.updateMany({
           where: {id: target.id, storageClass: "PUBLIC", mimeType: "image/webp", ...ownershipWhere(actor)},
-          data: {alt: command.data.payload.alt, isDecorative: command.data.payload.isDecorative},
+          data: {
+            alt: command.data.payload.alt,
+            isDecorative: command.data.payload.isDecorative,
+            focalX: command.data.payload.focalX,
+            focalY: command.data.payload.focalY,
+          },
         });
         return updated.count === 1
           ? persistenceSuccess(target.id)
@@ -307,10 +317,21 @@ export async function executeAdminMediaCommand(
       if (await hasMediaReferences(transaction, target)) {
         return persistenceFailure("MEDIA_IN_USE");
       }
+      // The physical file may already be gone (e.g. lost storage outside the app's
+      // control) even though the row is still unreferenced and safe to remove — that's
+      // not an invariant violation, so only stage a real file deletion when one exists.
+      let fileExists: boolean;
       try {
-        stagedDeletion = await stageCommittedFileDeletion(storageRoots, "PUBLIC", target.storageKey);
+        fileExists = await committedFileExists(storageRoots, "PUBLIC", target.storageKey);
       } catch {
         throw new MediaPersistenceInvariantError();
+      }
+      if (fileExists) {
+        try {
+          stagedDeletion = await stageCommittedFileDeletion(storageRoots, "PUBLIC", target.storageKey);
+        } catch {
+          throw new MediaPersistenceInvariantError();
+        }
       }
       const removed = await transaction.media.deleteMany({
         where: {id: target.id, storageClass: "PUBLIC", ...ownershipWhere(actor)},
@@ -432,6 +453,8 @@ export async function executeAdminMediaUpload(
           height: upload.height,
           alt: intent.alt,
           isDecorative: intent.isDecorative,
+          focalX: intent.focalX ?? null,
+          focalY: intent.focalY ?? null,
         },
       });
     }

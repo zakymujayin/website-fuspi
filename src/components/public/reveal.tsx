@@ -14,6 +14,12 @@ type RevealProps = {
 /**
  * Fades/lifts children in once they scroll into view. Same IntersectionObserver
  * shape as the stats counter, generalized so card grids don't all mount at once.
+ *
+ * Never stays hidden: reduced motion skips the animation outright, and a
+ * bounded fallback timer forces visibility if the observer never reports an
+ * intersection (odd viewport timing, a stitched/headless capture, a ref that
+ * mounts already off-screen in a zero-height parent) so content can't get
+ * stuck invisible the way it did before this existed.
  */
 export function Reveal({ children, index = 0, className }: RevealProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -29,18 +35,25 @@ export function Reveal({ children, index = 0, className }: RevealProps) {
           observer.disconnect();
         }
       },
-      { threshold: 0.15 },
+      { threshold: 0.15, rootMargin: "0px 0px -10% 0px" },
     );
     observer.observe(node);
-    return () => observer.disconnect();
+    const fallback = window.setTimeout(() => setInView(true), 1200);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(fallback);
+    };
   }, []);
 
   return (
     <div
       ref={ref}
       className={cn(
-        "flex h-full transition-all duration-700 ease-out",
-        inView ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0",
+        // Only ever hidden/offset under motion-safe: with no preference set,
+        // reduced motion never applies these, so content is always visible
+        // by default and this can never get stuck invisible.
+        "flex h-full opacity-100 motion-safe:transition-all motion-safe:duration-700 motion-safe:ease-out",
+        inView ? "translate-y-0" : "motion-safe:translate-y-5 motion-safe:opacity-0",
         className,
       )}
       style={{ transitionDelay: `${index * 70}ms` }}

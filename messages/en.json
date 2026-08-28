@@ -640,6 +640,14 @@
     "removeLabel": "Remove {name}",
     "focalPointEditorLabel": "Click the photo to set the focal point, or use the arrow keys",
     "focalPointHint": "Focal point: {x}%, {y}% — this part stays visible when the photo is auto-cropped at different sizes.",
+    "crop": {
+      "title": "Crop image (optional)",
+      "instructions": "Drag inside the box or press the arrow keys to move it; drag a corner handle (or Shift + arrow) to resize. Click Apply to crop.",
+      "apply": "Apply crop",
+      "reset": "Restore original",
+      "applied": "Image cropped",
+      "error": "Could not crop the image. Try again."
+    },
     "action": "Upload",
     "uploading": "Uploading…",
     "success": "{count} file(s) uploaded.",
@@ -668,6 +676,19 @@
     "alt": "Alternative text",
     "focalPointEditorLabel": "Click the photo to set the focal point, or use the arrow keys",
     "focalPointHint": "Focal point: {x}%, {y}%",
+    "crop": {
+      "title": "Crop image (optional)",
+      "instructions": "Drag inside the box or press the arrow keys to move it; drag a corner handle (or Shift + arrow) to resize. Click Apply to crop.",
+      "apply": "Apply crop",
+      "reset": "Restore original",
+      "applied": "Image cropped",
+      "error": "Could not crop the image. Try again."
+    },
+    "cropExisting": {
+      "button": "Crop this image",
+      "loading": "Loading image…",
+      "loadError": "Could not load the image to crop."
+    },
     "action": "Upload & select",
     "uploading": "Uploading…",
     "cancel": "Cancel",
@@ -1134,8 +1155,8 @@
     "serviceCta": "Access Service",
     "service": {
       "sila": {
-        "title": "Academic Information System (SILA)",
-        "description": "Access grades, course enrollment, class schedules, and student academic records online."
+        "title": "Academic Services System (SILA)",
+        "description": "Request official letters, diploma legalisation, and final-project administration online."
       },
       "complaints": {
         "title": "Complaints Service",
@@ -1186,6 +1207,7 @@
       "regional": "Regional",
       "lokal": "Local"
     },
+    "partnersLabel": "Our Partners",
     "partnersTitle": "Partnerships",
     "partnersDescription": "FUSPI's partnership network with universities and national Islamic institutions.",
     "footerCtaTitle": "Ready to join us?",
@@ -1457,6 +1479,7 @@
       "imageRequired": "An image is required.",
       "deanIncomplete": "Dean name and dean photo must both be set, or both left empty.",
       "videoIncomplete": "Video URL and video poster must both be set, or both left empty.",
+      "videoTitleRequired": "The Indonesian video title is required when the video URL is set.",
       "SESSION_INVALID": "Your session has expired. Sign in again and try once more.",
       "CSRF_INVALID": "The request could not be verified. Reload the page and try again.",
       "REQUEST_INVALID": "The request could not be processed. Check the fields and try again.",
@@ -1539,6 +1562,7 @@
       "videoUrl": "Video URL (YouTube, etc)",
       "videoPoster": "Video poster image",
       "videoPosterDescription": "Shown before the video plays.",
+      "showProfileVideoInGallery": "Also show the profile video in the Video Gallery section",
       "videoTitle": "Video title",
       "videoDesc": "Video description",
       "facultyName": "Faculty name",

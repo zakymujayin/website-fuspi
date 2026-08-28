@@ -47,7 +47,7 @@ export async function AchievementsSection({ items, locale, title, description, c
   return (
     // Royal blue, not navy: docs/03-design-system.md locks royal-500 as the
     // primary identity color and reserves navy for header/footer depth.
-    <section className="relative overflow-hidden border-t border-slate-200 bg-gradient-to-br from-royal-800 to-royal-950 py-12 md:py-16">
+    <section className="grain relative overflow-hidden bg-gradient-to-br from-royal-800 to-royal-950 py-12 md:py-16">
       {/* Soft glow, not a shape: a radial-gradient blob fades to nothing at
           its own edges, so there's no hard boundary line cutting across
           the band. */}

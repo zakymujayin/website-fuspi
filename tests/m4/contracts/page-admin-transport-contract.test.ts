@@ -39,6 +39,8 @@ const HERO = {
   isDecorative: false,
   width: 1_600,
   height: 900,
+  focalX: null,
+  focalY: null,
 };
 
 const SUMMARY = {

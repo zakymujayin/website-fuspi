@@ -49,6 +49,21 @@ async function validateCommittedTarget(
   return {root, destination, exists: true as const};
 }
 
+/** Whether a committed file exists on disk for this key, without staging anything. */
+export async function committedFileExists(
+  roots: StorageRoots,
+  rawStorageClass: unknown,
+  rawStorageKey: unknown,
+): Promise<boolean> {
+  try {
+    const target = await validateCommittedTarget(roots, rawStorageClass, rawStorageKey);
+    return target.exists;
+  } catch (error) {
+    if (error instanceof Error && error.name === "StorageBoundaryError") throw error;
+    throw storageBoundaryError();
+  }
+}
+
 export async function removeCommittedFile(
   roots: StorageRoots,
   rawStorageClass: unknown,

@@ -5,6 +5,10 @@ import {
   AdminMediaDeleteAction,
   type AdminMediaDeleteErrorLabels,
 } from "./media-delete-action";
+import {
+  AdminMediaFocalPointAction,
+  type AdminMediaFocalPointErrorLabels,
+} from "./media-focal-point-action";
 import { formatAdminMediaBytes, formatAdminMediaCreatedAt, formatAdminMediaDimensions } from "./media-format";
 import { AdminMediaThumbnail } from "./media-thumbnail";
 import { resolveAdminMediaThumbnail } from "./media-thumbnail-resolver";
@@ -22,6 +26,13 @@ export type AdminMediaItemCardLabels = {
   deleteConfirmAction: string;
   deleteCancel: string;
   deleteErrors: AdminMediaDeleteErrorLabels;
+  focalPointAction: string;
+  focalPointEditorLabel: string;
+  focalPointHintTemplate: string;
+  focalPointCancel: string;
+  focalPointSave: string;
+  focalPointSaving: string;
+  focalPointErrors: AdminMediaFocalPointErrorLabels;
 };
 
 type AdminMediaItemCardProps = {
@@ -63,6 +74,25 @@ export function AdminMediaItemCard({ item, locale, uploadPublicUrl, labels }: Ad
           <time dateTime={item.createdAt} className="text-xs text-slate-500">
             {formatAdminMediaCreatedAt(item.createdAt, locale)}
           </time>
+          {thumbnail.kind === "image" ? (
+            <AdminMediaFocalPointAction
+              mediaId={item.id}
+              imageUrl={thumbnail.src}
+              alt={thumbnail.alt}
+              isDecorative={item.isDecorative}
+              initialFocalX={item.focalX}
+              initialFocalY={item.focalY}
+              labels={{
+                action: labels.focalPointAction,
+                editorLabel: labels.focalPointEditorLabel,
+                hintTemplate: labels.focalPointHintTemplate,
+                cancel: labels.focalPointCancel,
+                save: labels.focalPointSave,
+                saving: labels.focalPointSaving,
+                errors: labels.focalPointErrors,
+              }}
+            />
+          ) : null}
           <AdminMediaDeleteAction
             mediaId={item.id}
             labels={{

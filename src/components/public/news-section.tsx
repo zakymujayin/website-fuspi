@@ -20,7 +20,7 @@ export async function NewsSection({ items, locale }: NewsSectionProps) {
   if (!featured) return null;
 
   return (
-    <section className="border-t border-slate-200 bg-gradient-to-b from-white to-royal-100/70 py-12 md:py-16">
+    <section className="bg-gradient-to-b from-white to-royal-50/60 py-12 md:py-16">
       <Container>
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
           <h2 className="section-rule font-display text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">

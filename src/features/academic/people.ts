@@ -56,6 +56,8 @@ const MEDIA_SELECT = {
   isDecorative: true,
   width: true,
   height: true,
+  focalX: true,
+  focalY: true,
 } as const;
 
 const DOCUMENT_INCLUDE = {
@@ -96,6 +98,8 @@ type MediaRow = {
   isDecorative: boolean;
   width: number | null;
   height: number | null;
+  focalX: number | null;
+  focalY: number | null;
 } | null;
 
 function publicMedia(media: MediaRow, rawUploadBase: string) {
@@ -116,6 +120,8 @@ function publicMedia(media: MediaRow, rawUploadBase: string) {
     isDecorative: media.isDecorative,
     width: media.width,
     height: media.height,
+    focalX: media.focalX,
+    focalY: media.focalY,
   });
   return parsed.success ? parsed.data : null;
 }

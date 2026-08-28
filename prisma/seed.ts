@@ -91,6 +91,13 @@ const SECTIONS: SectionCopy[] = [
     id: { title: "Video Profil" }, en: { title: "Profile Video" }, ar: { title: "فيديو تعريفي" },
   },
   {
+    key: "VIDEO_GALLERY",
+    id: { title: "Galeri Video", subtitle: "Kegiatan, wisuda, dan suasana kampus dalam video." },
+    en: { title: "Video Gallery", subtitle: "Activities, graduations, and campus life in video." },
+    ar: { title: "معرض الفيديو", subtitle: "الأنشطة وحفلات التخرج وأجواء الحرم الجامعي بالفيديو." },
+    itemLimit: 12,
+  },
+  {
     key: "AGENDA",
     id: { title: "Agenda Kegiatan" }, en: { title: "Upcoming Events" }, ar: { title: "الفعاليات القادمة" },
     itemLimit: 4,
@@ -205,7 +212,7 @@ async function main() {
     },
   });
 
-  await prisma.siteSetting.upsert({
+  const siteSetting = await prisma.siteSetting.upsert({
     where: { id: "singleton" },
     update: { contentOwnerId: admin.id },
     create: {
@@ -275,23 +282,21 @@ async function main() {
     { id: "stat-3", value: "1200", suffix: "+", icon: "graduation-cap", id_: "Mahasiswa", en_: "Students", ar_: "الطلاب" },
     { id: "stat-4", value: "24", suffix: "+", icon: "handshake", id_: "Mitra Kerjasama", en_: "Partners", ar_: "شركاء" },
   ];
-  for (const [index, stat] of statistics.entries()) {
-    const translations = [
-      { locale: "id" as const, label: stat.id_, status: "PUBLISHED" as const },
-      { locale: "en" as const, label: stat.en_, status: "PUBLISHED" as const },
-      { locale: "ar" as const, label: stat.ar_, status: "PUBLISHED" as const },
-    ];
-    await prisma.statistic.upsert({
-      where: { id: stat.id },
-      update: {
-        value: stat.value, suffix: stat.suffix, icon: stat.icon, order: index,
-        translations: { deleteMany: {}, create: translations },
-      },
-      create: {
-        id: stat.id, value: stat.value, suffix: stat.suffix, icon: stat.icon, order: index,
-        translations: { create: translations },
-      },
-    });
+  // Seeded once — the faculty maintains the real numbers and labels in the admin.
+  if ((await prisma.statistic.count()) === 0) {
+    for (const [index, stat] of statistics.entries()) {
+      const translations = [
+        { locale: "id" as const, label: stat.id_, status: "PUBLISHED" as const },
+        { locale: "en" as const, label: stat.en_, status: "PUBLISHED" as const },
+        { locale: "ar" as const, label: stat.ar_, status: "PUBLISHED" as const },
+      ];
+      await prisma.statistic.create({
+        data: {
+          id: stat.id, value: stat.value, suffix: stat.suffix, icon: stat.icon, order: index,
+          translations: { create: translations },
+        },
+      });
+    }
   }
 
   const quickLinks = [
@@ -302,13 +307,16 @@ async function main() {
     ["PMB", "https://pmb.uinbanten.ac.id"],
     ["E-Learning", "https://elearning.uinbanten.ac.id"],
   ] as const;
-  for (const [index, [label, url]] of quickLinks.entries()) {
-    const id = `quick-${index + 1}`;
-    await prisma.quickLink.upsert({
-      where: { id },
-      update: { url, order: index },
-      create: { id, url, order: index, translations: { create: { locale: "id", label, status: "PUBLISHED" } } },
-    });
+  // Seeded once — admins reorder, relabel, and add their own quick links.
+  if ((await prisma.quickLink.count()) === 0) {
+    for (const [index, [label, url]] of quickLinks.entries()) {
+      await prisma.quickLink.create({
+        data: {
+          id: `quick-${index + 1}`, url, order: index,
+          translations: { create: { locale: "id", label, status: "PUBLISHED" } },
+        },
+      });
+    }
   }
 
   // Hero slider — three real slides with generated placeholder imagery.
@@ -338,100 +346,103 @@ async function main() {
       ctaUrl: "https://pmb.uinbanten.ac.id",
     },
   ];
-  for (const [index, slide] of slides.entries()) {
-    const media = await upsertPlaceholderMedia(admin.id, {
-      label: slide.label, width: 1600, height: 900, from: "#1e3a8a", to: "#4169e1",
-      alt: slide.id_.title, originalName: `hero-${index + 1}.webp`,
+  // Seeded once as demo content. Re-running the seed must never overwrite the image,
+  // links, order, or copy of slides the faculty has since edited or replaced in the admin.
+  if ((await prisma.homeSlider.count()) === 0) {
+    for (const [index, slide] of slides.entries()) {
+      const media = await upsertPlaceholderMedia(admin.id, {
+        label: slide.label, width: 1600, height: 900, from: "#1e3a8a", to: "#4169e1",
+        alt: slide.id_.title, originalName: `hero-${index + 1}.webp`,
+      });
+      const translations = [
+        { locale: "id" as const, ...slide.id_, status: "PUBLISHED" as const },
+        { locale: "en" as const, ...slide.en_, status: "PUBLISHED" as const },
+        { locale: "ar" as const, ...slide.ar_, status: "PUBLISHED" as const },
+      ];
+      await prisma.homeSlider.create({
+        data: {
+          id: slide.id, imageMediaId: media.id, ctaUrl: slide.ctaUrl, order: index, isVisible: true,
+          translations: { create: translations },
+        },
+      });
+    }
+  }
+
+  // Dean welcome + localized site copy — seeded once. Re-running the seed must never
+  // overwrite values the faculty has since edited in the admin, so skip when the
+  // singleton already carries a dean name.
+  if (!siteSetting.deanName) {
+    const deanPhoto = await upsertPlaceholderMedia(admin.id, {
+      label: "Dekan", width: 800, height: 800, from: "#0f172a", to: "#1e3a8a",
+      alt: "Dr. Masykur, M.Hum.", originalName: "dean-portrait.webp",
     });
-    const translations = [
-      { locale: "id" as const, ...slide.id_, status: "PUBLISHED" as const },
-      { locale: "en" as const, ...slide.en_, status: "PUBLISHED" as const },
-      { locale: "ar" as const, ...slide.ar_, status: "PUBLISHED" as const },
-    ];
-    await prisma.homeSlider.upsert({
-      where: { id: slide.id },
-      update: {
-        imageMediaId: media.id, ctaUrl: slide.ctaUrl, order: index, isVisible: true,
-        translations: { deleteMany: {}, create: translations },
-      },
-      create: {
-        id: slide.id, imageMediaId: media.id, ctaUrl: slide.ctaUrl, order: index, isVisible: true,
-        translations: { create: translations },
+    await prisma.siteSetting.update({
+      where: { id: "singleton" },
+      data: {
+        deanName: "Dr. Masykur, M.Hum.",
+        deanPhotoId: deanPhoto.id,
+        email: "fuspi@uinbanten.ac.id",
+        phone: "+62254200323",
+        translations: {
+          upsert: (["id", "en", "ar"] as const).map((locale) => ({
+            where: { siteSettingId_locale: { siteSettingId: "singleton", locale } },
+            update: {
+              deanPosition: {
+                id: "Dekan Fakultas Ushuluddin dan Pemikiran Islam",
+                en: "Dean of the Faculty of Ushuluddin and Islamic Thought",
+                ar: "عميد كلية أصول الدين والفكر الإسلامي",
+              }[locale],
+              deanMessage: {
+                id: "Assalamu'alaikum warahmatullahi wabarakatuh. Selamat datang di situs resmi Fakultas Ushuluddin dan Pemikiran Islam UIN Sultan Maulana Hasanuddin Banten. FUSPI hadir sebagai pusat pengembangan keilmuan Islam yang integratif, menghasilkan lulusan yang mendalam dalam ilmu keislaman sekaligus tanggap terhadap dinamika zaman.",
+                en: "Assalamu'alaikum warahmatullahi wabarakatuh. Welcome to the official website of the Faculty of Ushuluddin and Islamic Thought, UIN Sultan Maulana Hasanuddin Banten. FUSPI is a hub for integrative Islamic knowledge development, producing graduates deeply rooted in Islamic sciences and responsive to contemporary dynamics.",
+                ar: "السلام عليكم ورحمة الله وبركاته. أهلاً بكم في الموقع الرسمي لكلية أصول الدين والفكر الإسلامي. تقدم الكلية نفسها كمركز لتطوير المعرفة الإسلامية التكاملية، لإعداد خريجين متجذرين في العلوم الإسلامية ومستجيبين لديناميكيات العصر.",
+              }[locale],
+              tagline: {
+                id: "Kredibel, kontekstual, dan berdaya saing global.",
+                en: "Credible, contextual, and globally competitive.",
+                ar: "موثوقة وسياقية وتنافسية عالمياً.",
+              }[locale],
+              address1: {
+                id: "Kampus 2 — Jl. Syekh Nawawi Al-Bantani, Kp. Andamui, Kel. Sukawana, Kec. Curug, Kota Serang, Banten 42171",
+                en: "Campus 2 — Jl. Syekh Nawawi Al-Bantani, Kp. Andamui, Kel. Sukawana, Kec. Curug, Kota Serang, Banten 42171, Indonesia",
+                ar: "الحرم الثاني — شارع الشيخ نووي البنتاني، كامبونج أنداموي، سوكاوانا، كوروغ، مدينة سيرانج، بانتن 42171",
+              }[locale],
+              status: "PUBLISHED" as const,
+            },
+            create: {
+              locale,
+              facultyName: {
+                id: "Fakultas Ushuluddin dan Pemikiran Islam",
+                en: "Faculty of Ushuluddin and Islamic Thought",
+                ar: "كلية أصول الدين والفكر الإسلامي",
+              }[locale],
+              tagline: {
+                id: "Kredibel, kontekstual, dan berdaya saing global.",
+                en: "Credible, contextual, and globally competitive.",
+                ar: "موثوقة وسياقية وتنافسية عالمياً.",
+              }[locale],
+              address1: {
+                id: "Kampus 2 — Jl. Syekh Nawawi Al-Bantani, Kp. Andamui, Kel. Sukawana, Kec. Curug, Kota Serang, Banten 42171",
+                en: "Campus 2 — Jl. Syekh Nawawi Al-Bantani, Kp. Andamui, Kel. Sukawana, Kec. Curug, Kota Serang, Banten 42171, Indonesia",
+                ar: "الحرم الثاني — شارع الشيخ نووي البنتاني، كامبونج أنداموي، سوكاوانا، كوروغ، مدينة سيرانج، بانتن 42171",
+              }[locale],
+              deanPosition: {
+                id: "Dekan Fakultas Ushuluddin dan Pemikiran Islam",
+                en: "Dean of the Faculty of Ushuluddin and Islamic Thought",
+                ar: "عميد كلية أصول الدين والفكر الإسلامي",
+              }[locale],
+              deanMessage: {
+                id: "Assalamu'alaikum warahmatullahi wabarakatuh. Selamat datang di situs resmi Fakultas Ushuluddin dan Pemikiran Islam UIN Sultan Maulana Hasanuddin Banten.",
+                en: "Assalamu'alaikum warahmatullahi wabarakatuh. Welcome to the official website of the Faculty of Ushuluddin and Islamic Thought, UIN Sultan Maulana Hasanuddin Banten.",
+                ar: "السلام عليكم ورحمة الله وبركاته. أهلاً بكم في الموقع الرسمي لكلية أصول الدين والفكر الإسلامي.",
+              }[locale],
+              status: "PUBLISHED" as const,
+            },
+          })),
+        },
       },
     });
   }
-
-  // Dean welcome — sample content until the faculty supplies a real photo and message.
-  const deanPhoto = await upsertPlaceholderMedia(admin.id, {
-    label: "Dekan", width: 800, height: 800, from: "#0f172a", to: "#1e3a8a",
-    alt: "Prof. Dr. H. Ahmad Fauzi, M.Ag.", originalName: "dean-portrait.webp",
-  });
-  await prisma.siteSetting.update({
-    where: { id: "singleton" },
-    data: {
-      deanName: "Prof. Dr. H. Ahmad Fauzi, M.Ag.",
-      deanPhotoId: deanPhoto.id,
-      email: "fuspi@uinbanten.ac.id",
-      phone: "+62254200323",
-      translations: {
-        upsert: (["id", "en", "ar"] as const).map((locale) => ({
-          where: { siteSettingId_locale: { siteSettingId: "singleton", locale } },
-          update: {
-            deanPosition: {
-              id: "Dekan Fakultas Ushuluddin dan Pemikiran Islam",
-              en: "Dean of the Faculty of Ushuluddin and Islamic Thought",
-              ar: "عميد كلية أصول الدين والفكر الإسلامي",
-            }[locale],
-            deanMessage: {
-              id: "Assalamu'alaikum warahmatullahi wabarakatuh. Selamat datang di situs resmi Fakultas Ushuluddin dan Pemikiran Islam UIN Sultan Maulana Hasanuddin Banten. FUSPI hadir sebagai pusat pengembangan keilmuan Islam yang integratif, menghasilkan lulusan yang mendalam dalam ilmu keislaman sekaligus tanggap terhadap dinamika zaman.",
-              en: "Assalamu'alaikum warahmatullahi wabarakatuh. Welcome to the official website of the Faculty of Ushuluddin and Islamic Thought, UIN Sultan Maulana Hasanuddin Banten. FUSPI is a hub for integrative Islamic knowledge development, producing graduates deeply rooted in Islamic sciences and responsive to contemporary dynamics.",
-              ar: "السلام عليكم ورحمة الله وبركاته. أهلاً بكم في الموقع الرسمي لكلية أصول الدين والفكر الإسلامي. تقدم الكلية نفسها كمركز لتطوير المعرفة الإسلامية التكاملية، لإعداد خريجين متجذرين في العلوم الإسلامية ومستجيبين لديناميكيات العصر.",
-            }[locale],
-            tagline: {
-              id: "Kredibel, kontekstual, dan berdaya saing global.",
-              en: "Credible, contextual, and globally competitive.",
-              ar: "موثوقة وسياقية وتنافسية عالمياً.",
-            }[locale],
-            address1: {
-              id: "Jl. Jenderal Sudirman No. 30, Serang, Banten 42118",
-              en: "Jl. Jenderal Sudirman No. 30, Serang, Banten 42118, Indonesia",
-              ar: "شارع الجنرال سوديرمان رقم 30، سيرانج، بانتن 42118، إندونيسيا",
-            }[locale],
-            status: "PUBLISHED" as const,
-          },
-          create: {
-            locale,
-            facultyName: {
-              id: "Fakultas Ushuluddin dan Pemikiran Islam",
-              en: "Faculty of Ushuluddin and Islamic Thought",
-              ar: "كلية أصول الدين والفكر الإسلامي",
-            }[locale],
-            tagline: {
-              id: "Kredibel, kontekstual, dan berdaya saing global.",
-              en: "Credible, contextual, and globally competitive.",
-              ar: "موثوقة وسياقية وتنافسية عالمياً.",
-            }[locale],
-            address1: {
-              id: "Jl. Jenderal Sudirman No. 30, Serang, Banten 42118",
-              en: "Jl. Jenderal Sudirman No. 30, Serang, Banten 42118, Indonesia",
-              ar: "شارع الجنرال سوديرمان رقم 30، سيرانج، بانتن 42118، إندونيسيا",
-            }[locale],
-            deanPosition: {
-              id: "Dekan Fakultas Ushuluddin dan Pemikiran Islam",
-              en: "Dean of the Faculty of Ushuluddin and Islamic Thought",
-              ar: "عميد كلية أصول الدين والفكر الإسلامي",
-            }[locale],
-            deanMessage: {
-              id: "Assalamu'alaikum warahmatullahi wabarakatuh. Selamat datang di situs resmi Fakultas Ushuluddin dan Pemikiran Islam UIN Sultan Maulana Hasanuddin Banten.",
-              en: "Assalamu'alaikum warahmatullahi wabarakatuh. Welcome to the official website of the Faculty of Ushuluddin and Islamic Thought, UIN Sultan Maulana Hasanuddin Banten.",
-              ar: "السلام عليكم ورحمة الله وبركاته. أهلاً بكم في الموقع الرسمي لكلية أصول الدين والفكر الإسلامي.",
-            }[locale],
-            status: "PUBLISHED" as const,
-          },
-        })),
-      },
-    },
-  });
 
   // Facilities album — homepage "Fasilitas" section reuses the Album/AlbumPhoto feature.
   const facilities = [

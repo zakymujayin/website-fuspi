@@ -16,6 +16,8 @@ describe("admin legacy media preview", () => {
       isDecorative: false,
       width: null,
       height: null,
+      focalX: null,
+      focalY: null,
     })).toEqual({
       id: "media-legacy-1",
       url: `/uploads/${LEGACY_STORAGE_KEY}`,
@@ -25,6 +27,8 @@ describe("admin legacy media preview", () => {
       isDecorative: true,
       width: null,
       height: null,
+      focalX: null,
+      focalY: null,
     });
   });
 
@@ -39,6 +43,8 @@ describe("admin legacy media preview", () => {
       isDecorative: false,
       width: 1_200,
       height: 800,
+      focalX: null,
+      focalY: null,
     })).toBeNull();
 
     expect(adminImageMediaPreview({
@@ -51,6 +57,8 @@ describe("admin legacy media preview", () => {
       isDecorative: false,
       width: null,
       height: null,
+      focalX: null,
+      focalY: null,
     })).toBeNull();
   });
 });

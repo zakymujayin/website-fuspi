@@ -640,6 +640,14 @@
     "removeLabel": "Hapus {name}",
     "focalPointEditorLabel": "Klik foto untuk menentukan titik fokus, atau gunakan tombol panah",
     "focalPointHint": "Titik fokus: {x}%, {y}% — bagian ini akan tetap terlihat saat foto dipotong otomatis di berbagai ukuran.",
+    "crop": {
+      "title": "Pangkas gambar (opsional)",
+      "instructions": "Seret bagian dalam kotak atau tekan tombol panah untuk menggeser; seret titik sudut (atau Shift + panah) untuk mengubah ukuran. Klik Terapkan untuk memangkas.",
+      "apply": "Terapkan pangkasan",
+      "reset": "Kembalikan asli",
+      "applied": "Gambar sudah dipangkas",
+      "error": "Gagal memangkas gambar. Coba lagi."
+    },
     "action": "Unggah",
     "uploading": "Mengunggah…",
     "success": "{count} berkas berhasil diunggah.",
@@ -668,6 +676,19 @@
     "alt": "Teks alternatif",
     "focalPointEditorLabel": "Klik foto untuk menentukan titik fokus, atau gunakan tombol panah",
     "focalPointHint": "Titik fokus: {x}%, {y}%",
+    "crop": {
+      "title": "Pangkas gambar (opsional)",
+      "instructions": "Seret bagian dalam kotak atau tekan tombol panah untuk menggeser; seret titik sudut (atau Shift + panah) untuk mengubah ukuran. Klik Terapkan untuk memangkas.",
+      "apply": "Terapkan pangkasan",
+      "reset": "Kembalikan asli",
+      "applied": "Gambar sudah dipangkas",
+      "error": "Gagal memangkas gambar. Coba lagi."
+    },
+    "cropExisting": {
+      "button": "Pangkas gambar ini",
+      "loading": "Memuat gambar…",
+      "loadError": "Gagal memuat gambar untuk dipangkas."
+    },
     "action": "Unggah & pilih",
     "uploading": "Mengunggah…",
     "cancel": "Batal",
@@ -1134,8 +1155,8 @@
     "serviceCta": "Akses Layanan",
     "service": {
       "sila": {
-        "title": "Sistem Informasi Akademik (SILA)",
-        "description": "Akses nilai, KRS, jadwal kuliah, dan data akademik mahasiswa secara daring."
+        "title": "Sistem Layanan Akademik (SILA)",
+        "description": "Ajukan surat keterangan, legalisir ijazah, dan layanan administrasi tugas akhir secara daring."
       },
       "complaints": {
         "title": "Layanan Pengaduan",
@@ -1186,6 +1207,7 @@
       "regional": "Regional",
       "lokal": "Lokal"
     },
+    "partnersLabel": "Mitra Kami",
     "partnersTitle": "Kerja Sama",
     "partnersDescription": "Jaringan kemitraan FUSPI dengan perguruan tinggi dan lembaga keislaman nasional.",
     "footerCtaTitle": "Siap bergabung bersama kami?",
@@ -1457,6 +1479,7 @@
       "imageRequired": "Gambar wajib dipilih.",
       "deanIncomplete": "Nama dekan dan foto dekan harus diisi bersamaan, atau dikosongkan bersamaan.",
       "videoIncomplete": "URL video dan poster video harus diisi bersamaan, atau dikosongkan bersamaan.",
+    "videoTitleRequired": "Judul video (ID) wajib diisi saat URL video diatur.",
       "SESSION_INVALID": "Sesi Anda telah berakhir. Masuk kembali lalu coba lagi.",
       "CSRF_INVALID": "Permintaan tidak dapat diverifikasi. Muat ulang halaman lalu coba lagi.",
       "REQUEST_INVALID": "Permintaan tidak dapat diproses. Periksa isian lalu coba lagi.",
@@ -1539,6 +1562,7 @@
       "videoUrl": "URL video (YouTube, dll)",
       "videoPoster": "Gambar poster video",
       "videoPosterDescription": "Ditampilkan sebelum video diputar.",
+      "showProfileVideoInGallery": "Tampilkan video profil juga di section Galeri Video",
       "videoTitle": "Judul video",
       "videoDesc": "Deskripsi video",
       "facultyName": "Nama fakultas",

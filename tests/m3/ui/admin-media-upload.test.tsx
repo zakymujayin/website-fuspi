@@ -1,7 +1,10 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
-import { describe, expect, it, vi } from "vitest";
+import { StrictMode } from "react";
+
+import { cleanup, render } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 // The component imports the locale-aware router; stub it so importing the module (for its pure
 // helpers) does not pull next/navigation into the jsdom test environment.
@@ -17,6 +20,9 @@ const {
   buildPdfFormData,
   toSafeImageUploadName,
   uploadFailureKey,
+  ImageUploadPreview,
+  newImageUploadRow,
+  cropLabels,
   MAX_IMAGE_BYTES,
   MAX_PDF_BYTES,
   MAX_IMAGE_COUNT,
@@ -35,6 +41,8 @@ const img = (alt: string, isDecorative = false, bytes = 100) => ({
   file: webp(bytes),
   alt,
   isDecorative,
+  focalX: null,
+  focalY: null,
 });
 
 describe("validateImageBatch", () => {
@@ -46,14 +54,14 @@ describe("validateImageBatch", () => {
     for (const type of ["", "application/octet-stream"]) {
       const file = new File([new Uint8Array(100)], "WhatsApp-Image-2026-08-10-at-19.00.12.jpeg.webp", { type });
       expect(isAcceptedImageFile(file)).toBe(true);
-      expect(validateImageBatch([{ file, alt: "Foto Acara FUSPI", isDecorative: false }])).toEqual({ ok: true });
+      expect(validateImageBatch([{ file, alt: "Foto Acara FUSPI", isDecorative: false, focalX: null, focalY: null }])).toEqual({ ok: true });
     }
   });
 
   it("accepts JPEG, JPG, PNG, and WebP files before server-side conversion to WebP", () => {
     for (const file of [jpeg(100), jpeg(100, "x.jpeg"), png(100), webp(100)]) {
       expect(isAcceptedImageFile(file)).toBe(true);
-      expect(validateImageBatch([{ file, alt: "Foto Acara FUSPI", isDecorative: false }])).toEqual({ ok: true });
+      expect(validateImageBatch([{ file, alt: "Foto Acara FUSPI", isDecorative: false, focalX: null, focalY: null }])).toEqual({ ok: true });
     }
   });
 
@@ -67,7 +75,7 @@ describe("validateImageBatch", () => {
   });
 
   it("reports the offending index for a non-image file", () => {
-    const svg = { file: new File([new Uint8Array(1)], "x.svg", { type: "image/svg+xml" }), alt: "a", isDecorative: false };
+    const svg = { file: new File([new Uint8Array(1)], "x.svg", { type: "image/svg+xml" }), alt: "a", isDecorative: false, focalX: null, focalY: null };
     expect(validateImageBatch([img("a"), svg])).toEqual({ ok: false, index: 1, reason: "type" });
   });
 
@@ -112,8 +120,8 @@ describe("buildImageBatchFormData", () => {
       policy: "CMS_IMAGE",
       uploadCount: 2,
       intents: [
-        { policy: "CMS_IMAGE", alt: "First", isDecorative: false },
-        { policy: "CMS_IMAGE", alt: "", isDecorative: true },
+        { policy: "CMS_IMAGE", alt: "First", isDecorative: false, focalX: null, focalY: null },
+        { policy: "CMS_IMAGE", alt: "", isDecorative: true, focalX: null, focalY: null },
       ],
     });
     expect(form.getAll("files")).toHaveLength(2);
@@ -131,6 +139,8 @@ describe("buildImageBatchFormData", () => {
       file: new File([new Uint8Array(100)], unsafeName, { type: "" }),
       alt: "Foto Acara FUSPI",
       isDecorative: false,
+      focalX: null,
+      focalY: null,
     }]);
     const [file] = form.getAll("files") as File[];
     expect(toSafeImageUploadName({ name: unsafeName, type: "" })).toBe("WhatsApp-Image-2026-08-10-at-19-00-12-jpeg.webp");
@@ -219,5 +229,114 @@ describe("component wiring and i18n", () => {
     for (const code of ["SESSION_INVALID", "UPLOAD_FAILED", "UNAVAILABLE"]) {
       expect(arBlock.error[code]).toBeTruthy();
     }
+  });
+});
+
+describe("newImageUploadRow", () => {
+  it("seeds originalFile with the pristine pick and leaves it uncropped", () => {
+    const file = png(20, "dean.png");
+    const row = newImageUploadRow(file);
+    expect(row.file).toBe(file);
+    expect(row.originalFile).toBe(file);
+    expect(row).toMatchObject({ alt: "", isDecorative: false, focalX: null, focalY: null });
+  });
+});
+
+describe("cropLabels", () => {
+  it("pulls the crop.* bundle off a namespace translator", () => {
+    expect(cropLabels((key: string) => `t:${key}`)).toEqual({
+      title: "t:crop.title",
+      instructions: "t:crop.instructions",
+      apply: "t:crop.apply",
+      reset: "t:crop.reset",
+      applied: "t:crop.applied",
+      error: "t:crop.error",
+    });
+  });
+});
+
+describe("crop wiring in the upload surfaces", () => {
+  const uploadSource = readFileSync(
+    path.join(process.cwd(), "src/components/admin/media/media-upload.tsx"),
+    "utf8",
+  );
+  const pickerSource = readFileSync(
+    path.join(process.cwd(), "src/components/admin/media/media-picker-upload-panel.tsx"),
+    "utf8",
+  );
+
+  it("replaces the row file with the cropped result and reverts to originalFile on reset", () => {
+    for (const source of [uploadSource, pickerSource]) {
+      expect(source).toContain("<ImageCropEditor");
+      expect(source).toMatch(/onApply=\{\(cropped\) => update\w+\(.*\{ file: cropped \}\)\}/);
+      expect(source).toMatch(/onReset=\{\(\) => update\w+\(.*\{ file: row\.originalFile \}\)\}/);
+    }
+  });
+
+  it("keeps the focal-point preview pointed at the (possibly cropped) row file", () => {
+    for (const source of [uploadSource, pickerSource]) {
+      expect(source).toContain("file={row.file}");
+    }
+  });
+});
+
+describe("ImageUploadPreview object-URL lifecycle", () => {
+  const liveUrls = new Set<string>();
+  let counter = 0;
+
+  afterEach(() => {
+    cleanup();
+    liveUrls.clear();
+    counter = 0;
+  });
+
+  function stubObjectUrls() {
+    URL.createObjectURL = vi.fn(() => {
+      counter += 1;
+      const url = `blob:mock/${counter}`;
+      liveUrls.add(url);
+      return url;
+    });
+    URL.revokeObjectURL = vi.fn((url: string) => {
+      liveUrls.delete(url);
+    });
+  }
+
+  it("renders the preview img with an object URL that is still live after a StrictMode remount", () => {
+    stubObjectUrls();
+    const { container } = render(
+      <StrictMode>
+        <ImageUploadPreview
+          file={png(10, "dean.png")}
+          x={null}
+          y={null}
+          onChange={() => {}}
+          label="focal"
+          hint="hint"
+        />
+      </StrictMode>,
+    );
+
+    const src = container.querySelector("img")?.getAttribute("src") ?? "";
+    expect(src).toMatch(/^blob:mock\//);
+    expect(liveUrls.has(src)).toBe(true);
+  });
+
+  it("revokes the object URL when the preview unmounts", () => {
+    stubObjectUrls();
+    const { container, unmount } = render(
+      <ImageUploadPreview
+        file={png(10, "dean.png")}
+        x={null}
+        y={null}
+        onChange={() => {}}
+        label="focal"
+        hint="hint"
+      />,
+    );
+    const src = container.querySelector("img")?.getAttribute("src") ?? "";
+    expect(liveUrls.has(src)).toBe(true);
+    unmount();
+    expect(liveUrls.has(src)).toBe(false);
   });
 });

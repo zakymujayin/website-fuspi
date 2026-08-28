@@ -92,11 +92,14 @@ export const AdminMediaUploadMetadataSchema = z.discriminatedUnion("policy", [
 ]);
 
 const AdminMediaAltSchema = MediaUploadIntentSchema.shape.alt;
+const AdminMediaFocalCoordinateSchema = MediaUploadIntentSchema.shape.focalX;
 
 export const AdminMediaMetadataUpdatePayloadSchema = z.object({
   mediaId: MediaIdSchema,
   alt: AdminMediaAltSchema,
   isDecorative: z.boolean(),
+  focalX: AdminMediaFocalCoordinateSchema,
+  focalY: AdminMediaFocalCoordinateSchema,
 }).strict().superRefine((value, context) => {
   if (value.isDecorative && value.alt !== "") {
     context.addIssue({
@@ -111,6 +114,11 @@ export const AdminMediaMetadataUpdatePayloadSchema = z.object({
       path: ["alt"],
       message: "Informative Media requires alternative text.",
     });
+  }
+  const hasX = value.focalX != null;
+  const hasY = value.focalY != null;
+  if (hasX !== hasY) {
+    context.addIssue({code: "custom", path: ["focalY"], message: "Focal point requires both coordinates."});
   }
 });
 

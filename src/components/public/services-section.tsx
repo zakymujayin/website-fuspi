@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpenText, CalendarCheck2, MessageSquareWarning, MonitorCheck } from "lucide-react";
+import { ArrowRight, ArrowUpRight, BookOpen, DoorOpen, FileText, Headset } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/ui/container";
@@ -6,11 +6,40 @@ import { Reveal } from "@/components/public/reveal";
 import { Link } from "@/i18n/navigation";
 
 type ServiceCard = {
-  key: "sila" | "complaints" | "booking" | "ejournal";
-  icon: typeof MonitorCheck;
+  key: "sila" | "ejournal" | "booking" | "complaints";
+  icon: typeof FileText;
   href: string;
   external: boolean;
+  /** Full utility strings per accent so Tailwind keeps them (no dynamic class names). */
+  accent: { chip: string; rule: string; hoverBorder: string; hoverArrow: string };
 };
+
+const ACCENTS = {
+  royal: {
+    chip: "bg-royal-50 text-royal-600",
+    rule: "bg-royal-500",
+    hoverBorder: "group-hover:border-royal-300",
+    hoverArrow: "group-hover:text-royal-500",
+  },
+  brass: {
+    chip: "bg-brass-400/15 text-brass-600",
+    rule: "bg-brass-500",
+    hoverBorder: "group-hover:border-brass-400",
+    hoverArrow: "group-hover:text-brass-600",
+  },
+  teal: {
+    chip: "bg-emerald-50 text-emerald-600",
+    rule: "bg-emerald-500",
+    hoverBorder: "group-hover:border-emerald-300",
+    hoverArrow: "group-hover:text-emerald-600",
+  },
+  navy: {
+    chip: "bg-navy-900/10 text-navy-900",
+    rule: "bg-navy-900",
+    hoverBorder: "group-hover:border-navy-800/40",
+    hoverArrow: "group-hover:text-navy-900",
+  },
+} as const;
 
 /**
  * SILA has no configured public URL yet (`NEXT_PUBLIC_SILA_URL` is unset) and
@@ -22,13 +51,14 @@ function buildServices(): readonly ServiceCard[] {
   return [
     {
       key: "sila",
-      icon: MonitorCheck,
+      icon: FileText,
       href: silaUrl && silaUrl.length > 0 ? silaUrl : "/layanan",
       external: Boolean(silaUrl && silaUrl.length > 0),
+      accent: ACCENTS.royal,
     },
-    { key: "complaints", icon: MessageSquareWarning, href: "/pengaduan", external: false },
-    { key: "booking", icon: CalendarCheck2, href: "/peminjaman", external: false },
-    { key: "ejournal", icon: BookOpenText, href: "/layanan", external: false },
+    { key: "ejournal", icon: BookOpen, href: "/layanan", external: false, accent: ACCENTS.brass },
+    { key: "booking", icon: DoorOpen, href: "/peminjaman", external: false, accent: ACCENTS.teal },
+    { key: "complaints", icon: Headset, href: "/pengaduan", external: false, accent: ACCENTS.navy },
   ] as const;
 }
 
@@ -37,21 +67,12 @@ export async function ServicesSection() {
   const services = buildServices();
 
   return (
-    <section className="relative overflow-hidden border-t border-slate-200 bg-gradient-to-b from-royal-50 to-royal-100/60 pt-10 pb-16 md:pt-14 md:pb-20">
-      {/* Soft glow, not a shape: fades to nothing at its own edges, tucked
-          into the top-right corner away from the card grid. */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage:
-            "radial-gradient(ellipse 55% 65% at 88% 5%, rgba(65,105,225,0.14), transparent 60%)",
-        }}
-      />
-
-      <Container className="relative">
+    <section className="bg-slate-50 py-14 md:py-20">
+      <Container>
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h2 className="section-rule font-display text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
+            <span className="text-xs font-medium tracking-wide text-royal-600 uppercase">{t("servicesEyebrow")}</span>
+            <h2 className="section-rule mt-2 font-display text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
               {t("servicesTitle")}
             </h2>
             <p className="mt-2 max-w-2xl text-sm text-slate-500">{t("servicesDescription")}</p>
@@ -65,65 +86,49 @@ export async function ServicesSection() {
           </Link>
         </div>
 
-        {/* One panel split into four, not four repeated tiles: a single
-            shape reads as a directory/toolbar rather than a stack of
-            generic feature cards. The fill runs royal to navy across the
-            panel (both already-locked identity colors) instead of one flat
-            blue, so it isn't just "white on blue" end to end. */}
-        <div className="overflow-hidden rounded-2xl bg-gradient-to-r from-royal-600 via-royal-900 to-navy-950">
-          <div className="grid divide-y divide-white/10 sm:grid-cols-2 sm:divide-y-0 sm:divide-x lg:grid-cols-4">
-            {services.map((service, index) => {
-              const title = t(`service.${service.key}.title`);
-              const description = t(`service.${service.key}.description`);
-              const content = (
-                <div className="group flex h-full flex-col gap-4 p-6 transition-colors duration-200 hover:bg-white/5 md:p-7">
-                  <service.icon aria-hidden className="size-6 text-brass-400" strokeWidth={1.5} />
-                  <div className="flex-1">
-                    <h3 className="font-display text-base font-semibold text-white md:text-lg">{title}</h3>
-                    <p className="mt-1.5 text-xs leading-relaxed text-slate-300 md:text-sm">{description}</p>
-                  </div>
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium text-white/70 transition-colors duration-200 group-hover:text-white">
-                    {t("serviceCta")}
-                    <ArrowRight
-                      aria-hidden
-                      className="size-3.5 transition-transform duration-200 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180"
-                      strokeWidth={1.5}
-                    />
+        <div className="grid gap-4 sm:grid-cols-2 md:gap-5">
+          {services.map((service, index) => {
+            const title = t(`service.${service.key}.title`);
+            const description = t(`service.${service.key}.description`);
+            const content = (
+              <div
+                className={`group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md md:p-8 ${service.accent.hoverBorder}`}
+              >
+                <span aria-hidden className={`absolute inset-x-0 top-0 h-1 ${service.accent.rule}`} />
+                <div className="flex items-start justify-between">
+                  <span className={`flex size-14 items-center justify-center rounded-2xl ${service.accent.chip}`}>
+                    <service.icon aria-hidden className="size-7" strokeWidth={1.75} />
                   </span>
+                  <ArrowUpRight
+                    aria-hidden
+                    className={`size-5 text-slate-300 transition-all duration-200 group-hover:-translate-y-0.5 rtl:-scale-x-100 ${service.accent.hoverArrow}`}
+                    strokeWidth={1.75}
+                  />
                 </div>
-              );
+                <h3 className="mt-6 font-display text-xl font-bold tracking-tight text-slate-900 md:text-2xl">
+                  {title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-500">{description}</p>
+                <span className="sr-only">{t("serviceCta")}</span>
+              </div>
+            );
 
-              return (
-                <Reveal key={service.key} index={index}>
-                  {service.external ? (
-                    <a href={service.href} target="_blank" rel="noopener noreferrer" className="block h-full">
-                      {content}
-                    </a>
-                  ) : (
-                    <Link href={service.href} className="block h-full">
-                      {content}
-                    </Link>
-                  )}
-                </Reveal>
-              );
-            })}
-          </div>
+            return (
+              <Reveal key={service.key} index={index}>
+                {service.external ? (
+                  <a href={service.href} target="_blank" rel="noopener noreferrer" className="block h-full">
+                    {content}
+                  </a>
+                ) : (
+                  <Link href={service.href} className="block h-full">
+                    {content}
+                  </Link>
+                )}
+              </Reveal>
+            );
+          })}
         </div>
       </Container>
-
-      {/* Echoes the hero's signature wave at a smaller scale, so the section
-          flows into News below instead of cutting off on a flat hairline.
-          Fill matches News's own starting background exactly, same formula
-          as the hero-to-dean seam: the curve is the transition, not a gap.
-          No accent line: a soft shadow under the curve instead. */}
-      <svg
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-12 w-full text-white drop-shadow-[0_-4px_12px_rgba(15,23,42,0.10)] md:h-16"
-        viewBox="0 0 1440 100"
-        preserveAspectRatio="none"
-      >
-        <path d="M0,50 C480,100 960,0 1440,50 L1440,100 L0,100 Z" fill="currentColor" />
-      </svg>
     </section>
   );
 }

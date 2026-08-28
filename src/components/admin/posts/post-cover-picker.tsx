@@ -2,7 +2,6 @@
 
 import { ImageOffIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
 
 import {
   buildAdminImagePickerHref,
@@ -11,6 +10,9 @@ import {
 } from "@/components/admin/media/media-picker-pagination";
 import { AdminMediaThumbnail } from "@/components/admin/media/media-thumbnail";
 import { resolveAdminMediaThumbnail } from "@/components/admin/media/media-thumbnail-resolver";
+import { MediaPickerCropPanel } from "@/components/admin/media/media-picker-crop-panel";
+import { MediaPickerUploadPanel } from "@/components/admin/media/media-picker-upload-panel";
+import { useAdminMediaPickerState } from "@/components/admin/media/use-admin-media-picker-state";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import type { AdminMediaItem } from "@/contracts/media-admin";
@@ -37,19 +39,15 @@ export function PostCoverPicker({
   uploadPublicUrl,
 }: PostCoverPickerProps) {
   const t = useTranslations("AdminPostCoverPicker");
-  const [open, setOpen] = useState(false);
-  const [items, setItems] = useState<readonly AdminMediaItem[] | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [loadError, setLoadError] = useState(false);
-  const [page, setPage] = useState(0);
-  const [hasNextPage, setHasNextPage] = useState(false);
   // Known previews by id, so the selected cover renders whether it came from the
   // initial view or from a pick in the list.
-  const [previews, setPreviews] = useState<Record<string, CoverPreview>>(() =>
-    initialCover ? { [initialCover.id]: initialCover } : {},
-  );
+  const {
+    open, setOpen, items, setItems, loading, setLoading, loadError, setLoadError,
+    page, setPage, hasNextPage, setHasNextPage, previews, setPreviews,
+  } = useAdminMediaPickerState(initialCover ? { [initialCover.id]: initialCover } : {});
 
   const selected = value ? previews[value] ?? null : null;
+  const selectedThumb = selected ? resolveAdminMediaThumbnail(selected, uploadPublicUrl) : null;
 
   async function loadImages(targetPage = 1) {
     if (loading) return;
@@ -106,9 +104,9 @@ export function PostCoverPicker({
       </div>
 
       <div className="flex flex-wrap items-center gap-4">
-        {selected ? (
+        {selected && selectedThumb ? (
           <AdminMediaThumbnail
-            thumbnail={resolveAdminMediaThumbnail(selected, uploadPublicUrl)}
+            thumbnail={selectedThumb}
             className="aspect-video w-40 rounded-lg"
           />
         ) : (
@@ -141,11 +139,22 @@ export function PostCoverPicker({
         </div>
       </div>
 
+      {selectedThumb?.kind === "image" ? (
+        <MediaPickerCropPanel
+          key={selectedThumb.src}
+          imageSrc={selectedThumb.src}
+          alt={selectedThumb.alt}
+          isDecorative={selectedThumb.isDecorative}
+          onReplaced={choose}
+        />
+      ) : null}
+
       {open ? (
         <div
           id="admin-post-cover-list"
           className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4"
         >
+          <MediaPickerUploadPanel onUploaded={(item) => choose(item)} />
           {loading && items === null ? (
             <p role="status" className="flex items-center gap-2 text-sm text-slate-500">
               <Spinner data-icon />

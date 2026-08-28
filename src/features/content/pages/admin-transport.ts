@@ -81,9 +81,11 @@ function safeHero(media: {
   isDecorative: boolean;
   width: number | null;
   height: number | null;
+  focalX: number | null;
+  focalY: number | null;
 } | null, uploadBase: string) {
   if (!media || media.storageClass !== "PUBLIC" || media.alt === null) return null;
-  const {id, mimeType, size, alt, isDecorative, width, height} = media;
+  const {id, mimeType, size, alt, isDecorative, width, height, focalX, focalY} = media;
   const parsed = PublicMediaViewSchema.safeParse({
     id,
     url: `${uploadBase}/${media.storageKey}`,
@@ -93,6 +95,8 @@ function safeHero(media: {
     isDecorative,
     width,
     height,
+    focalX,
+    focalY,
   });
   return parsed.success ? parsed.data : null;
 }
@@ -170,6 +174,8 @@ export async function getAdminPageEditor(
           isDecorative: true,
           width: true,
           height: true,
+          focalX: true,
+          focalY: true,
         },
       });
       hero = safeHero(media, uploadBase);

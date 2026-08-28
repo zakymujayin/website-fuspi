@@ -98,6 +98,22 @@ export default async function AdminMediaPage({ params, searchParams }: AdminMedi
                   UPLOAD_FAILED: t("delete.error.UPLOAD_FAILED"),
                   UNAVAILABLE: t("delete.error.UNAVAILABLE"),
                 },
+                focalPointAction: t("focalPoint.action"),
+                focalPointEditorLabel: t("focalPoint.editorLabel"),
+                focalPointHintTemplate: t.raw("focalPoint.hint"),
+                focalPointCancel: t("focalPoint.cancel"),
+                focalPointSave: t("focalPoint.save"),
+                focalPointSaving: t("focalPoint.saving"),
+                focalPointErrors: {
+                  SESSION_INVALID: t("focalPoint.error.SESSION_INVALID"),
+                  CSRF_INVALID: t("focalPoint.error.CSRF_INVALID"),
+                  REQUEST_INVALID: t("focalPoint.error.REQUEST_INVALID"),
+                  VALIDATION_FAILED: t("focalPoint.error.VALIDATION_FAILED"),
+                  NOT_FOUND: t("focalPoint.error.NOT_FOUND"),
+                  MEDIA_IN_USE: t("focalPoint.error.MEDIA_IN_USE"),
+                  UPLOAD_FAILED: t("focalPoint.error.UPLOAD_FAILED"),
+                  UNAVAILABLE: t("focalPoint.error.UNAVAILABLE"),
+                },
               }}
             />
           ) : (

@@ -20,17 +20,17 @@ const emptySnapshot = {
   locale: "en", generatedAt: "2026-08-04T03:00:00.000Z",
   navigation: {contentBar: [], topbar: [], header: [], footer: []}, externalLinks: [], sections: [], sliders: [],
   quickLinks: [], statistics: [], homeVideos: [], siteSetting: {facultyName: "Fakultas", tagline: null, addresses: [], dean: null,
-    video: null, logo: null, accreditationLogo: null, bluLogo: null, favicon: null,
+    video: null, showProfileVideoInGallery: false, logo: null, accreditationLogo: null, bluLogo: null, favicon: null,
     email: null, phone: null, socialLinks: {facebook: null, instagram: null, youtube: null, x: null},
     translation: resolution},
   content: {studyPrograms: [], news: [], announcements: [], columns: [], services: [], partnerships: [], events: [], testimonials: []},
 };
 
 describe("home and navigation frozen contracts", () => {
-  it("freezes all seventeen editable home section keys", () => {
+  it("freezes all eighteen editable home section keys", () => {
     expect(HomeSectionKeySchema.options).toEqual([
       "HERO", "QUICKLINK", "DEAN", "STATS", "INTRO", "PRODI", "ANNOUNCEMENT", "SERVICE",
-      "FACILITY", "NEWS", "PARTNERSHIP", "COLUMN", "ACHIEVEMENT", "VIDEO", "AGENDA", "TESTIMONIAL", "CTA",
+      "FACILITY", "NEWS", "PARTNERSHIP", "COLUMN", "ACHIEVEMENT", "VIDEO", "VIDEO_GALLERY", "AGENDA", "TESTIMONIAL", "CTA",
     ]);
     expect(HomeSectionKeySchema.safeParse("OTHER").success).toBe(false);
   });
@@ -65,6 +65,7 @@ describe("home and navigation frozen contracts", () => {
 
   it("requires complete dean and video asset pairs with safe public URLs", () => {
     const setting = {deanName: null, deanPhotoMediaId: null, videoUrl: null, videoPosterMediaId: null,
+      showProfileVideoInGallery: false,
       email: null, phone: null, facebookUrl: null, instagramUrl: null, youtubeUrl: null, xUrl: null,
       logoMediaId: null, accreditationLogoMediaId: null, bluLogoMediaId: null,
       faviconMediaId: null, contentOwnerId: null, expiresAt: null,
@@ -101,6 +102,12 @@ describe("home and navigation frozen contracts", () => {
     expect(formSource).not.toContain("defaultValue=");
     expect(formSource).toContain("value={idTr.videoTitle}");
     expect(formSource).toContain("onChange={updateTranslation(\"id\", \"videoTitle\")}");
+    // A video URL without an Indonesian title fails the form instead of silently hiding the section.
+    expect(formSource).toContain("setErrors([t(\"errors.videoTitleRequired\")])");
+    expect(formSource).toContain("videoUrlPayload !== null && nullableText(translationValues.id.videoTitle) === null");
+    // The "feature the profile video in the gallery section" toggle is persisted.
+    expect(formSource).toContain("showProfileVideoInGallery,");
+    expect(formSource).toContain("t(\"settings.showProfileVideoInGallery\")");
     expect(pageSource).toContain("key={`site-setting-${result.data.version ?? 0}`}");
     expect(pageSource).toContain("initialLogo={result.data.logoMedia ?? null}");
     expect(pageSource).toContain("initialAccreditationLogo={result.data.accreditationLogoMedia ?? null}");
@@ -120,7 +127,27 @@ describe("home and navigation frozen contracts", () => {
       for (const code of codes) {
         expect(messages.AdminHomeNav?.errors?.[code], `${locale} AdminHomeNav.errors.${code}`).toBeTruthy();
       }
+      expect(
+        messages.AdminHomeNav?.errors?.videoTitleRequired,
+        `${locale} AdminHomeNav.errors.videoTitleRequired`,
+      ).toBeTruthy();
     }
+  });
+
+  it("orders the homepage tail and merges the profile video with the video gallery", () => {
+    const homeSource = readFileSync(
+      path.join(process.cwd(), "src/app/[locale]/(public)/page.tsx"),
+      "utf8",
+    );
+    // "Sorotan Akademik" sits below "Sarana Prasarana"
+    expect(homeSource.indexOf("<ColumnsSection")).toBeGreaterThan(homeSource.indexOf("<FacilitiesSection"));
+    // One merged video section, low on the page: after Columns, before Partners
+    expect(homeSource.indexOf("<VideoSection")).toBeGreaterThan(homeSource.indexOf("<ColumnsSection"));
+    expect(homeSource.indexOf("<VideoSection")).toBeLessThan(homeSource.indexOf("<PartnersSection"));
+    // Still driven by the two independent section keys
+    expect(homeSource).toContain('isVisible("VIDEO")');
+    expect(homeSource).toContain('isVisible("VIDEO_GALLERY")');
+    expect(homeSource).toContain("showProfileInGallery");
   });
 
   it("encodes version intent and protects structural singleton resources", () => {
@@ -151,6 +178,24 @@ describe("home and navigation frozen contracts", () => {
     const emptyHero = {id: "section-hero", key: "HERO", order: 0, itemLimit: 4, cta: null, background: null,
       translation: {...resolution, title: "Sorotan", subtitle: null, ctaLabel: null}};
     expect(PublicHomeSnapshotSchema.safeParse({...emptySnapshot, sections: [emptyHero]}).success).toBe(false);
+  });
+
+  it("lets the profile video live in the video gallery section", () => {
+    const media = {id: "m-1", url: `/uploads/2026/08/${"a".repeat(64)}.webp`, mimeType: "image/webp" as const, size: 10,
+      alt: "poster", isDecorative: false, width: 800, height: 450, focalX: null, focalY: null};
+    const video = {url: "https://youtu.be/abcdefghijk", poster: media, title: "Profil", description: null};
+    const gallerySection = {id: "s-vg", key: "VIDEO_GALLERY", order: 0, itemLimit: 12, cta: null, background: null,
+      translation: {...resolution, title: "Galeri Video", subtitle: null, ctaLabel: null}};
+    const withGallery = (over: Record<string, unknown>) => PublicHomeSnapshotSchema.safeParse({
+      ...emptySnapshot,
+      sections: [gallerySection],
+      homeVideos: [{id: "hv-1", youtubeUrl: "https://youtu.be/abcdefghijk", order: 0, translation: {...resolution, title: "Wisuda"}}],
+      siteSetting: {...emptySnapshot.siteSetting, video, showProfileVideoInGallery: true, ...over},
+    });
+    // profile video + gallery section visible + opt-in → valid, no standalone VIDEO section needed
+    expect(withGallery({}).success).toBe(true);
+    // profile video configured but shown nowhere → rejected
+    expect(withGallery({showProfileVideoInGallery: false}).success).toBe(false);
   });
 
   it("requires the five study programs in the institutional order when present", () => {

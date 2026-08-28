@@ -3,13 +3,15 @@
 import { XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { useId, useRef, useState, type FormEvent } from "react";
+import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { FocalPointEditor } from "./focal-point-editor";
+import { ImageCropEditor, type ImageCropLabels } from "./image-crop-editor";
 
 export const MAX_IMAGE_BYTES = 5_242_880;
 export const MAX_PDF_BYTES = 20_971_520;
@@ -29,7 +31,24 @@ const FALLBACK_BROWSER_IMAGE_TYPES = new Set(["", "application/octet-stream"]);
 export type UploadPolicy = "CMS_IMAGE" | "PUBLIC_PDF";
 
 /** One selected image and its per-file accessibility metadata. */
-export type ImageUploadRow = { file: File; alt: string; isDecorative: boolean };
+export type ImageUploadRow = {
+  /** The file that gets uploaded — the cropped result once `originalFile` has been cropped, else identical to it. */
+  file: File;
+  /** The pristine pick, kept so a crop can be re-done or reverted without compounding quality loss. */
+  originalFile: File;
+  alt: string;
+  isDecorative: boolean;
+  focalX: number | null;
+  focalY: number | null;
+};
+
+/** A fresh row for a newly picked file — nothing cropped yet. */
+export function newImageUploadRow(file: File): ImageUploadRow {
+  return { file, originalFile: file, alt: "", isDecorative: false, focalX: null, focalY: null };
+}
+
+/** The parts of a row that shape the upload request; `originalFile` is editor-only state. */
+export type ImageUploadIntent = Omit<ImageUploadRow, "originalFile">;
 
 const FAILURE_CODES = [
   "SESSION_INVALID",
@@ -92,7 +111,7 @@ export type BatchValidation =
     };
 
 /** Client-side pre-check for a CMS image batch; mirrors the per-file metadata refine. */
-export function validateImageBatch(rows: readonly ImageUploadRow[]): BatchValidation {
+export function validateImageBatch(rows: readonly ImageUploadIntent[]): BatchValidation {
   if (rows.length === 0) return { ok: false, index: null, reason: "missing" };
   if (rows.length > MAX_IMAGE_COUNT) return { ok: false, index: null, reason: "count" };
   for (let index = 0; index < rows.length; index += 1) {
@@ -114,7 +133,7 @@ export function validatePdf(file: File | null): BatchValidation {
 }
 
 /** Assemble the frozen multipart body for a CMS image batch, one intent + one file per row, in order. */
-export function buildImageBatchFormData(rows: readonly ImageUploadRow[]): FormData {
+export function buildImageBatchFormData(rows: readonly ImageUploadIntent[]): FormData {
   const metadata = {
     policy: "CMS_IMAGE" as const,
     uploadCount: rows.length,
@@ -122,6 +141,8 @@ export function buildImageBatchFormData(rows: readonly ImageUploadRow[]): FormDa
       policy: "CMS_IMAGE" as const,
       alt: row.isDecorative ? "" : row.alt.trim(),
       isDecorative: row.isDecorative,
+      focalX: row.focalX,
+      focalY: row.focalY,
     })),
   };
   const form = new FormData();
@@ -141,6 +162,52 @@ export function buildPdfFormData(file: File): FormData {
   form.append("metadata", JSON.stringify(metadata));
   form.append("files", file);
   return form;
+}
+
+type ImageUploadPreviewProps = {
+  file: File;
+  x: number | null;
+  y: number | null;
+  onChange: (x: number, y: number) => void;
+  label: string;
+  hint: string;
+};
+
+/**
+ * Owns the object-URL lifecycle for one row's local file preview. Create and
+ * revoke live in the same effect so StrictMode's mount/unmount/mount cycle
+ * revokes then recreates the URL, instead of leaving a revoked src on the img.
+ */
+export function ImageUploadPreview({ file, x, y, onChange, label, hint }: ImageUploadPreviewProps) {
+  const [url, setUrl] = useState<string | null>(null);
+
+  // Create and revoke stay paired in one effect so StrictMode's mount/unmount/mount
+  // recreates the URL it just revoked; deriving it in render instead leaves a revoked
+  // src on the img after that cycle.
+  useEffect(() => {
+    const objectUrl = URL.createObjectURL(file);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- paired create/revoke, see above
+    setUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [file]);
+
+  if (!url) return null;
+
+  return <FocalPointEditor imageUrl={url} alt="" x={x} y={y} onChange={onChange} label={label} hint={hint} />;
+}
+
+type CropTranslator = (key: string, values?: Record<string, string | number>) => string;
+
+/** Label bundle for `ImageCropEditor`, off any translator whose namespace carries a `crop.*` block. */
+export function cropLabels(t: CropTranslator): ImageCropLabels {
+  return {
+    title: t("crop.title"),
+    instructions: t("crop.instructions"),
+    apply: t("crop.apply"),
+    reset: t("crop.reset"),
+    applied: t("crop.applied"),
+    error: t("crop.error"),
+  };
 }
 
 export function MediaUpload() {
@@ -173,7 +240,7 @@ export function MediaUpload() {
     resetAll();
   }
 
-  function updateImage(index: number, patch: Partial<Omit<ImageUploadRow, "file">>) {
+  function updateImage(index: number, patch: Partial<Omit<ImageUploadRow, "originalFile">>) {
     setImages((current) =>
       current.map((row, rowIndex) => (rowIndex === index ? { ...row, ...patch } : row)),
     );
@@ -282,7 +349,7 @@ export function MediaUpload() {
               multiple
               onChange={(event) => {
                 const files = [...(event.target.files ?? [])];
-                setImages(files.map((file) => ({ file, alt: "", isDecorative: false })));
+                setImages(files.map(newImageUploadRow));
                 setFieldError(null);
                 setSuccess(null);
               }}
@@ -294,21 +361,36 @@ export function MediaUpload() {
             <ul aria-label={t("selectedLabel")} className="flex flex-col gap-3">
               {images.map((row, index) => (
                 <li
-                  key={`${row.file.name}-${index}`}
+                  key={`${row.originalFile.name}-${index}`}
                   className="flex flex-col gap-2 rounded-lg border border-slate-200 p-3"
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <span className="truncate text-sm font-medium text-slate-700">{row.file.name}</span>
+                    <span className="truncate text-sm font-medium text-slate-700">{row.originalFile.name}</span>
                     <Button
                       type="button"
                       variant="ghost"
                       size="icon-sm"
-                      aria-label={t("removeLabel", { name: row.file.name })}
+                      aria-label={t("removeLabel", { name: row.originalFile.name })}
                       onClick={() => removeImage(index)}
                     >
                       <XIcon data-icon />
                     </Button>
                   </div>
+                  <ImageCropEditor
+                    file={row.originalFile}
+                    isCropped={row.file !== row.originalFile}
+                    onApply={(cropped) => updateImage(index, { file: cropped })}
+                    onReset={() => updateImage(index, { file: row.originalFile })}
+                    labels={cropLabels(t)}
+                  />
+                  <ImageUploadPreview
+                    file={row.file}
+                    x={row.focalX}
+                    y={row.focalY}
+                    onChange={(focalX, focalY) => updateImage(index, { focalX, focalY })}
+                    label={t("focalPointEditorLabel")}
+                    hint={t("focalPointHint", { x: row.focalX ?? 50, y: row.focalY ?? 50 })}
+                  />
                   <Field orientation="horizontal">
                     <Checkbox
                       id={`${formId}-dec-${index}`}

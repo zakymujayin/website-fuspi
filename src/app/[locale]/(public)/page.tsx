@@ -12,7 +12,7 @@ import {NewsSection} from "@/components/public/news-section";
 import {PartnersSection} from "@/components/public/partners-section";
 import {ServicesSection} from "@/components/public/services-section";
 import {StatsSection} from "@/components/public/stats-section";
-import {VideosSection} from "@/components/public/videos-section";
+import {VideoSection} from "@/components/public/video-section";
 import {institution} from "@/config/institution";
 import type {AppLocale} from "@/i18n/routing";
 import {getPrismaClient} from "@/lib/db/client";
@@ -51,7 +51,8 @@ export default async function HomePage({params}: {params: Promise<{locale: AppLo
 
   const [
     sliders, siteSetting, statistics, sections,
-    newsResult, announcementResult, columnResult, partnershipResult, eventResult,
+    newsResult, announcementResult, columnDeanResult, columnLecturerResult, columnStudentResult,
+    partnershipResult, eventResult,
   ] = await Promise.all([
     listPublicHomeSliders(prisma, locale, uploadBase),
     getPublicSiteSetting(prisma, locale, uploadBase),
@@ -59,14 +60,20 @@ export default async function HomePage({params}: {params: Promise<{locale: AppLo
     getPublicHomeSections(prisma, locale),
     listPublicPosts(prisma, {locale, type: "BERITA", pageSize: 5}, uploadBase),
     listPublicPosts(prisma, {locale, type: "PENGUMUMAN", pageSize: 5}, uploadBase),
-    listPublicPosts(prisma, {locale, type: "KOLOM", pageSize: 4}, uploadBase),
+    listPublicPosts(prisma, {locale, type: "KOLOM", columnType: "DEKAN", pageSize: 5}, uploadBase),
+    listPublicPosts(prisma, {locale, type: "KOLOM", columnType: "DOSEN", pageSize: 5}, uploadBase),
+    listPublicPosts(prisma, {locale, type: "KOLOM", columnType: "MAHASISWA", pageSize: 5}, uploadBase),
     listPublicContent(prisma, {resource: "PARTNERSHIP", locale, pageSize: 10}),
     listPublicContent(prisma, {resource: "EVENT", locale, pageSize: 10}),
   ]);
 
   const news = newsResult.ok ? newsResult.data.items : [];
   const announcements = announcementResult.ok ? announcementResult.data.items : [];
-  const columns = columnResult.ok ? columnResult.data.items : [];
+  const columnGroups = [
+    {role: "DEKAN" as const, items: columnDeanResult.ok ? columnDeanResult.data.items : []},
+    {role: "DOSEN" as const, items: columnLecturerResult.ok ? columnLecturerResult.data.items : []},
+    {role: "MAHASISWA" as const, items: columnStudentResult.ok ? columnStudentResult.data.items : []},
+  ];
   const partnerships = "ok" in partnershipResult && partnershipResult.ok ? partnershipResult.items : [];
   // pageSize is clamped to the shared 10/20/50 contract; the homepage widget
   // only ever shows the first four upcoming events.
@@ -81,7 +88,26 @@ export default async function HomePage({params}: {params: Promise<{locale: AppLo
   const achievementItems = achievementSection?.isVisible
     ? await listPublicHomeAchievements(prisma, locale, achievementSection.itemLimit, uploadBase)
     : [];
-  const galleryVideos = isVisible("VIDEO") ? await listPublicHomeGalleryVideos(prisma, locale) : [];
+  const videoGallerySection = sections.get("VIDEO_GALLERY");
+  const galleryVideos = videoGallerySection?.isVisible
+    ? await listPublicHomeGalleryVideos(prisma, locale, videoGallerySection.itemLimit)
+    : [];
+  const showProfileInGallery = siteSetting?.showProfileVideoInGallery ?? false;
+
+  // The profile video and the gallery are two independent home-section keys but
+  // render as one section — a lead player over a grid — so it never looks half-empty.
+  const profileVideo = siteSetting?.video ?? null;
+  const videoFeatured = profileVideo
+    && (isVisible("VIDEO") || (isVisible("VIDEO_GALLERY") && showProfileInGallery))
+    ? profileVideo
+    : null;
+  const videoGridItems = isVisible("VIDEO_GALLERY") ? galleryVideos : [];
+  const videoHasContent = Boolean(videoFeatured) || videoGridItems.length > 0;
+  const videoDevPlaceholder =
+    !videoHasContent && isVisible("VIDEO") && process.env.NODE_ENV !== "production";
+  const videoTitle = videoGridItems.length > 0
+    ? (videoGallerySection?.title ?? t("videoGalleryTitle"))
+    : (sections.get("VIDEO")?.title ?? t("videoGalleryTitle"));
 
   return (
     <>
@@ -109,8 +135,6 @@ export default async function HomePage({params}: {params: Promise<{locale: AppLo
         />
       ) : null}
 
-      {isVisible("COLUMN") ? <ColumnsSection items={columns} locale={locale} /> : null}
-
       {achievementItems.length > 0 ? (
         <AchievementsSection
           items={achievementItems}
@@ -123,12 +147,16 @@ export default async function HomePage({params}: {params: Promise<{locale: AppLo
 
       {facilityItems.length > 0 ? <FacilitiesSection items={facilityItems} /> : null}
 
-      {isVisible("VIDEO") && siteSetting?.video ? (
-        <VideosSection
-          video={siteSetting.video}
-          eyebrow={sections.get("VIDEO")?.title ?? ""}
-          galleryVideos={galleryVideos}
-          galleryTitle={t("videoGalleryTitle")}
+      {isVisible("COLUMN") ? <ColumnsSection groups={columnGroups} locale={locale} /> : null}
+
+      {videoHasContent || videoDevPlaceholder ? (
+        <VideoSection
+          eyebrow={videoFeatured && videoGridItems.length > 0 ? (sections.get("VIDEO")?.title ?? "") : ""}
+          title={videoTitle}
+          subtitle={videoGridItems.length > 0 ? (videoGallerySection?.subtitle ?? null) : null}
+          featured={videoFeatured}
+          videos={videoGridItems}
+          placeholder={videoDevPlaceholder}
         />
       ) : null}
 

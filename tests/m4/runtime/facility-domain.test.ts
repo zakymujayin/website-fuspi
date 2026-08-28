@@ -19,6 +19,8 @@ const image = {
   isDecorative: false,
   width: 1200,
   height: 800,
+  focalX: null,
+  focalY: null,
 };
 
 describe("facility domain", () => {

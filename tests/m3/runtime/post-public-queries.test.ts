@@ -42,6 +42,8 @@ function row(overrides: Record<string, unknown> = {}) {
       isDecorative: false,
       width: 320,
       height: 240,
+      focalX: null,
+      focalY: null,
     },
     images: [],
     translations: [translation("id", "Berita Indonesia")],

@@ -36,6 +36,22 @@ export function parseAdminMediaPickerPage(data: unknown): AdminMediaPickerPage |
   };
 }
 
+/** Refetch page 1 of the image picker and return the full list item for `mediaId` (e.g. a just-uploaded file), or null. */
+export async function findAdminMediaItemById(mediaId: string): Promise<AdminMediaItem | null> {
+  try {
+    const response = await fetch(buildAdminImagePickerHref(1), {
+      credentials: "same-origin",
+      headers: {accept: "application/json"},
+    });
+    const data: unknown = await response.json().catch(() => null);
+    const result = parseAdminMediaPickerPage(data);
+    if (!response.ok || !result) return null;
+    return result.items.find((item) => item.id === mediaId) ?? null;
+  } catch {
+    return null;
+  }
+}
+
 export function mergeAdminMediaPickerItems(
   current: readonly AdminMediaItem[],
   incoming: readonly AdminMediaItem[],

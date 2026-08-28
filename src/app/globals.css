@@ -293,6 +293,22 @@ html[dir="rtl"] :is(h1, h2, h3, h4) {
   max-width: 72ch;
 }
 
+/* Faint tiling film-grain over dark feature sections so they read as a textured
+   surface rather than a flat gradient. Purely decorative: sits above the section
+   background, below the content, and never intercepts pointer events. */
+@utility grain {
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
 /* Hides the scrollbar on drag/scroll-snap shelves without disabling scroll
    itself - the horizontal motion is the affordance, a visible track isn't. */
 @utility no-scrollbar {
@@ -301,6 +317,37 @@ html[dir="rtl"] :is(h1, h2, h3, h4) {
 
   &::-webkit-scrollbar {
     display: none;
+  }
+}
+
+/* Marquee track: defined here (not inline in the component) so pausing on
+   hover never re-renders/redefines the keyframes - a React-driven style
+   rewrite mid-loop is what caused the visible "stop, then restart from the
+   beginning" stutter. Duration is still set per instance via inline
+   `animationDuration`, since it depends on the item count. */
+@keyframes fuspi-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.fuspi-marquee-track {
+  animation-name: fuspi-marquee;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+.fuspi-marquee-track:hover,
+.fuspi-marquee-track:focus-within {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fuspi-marquee-track {
+    animation: none !important;
   }
 }
 

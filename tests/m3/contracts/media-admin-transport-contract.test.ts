@@ -24,6 +24,8 @@ const PUBLIC_IMAGE = {
   isDecorative: false,
   width: 1_200,
   height: 800,
+  focalX: null,
+  focalY: null,
   originalName: "kegiatan-fuspi.png",
   createdAt: "2026-07-21T08:00:00+07:00",
   uploaderName: "Editor FUSPI",
