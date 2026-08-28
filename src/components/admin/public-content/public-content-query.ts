@@ -102,7 +102,7 @@ export function toPublicContentAdminTransportQuery(query: PublicContentAdminNorm
 
 export function buildPublicContentAdminHref(
   resource: string,
-  {visibility = "ALL", search = "", direction = "desc", page = 1, pageSize}: {
+  {visibility = "ALL", search = "", direction = "asc", page = 1, pageSize}: {
     visibility?: string;
     search?: string;
     direction?: string;
@@ -113,7 +113,7 @@ export function buildPublicContentAdminHref(
   const params = new URLSearchParams();
   if (visibility !== "ALL") params.set("visibility", visibility);
   if (search) params.set("search", search);
-  if (direction !== "desc") params.set("direction", direction);
+  if (direction !== "asc") params.set("direction", direction);
   if (pageSize && pageSize !== 10) params.set("pageSize", String(pageSize));
   if (page > 1) params.set("page", String(page));
   const query = params.toString();

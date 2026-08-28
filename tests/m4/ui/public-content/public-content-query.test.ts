@@ -323,6 +323,17 @@ describe("buildPublicContentAdminHref", () => {
     expect(buildPublicContentAdminHref("kerjasama", { pageSize: 10 }))
       .toBe("/admin/kerjasama");
   });
+
+  it("omits the canonical direction (asc) from the href", () => {
+    expect(buildPublicContentAdminHref("kerjasama", { direction: "asc" }))
+      .toBe("/admin/kerjasama");
+    expect(buildPublicContentAdminHref("kerjasama")).toBe("/admin/kerjasama");
+  });
+
+  it("preserves a non-canonical direction (desc) in the href", () => {
+    expect(buildPublicContentAdminHref("kerjasama", { direction: "desc" }))
+      .toBe("/admin/kerjasama?direction=desc");
+  });
 });
 
 describe("totalPagesFor", () => {
