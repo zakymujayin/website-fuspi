@@ -892,6 +892,10 @@
       "title": "No pages yet",
       "description": "Pages will appear here once created."
     },
+    "searchEmpty": {
+      "title": "No results",
+      "description": "No pages match your search."
+    },
     "unavailable": {
       "title": "The page list cannot be loaded right now",
       "description": "Please reload this page again shortly."

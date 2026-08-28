@@ -892,6 +892,10 @@
       "title": "Belum ada halaman",
       "description": "Halaman akan tampil di sini setelah dibuat."
     },
+    "searchEmpty": {
+      "title": "Tidak ada hasil",
+      "description": "Tidak ada halaman yang cocok dengan pencarian Anda."
+    },
     "unavailable": {
       "title": "Daftar halaman sedang tidak dapat dimuat",
       "description": "Silakan muat ulang halaman ini beberapa saat lagi."

@@ -147,6 +147,12 @@ export default async function AdminPagesPage({ params, searchParams }: AdminPage
                 editLabelFor: (title: string) => t("editLabelFor", { title }),
               }}
             />
+          ) : query.search !== "" ? (
+            <AdminPageStateNotice
+              variant="empty"
+              title={t("searchEmpty.title")}
+              description={t("searchEmpty.description")}
+            />
           ) : (
             <AdminPageStateNotice
               variant="empty"
