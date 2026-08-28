@@ -1520,6 +1520,19 @@
     "searchPlaceholder": "Cari fasilitas...",
     "searchAriaLabel": "Cari fasilitas",
     "searchAction": "Cari",
+    "searchClear": "Bersihkan",
+    "pageSizeLabel": "Baris per halaman",
+    "searchEmpty": {
+      "title": "Tidak ada hasil",
+      "description": "Tidak ada fasilitas yang cocok dengan pencarian Anda."
+    },
+    "pagination": {
+      "ariaLabel": "Navigasi halaman daftar fasilitas",
+      "previous": "Halaman sebelumnya",
+      "next": "Halaman berikutnya",
+      "pageStatus": "Hal {page} dari {totalPages}",
+      "goToPage": "Ke halaman {page}"
+    },
     "activeFilter": "Filter status",
     "listAriaLabel": "Daftar fasilitas",
     "editLabelFor": "Sunting {title}",

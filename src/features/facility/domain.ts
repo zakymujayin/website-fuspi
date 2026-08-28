@@ -112,7 +112,7 @@ export function normalizeFacilitySearchParams(params: URLSearchParams) {
     const raw = RAW_LIST_QUERY_SCHEMA.parse(collectDuplicateAwareSearchParams(params));
     return {ok: true as const, data: FacilityListQuerySchema.parse({
       page: raw.page === undefined ? 1 : Number(raw.page),
-      pageSize: raw.pageSize === undefined ? 20 : Number(raw.pageSize),
+      pageSize: raw.pageSize === undefined ? 10 : Number(raw.pageSize),
       search: raw.search ?? "",
       direction: raw.direction ?? "ASC",
       active: raw.active ?? "ALL",

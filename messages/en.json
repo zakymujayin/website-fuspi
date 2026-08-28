@@ -1520,6 +1520,19 @@
     "searchPlaceholder": "Search facilities...",
     "searchAriaLabel": "Search facilities",
     "searchAction": "Search",
+    "searchClear": "Clear",
+    "pageSizeLabel": "Rows per page",
+    "searchEmpty": {
+      "title": "No results",
+      "description": "No facilities match your search."
+    },
+    "pagination": {
+      "ariaLabel": "Facility list pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "pageStatus": "Page {page} of {totalPages}",
+      "goToPage": "Go to page {page}"
+    },
     "activeFilter": "Status filter",
     "listAriaLabel": "Facility list",
     "editLabelFor": "Edit {title}",

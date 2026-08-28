@@ -1520,6 +1520,19 @@
     "searchPlaceholder": "ابحث في المرافق...",
     "searchAriaLabel": "بحث المرافق",
     "searchAction": "بحث",
+    "searchClear": "مسح",
+    "pageSizeLabel": "صفوف لكل صفحة",
+    "searchEmpty": {
+      "title": "لا توجد نتائج",
+      "description": "لا توجد مرافق تطابق بحثك."
+    },
+    "pagination": {
+      "ariaLabel": "التنقل بين صفحات قائمة المرافق",
+      "previous": "الصفحة السابقة",
+      "next": "الصفحة التالية",
+      "pageStatus": "صفحة {page} من {totalPages}",
+      "goToPage": "الانتقال إلى صفحة {page}"
+    },
     "activeFilter": "تصفية الحالة",
     "listAriaLabel": "قائمة المرافق",
     "editLabelFor": "تحرير {title}",
