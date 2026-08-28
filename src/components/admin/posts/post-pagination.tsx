@@ -15,6 +15,8 @@ type AdminPostPaginationProps = {
   pageStatusLabel: string;
   goToPageLabel: (page: number) => string;
   basePath?: string;
+  search?: string;
+  pageSize?: 10 | 20 | 50;
 };
 
 /** Windowed pagination control, preserving the active filter and locale in every link. */
@@ -28,6 +30,8 @@ export function AdminPostPagination({
   pageStatusLabel,
   goToPageLabel,
   basePath,
+  search,
+  pageSize,
 }: AdminPostPaginationProps) {
   if (totalPages <= 1) return null;
 
@@ -39,7 +43,7 @@ export function AdminPostPagination({
     <nav aria-label={ariaLabel} className="mt-8 flex items-center justify-center gap-1">
       {hasPrevious ? (
         <Link
-          href={buildAdminPostHref(status, current - 1, basePath)}
+          href={buildAdminPostHref(status, current - 1, basePath, { search, pageSize })}
           aria-label={previousLabel}
           className="inline-flex size-9 items-center justify-center rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100"
         >
@@ -70,7 +74,7 @@ export function AdminPostPagination({
                 </span>
               ) : (
                 <Link
-                  href={buildAdminPostHref(status, item, basePath)}
+                  href={buildAdminPostHref(status, item, basePath, { search, pageSize })}
                   aria-label={goToPageLabel(item)}
                   className="inline-flex size-9 items-center justify-center rounded-lg border border-slate-300 text-sm text-slate-600 hover:bg-slate-100"
                 >
@@ -84,7 +88,7 @@ export function AdminPostPagination({
 
       {hasNext ? (
         <Link
-          href={buildAdminPostHref(status, current + 1, basePath)}
+          href={buildAdminPostHref(status, current + 1, basePath, { search, pageSize })}
           aria-label={nextLabel}
           className="inline-flex size-9 items-center justify-center rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-100"
         >
