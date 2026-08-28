@@ -1,5 +1,3 @@
-import { ArrowRight } from "lucide-react";
-
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 
@@ -20,7 +18,6 @@ type PostCardHorizontalProps = {
   dateLabel: string;
   dateTimeIso: string;
   categoryLabel?: string | null;
-  readMoreLabel: string;
   fallbackNoticeMessage?: string | null;
 };
 
@@ -35,25 +32,24 @@ export function PostCardHorizontal({
   dateLabel,
   dateTimeIso,
   categoryLabel,
-  readMoreLabel,
   fallbackNoticeMessage,
 }: PostCardHorizontalProps) {
   const contentDir = LOCALE_DIRECTION[resolvedLocale];
 
   return (
-    <article className="flex flex-col gap-5 border-b border-slate-200 py-6 first:pt-0 sm:flex-row">
+    <article className="flex flex-col gap-4 border-b border-slate-200 py-5 first:pt-0 sm:flex-row">
       <Link
         href={href}
         tabIndex={-1}
         aria-hidden
-        className="block aspect-video w-full shrink-0 overflow-hidden rounded-lg sm:w-60"
+        className="block aspect-video w-full shrink-0 overflow-hidden rounded-lg sm:w-44"
       >
-        <PostCoverImage cover={cover} sizes="(min-width: 640px) 240px, 100vw" className="size-full" />
+        <PostCoverImage cover={cover} sizes="(min-width: 640px) 176px, 100vw" className="size-full" />
       </Link>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
+      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
         {categoryLabel ? (
-          <span className="text-[11px] font-medium tracking-wide text-royal-600 uppercase">
+          <span className="text-[11px] font-semibold tracking-wide text-royal-600 uppercase">
             {categoryLabel}
           </span>
         ) : null}
@@ -61,19 +57,12 @@ export function PostCardHorizontal({
         <h2
           lang={resolvedLocale}
           dir={contentDir}
-          className="text-balance font-display text-xl font-medium break-words text-slate-900"
+          className="text-pretty font-display text-base leading-snug font-semibold break-words text-slate-900 md:text-lg"
         >
           <Link href={href} className="line-clamp-2 hover:text-royal-600">
             {title}
           </Link>
         </h2>
-
-        <PostMetaRow
-          authorName={authorName}
-          dateLabel={dateLabel}
-          dateTimeIso={dateTimeIso}
-          className="text-[13px]"
-        />
 
         {excerpt ? (
           <p lang={resolvedLocale} dir={contentDir} className="line-clamp-2 break-words text-sm text-slate-600">
@@ -81,15 +70,14 @@ export function PostCardHorizontal({
           </p>
         ) : null}
 
-        {fallbackNoticeMessage ? <PostFallbackBanner message={fallbackNoticeMessage} compact /> : null}
+        <PostMetaRow
+          authorName={authorName}
+          dateLabel={dateLabel}
+          dateTimeIso={dateTimeIso}
+          className="mt-0.5 text-[13px]"
+        />
 
-        <Link
-          href={href}
-          className="mt-1 inline-flex items-center gap-2 text-sm font-medium text-royal-600 hover:text-royal-700"
-        >
-          {readMoreLabel}
-          <ArrowRight aria-hidden className="size-4 rtl:rotate-180" strokeWidth={1.5} />
-        </Link>
+        {fallbackNoticeMessage ? <PostFallbackBanner message={fallbackNoticeMessage} compact /> : null}
       </div>
     </article>
   );

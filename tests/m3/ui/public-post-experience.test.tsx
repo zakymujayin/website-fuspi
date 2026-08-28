@@ -292,7 +292,6 @@ describe("exact translation versus one calm fallback banner", () => {
         dateLabel="16 Januari 2026"
         dateTimeIso="2026-01-16T00:30:00.000Z"
         categoryLabel="akademik"
-        readMoreLabel="Selengkapnya"
         fallbackNoticeMessage="Menampilkan versi Bahasa Indonesia."
       />,
     );
@@ -310,7 +309,6 @@ describe("exact translation versus one calm fallback banner", () => {
         cover={{ kind: "placeholder" }}
         dateLabel="16 Januari 2026"
         dateTimeIso="2026-01-16T00:30:00.000Z"
-        readMoreLabel="Selengkapnya"
       />,
     );
     expect(markupToContainer(markup).textContent).not.toContain("Bahasa Indonesia");
@@ -327,7 +325,6 @@ describe("exact translation versus one calm fallback banner", () => {
           cover={{ kind: "placeholder" }}
           dateLabel="16 يناير 2026"
           dateTimeIso="2026-01-16T00:30:00.000Z"
-          readMoreLabel="اقرأ المزيد"
         />
       </div>,
     );
@@ -548,7 +545,6 @@ describe("Web Interface Guidelines corrections", () => {
         cover={{ kind: "placeholder" }}
         dateLabel="16 Januari 2026"
         dateTimeIso="2026-01-16T00:30:00.000Z"
-        readMoreLabel="Selengkapnya"
       />,
     );
     const container = markupToContainer(markup);
@@ -565,7 +561,6 @@ describe("Web Interface Guidelines corrections", () => {
         cover={{ kind: "placeholder" }}
         dateLabel="16 Januari 2026"
         dateTimeIso="2026-01-16T00:30:00.000Z"
-        readMoreLabel="Selengkapnya"
       />,
     );
     const time = markupToContainer(markup).querySelector("time");
@@ -582,7 +577,6 @@ describe("Web Interface Guidelines corrections", () => {
         cover={{ kind: "placeholder" }}
         dateLabel="16 Januari 2026"
         dateTimeIso="2026-01-16T00:30:00.000Z"
-        readMoreLabel="Selengkapnya"
       />,
     );
     expect(cardMarkup).toMatch(/min-w-0/);

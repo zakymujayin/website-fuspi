@@ -100,7 +100,7 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
         <SectionHeading as="h1" title={t("news.title")} description={t("news.description")} />
       </div>
 
-      <div className="mt-10">
+      <div className="mt-10 max-w-3xl">
         {!result.ok ? (
           <PostStateNotice
             variant="unavailable"
@@ -130,7 +130,6 @@ export default async function NewsListPage({ params, searchParams }: PageProps) 
                   dateLabel={formatJakartaPublishedDate(item.publishedAt, locale)}
                   dateTimeIso={item.publishedAt.toISOString()}
                   categoryLabel={item.categorySlug ? humanizeCategorySlug(item.categorySlug) : null}
-                  readMoreLabel={t("readMore")}
                   fallbackNoticeMessage={item.translation.isFallback ? t("fallbackNotice") : null}
                 />
               ))}

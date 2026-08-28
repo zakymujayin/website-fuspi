@@ -76,7 +76,7 @@ export default async function AnnouncementsPage({params}: {params: Promise<{loca
                 authorName={p.author?.name ?? null}
                 dateLabel={p.publishedAt ? formatDate(p.publishedAt) : ""}
                 dateTimeIso={p.publishedAt?.toISOString().slice(0, 10) ?? ""}
-                categoryLabel={catTl?.title ?? null} readMoreLabel={t("readMore")} />
+                categoryLabel={catTl?.title ?? null} />
             );
           })}
         </div>
