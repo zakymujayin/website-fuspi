@@ -10,16 +10,17 @@ type AdminPageSearchProps = {
   initialSearch: string;
   status: AdminPageStatusFilter;
   sort: AdminPageSort;
+  pageSize?: 10 | 20 | 50;
 };
 
-export function AdminPageSearch({ initialSearch, status, sort }: AdminPageSearchProps) {
+export function AdminPageSearch({ initialSearch, status, sort, pageSize }: AdminPageSearchProps) {
   const t = useTranslations("AdminPageList");
 
   return (
     <AdminListSearch
       initialSearch={initialSearch}
       maxLength={ADMIN_PAGE_SEARCH_MAX_LENGTH}
-      buildHref={(search) => buildAdminPageHref({ status, sort, search, page: 1 })}
+      buildHref={(search) => buildAdminPageHref({ status, sort, search, page: 1, pageSize })}
       labels={{
         placeholder: t("searchPlaceholder"),
         ariaLabel: t("searchAriaLabel"),

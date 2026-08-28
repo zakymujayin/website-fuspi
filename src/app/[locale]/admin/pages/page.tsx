@@ -111,6 +111,7 @@ export default async function AdminPagesPage({ params, searchParams }: AdminPage
               initialSearch={query.search}
               status={query.status}
               sort={query.sort}
+              pageSize={query.pageSize}
             />
             <AdminPageSizeSelect
               value={query.pageSize}
