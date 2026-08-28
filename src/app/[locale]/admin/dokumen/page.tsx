@@ -7,7 +7,15 @@ import { Link } from "@/i18n/navigation";
 
 import { listPublicContentAdmin } from "@/features/public-content/admin-query";
 import { getPrismaClient } from "@/lib/db/client";
-import { normalizePublicContentAdminQuery, toPublicContentAdminTransportQuery } from "@/components/admin/public-content/public-content-query";
+import {
+  normalizePublicContentAdminQuery,
+  toPublicContentAdminTransportQuery,
+  buildPublicContentAdminHref,
+  PUBLIC_CONTENT_SLUG_MAP,
+  PUBLIC_CONTENT_SEARCH_MAX_LENGTH,
+} from "@/components/admin/public-content/public-content-query";
+import { AdminListSearch } from "@/components/admin/shared/admin-list-search";
+import { AdminPageSizeSelect } from "@/components/admin/shared/admin-page-size-select";
 import { PublicContentStateNotice } from "@/components/admin/public-content/public-content-state-notice";
 import { PublicContentPagination } from "@/components/admin/public-content/public-content-pagination";
 import { PublicContentStatusBadge } from "@/components/admin/public-content/public-content-status-badge";
@@ -16,6 +24,7 @@ import { decideProtectedRoute, getRequestSession } from "@/lib/auth/runtime/requ
 import { parseAppLocale } from "@/lib/auth/runtime/redirect";
 
 const RESOURCE: PublicContentResource = "DOCUMENT";
+const RESOURCE_SLUG = PUBLIC_CONTENT_SLUG_MAP[RESOURCE];
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -69,10 +78,12 @@ export default async function AdminPublicContentPage({ params, searchParams }: P
           <div role="tablist" aria-label={t("filterAriaLabel")} className="flex flex-wrap gap-1">
             {visibilityOptions.map((v) => {
               const isActive = query.visibility === v;
-              const params = new URLSearchParams();
-              params.set("visibility", v);
-              if (query.search) params.set("search", query.search);
-              const href = `/admin/dokumen?${params.toString()}`;
+              const href = buildPublicContentAdminHref(RESOURCE_SLUG, {
+                visibility: v,
+                search: query.search,
+                direction: query.direction,
+                pageSize: query.pageSize,
+              });
               return isActive ? (
                 <span key={v} role="tab" aria-selected className="inline-flex h-8 items-center rounded-lg bg-royal-500 px-3 text-xs font-medium text-white">
                   {t(`visibility.${v}`)}
@@ -85,20 +96,41 @@ export default async function AdminPublicContentPage({ params, searchParams }: P
             })}
           </div>
 
-          <form method="GET" className="flex gap-2">
-            <input type="hidden" name="visibility" value={query.visibility} />
-            <input
-              type="search"
-              name="search"
-              defaultValue={query.search}
-              placeholder={t("searchPlaceholder")}
-              aria-label={t("searchAriaLabel")}
-              className="h-10 w-full max-w-xs rounded-lg border border-slate-300 px-3 text-sm text-slate-900 placeholder-slate-400 focus:border-royal-500 focus:outline-none focus:ring-1 focus:ring-royal-500"
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <AdminListSearch
+              initialSearch={query.search}
+              maxLength={PUBLIC_CONTENT_SEARCH_MAX_LENGTH}
+              buildHref={(search) =>
+                buildPublicContentAdminHref(RESOURCE_SLUG, {
+                  visibility: query.visibility,
+                  direction: query.direction,
+                  search,
+                  pageSize: query.pageSize,
+                  page: 1,
+                })
+              }
+              labels={{
+                placeholder: t("searchPlaceholder"),
+                ariaLabel: t("searchAriaLabel"),
+                action: t("searchAction"),
+                clear: t("searchClear"),
+              }}
             />
-            <button type="submit" className="inline-flex h-10 items-center rounded-lg border border-slate-300 px-3 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-100">
-              {t("searchAction")}
-            </button>
-          </form>
+            <AdminPageSizeSelect
+              value={query.pageSize}
+              label={t("pageSizeLabel")}
+              optionLabel={(n) => String(n)}
+              buildHref={(size) =>
+                buildPublicContentAdminHref(RESOURCE_SLUG, {
+                  visibility: query.visibility,
+                  direction: query.direction,
+                  search: query.search,
+                  pageSize: size,
+                  page: 1,
+                })
+              }
+            />
+          </div>
 
           <p className="text-sm text-slate-500">{t("totalCount", { count: result.data.page.total })}</p>
 
@@ -134,6 +166,12 @@ export default async function AdminPublicContentPage({ params, searchParams }: P
                 </li>
               ))}
             </ul>
+          ) : query.search !== "" ? (
+            <PublicContentStateNotice
+              variant="empty"
+              title={t("searchEmpty.title")}
+              description={t("searchEmpty.description")}
+            />
           ) : (
             <PublicContentStateNotice
               variant="empty"
@@ -145,14 +183,15 @@ export default async function AdminPublicContentPage({ params, searchParams }: P
           <PublicContentPagination
             current={result.data.page.page}
             totalPages={result.data.page.totalPages}
-            buildHref={(page) => {
-              const params = new URLSearchParams();
-              if (query.visibility !== "ALL") params.set("visibility", query.visibility);
-              if (query.search) params.set("search", query.search);
-              if (page > 1) params.set("page", String(page));
-              const qs = params.toString();
-              return `/admin/dokumen${qs ? `?${qs}` : ""}`;
-            }}
+            buildHref={(page) =>
+              buildPublicContentAdminHref(RESOURCE_SLUG, {
+                visibility: query.visibility,
+                search: query.search,
+                direction: query.direction,
+                pageSize: query.pageSize,
+                page,
+              })
+            }
             ariaLabel={t("pagination.ariaLabel")}
             previousLabel={t("pagination.previous")}
             nextLabel={t("pagination.next")}

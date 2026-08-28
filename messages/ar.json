@@ -1072,6 +1072,12 @@
     "searchPlaceholder": "بحث عن عنوان أو slug…",
     "searchAriaLabel": "بحث عن محتوى",
     "searchAction": "بحث",
+    "searchClear": "مسح",
+    "pageSizeLabel": "صفوف لكل صفحة",
+    "searchEmpty": {
+      "title": "لا توجد نتائج",
+      "description": "لا يوجد محتوى يطابق بحثك."
+    },
     "totalCount": "{count} عنصر",
     "visibility": {
       "ALL": "الكل",

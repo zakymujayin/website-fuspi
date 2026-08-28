@@ -27,4 +27,21 @@ describe("public-content admin list pages link to routes that exist", () => {
     expect(source).toContain(`/admin/${resource}/${"${item.id}"}/edit`);
     expect(existsSync(path.join(appDir, resource, "[id]", "edit", "page.tsx"))).toBe(true);
   });
+
+  it.each(RESOURCES)("%s: uses the shared search + page-size controls", (resource) => {
+    const source = readFileSync(path.join(appDir, resource, "page.tsx"), "utf8");
+    expect(source).toContain("AdminListSearch");
+    expect(source).toContain("AdminPageSizeSelect");
+    expect(source).not.toContain('method="GET"');
+  });
+
+  it("defines searchClear + pageSizeLabel for AdminPublicContent in all locales", () => {
+    for (const locale of ["id", "en", "ar"]) {
+      const m = JSON.parse(
+        readFileSync(path.join(process.cwd(), `messages/${locale}.json`), "utf8"),
+      );
+      expect(m.AdminPublicContent.searchClear).toBeTruthy();
+      expect(m.AdminPublicContent.pageSizeLabel).toBeTruthy();
+    }
+  });
 });

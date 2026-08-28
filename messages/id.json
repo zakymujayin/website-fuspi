@@ -1072,6 +1072,12 @@
     "searchPlaceholder": "Cari judul atau slug…",
     "searchAriaLabel": "Cari konten",
     "searchAction": "Cari",
+    "searchClear": "Bersihkan",
+    "pageSizeLabel": "Baris per halaman",
+    "searchEmpty": {
+      "title": "Tidak ada hasil",
+      "description": "Tidak ada konten yang cocok dengan pencarian Anda."
+    },
     "totalCount": "{count} konten",
     "visibility": {
       "ALL": "Semua",

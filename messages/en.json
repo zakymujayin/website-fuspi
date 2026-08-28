@@ -1072,6 +1072,12 @@
     "searchPlaceholder": "Search title or slug…",
     "searchAriaLabel": "Search content",
     "searchAction": "Search",
+    "searchClear": "Clear",
+    "pageSizeLabel": "Rows per page",
+    "searchEmpty": {
+      "title": "No results",
+      "description": "No content matches your search."
+    },
     "totalCount": "{count} items",
     "visibility": {
       "ALL": "All",
