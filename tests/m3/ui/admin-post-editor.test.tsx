@@ -130,6 +130,25 @@ describe("buildCreatePayload", () => {
     if (!result.success) return;
     expect(result.data).toMatchObject({type: "KOLOM", columnType: "DOSEN"});
   });
+
+  it("tags a PENGUMUMAN create payload with contentType while keeping the plain shape", () => {
+    const beritaResult = buildCreatePayload(validDraft());
+    expect(beritaResult.success).toBe(true);
+    if (beritaResult.success) expect(beritaResult.data).toMatchObject({ contentType: "BERITA" });
+
+    const draft = emptyDraft("PENGUMUMAN");
+    draft.slug = "pendaftaran-2026-2027";
+    draft.translations.id = {
+      title: "Pendaftaran Mahasiswa Baru 2026/2027",
+      excerpt: "",
+      content: "<p>Isi pengumuman.</p>",
+    };
+    const result = buildCreatePayload(draft);
+    expect(result.success).toBe(true);
+    if (!result.success) return;
+    expect(result.data).toMatchObject({ contentType: "PENGUMUMAN", publication: { intent: "SAVE_DRAFT" } });
+    expect("columnType" in result.data).toBe(false);
+  });
 });
 
 describe("buildUpdatePayload", () => {

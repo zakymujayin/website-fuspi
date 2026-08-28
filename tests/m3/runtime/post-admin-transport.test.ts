@@ -127,7 +127,8 @@ describe("M3 Post admin transport runtime", () => {
     expect(findFirst).toHaveBeenCalledWith({
       where: {
         id: "post-target",
-        type: "BERITA",
+        // Plain commands cover BERITA and the structurally identical PENGUMUMAN; KOLOM is excluded.
+        type: {in: ["BERITA", "PENGUMUMAN"]},
         authorId: "editor-1",
         contentOwnerId: "editor-1",
       },

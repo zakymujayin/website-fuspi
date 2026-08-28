@@ -12,6 +12,7 @@ import {
   LayoutDashboardIcon,
   LayoutPanelTopIcon,
   ListTreeIcon,
+  MegaphoneIcon,
   MessageCircleQuestionIcon,
   NewspaperIcon,
   QuoteIcon,
@@ -72,6 +73,7 @@ export const SIDEBAR_MENU_GROUPS = [
     items: [
       { href: "/admin/pages", icon: FileTextIcon, labelKey: "pages" },
       { href: "/admin/posts", icon: NewspaperIcon, labelKey: "posts" },
+      { href: "/admin/pengumuman", icon: MegaphoneIcon, labelKey: "announcements" },
       { href: "/admin/kolom", icon: FileTextIcon, labelKey: "kolom" },
       { href: "/admin/media", icon: ImageIcon, labelKey: "media" },
       { href: "/admin/taksonomi", icon: ListTreeIcon, labelKey: "taxonomies" },

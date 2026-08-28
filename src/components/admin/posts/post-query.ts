@@ -54,7 +54,10 @@ export function normalizeAdminPostQuery(raw: RawSearchParams): AdminPostNormaliz
 }
 
 /** Builds the frozen transport query from a normalized UI query. */
-export function toAdminPostTransportQuery(query: AdminPostNormalizedQuery, type?: "BERITA" | "KOLOM") {
+export function toAdminPostTransportQuery(
+  query: AdminPostNormalizedQuery,
+  type?: "BERITA" | "PENGUMUMAN" | "KOLOM",
+) {
   const transportQuery = {
     page: query.page,
     pageSize: query.pageSize,
@@ -65,13 +68,21 @@ export function toAdminPostTransportQuery(query: AdminPostNormalizedQuery, type?
   return type ? {...transportQuery, type} : transportQuery;
 }
 
-/** Builds an `/admin/posts` link preserving the active filter; `@/i18n/navigation`'s `Link` adds the locale. */
-export function buildAdminPostHref(status: AdminPostStatusFilter, page: number): string {
+/**
+ * Builds an admin post-list link preserving the active filter; `@/i18n/navigation`'s `Link` adds
+ * the locale. `basePath` lets the shared list chrome serve `/admin/posts`, `/admin/pengumuman`,
+ * and `/admin/kolom` without each one drifting back to `/admin/posts`.
+ */
+export function buildAdminPostHref(
+  status: AdminPostStatusFilter,
+  page: number,
+  basePath = "/admin/posts",
+): string {
   const params = new URLSearchParams();
   if (status !== "ALL") params.set("status", status);
   if (page > 1) params.set("page", String(page));
   const query = params.toString();
-  return query ? `/admin/posts?${query}` : "/admin/posts";
+  return query ? `${basePath}?${query}` : basePath;
 }
 
 export function totalPagesFor(total: number, pageSize: number): number {

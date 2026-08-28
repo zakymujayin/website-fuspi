@@ -343,7 +343,73 @@
     },
     "createAction": "Tulis berita",
     "edit": "Sunting",
-    "editLabelFor": "Sunting berita: {title}"
+    "editLabelFor": "Sunting berita: {title}",
+    "columns": {
+      "title": "Judul",
+      "category": "Kategori",
+      "author": "Penulis",
+      "locales": "Bahasa",
+      "status": "Status",
+      "published": "Terbit",
+      "actions": "Aksi"
+    }
+  },
+  "AdminAnnouncementList": {
+    "metaTitle": "Pengumuman",
+    "title": "Pengumuman",
+    "description": "Telusuri seluruh pengumuman fakultas, lalu saring menurut status penerbitan untuk menemukan yang Anda cari.",
+    "filterAriaLabel": "Saring pengumuman berdasarkan status",
+    "listAriaLabel": "Daftar pengumuman",
+    "totalCount": "{count} pengumuman",
+    "status": { "all": "Semua", "draft": "Draf", "published": "Terbit", "archived": "Arsip" },
+    "state": { "DRAFT": "Draf", "PUBLISHED": "Terbit", "SCHEDULED": "Terjadwal", "ARCHIVED": "Arsip" },
+    "featured": "Unggulan",
+    "localesLabel": "Bahasa tersedia: {locales}",
+    "uncategorized": "Tanpa kategori",
+    "unknownAuthor": "Penulis tidak diketahui",
+    "byLabel": "Oleh {name}",
+    "publishedAtLabel": "Terbit {instant}",
+    "updatedAtLabel": "Diperbarui {instant}",
+    "loading": "Memuat daftar pengumuman…",
+    "pagination": {
+      "ariaLabel": "Navigasi halaman daftar pengumuman",
+      "previous": "Halaman sebelumnya",
+      "next": "Halaman berikutnya",
+      "pageStatus": "Hal {page} dari {totalPages}",
+      "goToPage": "Ke halaman {page}"
+    },
+    "empty": {
+      "title": "Belum ada pengumuman",
+      "description": "Pengumuman akan tampil di sini setelah dibuat."
+    },
+    "unavailable": {
+      "title": "Daftar pengumuman sedang tidak dapat dimuat",
+      "description": "Silakan muat ulang halaman ini beberapa saat lagi."
+    },
+    "createAction": "Tulis pengumuman",
+    "edit": "Sunting",
+    "editLabelFor": "Sunting pengumuman: {title}",
+    "columns": {
+      "title": "Judul",
+      "category": "Kategori",
+      "author": "Penulis",
+      "locales": "Bahasa",
+      "status": "Status",
+      "published": "Terbit",
+      "actions": "Aksi"
+    }
+  },
+  "AdminAnnouncementEditor": {
+    "createMetaTitle": "Tulis Pengumuman",
+    "createTitle": "Tulis Pengumuman",
+    "createDescription": "Masukkan isi pengumuman dalam bahasa Indonesia. Terjemahan Inggris dan Arab bersifat opsional dan dapat ditambahkan nanti. Item disimpan sebagai draf.",
+    "editMetaTitle": "Sunting Pengumuman",
+    "editTitle": "Sunting Pengumuman",
+    "editDescription": "Perbarui isi pengumuman. Status penerbitan dikelola dari panel status di halaman ini.",
+    "unavailable": {
+      "title": "Pengumuman ini tidak dapat dimuat",
+      "description": "Tidak ditemukan, bukan milik Anda, atau sedang tidak tersedia."
+    }
   },
   "AdminColumnList": {
     "metaTitle": "Sorotan Akademik",
@@ -389,7 +455,16 @@
     },
     "createAction": "Tambah sorotan",
     "edit": "Sunting",
-    "editLabelFor": "Sunting sorotan akademik: {title}"
+    "editLabelFor": "Sunting sorotan akademik: {title}",
+    "columns": {
+      "title": "Judul",
+      "category": "Kategori",
+      "author": "Penulis",
+      "locales": "Bahasa",
+      "status": "Status",
+      "published": "Terbit",
+      "actions": "Aksi"
+    }
   },
   "AdminColumnEditor": {
     "createMetaTitle": "Tambah Sorotan Akademik",
@@ -420,6 +495,12 @@
       "DEKAN": "Dekan",
       "DOSEN": "Dosen",
       "MAHASISWA": "Mahasiswa"
+    },
+    "panel": {
+      "publish": "Publikasi",
+      "link": "Tautan permanen",
+      "featured": "Sorotan",
+      "classification": "Klasifikasi"
     },
     "taxonomyLegend": "Kategori dan tag",
     "taxonomyDescription": "Pilih kategori utama dan tag agar berita mudah ditemukan di arsip publik.",
@@ -1026,6 +1107,7 @@
       "dashboard": "Dashboard",
       "pages": "Halaman",
       "posts": "Berita",
+      "announcements": "Pengumuman",
       "columns": "Sorotan Akademik",
       "kolom": "Sorotan Akademik",
       "media": "Media",

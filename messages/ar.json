@@ -343,7 +343,73 @@
     },
     "createAction": "كتابة خبر",
     "edit": "تحرير",
-    "editLabelFor": "تحرير الخبر: {title}"
+    "editLabelFor": "تحرير الخبر: {title}",
+    "columns": {
+      "title": "العنوان",
+      "category": "التصنيف",
+      "author": "الكاتب",
+      "locales": "اللغات",
+      "status": "الحالة",
+      "published": "النشر",
+      "actions": "الإجراءات"
+    }
+  },
+  "AdminAnnouncementList": {
+    "metaTitle": "الإعلانات",
+    "title": "الإعلانات",
+    "description": "تصفّح جميع إعلانات الكلية، ثم صفِّها بحسب حالة النشر للعثور على ما تبحث عنه.",
+    "filterAriaLabel": "تصفية الإعلانات بحسب الحالة",
+    "listAriaLabel": "قائمة الإعلانات",
+    "totalCount": "{count} إعلانًا",
+    "status": { "all": "الكل", "draft": "مسودة", "published": "منشور", "archived": "مؤرشف" },
+    "state": { "DRAFT": "مسودة", "PUBLISHED": "منشور", "SCHEDULED": "مجدول", "ARCHIVED": "مؤرشف" },
+    "featured": "مميّز",
+    "localesLabel": "اللغات المتاحة: {locales}",
+    "uncategorized": "بدون تصنيف",
+    "unknownAuthor": "كاتب غير معروف",
+    "byLabel": "بقلم {name}",
+    "publishedAtLabel": "نُشر في {instant}",
+    "updatedAtLabel": "حُدِّث في {instant}",
+    "loading": "جارٍ تحميل قائمة الإعلانات…",
+    "pagination": {
+      "ariaLabel": "تنقّل صفحات قائمة الإعلانات",
+      "previous": "الصفحة السابقة",
+      "next": "الصفحة التالية",
+      "pageStatus": "صفحة {page} من {totalPages}",
+      "goToPage": "الانتقال إلى الصفحة {page}"
+    },
+    "empty": {
+      "title": "لا توجد إعلانات بعد",
+      "description": "ستظهر الإعلانات هنا بعد إنشائها."
+    },
+    "unavailable": {
+      "title": "تعذّر تحميل قائمة الإعلانات الآن",
+      "description": "يرجى إعادة تحميل الصفحة بعد قليل."
+    },
+    "createAction": "كتابة إعلان",
+    "edit": "تحرير",
+    "editLabelFor": "تحرير الإعلان: {title}",
+    "columns": {
+      "title": "العنوان",
+      "category": "التصنيف",
+      "author": "الكاتب",
+      "locales": "اللغات",
+      "status": "الحالة",
+      "published": "النشر",
+      "actions": "الإجراءات"
+    }
+  },
+  "AdminAnnouncementEditor": {
+    "createMetaTitle": "كتابة إعلان",
+    "createTitle": "كتابة إعلان",
+    "createDescription": "أدخل محتوى الإعلان بالإندونيسية. الترجمتان الإنجليزية والعربية اختياريتان ويمكن إضافتهما لاحقًا. يُحفظ العنصر كمسودة.",
+    "editMetaTitle": "تحرير الإعلان",
+    "editTitle": "تحرير الإعلان",
+    "editDescription": "حدّث محتوى الإعلان. تُدار حالة النشر من لوحة الحالة في هذه الصفحة.",
+    "unavailable": {
+      "title": "تعذّر تحميل هذا الإعلان",
+      "description": "لم يُعثر عليه، أو ليس ملكك، أو غير متاح مؤقتًا."
+    }
   },
   "AdminColumnList": {
     "metaTitle": "إضاءات أكاديمية",
@@ -389,7 +455,16 @@
     },
     "createAction": "إضافة إضاءة",
     "edit": "تحرير",
-    "editLabelFor": "تحرير الإضاءة الأكاديمية: {title}"
+    "editLabelFor": "تحرير الإضاءة الأكاديمية: {title}",
+    "columns": {
+      "title": "العنوان",
+      "category": "التصنيف",
+      "author": "الكاتب",
+      "locales": "اللغات",
+      "status": "الحالة",
+      "published": "النشر",
+      "actions": "الإجراءات"
+    }
   },
   "AdminColumnEditor": {
     "createMetaTitle": "إضافة إضاءة أكاديمية",
@@ -420,6 +495,12 @@
       "DEKAN": "العميد",
       "DOSEN": "محاضر",
       "MAHASISWA": "طالب"
+    },
+    "panel": {
+      "publish": "النشر",
+      "link": "الرابط الدائم",
+      "featured": "التمييز",
+      "classification": "التصنيف"
     },
     "taxonomyLegend": "الفئة والوسوم",
     "taxonomyDescription": "اختر الفئة الرئيسية والوسوم حتى يسهل العثور على الخبر في الأرشيف العام.",
@@ -1026,6 +1107,7 @@
       "dashboard": "لوحة التحكم",
       "pages": "الصفحات",
       "posts": "الأخبار",
+      "announcements": "الإعلانات",
       "columns": "إضاءات أكاديمية",
       "kolom": "إضاءات أكاديمية",
       "media": "الوسائط",

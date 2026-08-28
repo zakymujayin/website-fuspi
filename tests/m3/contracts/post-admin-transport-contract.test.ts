@@ -179,7 +179,13 @@ describe("M3 Berita editor and command transport contract", () => {
       ...editorView,
       translations: {en: ID_TRANSLATION},
     }).success).toBe(false);
+    // PENGUMUMAN shares the plain (no-column) editor shape with BERITA.
     expect(AdminPostEditorViewSchema.safeParse({...editorView, type: "PENGUMUMAN"}).success)
+      .toBe(true);
+    expect(AdminPostEditorViewSchema.safeParse({
+      ...editorView, type: "PENGUMUMAN", columnType: "DOSEN",
+    }).success).toBe(false);
+    expect(AdminPostEditorViewSchema.safeParse({...editorView, type: "INFORMASI"}).success)
       .toBe(false);
     expect(AdminPostEditorViewSchema.safeParse({
       ...editorView, version: 0,
@@ -247,6 +253,21 @@ describe("M3 Berita editor and command transport contract", () => {
     expect(toBeritaAutosaveInput(autosavePayload)).toMatchObject({
       type: "BERITA", columnType: null, intent: "AUTOSAVE_DRAFT",
     });
+
+    // The optional `contentType` flag selects the structurally identical PENGUMUMAN type; nothing
+    // else about the payload or command envelope changes.
+    expect(AdminPostTransportCommandSchema.safeParse({
+      action: "CREATE", payload: {...createPayload, contentType: "PENGUMUMAN"},
+    }).success).toBe(true);
+    expect(AdminPostTransportCommandSchema.safeParse({
+      action: "CREATE", payload: {...createPayload, contentType: "KOLOM"},
+    }).success).toBe(false);
+    expect(toBeritaCreateInput({...createPayload, contentType: "PENGUMUMAN"}))
+      .toMatchObject({type: "PENGUMUMAN", columnType: null});
+    expect(toBeritaUpdateInput({...updatePayload, contentType: "PENGUMUMAN"}))
+      .toMatchObject({type: "PENGUMUMAN", columnType: null});
+    expect(toBeritaAutosaveInput({...autosavePayload, contentType: "PENGUMUMAN"}))
+      .toMatchObject({type: "PENGUMUMAN", columnType: null});
     expect(ADMIN_POST_AUTOSAVE_INTERVAL_MS).toBe(30_000);
     expect(AdminPostTransportCommandSchema.safeParse({
       action: "AUTOSAVE", payload: {...autosavePayload, tagIds: ["tag-1", "tag-1"]},

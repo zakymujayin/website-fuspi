@@ -207,7 +207,7 @@ export const AdminPostListResultSchema = z.object({
 
 export const AdminPostEditorViewSchema = z.object({
   id: PostIdSchema,
-  type: z.enum(["BERITA", "KOLOM"]),
+  type: z.enum(["BERITA", "PENGUMUMAN", "KOLOM"]),
   columnType: ColumnTypeSchema.nullable(),
   slug: PostSlugSchema,
   isFeatured: z.boolean(),
@@ -227,8 +227,8 @@ export const AdminPostEditorViewSchema = z.object({
   capabilities: AdminPostCapabilitiesSchema,
 }).strict().superRefine((value, context) => {
   validatePublicationState(value, context);
-  if (value.type === "BERITA" && value.columnType !== null) {
-    context.addIssue({code: "custom", path: ["columnType"], message: "Berita cannot have a column type."});
+  if (value.type !== "KOLOM" && value.columnType !== null) {
+    context.addIssue({code: "custom", path: ["columnType"], message: "Only Kolom may carry a column type."});
   }
   if (value.type === "KOLOM" && value.columnType === null) {
     context.addIssue({code: "custom", path: ["columnType"], message: "Kolom requires a column type."});
@@ -241,6 +241,13 @@ export const AdminPostEditorViewSchema = z.object({
   }
 });
 
+/**
+ * Which single-content post type a plain (non-column) admin command targets. PENGUMUMAN is
+ * structurally identical to BERITA, so the two share one payload shape and command set; this flag
+ * is the only thing that tells them apart. Defaults to BERITA so existing callers are unaffected.
+ */
+export const AdminContentTypeSchema = z.enum(["BERITA", "PENGUMUMAN"]);
+
 const AdminPostMutableFieldsShape = {
   slug: PostCreateInputSchema.shape.slug,
   isFeatured: PostCreateInputSchema.shape.isFeatured,
@@ -252,18 +259,21 @@ const AdminPostMutableFieldsShape = {
 } as const;
 
 export const AdminPostCreatePayloadSchema = z.object({
+  contentType: AdminContentTypeSchema.default("BERITA"),
   ...AdminPostMutableFieldsShape,
   publication: PostCreateInputSchema.shape.publication,
 }).strict();
 export const AdminPostUpdatePayloadSchema = z.object({
   postId: PostUpdateInputSchema.shape.postId,
   expectedVersion: PostUpdateInputSchema.shape.expectedVersion,
+  contentType: AdminContentTypeSchema.default("BERITA"),
   ...AdminPostMutableFieldsShape,
 }).strict();
 export const AdminPostAutosavePayloadSchema = z.object({
   intent: PostAutosaveInputSchema.shape.intent,
   postId: PostAutosaveInputSchema.shape.postId,
   expectedVersion: PostAutosaveInputSchema.shape.expectedVersion,
+  contentType: AdminContentTypeSchema.default("BERITA"),
   ...AdminPostMutableFieldsShape,
 }).strict();
 
@@ -336,21 +346,24 @@ export const AdminPostMutationResponseSchema = z.discriminatedUnion("ok", [
 ]);
 
 export function toBeritaCreateInput(
-  value: z.infer<typeof AdminPostCreatePayloadSchema>,
+  value: z.input<typeof AdminPostCreatePayloadSchema>,
 ): PostCreateInput {
-  return PostCreateInputSchema.parse({...value, type: "BERITA", columnType: null});
+  const {contentType = "BERITA", ...rest} = value;
+  return PostCreateInputSchema.parse({...rest, type: contentType, columnType: null});
 }
 
 export function toBeritaUpdateInput(
-  value: z.infer<typeof AdminPostUpdatePayloadSchema>,
+  value: z.input<typeof AdminPostUpdatePayloadSchema>,
 ): PostUpdateInput {
-  return PostUpdateInputSchema.parse({...value, type: "BERITA", columnType: null});
+  const {contentType = "BERITA", ...rest} = value;
+  return PostUpdateInputSchema.parse({...rest, type: contentType, columnType: null});
 }
 
 export function toBeritaAutosaveInput(
-  value: z.infer<typeof AdminPostAutosavePayloadSchema>,
+  value: z.input<typeof AdminPostAutosavePayloadSchema>,
 ): PostAutosaveInput {
-  return PostAutosaveInputSchema.parse({...value, type: "BERITA", columnType: null});
+  const {contentType = "BERITA", ...rest} = value;
+  return PostAutosaveInputSchema.parse({...rest, type: contentType, columnType: null});
 }
 
 export function toKolomCreateInput(

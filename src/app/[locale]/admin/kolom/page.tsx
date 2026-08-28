@@ -76,6 +76,7 @@ export default async function AdminColumnsPage({ params, searchParams }: AdminCo
           <AdminPostFilterTabs
             active={query.status}
             ariaLabel={t("filterAriaLabel")}
+            basePath="/admin/kolom"
             labels={{
               ALL: t("status.all"),
               DRAFT: t("status.draft"),
@@ -103,6 +104,15 @@ export default async function AdminColumnsPage({ params, searchParams }: AdminCo
                 updatedAtLabel: (instant: string) => t("updatedAtLabel", { instant }),
                 edit: t("edit"),
                 editLabelFor: (title: string) => t("editLabelFor", { title }),
+                columns: {
+                  title: t("columns.title"),
+                  category: t("columns.category"),
+                  author: t("columns.author"),
+                  locales: t("columns.locales"),
+                  status: t("columns.status"),
+                  published: t("columns.published"),
+                  actions: t("columns.actions"),
+                },
               }}
             />
           ) : (
@@ -117,6 +127,7 @@ export default async function AdminColumnsPage({ params, searchParams }: AdminCo
             current={result.data.page}
             totalPages={totalPagesFor(result.data.total, result.data.pageSize)}
             status={query.status}
+            basePath="/admin/kolom"
             ariaLabel={t("pagination.ariaLabel")}
             previousLabel={t("pagination.previous")}
             nextLabel={t("pagination.next")}

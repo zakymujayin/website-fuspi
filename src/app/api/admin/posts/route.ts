@@ -87,9 +87,12 @@ export async function POST(request: Request) {
       revalidatePath(`/${locale}`);
       revalidatePath(`/${locale}/berita`);
       revalidatePath(`/${locale}/berita/[slug]`, "page");
+      revalidatePath(`/${locale}/pengumuman`);
+      revalidatePath(`/${locale}/pengumuman/[slug]`, "page");
       revalidatePath(`/${locale}/kolom`);
       revalidatePath(`/${locale}/kolom/[slug]`, "page");
       revalidatePath(`/${locale}/admin/posts`);
+      revalidatePath(`/${locale}/admin/pengumuman`);
       revalidatePath(`/${locale}/admin/kolom`);
     }
   }

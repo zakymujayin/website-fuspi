@@ -343,7 +343,73 @@
     },
     "createAction": "Write news",
     "edit": "Edit",
-    "editLabelFor": "Edit news item: {title}"
+    "editLabelFor": "Edit news item: {title}",
+    "columns": {
+      "title": "Title",
+      "category": "Category",
+      "author": "Author",
+      "locales": "Languages",
+      "status": "Status",
+      "published": "Published",
+      "actions": "Actions"
+    }
+  },
+  "AdminAnnouncementList": {
+    "metaTitle": "Announcements",
+    "title": "Announcements",
+    "description": "Browse every faculty announcement, then filter by publication status to find the one you are looking for.",
+    "filterAriaLabel": "Filter announcements by status",
+    "listAriaLabel": "Announcement list",
+    "totalCount": "{count} announcements",
+    "status": { "all": "All", "draft": "Draft", "published": "Published", "archived": "Archived" },
+    "state": { "DRAFT": "Draft", "PUBLISHED": "Published", "SCHEDULED": "Scheduled", "ARCHIVED": "Archived" },
+    "featured": "Featured",
+    "localesLabel": "Available languages: {locales}",
+    "uncategorized": "Uncategorized",
+    "unknownAuthor": "Unknown author",
+    "byLabel": "By {name}",
+    "publishedAtLabel": "Published {instant}",
+    "updatedAtLabel": "Updated {instant}",
+    "loading": "Loading the announcement list…",
+    "pagination": {
+      "ariaLabel": "Announcement list pagination",
+      "previous": "Previous page",
+      "next": "Next page",
+      "pageStatus": "Page {page} of {totalPages}",
+      "goToPage": "Go to page {page}"
+    },
+    "empty": {
+      "title": "No announcements yet",
+      "description": "Announcements will appear here once they are created."
+    },
+    "unavailable": {
+      "title": "The announcement list cannot be loaded right now",
+      "description": "Please reload this page in a moment."
+    },
+    "createAction": "Write announcement",
+    "edit": "Edit",
+    "editLabelFor": "Edit announcement: {title}",
+    "columns": {
+      "title": "Title",
+      "category": "Category",
+      "author": "Author",
+      "locales": "Languages",
+      "status": "Status",
+      "published": "Published",
+      "actions": "Actions"
+    }
+  },
+  "AdminAnnouncementEditor": {
+    "createMetaTitle": "Write Announcement",
+    "createTitle": "Write Announcement",
+    "createDescription": "Enter the announcement content in Indonesian. English and Arabic translations are optional and can be added later. The item is saved as a draft.",
+    "editMetaTitle": "Edit Announcement",
+    "editTitle": "Edit Announcement",
+    "editDescription": "Update the announcement content. Publication status is managed from the status panel on this page.",
+    "unavailable": {
+      "title": "This announcement cannot be loaded",
+      "description": "It was not found, is not yours, or is temporarily unavailable."
+    }
   },
   "AdminColumnList": {
     "metaTitle": "Academic Spotlight",
@@ -389,7 +455,16 @@
     },
     "createAction": "Add spotlight",
     "edit": "Edit",
-    "editLabelFor": "Edit academic spotlight item: {title}"
+    "editLabelFor": "Edit academic spotlight item: {title}",
+    "columns": {
+      "title": "Title",
+      "category": "Category",
+      "author": "Author",
+      "locales": "Languages",
+      "status": "Status",
+      "published": "Published",
+      "actions": "Actions"
+    }
   },
   "AdminColumnEditor": {
     "createMetaTitle": "Add Academic Spotlight",
@@ -420,6 +495,12 @@
       "DEKAN": "Dean",
       "DOSEN": "Lecturer",
       "MAHASISWA": "Student"
+    },
+    "panel": {
+      "publish": "Publish",
+      "link": "Permalink",
+      "featured": "Featured",
+      "classification": "Classification"
     },
     "taxonomyLegend": "Category and tags",
     "taxonomyDescription": "Choose the main category and tags so news can be found in the public archive.",
@@ -1026,6 +1107,7 @@
       "dashboard": "Dashboard",
       "pages": "Pages",
       "posts": "Posts",
+      "announcements": "Announcements",
       "columns": "Academic Spotlight",
       "kolom": "Academic Spotlight",
       "media": "Media",

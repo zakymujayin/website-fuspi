@@ -8,7 +8,7 @@ import {
 } from "@/contracts/post-admin";
 
 export type PostEditorLocale = "id" | "en" | "ar";
-export type PostEditorType = "BERITA" | "KOLOM";
+export type PostEditorType = "BERITA" | "PENGUMUMAN" | "KOLOM";
 export type PostEditorColumnType = "DEKAN" | "DOSEN" | "MAHASISWA";
 export const POST_EDITOR_LOCALES: readonly PostEditorLocale[] = ["id", "en", "ar"];
 
@@ -124,6 +124,11 @@ function columnBasePayload(draft: PostEditorDraft) {
   };
 }
 
+/** BERITA vs the structurally identical PENGUMUMAN — the frozen plain payloads carry this flag. */
+function plainContentType(draft: PostEditorDraft): "BERITA" | "PENGUMUMAN" {
+  return draft.type === "PENGUMUMAN" ? "PENGUMUMAN" : "BERITA";
+}
+
 /** Build the frozen CREATE payload. This task only ever saves a draft. */
 export function buildCreatePayload(draft: PostEditorDraft) {
   return draft.type === "KOLOM"
@@ -133,6 +138,7 @@ export function buildCreatePayload(draft: PostEditorDraft) {
       })
     : AdminPostCreatePayloadSchema.safeParse({
         ...basePayload(draft),
+        contentType: plainContentType(draft),
         publication: { intent: "SAVE_DRAFT" },
       });
 }
@@ -152,6 +158,7 @@ export function buildUpdatePayload(
     : AdminPostUpdatePayloadSchema.safeParse({
         postId,
         expectedVersion,
+        contentType: plainContentType(draft),
         ...basePayload(draft),
       });
 }
@@ -177,6 +184,7 @@ export function buildAutosavePayload(
         intent: "AUTOSAVE_DRAFT",
         postId,
         expectedVersion,
+        contentType: plainContentType(draft),
         ...basePayload(draft),
       });
 }

@@ -34,7 +34,7 @@ export type AdminPostTransportDatabase = ReturnType<typeof createPrismaClient>;
 export type AdminPostTransportClock = () => Date;
 type Actor = ActiveDatabaseSession & {role: "ADMIN" | "EDITOR"};
 type FailureCode = "SESSION_INVALID" | "REQUEST_INVALID" | "NOT_FOUND" | "UNAVAILABLE";
-type EditablePostType = "BERITA" | "KOLOM";
+type EditablePostType = "BERITA" | "PENGUMUMAN" | "KOLOM";
 export type AdminPostListLoadResult =
   | {ok: true; data: AdminPostListResult}
   | {ok: false; code: FailureCode};
@@ -338,11 +338,17 @@ function mutationFailure(code: AdminPostFailureResponse["code"]): AdminPostMutat
   return AdminPostMutationResponseSchema.parse({ok: false, code});
 }
 
-function commandPostType(action: string): EditablePostType | null {
+/**
+ * Post-type guard for the NOT_FOUND pre-check on non-create commands. Plain commands cover BERITA
+ * and the structurally identical PENGUMUMAN (they share one payload set, told apart by the
+ * payload's `contentType`); column commands are KOLOM-only.
+ */
+function commandPostTypeFilter(action: string): Prisma.PostWhereInput["type"] {
   if (action.endsWith("_COLUMN")) return "KOLOM";
-  if (action === "CREATE" || action === "UPDATE" || action === "AUTOSAVE") return "BERITA";
-  if (action === "PUBLICATION" || action === "DELETE") return "BERITA";
-  return null;
+  if (["CREATE", "UPDATE", "AUTOSAVE", "PUBLICATION", "DELETE"].includes(action)) {
+    return {in: ["BERITA", "PENGUMUMAN"]};
+  }
+  return undefined;
 }
 
 export async function executeAdminPostCommand(
@@ -358,7 +364,7 @@ export async function executeAdminPostCommand(
   if (!command.success) return mutationFailure("REQUEST_INVALID");
 
   try {
-    const targetType = commandPostType(command.data.action);
+    const targetType = commandPostTypeFilter(command.data.action);
     if (targetType && command.data.action !== "CREATE" && command.data.action !== "CREATE_COLUMN") {
       const target = await database.post.findFirst({
         where: {id: command.data.payload.postId, type: targetType, ...ownershipWhere(actor)},
