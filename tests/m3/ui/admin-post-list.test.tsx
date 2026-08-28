@@ -602,3 +602,39 @@ describe("direction safety and message parity", () => {
     }
   });
 });
+
+describe("search + page-size controls (Task 4)", () => {
+  it.each([
+    ["src/app/[locale]/admin/posts/page.tsx", "AdminPostList"],
+    ["src/app/[locale]/admin/kolom/page.tsx", "AdminColumnList"],
+    ["src/app/[locale]/admin/pengumuman/page.tsx", "AdminAnnouncementList"],
+  ])("%s renders search + page-size controls", (relPath) => {
+    const source = readFileSync(path.join(process.cwd(), relPath), "utf8");
+    expect(source).toContain("AdminListSearch");
+    expect(source).toContain("AdminPageSizeSelect");
+  });
+
+  it("defines the search + page-size keys in id, en, and ar for all three post namespaces", () => {
+    for (const locale of ["id", "en", "ar"]) {
+      const messages = JSON.parse(
+        readFileSync(path.join(process.cwd(), `messages/${locale}.json`), "utf8"),
+      );
+      for (const ns of ["AdminPostList", "AdminColumnList", "AdminAnnouncementList"]) {
+        for (const key of [
+          "searchPlaceholder",
+          "searchAriaLabel",
+          "searchAction",
+          "searchClear",
+          "pageSizeLabel",
+        ]) {
+          expect(messages[ns][key], `${locale}.${ns}.${key}`).toBeTruthy();
+        }
+        expect(messages[ns].searchEmpty.title, `${locale}.${ns}.searchEmpty.title`).toBeTruthy();
+        expect(
+          messages[ns].searchEmpty.description,
+          `${locale}.${ns}.searchEmpty.description`,
+        ).toBeTruthy();
+      }
+    }
+  });
+});

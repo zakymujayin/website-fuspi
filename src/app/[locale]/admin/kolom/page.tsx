@@ -9,6 +9,8 @@ import { AdminPostFilterTabs } from "@/components/admin/posts/post-filter-tabs";
 import { AdminPostList } from "@/components/admin/posts/post-list";
 import { AdminPostPagination } from "@/components/admin/posts/post-pagination";
 import {
+  ADMIN_POST_SEARCH_MAX_LENGTH,
+  buildAdminPostHref,
   normalizeAdminPostQuery,
   toAdminPostTransportQuery,
   totalPagesFor,
@@ -16,10 +18,14 @@ import {
 import { loadAdminPostsSafely } from "@/components/admin/posts/post-safe-load";
 import { AdminPostStateNotice } from "@/components/admin/posts/post-state-notice";
 import type { AdminPostPublicationState } from "@/components/admin/posts/post-status-badge";
+import { AdminListSearch } from "@/components/admin/shared/admin-list-search";
+import { AdminPageSizeSelect } from "@/components/admin/shared/admin-page-size-select";
 import { decideProtectedRoute, getRequestSession } from "@/lib/auth/runtime/request-session";
 import { parseAppLocale } from "@/lib/auth/runtime/redirect";
 import { listAdminPosts } from "@/lib/content/post-admin-transport";
 import { getPrismaClient } from "@/lib/db/client";
+
+const BASE_PATH = "/admin/kolom";
 
 type AdminColumnsPageProps = {
   params: Promise<{ locale: string }>;
@@ -76,7 +82,9 @@ export default async function AdminColumnsPage({ params, searchParams }: AdminCo
           <AdminPostFilterTabs
             active={query.status}
             ariaLabel={t("filterAriaLabel")}
-            basePath="/admin/kolom"
+            basePath={BASE_PATH}
+            search={query.search}
+            pageSize={query.pageSize}
             labels={{
               ALL: t("status.all"),
               DRAFT: t("status.draft"),
@@ -84,6 +92,30 @@ export default async function AdminColumnsPage({ params, searchParams }: AdminCo
               ARCHIVED: t("status.archived"),
             }}
           />
+
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <AdminListSearch
+              initialSearch={query.search}
+              maxLength={ADMIN_POST_SEARCH_MAX_LENGTH}
+              buildHref={(search) =>
+                buildAdminPostHref(query.status, 1, BASE_PATH, { search, pageSize: query.pageSize })
+              }
+              labels={{
+                placeholder: t("searchPlaceholder"),
+                ariaLabel: t("searchAriaLabel"),
+                action: t("searchAction"),
+                clear: t("searchClear"),
+              }}
+            />
+            <AdminPageSizeSelect
+              value={query.pageSize}
+              label={t("pageSizeLabel")}
+              optionLabel={(n) => String(n)}
+              buildHref={(size) =>
+                buildAdminPostHref(query.status, 1, BASE_PATH, { search: query.search, pageSize: size })
+              }
+            />
+          </div>
 
           <p className="text-sm text-slate-500">{t("totalCount", { count: result.data.total })}</p>
 
@@ -115,6 +147,12 @@ export default async function AdminColumnsPage({ params, searchParams }: AdminCo
                 },
               }}
             />
+          ) : query.search !== "" ? (
+            <AdminPostStateNotice
+              variant="empty"
+              title={t("searchEmpty.title")}
+              description={t("searchEmpty.description")}
+            />
           ) : (
             <AdminPostStateNotice
               variant="empty"
@@ -127,7 +165,9 @@ export default async function AdminColumnsPage({ params, searchParams }: AdminCo
             current={result.data.page}
             totalPages={totalPagesFor(result.data.total, result.data.pageSize)}
             status={query.status}
-            basePath="/admin/kolom"
+            basePath={BASE_PATH}
+            search={query.search}
+            pageSize={query.pageSize}
             ariaLabel={t("pagination.ariaLabel")}
             previousLabel={t("pagination.previous")}
             nextLabel={t("pagination.next")}

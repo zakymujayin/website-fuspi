@@ -344,6 +344,15 @@
     "createAction": "Tulis berita",
     "edit": "Sunting",
     "editLabelFor": "Sunting berita: {title}",
+    "searchPlaceholder": "Cari judul berita…",
+    "searchAriaLabel": "Cari berita",
+    "searchAction": "Cari",
+    "searchClear": "Bersihkan",
+    "searchEmpty": {
+      "title": "Tidak ada hasil",
+      "description": "Tidak ada berita yang cocok dengan pencarian Anda."
+    },
+    "pageSizeLabel": "Baris per halaman",
     "columns": {
       "title": "Judul",
       "category": "Kategori",
@@ -389,6 +398,15 @@
     "createAction": "Tulis pengumuman",
     "edit": "Sunting",
     "editLabelFor": "Sunting pengumuman: {title}",
+    "searchPlaceholder": "Cari judul pengumuman…",
+    "searchAriaLabel": "Cari pengumuman",
+    "searchAction": "Cari",
+    "searchClear": "Bersihkan",
+    "searchEmpty": {
+      "title": "Tidak ada hasil",
+      "description": "Tidak ada pengumuman yang cocok dengan pencarian Anda."
+    },
+    "pageSizeLabel": "Baris per halaman",
     "columns": {
       "title": "Judul",
       "category": "Kategori",
@@ -456,6 +474,15 @@
     "createAction": "Tambah sorotan",
     "edit": "Sunting",
     "editLabelFor": "Sunting sorotan akademik: {title}",
+    "searchPlaceholder": "Cari judul sorotan akademik…",
+    "searchAriaLabel": "Cari sorotan akademik",
+    "searchAction": "Cari",
+    "searchClear": "Bersihkan",
+    "searchEmpty": {
+      "title": "Tidak ada hasil",
+      "description": "Tidak ada sorotan akademik yang cocok dengan pencarian Anda."
+    },
+    "pageSizeLabel": "Baris per halaman",
     "columns": {
       "title": "Judul",
       "category": "Kategori",

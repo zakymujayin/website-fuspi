@@ -329,22 +329,29 @@ test.describe("M3 Post admin list QA", () => {
       await page.context().clearCookies();
     });
 
-    test("EDITOR-A sees only their own 15 posts and never EDITOR-B titles", async ({ page }) => {
+    test("EDITOR-A sees only their own posts and never EDITOR-B titles", async ({ page }) => {
       await page.context().addCookies([sessionCookie(editorASessionToken)]);
       await gotoPosts(page);
+      await page.waitForSelector(LIST_SELECTOR.id);
+      await expect(totalCount(page)).toHaveText("15 berita");
+      // 15 owned posts paginate at 10 per page, so page 1 shows the first 10.
       const items = await listItems(page);
-      expect(await items.count()).toBe(15);
+      expect(await items.count()).toBe(10);
       const body = (await page.locator("body").textContent()) ?? "";
       expect(body).not.toContain(`${marker} b `);
       await page.context().clearCookies();
     });
 
-    test("EDITOR-A pagination total is ownership-scoped (15 < 20 → no pagination)", async ({ page }) => {
+    test("EDITOR-A list is ownership-scoped and paginates at 10 per page (15 → 2 pages)", async ({ page }) => {
       await page.context().addCookies([sessionCookie(editorASessionToken)]);
       await gotoPosts(page);
       await page.waitForSelector(LIST_SELECTOR.id);
       await expect(totalCount(page)).toHaveText("15 berita");
-      await expect(page.locator("nav[aria-label='Navigasi halaman daftar berita']")).toHaveCount(0);
+      await expect(page.locator("nav[aria-label='Navigasi halaman daftar berita']")).toBeVisible();
+      expect(await (await listItems(page)).count()).toBe(10);
+
+      await gotoPosts(page, "/id/admin/posts?page=2");
+      expect(await (await listItems(page)).count()).toBe(5);
       await page.context().clearCookies();
     });
   });
@@ -423,7 +430,8 @@ test.describe("M3 Post admin list QA", () => {
       for (const path of hostile) {
         await gotoPosts(page, path);
         const items = await listItems(page);
-        expect(await items.count(), `canonical ALL for ${path}`).toBe(15);
+        // Canonical ALL for EDITOR-A is 15 owned posts; page 1 shows the first 10.
+        expect(await items.count(), `canonical ALL for ${path}`).toBe(10);
         const body = (await page.locator("body").textContent()) ?? "";
         expect(body, `no EDITOR-B leak for ${path}`).not.toContain(`${marker} b `);
       }
@@ -505,21 +513,48 @@ test.describe("M3 Post admin list QA", () => {
     });
   });
 
-  test.describe("Pagination — 20 items per page for ADMIN", () => {
-    test("ADMIN page 1 shows 20 rows and a next link", async ({ page }) => {
+  test.describe("Pagination — 10 items per page for ADMIN", () => {
+    test("ADMIN page 1 shows 10 rows and a next link", async ({ page }) => {
       await page.context().addCookies([sessionCookie(adminSessionToken)]);
       await gotoPosts(page);
       const items = await listItems(page);
-      expect(await items.count()).toBe(20);
+      expect(await items.count()).toBe(10);
       await expect(page.locator("nav[aria-label='Navigasi halaman daftar berita']")).toBeVisible();
       await page.context().clearCookies();
     });
 
-    test("ADMIN page 2 shows the remaining 6 rows", async ({ page }) => {
+    test("ADMIN page 2 shows 10 rows", async ({ page }) => {
       await page.context().addCookies([sessionCookie(adminSessionToken)]);
       await gotoPosts(page, "/id/admin/posts?page=2");
       const items = await listItems(page);
+      expect(await items.count()).toBe(10);
+      await page.context().clearCookies();
+    });
+
+    test("ADMIN page 3 shows the remaining 6 rows", async ({ page }) => {
+      await page.context().addCookies([sessionCookie(adminSessionToken)]);
+      await gotoPosts(page, "/id/admin/posts?page=3");
+      const items = await listItems(page);
       expect(await items.count()).toBe(6);
+      await page.context().clearCookies();
+    });
+  });
+
+  test.describe("Title search", () => {
+    test("typing a term narrows the list and reflects it in the URL", async ({ page }) => {
+      await page.context().addCookies([sessionCookie(adminSessionToken)]);
+      await gotoPosts(page);
+      await page.waitForSelector(LIST_SELECTOR.id);
+
+      const searchBox = page.getByRole("searchbox", { name: "Cari berita" });
+      await searchBox.fill("archived");
+      await searchBox.press("Enter");
+
+      await page.waitForURL(/[?&]search=archived(?:&|$)/);
+      const items = await listItems(page);
+      // Only EDITOR-A's three ARCHIVED fixtures carry "ARCHIVED" in the id-locale title.
+      expect(await items.count()).toBe(3);
+      await expect(totalCount(page)).toHaveText("3 berita");
       await page.context().clearCookies();
     });
   });

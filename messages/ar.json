@@ -344,6 +344,15 @@
     "createAction": "كتابة خبر",
     "edit": "تحرير",
     "editLabelFor": "تحرير الخبر: {title}",
+    "searchPlaceholder": "ابحث في عناوين الأخبار…",
+    "searchAriaLabel": "ابحث في الأخبار",
+    "searchAction": "بحث",
+    "searchClear": "مسح",
+    "searchEmpty": {
+      "title": "لا توجد نتائج",
+      "description": "لا توجد أخبار تطابق بحثك."
+    },
+    "pageSizeLabel": "صفوف لكل صفحة",
     "columns": {
       "title": "العنوان",
       "category": "التصنيف",
@@ -389,6 +398,15 @@
     "createAction": "كتابة إعلان",
     "edit": "تحرير",
     "editLabelFor": "تحرير الإعلان: {title}",
+    "searchPlaceholder": "ابحث في عناوين الإعلانات…",
+    "searchAriaLabel": "ابحث في الإعلانات",
+    "searchAction": "بحث",
+    "searchClear": "مسح",
+    "searchEmpty": {
+      "title": "لا توجد نتائج",
+      "description": "لا توجد إعلانات تطابق بحثك."
+    },
+    "pageSizeLabel": "صفوف لكل صفحة",
     "columns": {
       "title": "العنوان",
       "category": "التصنيف",
@@ -456,6 +474,15 @@
     "createAction": "إضافة إضاءة",
     "edit": "تحرير",
     "editLabelFor": "تحرير الإضاءة الأكاديمية: {title}",
+    "searchPlaceholder": "ابحث في عناوين الإضاءات الأكاديمية…",
+    "searchAriaLabel": "ابحث في الإضاءات الأكاديمية",
+    "searchAction": "بحث",
+    "searchClear": "مسح",
+    "searchEmpty": {
+      "title": "لا توجد نتائج",
+      "description": "لا توجد إضاءات أكاديمية تطابق بحثك."
+    },
+    "pageSizeLabel": "صفوف لكل صفحة",
     "columns": {
       "title": "العنوان",
       "category": "التصنيف",

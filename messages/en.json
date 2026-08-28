@@ -344,6 +344,15 @@
     "createAction": "Write news",
     "edit": "Edit",
     "editLabelFor": "Edit news item: {title}",
+    "searchPlaceholder": "Search news titles…",
+    "searchAriaLabel": "Search news",
+    "searchAction": "Search",
+    "searchClear": "Clear",
+    "searchEmpty": {
+      "title": "No results",
+      "description": "No news matches your search."
+    },
+    "pageSizeLabel": "Rows per page",
     "columns": {
       "title": "Title",
       "category": "Category",
@@ -389,6 +398,15 @@
     "createAction": "Write announcement",
     "edit": "Edit",
     "editLabelFor": "Edit announcement: {title}",
+    "searchPlaceholder": "Search announcement titles…",
+    "searchAriaLabel": "Search announcements",
+    "searchAction": "Search",
+    "searchClear": "Clear",
+    "searchEmpty": {
+      "title": "No results",
+      "description": "No announcements match your search."
+    },
+    "pageSizeLabel": "Rows per page",
     "columns": {
       "title": "Title",
       "category": "Category",
@@ -456,6 +474,15 @@
     "createAction": "Add spotlight",
     "edit": "Edit",
     "editLabelFor": "Edit academic spotlight item: {title}",
+    "searchPlaceholder": "Search academic spotlight titles…",
+    "searchAriaLabel": "Search academic spotlight",
+    "searchAction": "Search",
+    "searchClear": "Clear",
+    "searchEmpty": {
+      "title": "No results",
+      "description": "No academic spotlight items match your search."
+    },
+    "pageSizeLabel": "Rows per page",
     "columns": {
       "title": "Title",
       "category": "Category",
