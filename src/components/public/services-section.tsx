@@ -10,36 +10,7 @@ type ServiceCard = {
   icon: typeof FileText;
   href: string;
   external: boolean;
-  /** Full utility strings per accent so Tailwind keeps them (no dynamic class names). */
-  accent: { chip: string; rule: string; hoverBorder: string; hoverArrow: string };
 };
-
-const ACCENTS = {
-  royal: {
-    chip: "bg-royal-50 text-royal-600",
-    rule: "bg-royal-500",
-    hoverBorder: "group-hover:border-royal-300",
-    hoverArrow: "group-hover:text-royal-500",
-  },
-  brass: {
-    chip: "bg-brass-400/15 text-brass-600",
-    rule: "bg-brass-500",
-    hoverBorder: "group-hover:border-brass-400",
-    hoverArrow: "group-hover:text-brass-600",
-  },
-  teal: {
-    chip: "bg-emerald-50 text-emerald-600",
-    rule: "bg-emerald-500",
-    hoverBorder: "group-hover:border-emerald-300",
-    hoverArrow: "group-hover:text-emerald-600",
-  },
-  navy: {
-    chip: "bg-navy-900/10 text-navy-900",
-    rule: "bg-navy-900",
-    hoverBorder: "group-hover:border-navy-800/40",
-    hoverArrow: "group-hover:text-navy-900",
-  },
-} as const;
 
 /**
  * SILA has no configured public URL yet (`NEXT_PUBLIC_SILA_URL` is unset) and
@@ -54,11 +25,10 @@ function buildServices(): readonly ServiceCard[] {
       icon: FileText,
       href: silaUrl && silaUrl.length > 0 ? silaUrl : "/layanan",
       external: Boolean(silaUrl && silaUrl.length > 0),
-      accent: ACCENTS.royal,
     },
-    { key: "ejournal", icon: BookOpen, href: "/layanan", external: false, accent: ACCENTS.brass },
-    { key: "booking", icon: DoorOpen, href: "/peminjaman", external: false, accent: ACCENTS.teal },
-    { key: "complaints", icon: Headset, href: "/pengaduan", external: false, accent: ACCENTS.navy },
+    { key: "ejournal", icon: BookOpen, href: "/layanan", external: false },
+    { key: "booking", icon: DoorOpen, href: "/peminjaman", external: false },
+    { key: "complaints", icon: Headset, href: "/pengaduan", external: false },
   ] as const;
 }
 
@@ -67,7 +37,7 @@ export async function ServicesSection() {
   const services = buildServices();
 
   return (
-    <section className="bg-slate-50 py-14 md:py-20">
+    <section className="bg-gradient-to-b from-slate-50 to-royal-50/40 py-14 md:py-20">
       <Container>
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -91,24 +61,28 @@ export async function ServicesSection() {
             const title = t(`service.${service.key}.title`);
             const description = t(`service.${service.key}.description`);
             const content = (
-              <div
-                className={`group relative flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white p-7 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md md:p-8 ${service.accent.hoverBorder}`}
-              >
-                <span aria-hidden className={`absolute inset-x-0 top-0 h-1 ${service.accent.rule}`} />
-                <div className="flex items-start justify-between">
-                  <span className={`flex size-14 items-center justify-center rounded-2xl ${service.accent.chip}`}>
+              <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl bg-royal-700 p-7 shadow-sm ring-1 ring-royal-600 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:ring-brass-500/60 md:p-8">
+                {/* Oversized watermark of the card's own icon, bleeding off the
+                    trailing-bottom corner. Purely decorative. */}
+                <service.icon
+                  aria-hidden
+                  strokeWidth={1}
+                  className="pointer-events-none absolute -end-4 -bottom-6 size-40 text-white/[0.07] transition-transform duration-300 group-hover:scale-105 rtl:-scale-x-100"
+                />
+                <div className="relative flex items-start justify-between">
+                  <span className="flex size-14 items-center justify-center rounded-2xl bg-white/10 text-white ring-1 ring-white/20 transition-colors duration-200 group-hover:bg-brass-400 group-hover:text-royal-950">
                     <service.icon aria-hidden className="size-7" strokeWidth={1.75} />
                   </span>
                   <ArrowUpRight
                     aria-hidden
-                    className={`size-5 text-slate-300 transition-all duration-200 group-hover:-translate-y-0.5 rtl:-scale-x-100 ${service.accent.hoverArrow}`}
+                    className="size-5 text-white/30 transition-all duration-200 group-hover:-translate-y-0.5 group-hover:text-brass-400 rtl:-scale-x-100"
                     strokeWidth={1.75}
                   />
                 </div>
-                <h3 className="mt-6 font-display text-xl font-bold tracking-tight text-slate-900 md:text-2xl">
+                <h3 className="relative mt-6 font-display text-xl font-bold tracking-tight text-white md:text-2xl">
                   {title}
                 </h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-500">{description}</p>
+                <p className="relative mt-2 text-sm leading-relaxed text-royal-100">{description}</p>
                 <span className="sr-only">{t("serviceCta")}</span>
               </div>
             );
