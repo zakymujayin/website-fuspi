@@ -837,6 +837,7 @@
     "searchAriaLabel": "البحث في الصفحات",
     "searchAction": "بحث",
     "searchClear": "مسح",
+    "pageSizeLabel": "صفوف لكل صفحة",
     "pagination": {
       "ariaLabel": "تنقّل صفحات قائمة الصفحات",
       "previous": "الصفحة السابقة",

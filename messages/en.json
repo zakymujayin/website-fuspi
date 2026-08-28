@@ -837,6 +837,7 @@
     "searchAriaLabel": "Search pages",
     "searchAction": "Search",
     "searchClear": "Clear",
+    "pageSizeLabel": "Rows per page",
     "pagination": {
       "ariaLabel": "Page list pagination",
       "previous": "Previous page",

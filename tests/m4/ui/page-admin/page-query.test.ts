@@ -34,7 +34,8 @@ describe("normalizeAdminPageQuery — whole-record fail-closed normalization", (
   });
 
   it.each([
-    ["unknown key", { page: "2", pageSize: "50" }],
+    ["unknown key", { page: "2", ownerId: "attacker" }],
+    ["free-int page size", { status: "DRAFT", pageSize: "40" }],
     ["repeated page", { page: ["2", "3"] }],
     ["repeated status", { status: ["DRAFT", "PUBLISHED"] }],
     ["repeated search", { search: ["a", "b"] }],
@@ -62,9 +63,15 @@ describe("normalizeAdminPageQuery — whole-record fail-closed normalization", (
     expect(normalizeAdminPageQuery({ search: "   " }).search).toBe("");
   });
 
-  it("never lets pageSize come from the URL", () => {
-    const result = normalizeAdminPageQuery({ page: "2" });
-    expect(result.pageSize).toBe(ADMIN_PAGE_PAGE_SIZE);
+  it("defaults page size to 10 and accepts 10/20/50 from the URL", () => {
+    expect(normalizeAdminPageQuery({}).pageSize).toBe(10);
+    expect(normalizeAdminPageQuery({ pageSize: "50" }).pageSize).toBe(50);
+  });
+
+  it("collapses the whole query when pageSize is a free integer", () => {
+    expect(normalizeAdminPageQuery({ status: "DRAFT", pageSize: "40" })).toEqual({
+      page: 1, status: "ALL", search: "", sort: "UPDATED_DESC", pageSize: 10,
+    });
   });
 });
 
@@ -103,6 +110,11 @@ describe("buildAdminPageHref", () => {
     expect(buildAdminPageHref({ status: "ALL", search: "", sort: "UPDATED_DESC", page: 1 })).toBe(
       "/admin/pages",
     );
+  });
+
+  it("serializes a non-default page size", () => {
+    expect(buildAdminPageHref({ pageSize: 20 })).toBe("/admin/pages?pageSize=20");
+    expect(buildAdminPageHref({ pageSize: 10 })).toBe("/admin/pages");
   });
 });
 

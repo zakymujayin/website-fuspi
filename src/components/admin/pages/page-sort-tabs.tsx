@@ -9,11 +9,12 @@ type AdminPageSortTabsProps = {
   labels: Record<AdminPageSort, string>;
   status: AdminPageStatusFilter;
   search: string;
+  pageSize: 10 | 20 | 50;
 };
 
 const SORTS: readonly AdminPageSort[] = ["UPDATED_DESC", "TITLE_ASC"];
 
-export function AdminPageSortTabs({ active, ariaLabel, labels, status, search }: AdminPageSortTabsProps) {
+export function AdminPageSortTabs({ active, ariaLabel, labels, status, search, pageSize }: AdminPageSortTabsProps) {
   return (
     <div className="flex items-center gap-2">
       <span className="text-sm text-slate-500" id="admin-page-sort-label">
@@ -25,7 +26,7 @@ export function AdminPageSortTabs({ active, ariaLabel, labels, status, search }:
           return (
             <Link
               key={sort}
-              href={buildAdminPageHref({ status, search, sort, page: 1 })}
+              href={buildAdminPageHref({ status, search, sort, page: 1, pageSize })}
               aria-current={isActive ? "page" : undefined}
               className={cn(
                 "inline-flex h-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-colors",

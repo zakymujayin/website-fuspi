@@ -11,10 +11,12 @@ import { AdminPagePagination } from "@/components/admin/pages/page-pagination";
 import { AdminPageSearch } from "@/components/admin/pages/page-search";
 import { AdminPageSortTabs } from "@/components/admin/pages/page-sort-tabs";
 import {
+  buildAdminPageHref,
   normalizeAdminPageQuery,
   toAdminPageTransportQuery,
   totalPagesFor,
 } from "@/components/admin/pages/page-query";
+import { AdminPageSizeSelect } from "@/components/admin/shared/admin-page-size-select";
 import { loadAdminPagesSafely } from "@/components/admin/pages/page-safe-load";
 import { AdminPageStateNotice } from "@/components/admin/pages/page-state-notice";
 import type { AdminPagePublicationState } from "@/components/admin/pages/page-status-badge";
@@ -89,6 +91,7 @@ export default async function AdminPagesPage({ params, searchParams }: AdminPage
               }}
               search={query.search}
               sort={query.sort}
+              pageSize={query.pageSize}
             />
             <AdminPageSortTabs
               active={query.sort}
@@ -99,14 +102,31 @@ export default async function AdminPagesPage({ params, searchParams }: AdminPage
               }}
               status={query.status}
               search={query.search}
+              pageSize={query.pageSize}
             />
           </div>
 
-          <AdminPageSearch
-            initialSearch={query.search}
-            status={query.status}
-            sort={query.sort}
-          />
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <AdminPageSearch
+              initialSearch={query.search}
+              status={query.status}
+              sort={query.sort}
+            />
+            <AdminPageSizeSelect
+              value={query.pageSize}
+              label={t("pageSizeLabel")}
+              optionLabel={String}
+              buildHref={(size) =>
+                buildAdminPageHref({
+                  status: query.status,
+                  search: query.search,
+                  sort: query.sort,
+                  page: 1,
+                  pageSize: size,
+                })
+              }
+            />
+          </div>
 
           <p className="text-sm text-slate-500">{t("totalCount", { count: result.data.total })}</p>
 
@@ -137,7 +157,7 @@ export default async function AdminPagesPage({ params, searchParams }: AdminPage
           <AdminPagePagination
             current={result.data.page}
             totalPages={totalPagesFor(result.data.total, result.data.pageSize)}
-            query={{ status: query.status, search: query.search, sort: query.sort }}
+            query={{ status: query.status, search: query.search, sort: query.sort, pageSize: query.pageSize }}
             ariaLabel={t("pagination.ariaLabel")}
             previousLabel={t("pagination.previous")}
             nextLabel={t("pagination.next")}

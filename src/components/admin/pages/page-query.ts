@@ -1,14 +1,15 @@
 export type AdminPageStatusFilter = "ALL" | "DRAFT" | "PUBLISHED" | "ARCHIVED";
 export type AdminPageSort = "UPDATED_DESC" | "TITLE_ASC";
 
-/** Fixed page size. One of the frozen `PageListQuerySchema` literals, never URL-driven. */
-export const ADMIN_PAGE_PAGE_SIZE = 20;
+/** Default page size. One of the frozen `PageListQuerySchema` literals; overridable via `pageSize`. */
+export const ADMIN_PAGE_PAGE_SIZE = 10;
 /** Mirrors the frozen `SearchTextSchema` bound so the control cannot submit an over-long term. */
 export const ADMIN_PAGE_SEARCH_MAX_LENGTH = 100;
 
 const STATUS_FILTERS: readonly AdminPageStatusFilter[] = ["ALL", "DRAFT", "PUBLISHED", "ARCHIVED"];
 const SORTS: readonly AdminPageSort[] = ["UPDATED_DESC", "TITLE_ASC"];
-const ALLOWED_QUERY_KEYS = new Set(["page", "status", "search", "sort"]);
+const ALLOWED_QUERY_KEYS = new Set(["page", "status", "search", "sort", "pageSize"]);
+const PAGE_SIZE_VALUES = new Set(["10", "20", "50"]);
 
 // Mirrors the frozen `RawAdminPageListQuerySchema` page form exactly: 1-4 digits with no leading
 // zero, or the literal upper bound "10000" — never a clamp of a larger value.
@@ -21,7 +22,7 @@ export type AdminPageNormalizedQuery = {
   status: AdminPageStatusFilter;
   search: string;
   sort: AdminPageSort;
-  pageSize: number;
+  pageSize: 10 | 20 | 50;
 };
 
 const ADMIN_PAGE_CANONICAL_QUERY: AdminPageNormalizedQuery = {
@@ -29,29 +30,31 @@ const ADMIN_PAGE_CANONICAL_QUERY: AdminPageNormalizedQuery = {
   status: "ALL",
   search: "",
   sort: "UPDATED_DESC",
-  pageSize: ADMIN_PAGE_PAGE_SIZE,
+  pageSize: 10,
 };
 
 type RawSearchParams = Record<string, string | string[] | undefined>;
 
 /**
  * Whole-record search param normalization, matching the rule frozen for the Media Library and Post
- * list: this route accepts only `page`, `status`, `search`, and `sort`, with a fixed `pageSize`. Any
- * unknown key, repeated/array value, or member outside its strict form collapses the *entire* query
- * back to canonical defaults rather than partially trusting the rest, so one invalid member can
- * never be used to probe which Pages exist.
+ * list: this route accepts only `page`, `status`, `search`, `sort`, and `pageSize`. Any unknown
+ * key, repeated/array value, a `pageSize` that is not exactly one of the frozen literals, or a
+ * member outside its strict form collapses the *entire* query back to canonical defaults rather
+ * than partially trusting the rest, so one invalid member can never be used to probe which Pages
+ * exist.
  */
 export function normalizeAdminPageQuery(raw: RawSearchParams): AdminPageNormalizedQuery {
   for (const key of Object.keys(raw)) {
     if (!ALLOWED_QUERY_KEYS.has(key)) return ADMIN_PAGE_CANONICAL_QUERY;
   }
 
-  const { page: rawPage, status: rawStatus, search: rawSearch, sort: rawSort } = raw;
+  const { page: rawPage, status: rawStatus, search: rawSearch, sort: rawSort, pageSize: rawPageSize } = raw;
   if (
     Array.isArray(rawPage)
     || Array.isArray(rawStatus)
     || Array.isArray(rawSearch)
     || Array.isArray(rawSort)
+    || Array.isArray(rawPageSize)
   ) return ADMIN_PAGE_CANONICAL_QUERY;
 
   if (rawPage !== undefined && !STRICT_PAGE_PATTERN.test(rawPage)) return ADMIN_PAGE_CANONICAL_QUERY;
@@ -59,6 +62,9 @@ export function normalizeAdminPageQuery(raw: RawSearchParams): AdminPageNormaliz
     return ADMIN_PAGE_CANONICAL_QUERY;
   }
   if (rawSort !== undefined && !(SORTS as readonly string[]).includes(rawSort)) {
+    return ADMIN_PAGE_CANONICAL_QUERY;
+  }
+  if (rawPageSize !== undefined && !PAGE_SIZE_VALUES.has(rawPageSize)) {
     return ADMIN_PAGE_CANONICAL_QUERY;
   }
   // Trim first: a term of only spaces is "no search", not an invalid one. Anything still over the
@@ -73,7 +79,7 @@ export function normalizeAdminPageQuery(raw: RawSearchParams): AdminPageNormaliz
     status: rawStatus !== undefined ? (rawStatus as AdminPageStatusFilter) : "ALL",
     search,
     sort: rawSort !== undefined ? (rawSort as AdminPageSort) : "UPDATED_DESC",
-    pageSize: ADMIN_PAGE_PAGE_SIZE,
+    pageSize: rawPageSize !== undefined ? (Number(rawPageSize) as 10 | 20 | 50) : 10,
   };
 }
 
@@ -81,14 +87,14 @@ export function normalizeAdminPageQuery(raw: RawSearchParams): AdminPageNormaliz
 export function toAdminPageTransportQuery(query: AdminPageNormalizedQuery) {
   return {
     page: query.page,
-    pageSize: query.pageSize as 10 | 20 | 50,
+    pageSize: query.pageSize,
     status: query.status,
     search: query.search,
     sort: query.sort,
   } as const;
 }
 
-type AdminPageHrefParts = Partial<Pick<AdminPageNormalizedQuery, "status" | "search" | "sort">> & {
+type AdminPageHrefParts = Partial<Pick<AdminPageNormalizedQuery, "status" | "search" | "sort" | "pageSize">> & {
   page?: number;
 };
 
@@ -101,11 +107,13 @@ export function buildAdminPageHref({
   search = "",
   sort = "UPDATED_DESC",
   page = 1,
+  pageSize,
 }: AdminPageHrefParts = {}): string {
   const params = new URLSearchParams();
   if (status !== "ALL") params.set("status", status);
   if (search) params.set("search", search);
   if (sort !== "UPDATED_DESC") params.set("sort", sort);
+  if (pageSize && pageSize !== 10) params.set("pageSize", String(pageSize));
   if (page > 1) params.set("page", String(page));
   const query = params.toString();
   return query ? `/admin/pages?${query}` : "/admin/pages";

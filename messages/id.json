@@ -837,6 +837,7 @@
     "searchAriaLabel": "Cari halaman",
     "searchAction": "Cari",
     "searchClear": "Hapus",
+    "pageSizeLabel": "Baris per halaman",
     "pagination": {
       "ariaLabel": "Navigasi halaman daftar halaman",
       "previous": "Halaman sebelumnya",

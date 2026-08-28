@@ -8,7 +8,7 @@ import { buildAdminPageHref, buildPaginationItems, type AdminPageNormalizedQuery
 type AdminPagePaginationProps = {
   current: number;
   totalPages: number;
-  query: Pick<AdminPageNormalizedQuery, "status" | "search" | "sort">;
+  query: Pick<AdminPageNormalizedQuery, "status" | "search" | "sort" | "pageSize">;
   ariaLabel: string;
   previousLabel: string;
   nextLabel: string;
