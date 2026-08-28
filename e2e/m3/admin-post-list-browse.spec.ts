@@ -230,7 +230,7 @@ test.describe("M3 Post admin list QA", () => {
       });
     }
 
-    // ADMIN owns 3 posts, taking the ADMIN-visible total to 26 (> one page of 20).
+    // ADMIN owns 3 posts, taking the ADMIN-visible total to 26 (> one page of 10).
     for (let i = 1; i <= 3; i += 1) {
       await insertPost({
         ownerId: adminId, ownerMarker: "admin", index: i, status: "PUBLISHED",
