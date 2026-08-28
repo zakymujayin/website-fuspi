@@ -61,6 +61,15 @@ const SAMPLE_LABELS = {
   updatedAtLabel: (instant: string) => `Diperbarui ${instant}`,
   edit: "Sunting",
   editLabelFor: (title: string) => `Sunting berita: ${title}`,
+  columns: {
+    title: "Judul",
+    category: "Kategori",
+    author: "Penulis",
+    locales: "Bahasa",
+    status: "Status",
+    published: "Terbit",
+    actions: "Aksi",
+  },
 };
 
 const FILTER_LABELS = {
@@ -357,7 +366,7 @@ describe("AdminPostList", () => {
     expect(text).toContain("Penulis tidak diketahui");
   });
 
-  it("exposes the list under its accessible name with one item per entry", () => {
+  it("exposes the list under its accessible name with one row per entry", () => {
     const markup = renderToStaticMarkup(
       <AdminPostList
         items={[SAMPLE_ITEM, { ...SAMPLE_ITEM, id: "post-2" }]}
@@ -367,8 +376,23 @@ describe("AdminPostList", () => {
       />,
     );
     const container = markupToContainer(markup);
-    expect(container.querySelector("ul")?.getAttribute("aria-label")).toBe("Daftar berita");
-    expect(container.querySelectorAll("li")).toHaveLength(2);
+    expect(container.querySelector("table")?.getAttribute("aria-label")).toBe("Daftar berita");
+    expect(container.querySelectorAll("tbody tr")).toHaveLength(2);
+  });
+
+  it("renders a header cell per column with a scope", () => {
+    const markup = renderToStaticMarkup(
+      <AdminPostList items={[SAMPLE_ITEM]} locale="id" ariaLabel="Daftar" labels={SAMPLE_LABELS} />,
+    );
+    const headers = Array.from(markupToContainer(markup).querySelectorAll("thead th"));
+    expect(headers).toHaveLength(7);
+    for (const header of headers) {
+      expect(header.getAttribute("scope")).toBe("col");
+    }
+    const text = markupToContainer(markup).querySelector("thead")?.textContent ?? "";
+    expect(text).toContain("Judul");
+    expect(text).toContain("Kategori");
+    expect(text).toContain("Terbit");
   });
 
   it("never renders the slug, and performs no mutation from the list itself", () => {

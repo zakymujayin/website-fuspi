@@ -56,7 +56,7 @@ export default async function AdminPublicContentPage({ params, searchParams }: P
           <p className="mt-2 max-w-prose text-sm text-slate-500">{t("SCHOLARSHIP.description")}</p>
         </div>
         <Link
-          href={`/admin/beasiswa/new`}
+          href={`/admin/beasiswa/baru`}
           className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-lg bg-royal-500 px-4 text-sm font-medium text-white transition-colors hover:bg-royal-600"
         >
           <PlusIcon aria-hidden data-icon strokeWidth={1.5} />

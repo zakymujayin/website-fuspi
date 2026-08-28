@@ -30,7 +30,14 @@ if (
 
 const BREAKPOINTS = [360, 390, 768, 1024, 1440] as const;
 const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"];
-const LIST_SELECTOR = { id: "ul[aria-label='Daftar berita']", ar: "ul[aria-label='قائمة الأخبار']" };
+const LIST_SELECTOR = {
+  id: "table[aria-label='Daftar berita']",
+  ar: "table[aria-label='قائمة الأخبار']",
+};
+const ROW_SELECTOR = {
+  id: `${LIST_SELECTOR.id} tbody tr`,
+  ar: `${LIST_SELECTOR.ar} tbody tr`,
+};
 
 test.describe("M3 Post admin list QA", () => {
   test.skip(!DATABASE_URL, "Post admin list browser tests require an isolated PostgreSQL database.");
@@ -261,7 +268,7 @@ test.describe("M3 Post admin list QA", () => {
 
   async function listItems(page: Page, locale: "id" | "ar" = "id") {
     await page.waitForSelector(LIST_SELECTOR[locale]);
-    return page.locator(`${LIST_SELECTOR[locale]} > li`);
+    return page.locator(ROW_SELECTOR[locale]);
   }
 
   /** The total-count line is exactly "<n> berita"; the page description also contains the word
@@ -428,7 +435,7 @@ test.describe("M3 Post admin list QA", () => {
     test("shows title, featured flag, locales, category, author, and Jakarta time", async ({ page }) => {
       await page.context().addCookies([sessionCookie(editorASessionToken)]);
       await gotoPosts(page, "/id/admin/posts?status=DRAFT");
-      const featured = page.locator(`${LIST_SELECTOR.id} > li`, { hasText: "Unggulan" }).first();
+      const featured = page.locator(ROW_SELECTOR.id, { hasText: "Unggulan" }).first();
       const text = (await featured.textContent()) ?? "";
       expect(text).toContain("ID · EN");
       expect(text).toContain("Akademik");
@@ -601,7 +608,7 @@ test.describe("M3 Post admin list QA", () => {
       await gotoPosts(page);
       const items = await listItems(page);
       const rowCount = await items.count();
-      const editLinks = page.locator(`${LIST_SELECTOR.id} > li a[href*="/edit"]`);
+      const editLinks = page.locator(`${ROW_SELECTOR.id} a[href*="/edit"]`);
       expect(await editLinks.count()).toBe(rowCount);
 
       const hrefs = await editLinks.evaluateAll((els) =>
@@ -620,7 +627,7 @@ test.describe("M3 Post admin list QA", () => {
       await gotoPosts(page);
       await page.waitForSelector(LIST_SELECTOR.id);
       const names = await page
-        .locator(`${LIST_SELECTOR.id} > li a[href*="/edit"]`)
+        .locator(`${ROW_SELECTOR.id} a[href*="/edit"]`)
         .evaluateAll((els) => els.map((el) => el.getAttribute("aria-label") ?? ""));
       expect(names.length).toBeGreaterThan(1);
       expect(names.every((n) => n.length > 0)).toBe(true);
@@ -635,7 +642,7 @@ test.describe("M3 Post admin list QA", () => {
       await expect(page).toHaveURL(/\/id\/admin\/posts\/new$/);
 
       await gotoPosts(page);
-      await page.locator(`${LIST_SELECTOR.id} > li a[href*="/edit"]`).first().click();
+      await page.locator(`${ROW_SELECTOR.id} a[href*="/edit"]`).first().click();
       await expect(page).toHaveURL(/\/id\/admin\/posts\/[^/]+\/edit$/);
       await expect(page.locator("h1")).toBeVisible();
       await page.context().clearCookies();

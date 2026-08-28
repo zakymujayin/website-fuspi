@@ -17,17 +17,34 @@ import {
 
 type WorkflowRow = Parameters<typeof workflow>[0];
 
+type AdminSummary = ReturnType<typeof PublicContentAdminSummarySchema.parse>;
+
+/**
+ * Projects one row onto the frozen list summary. A row whose stored workflow/governance data
+ * cannot satisfy the contract is skipped (and logged server-side) rather than failing the whole
+ * list — a single inconsistent record must never make an entire admin section unreachable.
+ */
 function summary(value: {
   id: string; resource: string; slug: string | null; primaryText: string;
   isPublic: boolean; expired: boolean; order: number | null; version: number | null;
   translations: WorkflowRow[]; governance: ReturnType<typeof governance> | null;
-}) {
-  return PublicContentAdminSummarySchema.parse({
+}): AdminSummary | null {
+  const parsed = PublicContentAdminSummarySchema.safeParse({
     id: value.id, resource: value.resource, slug: value.slug, primaryText: value.primaryText,
     visibility: value.expired ? "EXPIRED" : value.isPublic ? "PUBLIC" : "HIDDEN",
     order: value.order, version: value.version,
     translations: value.translations.map(workflow), governance: value.governance,
   });
+  if (parsed.success) return parsed.data;
+  console.error(
+    `[public-content] skipped ${value.resource} ${value.id}: `
+    + parsed.error.issues.map((issue) => `${issue.path.join(".")}:${issue.code}`).join(", "),
+  );
+  return null;
+}
+
+function present(items: Array<AdminSummary | null>): AdminSummary[] {
+  return items.filter((item): item is AdminSummary => item !== null);
 }
 
 function governanceFilter(query: {visibility: string}, now: Date) {
@@ -147,8 +164,12 @@ export async function listPublicContentAdmin(
       total = result[1]; items = result[0].map((row) => summary({id: row.id, resource: "TESTIMONIAL", slug: null, primaryText: row.name,
         isPublic: row.isVisible && Boolean(row.publicationConsentAt && row.publicationConsentAt <= now), expired: false, order: row.order, version: row.version, translations: row.translations, governance: null}));
     }
-    return {ok: true as const, data: PublicContentAdminListResultSchema.parse({items, page: pageMetadata(query.page, query.pageSize, total)})};
-  } catch {
+    return {ok: true as const, data: PublicContentAdminListResultSchema.parse({
+      items: present(items),
+      page: pageMetadata(query.page, query.pageSize, total),
+    })};
+  } catch (error) {
+    console.error("[public-content] admin list failed:", error instanceof Error ? error.message : error);
     return {ok: false as const, code: "UNAVAILABLE" as const};
   }
 }

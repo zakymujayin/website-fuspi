@@ -92,7 +92,9 @@ export function toPublicContentAdminTransportQuery(query: PublicContentAdminNorm
     category: query.category,
     year: query.year,
     search: query.search,
-    direction: query.direction,
+    // The UI query keeps `direction` lowercase for URL building; the frozen transport contract
+    // (`CmsSortDirectionSchema`) expects "ASC" | "DESC".
+    direction: query.direction.toUpperCase() as "ASC" | "DESC",
   } as const;
 }
 

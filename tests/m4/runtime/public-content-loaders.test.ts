@@ -1,5 +1,9 @@
 import {describe, expect, it, vi} from "vitest";
 
+import {
+  normalizePublicContentAdminQuery,
+  toPublicContentAdminTransportQuery,
+} from "@/components/admin/public-content/public-content-query";
 import {getPublicContentAdminDetail} from "@/features/public-content/admin-detail";
 import {listPublicContentAdmin} from "@/features/public-content/admin-query";
 import {exportPartnershipCsv} from "@/features/public-content/export";
@@ -25,6 +29,94 @@ describe("public content admin loaders", () => {
     }, now)).toEqual({ok: false, code: "SESSION_INVALID"});
     expect(database.service.findUnique).not.toHaveBeenCalled();
     expect(database.service.findMany).not.toHaveBeenCalled();
+  });
+
+  it("accepts the query the admin list pages actually build (normalize → transport → loader)", async () => {
+    const row = {
+      id: "partnership-1", slug: "mitra-satu", partnerName: "Mitra Satu", level: "NASIONAL",
+      country: null, startDate: null, endDate: null, isActive: true, order: 0, version: 1,
+      translations: [{...workflow, category: "Kerjasama", description: null}],
+    };
+    const database = {
+      partnership: {
+        findMany: vi.fn().mockResolvedValue([row]),
+        count: vi.fn().mockResolvedValue(1),
+      },
+      $transaction: vi.fn(async (operations: Array<Promise<unknown>>) => Promise.all(operations)),
+    } as unknown as PublicContentDatabase;
+
+    const uiQuery = normalizePublicContentAdminQuery({}, "PARTNERSHIP");
+    const result = await listPublicContentAdmin(
+      database, actor, toPublicContentAdminTransportQuery(uiQuery), now,
+    );
+
+    expect(result).toMatchObject({
+      ok: true,
+      data: {items: [{id: "partnership-1", primaryText: "Mitra Satu", visibility: "PUBLIC"}]},
+    });
+  });
+
+  it("lists a governance-carrying EVENT through the query the /admin/agenda page builds", async () => {
+    const row = {
+      id: "event-1", slug: "wisuda-2026",
+      startAt: new Date("2026-09-01T02:00:00.000Z"), endAt: null,
+      isPublished: true, version: 1,
+      governanceStatus: "CURRENT", contentOwnerId: "admin-1",
+      lastReviewedAt: null, reviewDueAt: null, expiresAt: null,
+      translations: [{...workflow, title: "Wisuda 2026", description: null, location: null}],
+    };
+    const database = {
+      event: {
+        findMany: vi.fn().mockResolvedValue([row]),
+        count: vi.fn().mockResolvedValue(1),
+      },
+      $transaction: vi.fn(async (operations: Array<Promise<unknown>>) => Promise.all(operations)),
+    } as unknown as PublicContentDatabase;
+
+    const uiQuery = normalizePublicContentAdminQuery({}, "EVENT");
+    const result = await listPublicContentAdmin(
+      database, actor, toPublicContentAdminTransportQuery(uiQuery), now,
+    );
+
+    expect(result).toMatchObject({
+      ok: true,
+      data: {items: [{id: "event-1", primaryText: "Wisuda 2026", visibility: "PUBLIC"}]},
+    });
+  });
+
+  it("skips a row with contract-inconsistent workflow data instead of failing the whole list", async () => {
+    const good = {
+      id: "event-good", slug: "wisuda-2026",
+      startAt: new Date("2026-09-01T02:00:00.000Z"), endAt: null, isPublished: true, version: 1,
+      governanceStatus: "CURRENT", contentOwnerId: "admin-1",
+      lastReviewedAt: null, reviewDueAt: null, expiresAt: null,
+      translations: [{...workflow, title: "Wisuda 2026", description: null, location: null}],
+    };
+    const broken = {
+      ...good, id: "event-broken", slug: "seminar-2026",
+      // PUBLISHED translation with no reviewer metadata — violates CmsTranslationWorkflowSchema.
+      translations: [{
+        locale: "id" as const, status: "PUBLISHED" as const, sourceVersion: 1,
+        translatorId: null, reviewerId: null, reviewedAt: null,
+        title: "Seminar 2026", description: null, location: null,
+      }],
+    };
+    const database = {
+      event: {
+        findMany: vi.fn().mockResolvedValue([broken, good]),
+        count: vi.fn().mockResolvedValue(2),
+      },
+      $transaction: vi.fn(async (operations: Array<Promise<unknown>>) => Promise.all(operations)),
+    } as unknown as PublicContentDatabase;
+
+    const result = await listPublicContentAdmin(database, actor, {
+      resource: "EVENT", page: 1, pageSize: 20, search: "", direction: "ASC",
+      visibility: "ALL", translationStatus: null, category: null, year: null,
+    }, now);
+
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.data.items.map((item) => item.id)).toEqual(["event-good"]);
   });
 
   it("reconstructs a strict Service editor input without leaking technical fields", async () => {
