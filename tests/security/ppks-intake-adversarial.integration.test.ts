@@ -144,13 +144,77 @@ suite("PPKS intake adversarial PostgreSQL boundary", () => {
     }
   });
 
-  /* The reporter holds a valid token, but the general tracking endpoint must not
-     become a side channel into PPKS content. */
-  it("refuses the general public tracking endpoint even with the right token", async () => {
+  /* `getPublicTicket` returns decrypted-by-nobody content columns, so it must
+     stay closed to PPKS. Status tracking is a different, contentless view. */
+  it("refuses the content-bearing public endpoint even with the right token", async () => {
     expect(await getPublicTicket(prisma, ppksNumber, ppksToken, TRACKING_SECRET))
       .toEqual({ok: false, code: "NOT_FOUND"});
-    expect(await boundary.tracking({ticketNumber: ppksNumber, token: ppksToken}))
+  });
+
+  /* docs/14 B and D2: an anonymous reporter has no email, so the token is the
+     only way to learn the report is being handled. */
+  it("lets the reporter follow the status with their token", async () => {
+    const tracked = await boundary.tracking({ticketNumber: ppksNumber, token: ppksToken});
+    expect(tracked.ok).toBe(true);
+    if (!tracked.ok) return;
+    expect(tracked.data.ticketNumber).toBe(ppksNumber);
+    expect(tracked.data.status).toBe("BARU");
+    expect(tracked.data.priority).toBe("TINGGI");
+  });
+
+  it("exposes no content, identity, or attachment through tracking", async () => {
+    const tracked = await boundary.tracking({ticketNumber: ppksNumber, token: ppksToken});
+    expect(tracked.ok).toBe(true);
+    if (!tracked.ok) return;
+    const serialised = JSON.stringify(tracked.data);
+    expect(serialised).not.toContain(DESCRIPTION);
+    expect(serialised).not.toContain(IDENTITY);
+    expect(Object.keys(tracked.data).sort())
+      .toEqual(["priority", "status", "ticketNumber", "updatedAt"]);
+  });
+
+  it("refuses tracking with a wrong token", async () => {
+    expect(await boundary.tracking({ticketNumber: ppksNumber, token: "x".repeat(43)}))
       .toMatchObject({ok: false, code: "NOT_FOUND"});
+  });
+
+  /* docs/14 D2: an immediate safety threat does not wait for triage. */
+  it("escalates a report flagged as an immediate danger to URGENT", async () => {
+    const result = await submitPpksReport(
+      prisma,
+      {description: "Ancaman sedang berlangsung dan pelapor merasa tidak aman.", immediateDanger: true},
+      "198.51.100.21", IP_SECRET, TRACKING_SECRET, sealingKey,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    ticketNumbers.push(result.data.ticketNumber);
+    const row = await prisma.ticket.findUniqueOrThrow({
+      where: {ticketNumber: result.data.ticketNumber}, select: {priority: true},
+    });
+    expect(row.priority).toBe("URGENT");
+  });
+
+  /* docs/14 D2: reporting as a witness must be possible, and who reported is
+     itself sensitive, so it lives inside the encrypted envelope. */
+  it("accepts a witness report and keeps that fact encrypted", async () => {
+    const result = await submitPpksReport(
+      prisma,
+      {description: "Melaporkan kejadian yang saya saksikan di koridor kampus.", reporterRole: "SAKSI"},
+      "198.51.100.22", IP_SECRET, TRACKING_SECRET, sealingKey,
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    ticketNumbers.push(result.data.ticketNumber);
+    const row = await prisma.ticket.findUniqueOrThrow({
+      where: {ticketNumber: result.data.ticketNumber},
+      select: {id: true, reporterIdentityCiphertext: true},
+    });
+    expect(row.reporterIdentityCiphertext).not.toBeNull();
+    expect(JSON.stringify(row)).not.toContain("Saksi");
+
+    const detail = await boundary.detail({sessionToken: satgasSession}, {id: row.id});
+    expect(detail.ok).toBe(true);
+    if (detail.ok) expect(detail.data.reporterIdentity).toContain("Saksi");
   });
 
   it("still refuses a PPKS category through the general intake", async () => {

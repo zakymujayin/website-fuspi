@@ -31,7 +31,11 @@ export type ComplaintTrackLabels = {
   sendReply: string;
   sendingReply: string;
   statuses: Record<string, string>;
+  priorities: Record<string, string>;
   categories: Record<string, string>;
+  confidentialTitle: string;
+  confidentialBody: string;
+  priorityLabel: string;
   errorCodes: Record<string, string>;
 };
 
@@ -138,6 +142,35 @@ export function ComplaintTrackForm({
           {pending ? labels.tracking : labels.track}
         </button>
       </form>
+
+      {state.status === "status-only" ? (
+        <section aria-live="polite" className="mt-10 rounded-xl border border-slate-200 bg-white p-6">
+          <div className="flex flex-wrap items-baseline justify-between gap-3">
+            <h2 className="font-display text-lg font-semibold text-slate-900">{labels.confidentialTitle}</h2>
+            <span className="rounded-full bg-royal-50 px-3 py-1 text-xs font-medium text-royal-700">
+              {labels.statuses[state.ticket.status] ?? state.ticket.status}
+            </span>
+          </div>
+          <p dir="ltr" className="mt-1 font-mono text-sm text-slate-500">{state.ticket.ticketNumber}</p>
+          <dl className="mt-5 space-y-3 text-sm">
+            <div>
+              <dt className="text-xs text-slate-400 uppercase">{labels.priorityLabel}</dt>
+              <dd className="text-slate-700">
+                {labels.priorities[state.ticket.priority] ?? state.ticket.priority}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs text-slate-400 uppercase">{labels.updatedLabel}</dt>
+              <dd className="text-slate-700">{formatDate(state.ticket.updatedAt)}</dd>
+            </div>
+          </dl>
+          {/* No content is shown here by design, so the reader is told why
+              rather than left thinking the page is broken. */}
+          <p className="mt-5 border-t border-slate-100 pt-4 text-sm text-slate-600">
+            {labels.confidentialBody}
+          </p>
+        </section>
+      ) : null}
 
       {state.status === "found" ? (
         <section aria-live="polite" className="mt-10 rounded-xl border border-slate-200 bg-white p-6">

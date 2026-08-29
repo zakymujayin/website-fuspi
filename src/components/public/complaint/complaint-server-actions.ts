@@ -2,8 +2,10 @@
 
 import {headers} from "next/headers";
 
+import {createTicketQueryBoundary} from "@/features/tickets/query-isolation";
 import {addPublicReply, getPublicTicket, submitPublicTicket} from "@/features/tickets/workflow";
 import {getPrismaClient} from "@/lib/db/client";
+import {createPpksKeyResolver} from "@/lib/tickets/ppks-encryption";
 
 /* Mirrors the public ticket route: the same secrets and the same client-address
    derivation, so the rate limit counts a submitter identically whichever entry
@@ -39,9 +41,21 @@ export type TrackedTicket = {
   updatedAt: string;
 };
 
+/* A PPKS report resolves to this reduced shape. docs/14 D1 keeps its content
+   away from every public surface, but B and D2 still entitle an anonymous
+   reporter to know their report is moving. Status, priority, and a timestamp
+   are all that cross. */
+export type TrackedStatusOnly = {
+  ticketNumber: string;
+  status: string;
+  priority: string;
+  updatedAt: string;
+};
+
 export type TrackState =
   | {status: "idle"}
   | {status: "found"; ticket: TrackedTicket; token: string}
+  | {status: "status-only"; ticket: TrackedStatusOnly}
   | {status: "error"; code: ComplaintFailureCode};
 
 function text(form: FormData, key: string): string {
@@ -111,6 +125,39 @@ function serialise(data: {
  * missing from the view the reader was looking at, which reads as a failure and
  * invites them to send it twice.
  */
+/* Tracking never decrypts, so an absent key must not deny a reporter their
+   status. The resolver is supplied when configured and left inert otherwise. */
+function ppksResolver() {
+  try {
+    return createPpksKeyResolver();
+  } catch {
+    return () => undefined;
+  }
+}
+
+async function trackStatusOnly(
+  ticketNumber: string,
+  token: string,
+): Promise<TrackedStatusOnly | null> {
+  try {
+    const boundary = createTicketQueryBoundary({
+      database: getPrismaClient(),
+      resolveKey: ppksResolver(),
+      trackingHmacSecret: TRACKING_HMAC_SECRET,
+    });
+    const tracked = await boundary.tracking({ticketNumber, token});
+    if (!tracked.ok) return null;
+    return {
+      ticketNumber: tracked.data.ticketNumber,
+      status: tracked.data.status,
+      priority: tracked.data.priority,
+      updatedAt: tracked.data.updatedAt.toISOString(),
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function trackComplaintAction(
   _prevState: TrackState,
   form: FormData,
@@ -123,6 +170,14 @@ export async function trackComplaintAction(
     ? await addPublicReply(prisma, ticketNumber, token, text(form, "body"), TRACKING_HMAC_SECRET)
     : await getPublicTicket(prisma, ticketNumber, token, TRACKING_HMAC_SECRET);
 
-  if (!result.ok) return {status: "error", code: failureCode(result.code)};
-  return {status: "found", ticket: serialise(result.data), token};
+  if (result.ok) return {status: "found", ticket: serialise(result.data), token};
+
+  /* The content view refuses PPKS by category, so a genuine PPKS reporter lands
+     here holding a valid token. Fall through to the contentless status view
+     before deciding the lookup failed. */
+  if (result.code === "NOT_FOUND") {
+    const tracked = await trackStatusOnly(ticketNumber, token);
+    if (tracked) return {status: "status-only", ticket: tracked};
+  }
+  return {status: "error", code: failureCode(result.code)};
 }

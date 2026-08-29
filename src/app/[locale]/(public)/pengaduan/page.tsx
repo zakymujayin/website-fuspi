@@ -1,4 +1,4 @@
-import {MessageSquare, Search} from "lucide-react";
+import {MessageSquare, Search, ShieldAlert} from "lucide-react";
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
@@ -15,6 +15,7 @@ export default async function PengaduanPage({params}: {params: Promise<{locale: 
   await params;
   setRequestLocale("id");
   const t = await getTranslations("Pages");
+  const tPpks = await getTranslations("Ppks");
 
   return (
     <Container className="py-12 md:py-20">
@@ -41,6 +42,22 @@ export default async function PengaduanPage({params}: {params: Promise<{locale: 
           </div>
         </Link>
       </div>
+
+      {/* Separated from the two cards above on purpose: this is a different
+          channel with different confidentiality rules, not another complaint
+          type sitting in the same queue. */}
+      <Link
+        href="/pengaduan/ppks"
+        className="group mt-6 flex flex-col gap-4 rounded-xl border-2 border-royal-200 bg-royal-50 p-6 transition-colors hover:border-royal-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-600"
+      >
+        <span className="flex size-10 items-center justify-center rounded-lg bg-white text-royal-600">
+          <ShieldAlert data-icon aria-hidden className="size-5" strokeWidth={1.5} />
+        </span>
+        <div>
+          <h2 className="font-display text-[15px] font-semibold text-slate-900">{tPpks("title")}</h2>
+          <p className="mt-1.5 text-sm text-slate-600">{tPpks("description")}</p>
+        </div>
+      </Link>
     </Container>
   );
 }

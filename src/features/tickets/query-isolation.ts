@@ -616,11 +616,13 @@ export function createTicketQueryBoundary(options: Readonly<{
     }
 
     try {
+      /* Every category is reachable here, PPKS included. `docs/14` B and D2
+         allow a report to be filed anonymously, which makes the tracking token
+         the reporter's only way to learn what is happening to it. The projection
+         below carries no content, identity, or attachment: status, priority and
+         a timestamp only, all gated on a token bound to this one ticket. */
       const row = await database.ticket.findFirst({
-        where: {
-          ticketNumber: query.data.ticketNumber,
-          category: GENERAL_CATEGORY_FILTER,
-        },
+        where: {ticketNumber: query.data.ticketNumber},
         select: {
           ticketNumber: true,
           trackingTokenHash: true,

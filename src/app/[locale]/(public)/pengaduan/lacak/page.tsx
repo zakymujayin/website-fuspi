@@ -9,6 +9,7 @@ import type {AppLocale} from "@/i18n/routing";
 
 const STATUSES = ["BARU", "DIVERIFIKASI", "DIPROSES", "MENUNGGU_PELAPOR", "SELESAI", "DITOLAK"] as const;
 const CATEGORIES = ["AKADEMIK", "KEMAHASISWAAN", "SARANA", "LAINNYA"] as const;
+const PRIORITIES = ["RENDAH", "SEDANG", "TINGGI", "URGENT"] as const;
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
@@ -45,6 +46,12 @@ export default async function ComplaintTrackPage({params}: {params: Promise<{loc
     statuses: Object.fromEntries(
       STATUSES.map((value) => [value, t(`status${value}` as "statusBARU")]),
     ),
+    priorities: Object.fromEntries(
+      PRIORITIES.map((value) => [value, t(`priority${value}` as "priorityRENDAH")]),
+    ),
+    priorityLabel: t("labelPriority"),
+    confidentialTitle: t("confidentialTitle"),
+    confidentialBody: t("confidentialBody"),
     categories: Object.fromEntries(
       CATEGORIES.map((value) => [value, t(`category${value}` as "categoryAKADEMIK")]),
     ),

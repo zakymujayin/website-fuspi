@@ -43,7 +43,21 @@ const PpksReportInputSchema = z.object({
   subject: z.string().trim().min(2).max(500).nullable().optional(),
   description: z.string().trim().min(10).max(100_000),
   reporterIdentity: z.string().trim().min(1).max(2_000).nullable().optional(),
+  /* `docs/14` D2: a report may come from a witness or a third party, not only
+     from the person harmed. The distinction is stored with the identity text so
+     it stays inside the encrypted envelope rather than becoming queryable
+     metadata about who reported what. */
+  reporterRole: z.enum(["KORBAN", "SAKSI", "PIHAK_KETIGA"]).nullable().optional(),
+  /* `docs/14` D2: an immediate safety threat escalates to URGENT automatically,
+     without waiting for triage. */
+  immediateDanger: z.boolean().optional(),
 }).strict();
+
+const PPKS_REPORTER_ROLE_LABEL = {
+  KORBAN: "Korban langsung",
+  SAKSI: "Saksi",
+  PIHAK_KETIGA: "Pihak ketiga",
+} as const;
 
 const PublicReplyInputSchema = z.object({
   ticketNumber: z.string().regex(TICKET_NUMBER_PATTERN),
@@ -420,8 +434,12 @@ export async function submitPpksReport(
     descriptionCiphertext = sealPpksTicketField(
       parsed.data.description, ticketId, "description", sealingKey,
     );
-    reporterIdentityCiphertext = parsed.data.reporterIdentity
-      ? sealPpksTicketField(parsed.data.reporterIdentity, ticketId, "reporterIdentity", sealingKey)
+    const identityParts = [
+      parsed.data.reporterRole ? PPKS_REPORTER_ROLE_LABEL[parsed.data.reporterRole] : null,
+      parsed.data.reporterIdentity,
+    ].filter((part): part is string => Boolean(part));
+    reporterIdentityCiphertext = identityParts.length > 0
+      ? sealPpksTicketField(identityParts.join("\n"), ticketId, "reporterIdentity", sealingKey)
       : null;
   } catch {
     /* Never surface why sealing failed: the reason is configuration, and the
@@ -443,9 +461,9 @@ export async function submitPpksReport(
           ticketNumber,
           trackingTokenHash,
           category: PPKS_CATEGORY,
-          /* A report of sexual violence does not wait in the ordinary queue.
-             Satgas can lower it after triage. */
-          priority: "TINGGI",
+          /* `docs/14` A: PPKS is at least TINGGI, and an immediate safety
+             threat goes straight to URGENT. Satgas may adjust after triage. */
+          priority: parsed.data.immediateDanger ? "URGENT" : "TINGGI",
           subjectCiphertext,
           descriptionCiphertext,
           reporterIdentityCiphertext,
