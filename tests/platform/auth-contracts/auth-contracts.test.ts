@@ -13,11 +13,13 @@ import {
 import {
   AUTH_ACTIONS,
   AUTH_RESOURCES,
+  canAccessAdminShell,
   getPermissionRule,
   PERMISSION_MATRIX,
 } from "@/lib/auth/permission-matrix";
+import {authorize} from "@/lib/auth/runtime/authorization";
 
-const ROLES = ["ADMIN", "EDITOR", "PETUGAS", "SATGAS_PPKS"] as const;
+const ROLES = ["ADMIN", "EDITOR", "PETUGAS", "SATGAS_PPKS", "DOSEN"] as const;
 
 describe("authentication contracts", () => {
   it("normalizes credentials without exposing account state", () => {
@@ -173,8 +175,56 @@ describe("permission matrix", () => {
     }
   });
 
+  it("limits DOSEN to its own lecturer profile", () => {
+    for (const action of ["VIEW", "UPDATE"] as const) {
+      expect(getPermissionRule("DOSEN", action, "LECTURER_PROFILE")).toMatchObject({
+        allowed: true,
+        ownership: "OWN",
+      });
+    }
+    expect(getPermissionRule("DOSEN", "DELETE", "LECTURER_PROFILE").allowed).toBe(false);
+  });
+
+  it("denies DOSEN every CMS, user-management, booking and ticket capability", () => {
+    for (const resource of ["POST", "CMS", "BOOKING", "TICKET", "PPKS_AGGREGATE", "PPKS_TICKET", "PPKS_ACCESS_LOG", "AUDIT_LOG"] as const) {
+      for (const action of AUTH_ACTIONS) {
+        expect(getPermissionRule("DOSEN", action, resource).allowed).toBe(false);
+      }
+    }
+    for (const action of AUTH_ACTIONS) {
+      if (action === "CHANGE_PASSWORD") continue;
+      expect(getPermissionRule("DOSEN", action, "USER").allowed).toBe(false);
+    }
+  });
+
+  it("stops one DOSEN from editing another lecturer's profile", () => {
+    const dosen = {
+      userId: "dosen-a",
+      role: "DOSEN" as const,
+      isActive: true as const,
+      mustChangePassword: false,
+      expiresAt: new Date("2026-12-31T00:00:00.000Z"),
+    };
+    expect(
+      authorize({actor: dosen, resourceOwnerId: "dosen-a"}, "UPDATE", "LECTURER_PROFILE").allowed,
+    ).toBe(true);
+    expect(
+      authorize({actor: dosen, resourceOwnerId: "dosen-b"}, "UPDATE", "LECTURER_PROFILE").allowed,
+    ).toBe(false);
+    expect(
+      authorize({actor: dosen, resourceOwnerId: null}, "UPDATE", "LECTURER_PROFILE").allowed,
+    ).toBe(false);
+  });
+
+  it("denies no role except DOSEN the admin shell", () => {
+    for (const role of ["ADMIN", "EDITOR", "PETUGAS", "SATGAS_PPKS"] as const) {
+      expect(canAccessAdminShell(role)).toBe(true);
+    }
+    expect(canAccessAdminShell("DOSEN")).toBe(false);
+  });
+
   it("denies role changes to every non-ADMIN role", () => {
-    for (const role of ["EDITOR", "PETUGAS", "SATGAS_PPKS"] as const) {
+    for (const role of ["EDITOR", "PETUGAS", "SATGAS_PPKS", "DOSEN"] as const) {
       expect(getPermissionRule(role, "CHANGE_ROLE", "USER")).toMatchObject({
         allowed: false,
         ownership: "NONE",

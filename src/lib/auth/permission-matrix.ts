@@ -7,7 +7,7 @@ export const AUTH_ACTIONS = [
 
 export const AUTH_RESOURCES = [
   "POST", "MEDIA", "CMS", "USER", "BOOKING", "TICKET", "PPKS_AGGREGATE",
-  "PPKS_TICKET", "PPKS_ACCESS_LOG", "AUDIT_LOG",
+  "PPKS_TICKET", "PPKS_ACCESS_LOG", "AUDIT_LOG", "LECTURER_PROFILE",
 ] as const;
 
 export type AuthAction = (typeof AUTH_ACTIONS)[number];
@@ -33,7 +33,7 @@ type PermissionMatrix = Readonly<Record<
   Readonly<Record<AuthResource, Readonly<Record<AuthAction, PermissionRule>>>>
 >>;
 
-const ROLES: readonly AuthRole[] = ["ADMIN", "EDITOR", "PETUGAS", "SATGAS_PPKS"];
+const ROLES: readonly AuthRole[] = ["ADMIN", "EDITOR", "PETUGAS", "SATGAS_PPKS", "DOSEN"];
 const DENY: PermissionRule = Object.freeze({
   allowed: false,
   ownership: "NONE",
@@ -98,6 +98,12 @@ function buildPermissionMatrix(): MutablePermissionMatrix {
   });
   grant(matrix, "SATGAS_PPKS", "USER", ["CHANGE_PASSWORD"], own);
 
+  /* DOSEN edits only its own lecturer record. Every other resource stays denied
+     by default, including the CMS, other people's profiles, and all tickets. */
+  grant(matrix, "DOSEN", "LECTURER_PROFILE", ["VIEW", "UPDATE"], own);
+  grant(matrix, "DOSEN", "MEDIA", ["VIEW", "CREATE"], own);
+  grant(matrix, "DOSEN", "USER", ["CHANGE_PASSWORD"], own);
+
   return matrix;
 }
 
@@ -112,6 +118,14 @@ function freezePermissionMatrix(matrix: MutablePermissionMatrix): PermissionMatr
 }
 
 export const PERMISSION_MATRIX = freezePermissionMatrix(buildPermissionMatrix());
+
+/* Roles allowed into the /admin CMS shell. DOSEN is excluded: it signs in through
+   the same login page but belongs in its own profile area, not the CMS. */
+const ADMIN_SHELL_ROLES: readonly AuthRole[] = ["ADMIN", "EDITOR", "PETUGAS", "SATGAS_PPKS"];
+
+export function canAccessAdminShell(role: AuthRole): boolean {
+  return ADMIN_SHELL_ROLES.includes(role);
+}
 
 export function getPermissionRule(
   role: AuthRole,

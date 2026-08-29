@@ -18,6 +18,7 @@ import {
   QuoteIcon,
   SlidersHorizontalIcon,
   TrophyIcon,
+  UserPlusIcon,
   UsersIcon,
   VideoIcon,
 } from "lucide-react";
@@ -95,6 +96,11 @@ export const SIDEBAR_MENU_GROUPS = [
       },
       { href: "/admin/prestasi", icon: TrophyIcon, labelKey: "achievements" },
       { href: "/admin/kegiatan", icon: UsersIcon, labelKey: "activities" },
+      {
+        href: "/admin/impor-dosen",
+        icon: UserPlusIcon,
+        labelKey: "lecturerImport",
+      },
     ],
   },
   {

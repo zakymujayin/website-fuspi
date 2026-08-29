@@ -11,7 +11,7 @@ import {
   registerFailedLoginAttempt,
 } from "@/lib/auth/runtime/rate-limit";
 import type {createPrismaClient} from "@/lib/db/client";
-import {normalizeAuthRedirect} from "@/lib/auth/runtime/redirect";
+import {resolvePostLoginDestination} from "@/lib/auth/runtime/redirect";
 
 type PrismaClient = ReturnType<typeof createPrismaClient>;
 type CredentialUser = Readonly<{
@@ -54,10 +54,7 @@ export async function authenticateCredentials(
   const parsed = LoginCredentialsSchema.safeParse(options.rawCredentials);
   if (!parsed.success) return {ok: false, code: "INVALID_CREDENTIALS"};
 
-  const redirectTo = normalizeAuthRedirect(
-    options.redirectTo,
-    options.locale ?? "id",
-  );
+  const locale = options.locale ?? "id";
   const now = options.now ?? new Date();
 
   try {
@@ -82,6 +79,7 @@ export async function authenticateCredentials(
         passwordHash: true,
         isActive: true,
         mustChangePassword: true,
+        role: true,
       },
     });
     const comparison = selectCredentialComparison(user);
@@ -106,7 +104,7 @@ export async function authenticateCredentials(
     await options.issueSession(user.id);
     return {
       ok: true,
-      redirectTo,
+      redirectTo: resolvePostLoginDestination(user.role, options.redirectTo, locale),
       requiresPasswordChange: user.mustChangePassword,
     };
   } catch {

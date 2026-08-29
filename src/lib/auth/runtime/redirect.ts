@@ -62,6 +62,26 @@ export function normalizeAuthRedirect(
   return SafeInternalPathSchema.safeParse(normalized).success ? normalized : fallback;
 }
 
+/**
+ * Where a role belongs after signing in. Everyone shares one login page, so the
+ * split happens here rather than in a second sign-in screen. This wraps
+ * `normalizeAuthRedirect` instead of altering it: the open-redirect guard keeps
+ * deciding what is safe, and this only re-points a destination the role may not
+ * use. A DOSEN aimed at the CMS lands in the lecturer portal instead.
+ */
+export function resolvePostLoginDestination(
+  role: unknown,
+  candidate: unknown,
+  locale: AppLocale,
+): string {
+  const destination = normalizeAuthRedirect(candidate, locale);
+  if (role !== "DOSEN") return destination;
+  const adminRoot = `/${locale}/admin`;
+  return destination === adminRoot || destination.startsWith(`${adminRoot}/`)
+    ? `/${locale}/portal-dosen`
+    : destination;
+}
+
 export function createPostPasswordLoginRedirect(
   locale: AppLocale,
   destination: unknown,

@@ -181,6 +181,169 @@ async function upsertPlaceholderMedia(
   });
 }
 
+/* Demo lecturers. Identities are fictional on purpose: the directory carries
+   education history and publications, and attaching invented credentials to a
+   real person would fabricate an academic record. */
+const LECTURERS = [
+  {
+    slug: "halimah-nur-azizah",
+    name: "Dr. Halimah Nur Azizah, M.Ag.",
+    nidn: "2014058701",
+    program: "IAT",
+    position: "Dosen Ilmu Al-Qur'an dan Tafsir",
+    expertise: "Tafsir tematik, studi mushaf Nusantara",
+    quote: "خَيْرُ النَّاسِ أَنْفَعُهُمْ لِلنَّاسِ",
+    officeLocation: "Gedung FUSPI Lt. 2, Ruang Dosen IAT",
+    officeHours: "Selasa dan Kamis, 09.00-12.00 WIB",
+    bio: "<p>Menekuni kajian tafsir tematik dengan perhatian khusus pada tradisi penyalinan mushaf di Nusantara. Aktif membimbing penelitian mahasiswa tentang resepsi Al-Qur'an dalam praktik keagamaan masyarakat Banten.</p>",
+    educations: [
+      { degree: "Dr.", field: "Ilmu Al-Qur'an dan Tafsir", institution: "UIN Sunan Kalijaga", city: "Yogyakarta", year: 2019 },
+      { degree: "M.Ag.", field: "Tafsir Hadis", institution: "UIN Sunan Ampel", city: "Surabaya", year: 2012 },
+      { degree: "S.Ag.", field: "Tafsir Hadis", institution: "UIN Sunan Ampel", city: "Surabaya", year: 2009 },
+    ],
+    publications: [
+      { title: "Resepsi Estetis Surah Ar-Rahman dalam Tradisi Pesantren Banten", type: "JURNAL" as const, year: 2024, publisher: "Jurnal Studi Al-Qur'an" },
+      { title: "Metodologi Tafsir Maqasidi: Pembacaan atas Ayat-ayat Sosial", type: "JURNAL" as const, year: 2022, publisher: "Ulumuna" },
+      { title: "Mushaf Nusantara: Jejak Lokalitas dalam Penyalinan Al-Qur'an", type: "BUKU" as const, year: 2021, publisher: "Pustaka Pelajar" },
+    ],
+  },
+  {
+    slug: "ahmad-syauqi-ramadhan",
+    name: "Ahmad Syauqi Ramadhan, M.Th.I.",
+    nidn: "2027119002",
+    program: "IAT",
+    position: "Dosen Ulumul Qur'an",
+    expertise: "Ulumul Qur'an, qiraat",
+    officeLocation: "Gedung FUSPI Lt. 2, Ruang Dosen IAT",
+    officeHours: "Rabu, 13.00-15.00 WIB",
+    bio: "<p>Mengampu mata kuliah Ulumul Qur'an dan ilmu qiraat. Penelitiannya berfokus pada transmisi bacaan Al-Qur'an di lembaga tahfiz.</p>",
+    educations: [
+      { degree: "M.Th.I.", field: "Ilmu Al-Qur'an dan Tafsir", institution: "UIN Syarif Hidayatullah", city: "Jakarta", year: 2018 },
+      { degree: "S.Th.I.", field: "Ilmu Al-Qur'an dan Tafsir", institution: "UIN Syarif Hidayatullah", city: "Jakarta", year: 2015 },
+    ],
+    publications: [
+      { title: "Transmisi Qiraat Sab'ah di Lembaga Tahfiz Banten", type: "JURNAL" as const, year: 2023, publisher: "Jurnal Ilmu Al-Qur'an" },
+      { title: "Pengantar Ulumul Qur'an untuk Mahasiswa", type: "BUKU" as const, year: 2020, publisher: "Rajawali Pers" },
+    ],
+  },
+  {
+    slug: "muhammad-faiz-abdullah",
+    name: "Dr. Muhammad Faiz Abdullah, Lc., M.A.",
+    nidn: "2003077503",
+    program: "IH",
+    position: "Dosen Ulumul Hadis",
+    expertise: "Kritik sanad, hadis dan isu kontemporer",
+    quote: "مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا سَهَّلَ اللَّهُ لَهُ طَرِيقًا إِلَى الْجَنَّةِ",
+    officeLocation: "Gedung FUSPI Lt. 3, Ruang Dosen IH",
+    officeHours: "Senin dan Rabu, 10.00-12.00 WIB",
+    bio: "<p>Mendalami kritik sanad dan matan hadis serta penerapannya pada persoalan kontemporer. Menyelesaikan studi sarjana di Kairo sebelum melanjutkan program magister dan doktor di Jakarta.</p>",
+    educations: [
+      { degree: "Dr.", field: "Ilmu Hadis", institution: "UIN Syarif Hidayatullah", city: "Jakarta", year: 2016 },
+      { degree: "M.A.", field: "Tafsir Hadis", institution: "UIN Syarif Hidayatullah", city: "Jakarta", year: 2008 },
+      { degree: "Lc.", field: "Ushuluddin", institution: "Universitas Al-Azhar", city: "Kairo", year: 2003 },
+    ],
+    publications: [
+      { title: "Kritik Matan Hadis dalam Wacana Fikih Kontemporer", type: "JURNAL" as const, year: 2024, publisher: "Al-Qalam" },
+      { title: "Hadis dan Otoritas Keilmuan di Pesantren", type: "BAB_BUKU" as const, year: 2021, publisher: "LKiS" },
+      { title: "Standar Kesahihan Hadis: Tinjauan Metodologis", type: "PROSIDING" as const, year: 2019, publisher: "Annual Conference on Islamic Studies" },
+    ],
+  },
+  {
+    slug: "zulfa-kamila",
+    name: "Zulfa Kamila, M.Hum.",
+    nidn: "2019098804",
+    program: "IH",
+    position: "Dosen Sejarah Hadis",
+    expertise: "Historiografi hadis, manuskrip keislaman",
+    officeLocation: "Gedung FUSPI Lt. 3, Ruang Dosen IH",
+    officeHours: "Kamis, 09.00-11.00 WIB",
+    bio: "<p>Meneliti historiografi periwayatan hadis dan koleksi manuskrip keislaman di wilayah Banten.</p>",
+    educations: [
+      { degree: "M.Hum.", field: "Sejarah Peradaban Islam", institution: "Universitas Indonesia", city: "Depok", year: 2017 },
+      { degree: "S.Hum.", field: "Sejarah Kebudayaan Islam", institution: "UIN Sunan Kalijaga", city: "Yogyakarta", year: 2013 },
+    ],
+    publications: [
+      { title: "Manuskrip Hadis di Banten: Inventarisasi Awal", type: "JURNAL" as const, year: 2023, publisher: "Manuskripta" },
+      { title: "Perempuan Periwayat dalam Sejarah Hadis", type: "ARTIKEL" as const, year: 2022, publisher: "Jurnal Perempuan dan Islam" },
+    ],
+  },
+  {
+    slug: "ridwan-maulana-hakim",
+    name: "Dr. Ridwan Maulana Hakim, M.Fil.I.",
+    nidn: "2011068205",
+    program: "AFI",
+    position: "Dosen Filsafat Islam",
+    expertise: "Filsafat Islam klasik, etika",
+    officeLocation: "Gedung FUSPI Lt. 3, Ruang Dosen AFI",
+    officeHours: "Selasa, 13.00-15.00 WIB",
+    bio: "<p>Mengkaji pemikiran filsafat Islam klasik dan relevansinya bagi diskursus etika modern.</p>",
+    educations: [
+      { degree: "Dr.", field: "Filsafat Islam", institution: "UIN Sunan Kalijaga", city: "Yogyakarta", year: 2017 },
+      { degree: "M.Fil.I.", field: "Filsafat Islam", institution: "UIN Sunan Kalijaga", city: "Yogyakarta", year: 2010 },
+      { degree: "S.Fil.I.", field: "Aqidah Filsafat", institution: "UIN Sunan Gunung Djati", city: "Bandung", year: 2007 },
+    ],
+    publications: [
+      { title: "Etika Kebajikan dalam Pemikiran Ibn Miskawaih", type: "JURNAL" as const, year: 2024, publisher: "Jurnal Filsafat" },
+      { title: "Rasionalitas dan Wahyu: Perdebatan Klasik yang Belum Usai", type: "BUKU" as const, year: 2022, publisher: "Mizan" },
+    ],
+  },
+  {
+    slug: "nabila-syarifah",
+    name: "Nabila Syarifah, M.Ag.",
+    nidn: "2025039106",
+    program: "AFI",
+    position: "Dosen Ilmu Kalam",
+    expertise: "Ilmu kalam, pemikiran Islam kontemporer",
+    officeLocation: "Gedung FUSPI Lt. 3, Ruang Dosen AFI",
+    officeHours: "Jumat, 09.00-11.00 WIB",
+    bio: "<p>Fokus pada kajian ilmu kalam dan perkembangan pemikiran Islam kontemporer di Indonesia.</p>",
+    educations: [
+      { degree: "M.Ag.", field: "Aqidah dan Filsafat Islam", institution: "UIN Syarif Hidayatullah", city: "Jakarta", year: 2019 },
+      { degree: "S.Ag.", field: "Aqidah dan Filsafat Islam", institution: "UIN Sultan Maulana Hasanuddin", city: "Serang", year: 2015 },
+    ],
+    publications: [
+      { title: "Kalam Jadid dan Tantangan Pluralisme", type: "JURNAL" as const, year: 2023, publisher: "Refleksi" },
+      { title: "Membaca Ulang Konsep Iman dalam Teologi Asy'ariyah", type: "ARTIKEL" as const, year: 2021, publisher: "Jurnal Theologia" },
+    ],
+  },
+];
+
+
+/* Bookable rooms. dayOfWeek follows getUTCDay(): 0 is Sunday, so 1..5 is the
+   Monday-to-Friday working week in Jakarta. Minutes are counted from midnight. */
+const ROOMS = [
+  {
+    slug: "aula-fuspi",
+    capacity: 200,
+    bufferMinutes: 60,
+    name: "Aula FUSPI",
+    location: "Gedung FUSPI Lt. 1",
+    facilities: "Panggung, tata suara, proyektor, kursi 200",
+    hours: [1, 2, 3, 4, 5].map((dayOfWeek) => ({dayOfWeek, opensAtMinute: 480, closesAtMinute: 1020})),
+  },
+  {
+    slug: "ruang-seminar-2-1",
+    capacity: 60,
+    bufferMinutes: 30,
+    name: "Ruang Seminar 2.1",
+    location: "Gedung FUSPI Lt. 2",
+    facilities: "Proyektor, papan tulis, pendingin ruangan",
+    hours: [
+      ...[1, 2, 3, 4, 5].map((dayOfWeek) => ({dayOfWeek, opensAtMinute: 480, closesAtMinute: 1020})),
+      {dayOfWeek: 6, opensAtMinute: 480, closesAtMinute: 720},
+    ],
+  },
+  {
+    slug: "ruang-diskusi-3-4",
+    capacity: 25,
+    bufferMinutes: 15,
+    name: "Ruang Diskusi 3.4",
+    location: "Gedung FUSPI Lt. 3",
+    facilities: "Meja diskusi, papan tulis",
+    hours: [1, 2, 3, 4, 5].map((dayOfWeek) => ({dayOfWeek, opensAtMinute: 480, closesAtMinute: 960})),
+  },
+];
+
 async function main() {
   const email = process.env.SEED_ADMIN_EMAIL;
   const password = process.env.SEED_ADMIN_PASSWORD;
@@ -530,6 +693,104 @@ async function main() {
         publishedAt: new Date(Date.now() - index * 86_400_000),
         authorId: admin.id, categoryId: pengumumanCategory.id,
         translations: { create: { locale: "id", title: item.id_title, content: item.id_content, status: "PUBLISHED" } },
+      },
+    });
+  }
+
+  const programsByCode = new Map(
+    (await prisma.studyProgram.findMany({ select: { id: true, code: true } })).map((p) => [p.code, p.id]),
+  );
+
+  const lecturerAccount = await prisma.user.upsert({
+    where: { email: "dosen.demo@fuspi.uinbanten.ac.id" },
+    update: { role: "DOSEN" },
+    create: {
+      email: "dosen.demo@fuspi.uinbanten.ac.id",
+      name: LECTURERS[0].name,
+      passwordHash: await bcrypt.hash("WelcomeDosenDemo321@_", 12),
+      role: "DOSEN",
+      mustChangePassword: true,
+    },
+  });
+
+  for (const [index, item] of LECTURERS.entries()) {
+    const translation = {
+      locale: "id" as const,
+      position: item.position,
+      expertise: item.expertise,
+      bio: item.bio,
+      quote: item.quote ?? null,
+      officeHours: item.officeHours,
+      officeLocation: item.officeLocation,
+      status: "PUBLISHED" as const,
+    };
+    const educations = item.educations.map((e, order) => ({ ...e, order }));
+    const publications = item.publications.map((p, order) => ({ ...p, order }));
+
+    await prisma.lecturer.upsert({
+      where: { slug: item.slug },
+      update: {
+        name: item.name,
+        nidn: item.nidn,
+        email: `${item.slug}@fuspi.uinbanten.ac.id`,
+        studyProgramId: programsByCode.get(item.program) ?? null,
+        order: index,
+        isActive: true,
+        userId: index === 0 ? lecturerAccount.id : undefined,
+        translations: { deleteMany: {}, create: [translation] },
+        educations: { deleteMany: {}, create: educations },
+        publications: { deleteMany: {}, create: publications },
+      },
+      create: {
+        slug: item.slug,
+        name: item.name,
+        nidn: item.nidn,
+        email: `${item.slug}@fuspi.uinbanten.ac.id`,
+        studyProgramId: programsByCode.get(item.program) ?? null,
+        order: index,
+        userId: index === 0 ? lecturerAccount.id : undefined,
+        translations: { create: [translation] },
+        educations: { create: educations },
+        publications: { create: publications },
+      },
+    });
+  }
+
+  for (const room of ROOMS) {
+    await prisma.room.upsert({
+      where: {slug: room.slug},
+      update: {
+        capacity: room.capacity,
+        bufferMinutes: room.bufferMinutes,
+        isActive: true,
+        contentOwnerId: admin.id,
+        translations: {
+          deleteMany: {},
+          create: [{
+            locale: "id" as const,
+            name: room.name,
+            location: room.location,
+            facilities: room.facilities,
+            status: "PUBLISHED" as const,
+          }],
+        },
+        operatingHours: {deleteMany: {}, create: room.hours},
+      },
+      create: {
+        slug: room.slug,
+        capacity: room.capacity,
+        bufferMinutes: room.bufferMinutes,
+        contentOwnerId: admin.id,
+        translations: {
+          create: [{
+            locale: "id" as const,
+            name: room.name,
+            location: room.location,
+            facilities: room.facilities,
+            status: "PUBLISHED" as const,
+          }],
+        },
+        operatingHours: {create: room.hours},
       },
     });
   }

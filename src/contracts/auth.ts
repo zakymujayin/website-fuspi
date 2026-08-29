@@ -5,6 +5,7 @@ export const AuthRoleSchema = z.enum([
   "EDITOR",
   "PETUGAS",
   "SATGAS_PPKS",
+  "DOSEN",
 ]);
 
 export const LoginCredentialsSchema = z

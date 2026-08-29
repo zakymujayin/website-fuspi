@@ -5,7 +5,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { signOut } from "@/auth";
 import { AdminLayoutShell } from "@/components/admin/admin-layout-shell";
 import { SkipLink } from "@/components/public/skip-link";
-import { parseAppLocale } from "@/lib/auth/runtime/redirect";
+import { canAccessAdminShell } from "@/lib/auth/permission-matrix";
+import { parseAppLocale, resolvePostLoginDestination } from "@/lib/auth/runtime/redirect";
 import {
   decideProtectedRoute,
   getRequestSession,
@@ -50,6 +51,9 @@ export default async function AdminLayout({
     `/${appLocale}/admin`,
   );
   if (!decision.allow) redirect(decision.redirectTo);
+  if (session.ok && !canAccessAdminShell(session.session.role)) {
+    redirect(resolvePostLoginDestination(session.session.role, null, appLocale));
+  }
 
   const t = await getTranslations({ locale, namespace: "AdminSidebar" });
 
@@ -101,6 +105,7 @@ export default async function AdminLayout({
       agenda: t("items.agenda"),
       testimoni: t("items.testimoni"),
       fasilitas: t("items.fasilitas"),
+      lecturerImport: t("items.lecturerImport"),
       new: t("items.new"),
       baru: t("items.baru"),
       edit: t("items.edit"),
