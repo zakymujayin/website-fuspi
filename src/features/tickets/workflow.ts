@@ -1,4 +1,4 @@
-import {randomUUID, timingSafeEqual} from "node:crypto";
+import {randomUUID} from "node:crypto";
 import {z} from "zod";
 
 import {Sha256ChecksumSchema, StorageClassSchema} from "@/contracts/storage";
@@ -10,7 +10,7 @@ import {
 import {Prisma as PrismaNamespace} from "@/generated/prisma/client";
 import type {Prisma} from "@/generated/prisma/client";
 import type {createPrismaClient} from "@/lib/db/client";
-import {createTrackingTokenDigest, generateTrackingToken} from "@/lib/security/tracking-token";
+import {createTrackingTokenDigest, generateTrackingToken, verifyTrackingTokenDigest} from "@/lib/security/tracking-token";
 import {createHmacDigest} from "@/lib/security/hmac";
 
 export type TicketWorkflowDatabase = ReturnType<typeof createPrismaClient>;
@@ -200,13 +200,15 @@ function validateStaffActor(rawActor: unknown, now: Date):
   return {ok: true, userId: parsed.data.userId, role: parsed.data.role};
 }
 
+/* Delegates to the shared verifier. The local reimplementation reached for
+   `createTrackingTokenDigest`, which parses the token with `.parse` and therefore
+   throws on a well-formed but non-canonical base64url token. That exception was
+   caught upstream and reported as UNAVAILABLE, so a simply wrong tracking code
+   answered "service unavailable" instead of "not found", and the public API
+   returned 503 rather than 404. */
 function verifyTrackingToken(ticketNumber: string, token: string, storedHash: string | undefined, trackingHmacSecret: string): boolean {
   if (!storedHash) return false;
-  const candidate = createTrackingTokenDigest(token, trackingHmacSecret, "TICKET");
-  const candidateBuffer = Buffer.from(candidate, "hex");
-  const storedBuffer = Buffer.from(storedHash, "hex");
-  return candidateBuffer.length === storedBuffer.length
-    && timingSafeEqual(candidateBuffer, storedBuffer);
+  return verifyTrackingTokenDigest(token, storedHash, trackingHmacSecret, "TICKET");
 }
 
 async function nextAnnualTicketNumber(tx: Prisma.TransactionClient, now: Date): Promise<string> {

@@ -12,6 +12,7 @@ import type {createPrismaClient} from "@/lib/db/client";
 import {
   createTrackingTokenDigest,
   generateTrackingToken,
+  verifyTrackingTokenDigest,
 } from "@/lib/security/tracking-token";
 
 
@@ -1056,7 +1057,6 @@ export async function getPublicBooking(
 
   try {
     const secret = getTrackingTokenSecret();
-    const expectedHash = createTrackingTokenDigest(parsed.data.token, secret, "BOOKING");
 
     const booking = await prisma.booking.findUnique({
       where: {bookingNumber: parsed.data.bookingNumber},
@@ -1073,7 +1073,12 @@ export async function getPublicBooking(
       },
     });
 
-    if (!booking || booking.trackingTokenHash !== expectedHash) {
+    /* `verifyTrackingTokenDigest` is used rather than hashing and comparing here:
+       `createTrackingTokenDigest` parses with `.parse`, so a well-formed but
+       non-canonical base64url token threw and surfaced as UNAVAILABLE, answering
+       503 for what is simply a wrong code. The shared verifier also compares in
+       constant time, which a plain `!==` on a secret digest did not. */
+    if (!booking || !verifyTrackingTokenDigest(parsed.data.token, booking.trackingTokenHash, secret, "BOOKING")) {
       return {ok: false as const, code: "NOT_FOUND" as const};
     }
 
