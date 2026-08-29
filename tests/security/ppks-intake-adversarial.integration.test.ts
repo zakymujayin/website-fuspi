@@ -2,8 +2,11 @@ import {randomUUID} from "node:crypto";
 
 import {afterAll, beforeAll, describe, expect, it} from "vitest";
 
+import {PpksTicketDetailSchema} from "@/contracts/ticket";
 import {createTicketQueryBoundary} from "@/features/tickets/query-isolation";
 import {
+  addPublicReply,
+  executePpksCommand,
   getPublicTicket,
   listStaffTickets,
   submitPpksReport,
@@ -81,6 +84,7 @@ suite("PPKS intake adversarial PostgreSQL boundary", () => {
     })).map(({id}) => id);
     if (ids.length) {
       await prisma.ticketAccessLog.deleteMany({where: {ticketId: {in: ids}}});
+      await prisma.ticketReply.deleteMany({where: {ticketId: {in: ids}}});
       await prisma.ticketHistory.deleteMany({where: {ticketId: {in: ids}}});
       await prisma.ticket.deleteMany({where: {id: {in: ids}}});
     }
@@ -253,6 +257,133 @@ suite("PPKS intake adversarial PostgreSQL boundary", () => {
     );
     expect(result).toEqual({ok: false, code: "UNAVAILABLE"});
     expect(await prisma.ticket.count()).toBe(before);
+  });
+
+  describe("Satgas handling actions", () => {
+    const satgas = () => ({
+      userId: userIds[0], role: "SATGAS_PPKS" as const, isActive: true as const,
+      mustChangePassword: false, expiresAt: new Date(Date.now() + 3_600_000),
+    });
+
+    it("refuses every actor that is not SATGAS_PPKS", async () => {
+      for (const role of ["ADMIN", "EDITOR", "PETUGAS", "DOSEN"] as const) {
+        const result = await executePpksCommand(
+          prisma, {...satgas(), role}, {action: "UPDATE_STATUS", ticketId: ppksTicketId, status: "DIPROSES"}, sealingKey,
+        );
+        expect(result).toEqual({ok: false, code: "SESSION_INVALID"});
+      }
+      const row = await prisma.ticket.findUniqueOrThrow({where: {id: ppksTicketId}, select: {status: true}});
+      expect(row.status).toBe("BARU");
+    });
+
+    it("cannot reach a general ticket through the PPKS executor", async () => {
+      const general = await submitPublicTicket(
+        prisma, {category: "SARANA", subject: "Umum", description: "Tiket umum untuk pengujian isolasi."},
+        "198.51.100.30", IP_SECRET, TRACKING_SECRET,
+      );
+      if (!general.ok) throw new Error(general.code);
+      ticketNumbers.push(general.data.ticketNumber);
+      const target = await prisma.ticket.findUniqueOrThrow({
+        where: {ticketNumber: general.data.ticketNumber}, select: {id: true},
+      });
+      const result = await executePpksCommand(
+        prisma, satgas(), {action: "UPDATE_STATUS", ticketId: target.id, status: "SELESAI"}, sealingKey,
+      );
+      expect(result).toEqual({ok: false, code: "NOT_FOUND"});
+    });
+
+    it("requires a reason before a priority may be changed", async () => {
+      const missing = await executePpksCommand(
+        prisma, satgas(), {action: "UPDATE_PRIORITY", ticketId: ppksTicketId, priority: "RENDAH"}, sealingKey,
+      );
+      expect(missing).toEqual({ok: false, code: "REQUEST_INVALID"});
+
+      const given = await executePpksCommand(
+        prisma, satgas(),
+        {action: "UPDATE_PRIORITY", ticketId: ppksTicketId, priority: "SEDANG", reason: "Setelah verifikasi awal."},
+        sealingKey,
+      );
+      expect(given).toEqual({ok: true});
+      const row = await prisma.ticket.findUniqueOrThrow({where: {id: ppksTicketId}, select: {priority: true}});
+      expect(row.priority).toBe("SEDANG");
+    });
+
+    it("seals a reply and records it in the access log", async () => {
+      const before = await prisma.ticketAccessLog.count({where: {ticketId: ppksTicketId, action: "REPLY"}});
+      const result = await executePpksCommand(
+        prisma, satgas(),
+        {action: "REPLY", ticketId: ppksTicketId, body: "BALASANRAHASIA dari Satgas.", isInternal: false},
+        sealingKey,
+      );
+      expect(result).toEqual({ok: true});
+
+      const reply = await prisma.ticketReply.findFirstOrThrow({
+        where: {ticketId: ppksTicketId}, select: {bodyCiphertext: true, isInternal: true},
+      });
+      expect(reply.bodyCiphertext).not.toContain("BALASANRAHASIA");
+      expect(reply.isInternal).toBe(false);
+      expect(await prisma.ticketAccessLog.count({where: {ticketId: ppksTicketId, action: "REPLY"}}))
+        .toBeGreaterThan(before);
+
+      const detail = await boundary.detail({sessionToken: satgasSession}, {id: ppksTicketId});
+      expect(detail.ok).toBe(true);
+      if (!detail.ok) return;
+      const ppks = PpksTicketDetailSchema.parse(detail.data);
+      expect(ppks.replies.map((reply) => reply.body)).toContain("BALASANRAHASIA dari Satgas.");
+    });
+
+    /* docs/14 line 77: an internal note must never be visible to the reporter. */
+    it("keeps an internal note out of every reporter-facing view", async () => {
+      const general = await submitPublicTicket(
+        prisma, {category: "SARANA", subject: "Umum", description: "Tiket umum untuk menguji catatan internal."},
+        "198.51.100.31", IP_SECRET, TRACKING_SECRET,
+      );
+      if (!general.ok) throw new Error(general.code);
+      ticketNumbers.push(general.data.ticketNumber);
+      const target = await prisma.ticket.findUniqueOrThrow({
+        where: {ticketNumber: general.data.ticketNumber}, select: {id: true},
+      });
+      await prisma.ticketReply.create({
+        data: {ticketId: target.id, isInternal: true, bodyCiphertext: "CATATANINTERNAL jangan terlihat."},
+      });
+      await prisma.ticketReply.create({
+        data: {ticketId: target.id, isInternal: false, bodyCiphertext: "Balasan publik biasa."},
+      });
+
+      const viewed = await getPublicTicket(
+        prisma, general.data.ticketNumber, general.data.trackingToken, TRACKING_SECRET,
+      );
+      expect(viewed.ok).toBe(true);
+      if (!viewed.ok) return;
+      const bodies = viewed.data.replies.map((r) => r.body);
+      expect(bodies).toContain("Balasan publik biasa.");
+      expect(JSON.stringify(bodies)).not.toContain("CATATANINTERNAL");
+
+      const replied = await addPublicReply(
+        prisma, general.data.ticketNumber, general.data.trackingToken, "Tambahan dari pelapor.", TRACKING_SECRET,
+      );
+      expect(replied.ok).toBe(true);
+      if (replied.ok) {
+        expect(JSON.stringify(replied.data.replies)).not.toContain("CATATANINTERNAL");
+      }
+    });
+
+    it("seals the resolution when closing", async () => {
+      const result = await executePpksCommand(
+        prisma, satgas(),
+        {action: "CLOSE", ticketId: ppksTicketId, resolution: "RESOLUSIRAHASIA ditangani sesuai prosedur."},
+        sealingKey,
+      );
+      expect(result).toEqual({ok: true});
+      const row = await prisma.ticket.findUniqueOrThrow({
+        where: {id: ppksTicketId}, select: {status: true, resolutionCiphertext: true},
+      });
+      expect(row.status).toBe("SELESAI");
+      expect(row.resolutionCiphertext).not.toContain("RESOLUSIRAHASIA");
+
+      const detail = await boundary.detail({sessionToken: satgasSession}, {id: ppksTicketId});
+      if (detail.ok) expect(PpksTicketDetailSchema.parse(detail.data).resolution).toContain("RESOLUSIRAHASIA");
+    });
   });
 
   it("cannot be opened by a key version that was never issued", async () => {

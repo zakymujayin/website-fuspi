@@ -1561,6 +1561,7 @@ model TicketReply {
   id              String   @id @default(cuid())
   ticketId        String
   authorId        String?
+  isInternal      Boolean  @default(false)
   bodyCiphertext  String   @db.Text
   encryptionNonce String?
   encryptionTag   String?

@@ -12,7 +12,7 @@ import type {Prisma} from "@/generated/prisma/client";
 import type {createPrismaClient} from "@/lib/db/client";
 import {createTrackingTokenDigest, generateTrackingToken, verifyTrackingTokenDigest} from "@/lib/security/tracking-token";
 import {createHmacDigest} from "@/lib/security/hmac";
-import {sealPpksTicketField} from "@/lib/tickets/protected-fields";
+import {sealPpksReplyBody, sealPpksTicketField} from "@/lib/tickets/protected-fields";
 
 export type TicketWorkflowDatabase = ReturnType<typeof createPrismaClient>;
 
@@ -480,6 +480,189 @@ export async function submitPpksReport(
   }
 }
 
+/* A Satgas command is its own union rather than a branch of the staff one: the
+   actor role differs, the target category differs, and the payload is sealed
+   before it is written. Sharing the general executor would mean one path where
+   forgetting a category filter exposes a PPKS ticket to ADMIN. */
+const PpksCommandSchema = z.discriminatedUnion("action", [
+  z.object({
+    action: z.literal("ASSIGN"),
+    ticketId: z.string().min(1).max(191),
+    assigneeId: z.string().min(1).max(191),
+  }).strict(),
+  z.object({
+    action: z.literal("UPDATE_STATUS"),
+    ticketId: z.string().min(1).max(191),
+    status: z.enum(TicketStatus),
+    reason: z.string().trim().max(500).nullable().default(null),
+  }).strict(),
+  z.object({
+    action: z.literal("UPDATE_PRIORITY"),
+    ticketId: z.string().min(1).max(191),
+    priority: z.enum(TicketPriority),
+    /* docs/14 line 77 requires a reason for a priority change, so it is required
+       here rather than nullable: a silent downgrade of a PPKS report is exactly
+       the change that should have to be explained. */
+    reason: z.string().trim().min(1).max(500),
+  }).strict(),
+  z.object({
+    action: z.literal("REPLY"),
+    ticketId: z.string().min(1).max(191),
+    body: z.string().trim().min(1).max(100_000),
+    isInternal: z.boolean(),
+  }).strict(),
+  z.object({
+    action: z.literal("CLOSE"),
+    ticketId: z.string().min(1).max(191),
+    resolution: z.string().trim().min(1).max(100_000),
+  }).strict(),
+]);
+
+function validateSatgasActor(rawActor: unknown, now: Date) {
+  const parsed = z.object({
+    userId: z.string().min(1).max(191),
+    role: z.literal("SATGAS_PPKS"),
+    isActive: z.literal(true),
+    mustChangePassword: z.literal(false),
+    expiresAt: z.date(),
+  }).safeParse(rawActor);
+  return parsed.success && parsed.data.expiresAt > now ? parsed.data : null;
+}
+
+export type PpksCommandResult =
+  | {ok: true}
+  | {ok: false; code: "SESSION_INVALID" | "REQUEST_INVALID" | "NOT_FOUND" | "UNAVAILABLE" | "VALIDATION_FAILED"};
+
+/**
+ * Applies a Satgas handling action to a PPKS report.
+ *
+ * Only SATGAS_PPKS may call it and only PPKS tickets are reachable, so this can
+ * never be used to reach a general ticket or the other way round. Every action
+ * writes both a history event and an access-log row inside the same transaction
+ * as the change, which `docs/14` D1 requires: the log has to record who touched
+ * a report, not only who read one.
+ */
+export async function executePpksCommand(
+  prisma: TicketWorkflowDatabase,
+  rawActor: unknown,
+  rawCommand: unknown,
+  sealingKey: Readonly<{key: Uint8Array; keyVersion: number}>,
+  now = new Date(),
+): Promise<PpksCommandResult> {
+  const actor = validateSatgasActor(rawActor, now);
+  if (!actor) return {ok: false, code: "SESSION_INVALID"};
+  const parsed = PpksCommandSchema.safeParse(rawCommand);
+  if (!parsed.success) return {ok: false, code: "REQUEST_INVALID"};
+  const command = parsed.data;
+
+  /* Sealed before the transaction opens: a key failure must not leave a
+     half-applied change or a plaintext note behind. */
+  let replyId: string | null = null;
+  let replyCiphertext: string | null = null;
+  let resolutionCiphertext: string | null = null;
+  try {
+    if (command.action === "REPLY") {
+      replyId = randomUUID();
+      replyCiphertext = sealPpksReplyBody(command.body, command.ticketId, replyId, sealingKey);
+    }
+    if (command.action === "CLOSE") {
+      resolutionCiphertext = sealPpksTicketField(
+        command.resolution, command.ticketId, "resolution", sealingKey,
+      );
+    }
+  } catch {
+    return {ok: false, code: "UNAVAILABLE"};
+  }
+
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const ticket = await tx.ticket.findFirst({
+        where: {id: command.ticketId, category: PPKS_CATEGORY},
+        select: {id: true, status: true, priority: true},
+      });
+      /* No denied-access row is written for a missing ticket: the log has a
+         foreign key to the ticket, so the insert would fail and abort this
+         transaction, turning a clean NOT_FOUND into UNAVAILABLE. A non-Satgas
+         caller is already refused above, before any query runs. */
+      if (!ticket) return {ok: false as const, code: "NOT_FOUND" as const};
+
+      const audit = (action: "REPLY" | "ASSIGN" | "STATUS_CHANGE") =>
+        tx.ticketAccessLog.create({
+          data: {ticketId: ticket.id, userId: actor.userId, action, allowed: true},
+        });
+
+      switch (command.action) {
+        case "ASSIGN": {
+          await tx.ticket.update({
+            where: {id: ticket.id},
+            data: {assigneeId: command.assigneeId, firstRespondedAt: undefined},
+          });
+          await tx.ticketHistory.create({
+            data: {ticketId: ticket.id, actorId: actor.userId, event: "ASSIGNED", toStatus: ticket.status},
+          });
+          await audit("ASSIGN");
+          return {ok: true as const};
+        }
+        case "UPDATE_STATUS": {
+          await tx.ticket.update({where: {id: ticket.id}, data: {status: command.status}});
+          await tx.ticketHistory.create({
+            data: {
+              ticketId: ticket.id, actorId: actor.userId, event: "STATUS_CHANGED",
+              fromStatus: ticket.status, toStatus: command.status, reason: command.reason,
+            },
+          });
+          await audit("STATUS_CHANGE");
+          return {ok: true as const};
+        }
+        case "UPDATE_PRIORITY": {
+          await tx.ticket.update({where: {id: ticket.id}, data: {priority: command.priority}});
+          await tx.ticketHistory.create({
+            data: {
+              ticketId: ticket.id, actorId: actor.userId, event: "PRIORITY_CHANGED",
+              toStatus: ticket.status, reason: command.reason,
+            },
+          });
+          await audit("STATUS_CHANGE");
+          return {ok: true as const};
+        }
+        case "REPLY": {
+          await tx.ticketReply.create({
+            data: {
+              id: replyId!, ticketId: ticket.id, authorId: actor.userId,
+              isInternal: command.isInternal, bodyCiphertext: replyCiphertext!,
+              keyVersion: sealingKey.keyVersion,
+            },
+          });
+          await tx.ticketHistory.create({
+            data: {ticketId: ticket.id, actorId: actor.userId, event: "REPLIED", toStatus: ticket.status},
+          });
+          await audit("REPLY");
+          return {ok: true as const};
+        }
+        case "CLOSE": {
+          await tx.ticket.update({
+            where: {id: ticket.id},
+            data: {
+              status: "SELESAI", closedAt: now,
+              resolutionCiphertext, keyVersion: sealingKey.keyVersion,
+            },
+          });
+          await tx.ticketHistory.create({
+            data: {
+              ticketId: ticket.id, actorId: actor.userId, event: "CLOSED",
+              fromStatus: ticket.status, toStatus: "SELESAI",
+            },
+          });
+          await audit("STATUS_CHANGE");
+          return {ok: true as const};
+        }
+      }
+    }, {isolationLevel: PrismaNamespace.TransactionIsolationLevel.Serializable});
+  } catch {
+    return {ok: false, code: "UNAVAILABLE"};
+  }
+}
+
 export async function getPublicTicket(
   prisma: TicketWorkflowDatabase,
   ticketNumber: string,
@@ -507,6 +690,9 @@ export async function getPublicTicket(
         createdAt: true,
         updatedAt: true,
         replies: {
+          /* Internal handling notes never reach the reporter. Filtered at the query
+             itself so a later change to the view cannot carry one through. */
+          where: {isInternal: false},
           select: {id: true, bodyCiphertext: true, createdAt: true},
           orderBy: {createdAt: "asc"},
         },
@@ -600,6 +786,9 @@ export async function addPublicReply(
           createdAt: true,
           updatedAt: true,
           replies: {
+            /* Internal handling notes never reach the reporter. Filtered at the query
+               itself so a later change to the view cannot carry one through. */
+            where: {isInternal: false},
             select: {id: true, bodyCiphertext: true, createdAt: true},
             orderBy: {createdAt: "asc"},
           },
