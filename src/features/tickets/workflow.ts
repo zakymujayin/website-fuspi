@@ -12,6 +12,7 @@ import type {Prisma} from "@/generated/prisma/client";
 import type {createPrismaClient} from "@/lib/db/client";
 import {createTrackingTokenDigest, generateTrackingToken, verifyTrackingTokenDigest} from "@/lib/security/tracking-token";
 import {createHmacDigest} from "@/lib/security/hmac";
+import {sealPpksTicketField} from "@/lib/tickets/protected-fields";
 
 export type TicketWorkflowDatabase = ReturnType<typeof createPrismaClient>;
 
@@ -33,6 +34,15 @@ const PublicTicketInputSchema = z.object({
   category: z.enum(NON_PPKS_CATEGORIES),
   subject: z.string().trim().min(2).max(500),
   description: z.string().trim().min(10).max(100_000),
+}).strict();
+
+/* PPKS intake is deliberately separate from `PublicTicketInputSchema`, which
+   excludes the PPKS category. Identity is optional: a reporter must be able to
+   file anonymously, and an empty field is a choice rather than a missing value. */
+const PpksReportInputSchema = z.object({
+  subject: z.string().trim().min(2).max(500).nullable().optional(),
+  description: z.string().trim().min(10).max(100_000),
+  reporterIdentity: z.string().trim().min(1).max(2_000).nullable().optional(),
 }).strict();
 
 const PublicReplyInputSchema = z.object({
@@ -366,6 +376,84 @@ export async function submitPublicTicket(
         },
       });
 
+      await incrementPublicRateLimit(tx, clientIp, ipHmacSecret, now);
+      return {ok: true as const, data: {ticketNumber, trackingToken}};
+    }, {isolationLevel: PrismaNamespace.TransactionIsolationLevel.Serializable});
+  } catch {
+    return failure("UNAVAILABLE");
+  }
+}
+
+/**
+ * Files a PPKS report. Content is sealed field by field before anything touches
+ * the database, so a misconfigured key fails the request instead of storing
+ * plaintext or consuming a ticket number.
+ *
+ * The row is written with the PPKS category, which every general-purpose query
+ * in this module and in `query-isolation.ts` filters out. Only SATGAS_PPKS can
+ * reach it, and only through the audited detail path.
+ */
+export async function submitPpksReport(
+  prisma: TicketWorkflowDatabase,
+  rawInput: unknown,
+  clientIp: string,
+  ipHmacSecret: string,
+  trackingHmacSecret: string,
+  sealingKey: Readonly<{key: Uint8Array; keyVersion: number}>,
+  now = new Date(),
+): Promise<PublicTicketResult> {
+  const parsed = PpksReportInputSchema.safeParse(rawInput);
+  if (!parsed.success) return failure("REQUEST_INVALID");
+
+  /* The id is minted here because each envelope is bound to it, which stops
+     ciphertext from being lifted onto another ticket. */
+  const ticketId = randomUUID();
+  const trackingToken = generateTrackingToken();
+
+  let subjectCiphertext: string | null;
+  let descriptionCiphertext: string;
+  let reporterIdentityCiphertext: string | null;
+  try {
+    subjectCiphertext = parsed.data.subject
+      ? sealPpksTicketField(parsed.data.subject, ticketId, "subject", sealingKey)
+      : null;
+    descriptionCiphertext = sealPpksTicketField(
+      parsed.data.description, ticketId, "description", sealingKey,
+    );
+    reporterIdentityCiphertext = parsed.data.reporterIdentity
+      ? sealPpksTicketField(parsed.data.reporterIdentity, ticketId, "reporterIdentity", sealingKey)
+      : null;
+  } catch {
+    /* Never surface why sealing failed: the reason is configuration, and the
+       reporter can do nothing with it. */
+    return failure("UNAVAILABLE");
+  }
+
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const limited = await checkPublicRateLimit(tx, clientIp, ipHmacSecret, now);
+      if (limited) return failure("RATE_LIMITED");
+
+      const ticketNumber = await nextAnnualTicketNumber(tx, now);
+      const trackingTokenHash = createTrackingTokenDigest(trackingToken, trackingHmacSecret, "TICKET");
+
+      await tx.ticket.create({
+        data: {
+          id: ticketId,
+          ticketNumber,
+          trackingTokenHash,
+          category: PPKS_CATEGORY,
+          /* A report of sexual violence does not wait in the ordinary queue.
+             Satgas can lower it after triage. */
+          priority: "TINGGI",
+          subjectCiphertext,
+          descriptionCiphertext,
+          reporterIdentityCiphertext,
+          keyVersion: sealingKey.keyVersion,
+        },
+      });
+
+      await tx.ticketHistory.create({data: {ticketId, event: "CREATED"}});
       await incrementPublicRateLimit(tx, clientIp, ipHmacSecret, now);
       return {ok: true as const, data: {ticketNumber, trackingToken}};
     }, {isolationLevel: PrismaNamespace.TransactionIsolationLevel.Serializable});
