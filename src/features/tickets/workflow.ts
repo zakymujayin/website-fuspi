@@ -2,6 +2,7 @@ import {randomUUID} from "node:crypto";
 import {z} from "zod";
 
 import {Sha256ChecksumSchema, StorageClassSchema} from "@/contracts/storage";
+import type {ValidatedPpksAttachment} from "@/contracts/storage";
 import {
   ComplaintCategory,
   TicketPriority,
@@ -10,8 +11,11 @@ import {
 import {Prisma as PrismaNamespace} from "@/generated/prisma/client";
 import type {Prisma} from "@/generated/prisma/client";
 import type {createPrismaClient} from "@/lib/db/client";
+import {enqueueNotification} from "@/lib/outbox/enqueue";
 import {createTrackingTokenDigest, generateTrackingToken, verifyTrackingTokenDigest} from "@/lib/security/tracking-token";
 import {createHmacDigest} from "@/lib/security/hmac";
+import type {StorageRoots} from "@/lib/storage";
+import {encryptAndStagePpksAttachment, type StagedPpksAttachment} from "@/lib/storage";
 import {sealPpksReplyBody, sealPpksTicketField} from "@/lib/tickets/protected-fields";
 
 export type TicketWorkflowDatabase = ReturnType<typeof createPrismaClient>;
@@ -195,6 +199,18 @@ type StaffCommandResult =
 type AttachmentResult =
   | {ok: true; data: {id: string}}
   | {ok: false; code: "SESSION_INVALID" | "REQUEST_INVALID" | "NOT_FOUND" | "UNAVAILABLE" | "RATE_LIMITED" | "VALIDATION_FAILED"};
+
+type PreparedPpksAttachment = {
+  id: string;
+  staged: StagedPpksAttachment;
+};
+
+type PpksReportOptions = Readonly<{
+  attachments?: readonly ValidatedPpksAttachment[];
+  storageRoots?: StorageRoots;
+  notificationRecipient?: string | null;
+  locale?: "id" | "en" | "ar";
+}>;
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -414,6 +430,7 @@ export async function submitPpksReport(
   ipHmacSecret: string,
   trackingHmacSecret: string,
   sealingKey: Readonly<{key: Uint8Array; keyVersion: number}>,
+  options: PpksReportOptions = {},
   now = new Date(),
 ): Promise<PublicTicketResult> {
   const parsed = PpksReportInputSchema.safeParse(rawInput);
@@ -423,10 +440,15 @@ export async function submitPpksReport(
      ciphertext from being lifted onto another ticket. */
   const ticketId = randomUUID();
   const trackingToken = generateTrackingToken();
+  const attachments = options.attachments ?? [];
+  if (attachments.length > 3 || (attachments.length > 0 && !options.storageRoots)) {
+    return failure("REQUEST_INVALID");
+  }
 
   let subjectCiphertext: string | null;
   let descriptionCiphertext: string;
   let reporterIdentityCiphertext: string | null;
+  const preparedAttachments: PreparedPpksAttachment[] = [];
   try {
     subjectCiphertext = parsed.data.subject
       ? sealPpksTicketField(parsed.data.subject, ticketId, "subject", sealingKey)
@@ -441,9 +463,24 @@ export async function submitPpksReport(
     reporterIdentityCiphertext = identityParts.length > 0
       ? sealPpksTicketField(identityParts.join("\n"), ticketId, "reporterIdentity", sealingKey)
       : null;
+    for (const attachment of attachments) {
+      const attachmentId = randomUUID();
+      preparedAttachments.push({
+        id: attachmentId,
+        staged: await encryptAndStagePpksAttachment({
+          attachment,
+          ticketId,
+          attachmentId,
+          key: sealingKey.key,
+          keyVersion: sealingKey.keyVersion,
+          roots: options.storageRoots!,
+        }),
+      });
+    }
   } catch {
     /* Never surface why sealing failed: the reason is configuration, and the
        reporter can do nothing with it. */
+    await Promise.all(preparedAttachments.map(({staged}) => staged.discard().catch(() => undefined)));
     return failure("UNAVAILABLE");
   }
 
@@ -471,11 +508,44 @@ export async function submitPpksReport(
         },
       });
 
+      if (preparedAttachments.length > 0) {
+        await tx.ticketAttachment.createMany({
+          data: preparedAttachments.map(({id, staged}) => ({
+            id,
+            ticketId,
+            storageKey: staged.metadata.storageKey,
+            storageClass: staged.metadata.storageClass,
+            originalName: staged.metadata.originalName,
+            mimeType: staged.metadata.mimeType,
+            size: staged.metadata.size,
+            checksumSha256: staged.metadata.checksumSha256,
+            encryptionNonce: staged.metadata.encryptionNonce,
+            encryptionTag: staged.metadata.encryptionTag,
+            keyVersion: staged.metadata.keyVersion,
+          })),
+        });
+      }
+
       await tx.ticketHistory.create({data: {ticketId, event: "CREATED"}});
+      if (options.notificationRecipient) {
+        await enqueueNotification(tx, {
+          type: "SENSITIVE_REPORT",
+          recipient: options.notificationRecipient,
+          locale: options.locale ?? "id",
+          template: "ppks-report-received",
+          idempotencyKey: `sensitive-report-notify:${ticketId}`,
+          sensitive: false,
+          payload: {},
+        });
+      }
+      for (const {staged} of preparedAttachments) {
+        await staged.commit();
+      }
       await incrementPublicRateLimit(tx, clientIp, ipHmacSecret, now);
       return {ok: true as const, data: {ticketNumber, trackingToken}};
     }, {isolationLevel: PrismaNamespace.TransactionIsolationLevel.Serializable});
   } catch {
+    await Promise.all(preparedAttachments.map(({staged}) => staged.discard().catch(() => undefined)));
     return failure("UNAVAILABLE");
   }
 }

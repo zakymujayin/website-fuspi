@@ -2,7 +2,7 @@
 
 import {CircleAlert, CircleCheck, Upload} from "lucide-react";
 import {useTranslations} from "next-intl";
-import {useActionState, useRef, useState} from "react";
+import {useActionState, useState} from "react";
 
 import {
   importLecturersFromCsvAction,
@@ -47,15 +47,12 @@ export function LecturerImportForm({
   /* The counts are only known once the action has run, so these two strings are
      resolved here where the ICU argument can actually be supplied. */
   const t = useTranslations("AdminLecturerImport");
-  const [csv, setCsv] = useState("");
   const [fileName, setFileName] = useState("");
-  const fileRef = useRef<HTMLInputElement>(null);
 
-  async function onFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+  function onFileChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
     if (!file) return;
     setFileName(file.name);
-    setCsv(await file.text());
   }
 
   const ready = state.status === "preview" ? state.ready : 0;
@@ -63,17 +60,15 @@ export function LecturerImportForm({
   return (
     <div className="max-w-4xl space-y-8">
       <form action={action} className="space-y-5">
-        <input type="hidden" name="csv" value={state.status === "preview" ? state.csv : csv} />
-
         <div>
           <label htmlFor="lecturer-csv" className="block text-sm font-medium text-slate-700">
             {labels.fileLabel}
           </label>
           <input
-            ref={fileRef}
             id="lecturer-csv"
+            name="file"
             type="file"
-            accept=".csv,text/csv"
+            accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             onChange={onFileChange}
             className="mt-2 block w-full rounded-lg border border-slate-300 bg-white p-2.5 text-sm text-slate-900 file:me-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-slate-700 focus:border-royal-500 focus:outline-2 focus:outline-offset-0 focus:outline-royal-500"
           />
@@ -96,7 +91,7 @@ export function LecturerImportForm({
             type="submit"
             name="intent"
             value="preview"
-            disabled={pending || (csv === "" && state.status !== "preview")}
+            disabled={pending || (fileName === "" && state.status !== "preview")}
             className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-600 disabled:opacity-60"
           >
             <Upload aria-hidden data-icon className="size-4" strokeWidth={1.5} />

@@ -1,4 +1,5 @@
 import Papa from "papaparse";
+import {readSheet} from "read-excel-file/node";
 
 import {LecturerInputSchema} from "@/contracts/academic";
 import {AcademicImportSafeCellSchema} from "@/contracts/academic-editor";
@@ -36,6 +37,12 @@ export type LecturerCsvRow = {
 export type LecturerCsvParseResult =
   | {ok: true; rows: LecturerCsvRow[]; issues: LecturerCsvIssue[]; skipped: number}
   | {ok: false; code: "EMPTY" | "TOO_MANY_ROWS" | "MISSING_NAME_COLUMN" | "MALFORMED"};
+
+export type LecturerImportFile = Readonly<{
+  bytes: Uint8Array;
+  filename: string;
+  declaredMime: string;
+}>;
 
 /* Phone numbers legitimately open with "+", which the formula guard rejects.
    The column is exempt because `PhoneSchema` already narrows it to an optional
@@ -107,6 +114,14 @@ export function parseLecturerCsv(
   if (records.length > MAX_ROWS) return {ok: false, code: "TOO_MANY_ROWS"};
   if (!(parsed.meta.fields ?? []).includes("nama")) return {ok: false, code: "MISSING_NAME_COLUMN"};
 
+  return parseLecturerRecords(records, programIdByCode, orderOffset);
+}
+
+function parseLecturerRecords(
+  records: Record<string, string>[],
+  programIdByCode: ReadonlyMap<string, string>,
+  orderOffset: number,
+): LecturerCsvParseResult {
   const rows: LecturerCsvRow[] = [];
   const issues: LecturerCsvIssue[] = [];
   const seenSlugs = new Set<string>();
@@ -180,4 +195,61 @@ export function parseLecturerCsv(
   });
 
   return {ok: true, rows, issues, skipped: records.length - rows.length};
+}
+
+function isXlsxUpload(file: LecturerImportFile) {
+  const name = file.filename.toLowerCase();
+  const mime = file.declaredMime.toLowerCase();
+  return name.endsWith(".xlsx")
+    || mime === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+}
+
+function isCsvUpload(file: LecturerImportFile) {
+  const name = file.filename.toLowerCase();
+  const mime = file.declaredMime.toLowerCase();
+  return name.endsWith(".csv") || mime === "text/csv" || mime === "application/csv";
+}
+
+function cellToString(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (value instanceof Date) return value.toISOString();
+  if (typeof value === "number" || typeof value === "boolean") return String(value);
+  return String(value);
+}
+
+export async function parseLecturerImportFile(
+  file: LecturerImportFile,
+  programIdByCode: ReadonlyMap<string, string>,
+  orderOffset = 0,
+): Promise<LecturerCsvParseResult> {
+  if (file.bytes.byteLength < 1) return {ok: false, code: "EMPTY"};
+  if (isCsvUpload(file)) {
+    try {
+      return parseLecturerCsv(
+        new TextDecoder("utf-8", {fatal: true}).decode(file.bytes),
+        programIdByCode,
+        orderOffset,
+      );
+    } catch {
+      return {ok: false, code: "MALFORMED"};
+    }
+  }
+  if (!isXlsxUpload(file)) return {ok: false, code: "MALFORMED"};
+
+  try {
+    const rows = await readSheet(Buffer.from(file.bytes));
+    if (rows.length === 0) return {ok: false, code: "EMPTY"};
+    const fields = rows[0]!.map((value) => cellToString(value).trim().toLowerCase());
+    if (!fields.includes("nama")) return {ok: false, code: "MISSING_NAME_COLUMN"};
+    const records = rows.slice(1).map((row) => Object.fromEntries(
+      fields.map((field, index) => [field, cellToString(row[index]).trim()]),
+    ) as Record<string, string>).filter((record) =>
+      Object.values(record).some((value) => value.trim() !== ""),
+    );
+    if (records.length === 0) return {ok: false, code: "EMPTY"};
+    if (records.length > MAX_ROWS) return {ok: false, code: "TOO_MANY_ROWS"};
+    return parseLecturerRecords(records, programIdByCode, orderOffset);
+  } catch {
+    return {ok: false, code: "MALFORMED"};
+  }
 }

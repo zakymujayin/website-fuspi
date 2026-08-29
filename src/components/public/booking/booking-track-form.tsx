@@ -9,6 +9,7 @@ import {
 } from "@/components/public/booking/booking-server-actions";
 import {Field, FieldDescription, FieldGroup, FieldLabel} from "@/components/ui/field";
 import {Input} from "@/components/ui/input";
+import {Textarea} from "@/components/ui/textarea";
 
 export type BookingTrackLabels = {
   bookingNumber: string;
@@ -23,6 +24,10 @@ export type BookingTrackLabels = {
   purposeLabel: string;
   submittedLabel: string;
   cancelReasonLabel: string;
+  cancelTitle: string;
+  cancelHint: string;
+  cancelSubmit: string;
+  cancelling: string;
   historyLabel: string;
   participantUnit: string;
   statuses: Record<string, string>;
@@ -172,6 +177,26 @@ export function BookingTrackForm({
                 ))}
               </ol>
             </div>
+          ) : null}
+
+          {state.booking.status === "MENUNGGU" || state.booking.status === "DISETUJUI" ? (
+            <form action={action} className="mt-8 border-t border-slate-200 pt-6">
+              <input type="hidden" name="intent" value="cancel" />
+              <input type="hidden" name="bookingNumber" value={state.booking.bookingNumber} />
+              <input type="hidden" name="token" value={state.token} />
+              <Field>
+                <FieldLabel htmlFor="cancelReason">{labels.cancelTitle}</FieldLabel>
+                <Textarea id="cancelReason" name="cancelReason" rows={3} maxLength={500} dir="auto" />
+                <FieldDescription>{labels.cancelHint}</FieldDescription>
+              </Field>
+              <button
+                type="submit"
+                disabled={pending}
+                className="mt-4 rounded-lg border border-danger px-4 py-2 text-sm font-semibold text-danger transition-colors hover:bg-danger-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger disabled:opacity-60"
+              >
+                {pending ? labels.cancelling : labels.cancelSubmit}
+              </button>
+            </form>
           ) : null}
         </section>
       ) : null}

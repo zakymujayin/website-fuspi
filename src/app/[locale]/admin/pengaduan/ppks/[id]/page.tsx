@@ -169,6 +169,12 @@ export default async function AdminPpksDetailPage({
               <li key={file.id} className="flex flex-wrap items-baseline gap-x-3 text-slate-700">
                 <span dir="auto">{file.originalName}</span>
                 <span className="font-mono text-xs text-slate-400">{Math.ceil(file.size / 1024)} KB</span>
+                <a
+                  href={`/api/admin/ppks/attachments/${file.id}`}
+                  className="font-medium text-royal-600 underline-offset-2 hover:underline"
+                >
+                  {t("attachmentDownload")}
+                </a>
               </li>
             ))}
           </ul>

@@ -1,6 +1,7 @@
 import {z} from "zod";
 
 import {TrustedAdminFoundationActorSchema} from "@/contracts/admin-foundation";
+import {ActiveDatabaseSessionSchema} from "@/contracts/auth";
 import {
   CmsPageMetadataSchema,
   collectDuplicateAwareSearchParams,
@@ -24,6 +25,11 @@ const UNSAFE_TEXT_PATTERN = /[\u0000-\u001f\u007f-\u009f]/u;
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 const BOOKING_NUMBER_PATTERN = /^FUSPI-B-\d{4}-\d{4,}$/u;
 const TRACKING_TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/;
+
+const BookingActorSchema = ActiveDatabaseSessionSchema.extend({
+  role: z.enum(["ADMIN", "PETUGAS"]),
+  mustChangePassword: z.literal(false),
+}).strict();
 
 const RAW_ROOM_LIST_QUERY_SCHEMA = z.object({
   page: z.string().regex(/^(?:[1-9]\d{0,3}|10000)$/u).optional(),
@@ -141,6 +147,10 @@ const PUBLIC_BOOKING_TRACK_QUERY_SCHEMA = z.object({
   token: z.string().regex(TRACKING_TOKEN_PATTERN),
 }).strict();
 
+const PUBLIC_BOOKING_CANCEL_SCHEMA = PUBLIC_BOOKING_TRACK_QUERY_SCHEMA.extend({
+  reason: z.string().trim().min(1).max(500).nullable().optional(),
+}).strict();
+
 const ROOM_LIST_RESULT_SCHEMA = z.object({
   items: z.array(z.object({
     id: z.string(),
@@ -207,6 +217,19 @@ const BOOKING_ADMIN_RESULT_SCHEMA = z.discriminatedUnion("ok", [
   ])}).strict(),
 ]);
 
+const BOOKING_ADMIN_LIST_QUERY_SCHEMA = z.object({
+  status: z.enum(["ALL", "MENUNGGU", "DISETUJUI", "DITOLAK", "DIBATALKAN", "SELESAI"]).default("ALL"),
+  page: z.number().int().min(1).max(10_000).default(1),
+  pageSize: z.union([z.literal(10), z.literal(20), z.literal(50)]).default(20),
+}).strict();
+
+const BOOKING_PUBLIC_CANCEL_RESULT_SCHEMA = z.discriminatedUnion("ok", [
+  z.object({ok: z.literal(true), bookingNumber: z.string().regex(BOOKING_NUMBER_PATTERN)}).strict(),
+  z.object({ok: z.literal(false), code: z.enum([
+    "REQUEST_INVALID", "NOT_FOUND", "INVALID_STATE", "UNAVAILABLE",
+  ])}).strict(),
+]);
+
 const PUBLIC_ROOM_LIST_RESULT_SCHEMA = z.discriminatedUnion("ok", [
   z.object({
     ok: z.literal(true),
@@ -226,8 +249,13 @@ const PUBLIC_ROOM_LIST_RESULT_SCHEMA = z.discriminatedUnion("ok", [
   z.object({ok: z.literal(false), code: z.literal("UNAVAILABLE")}).strict(),
 ]);
 
-function actorOrNull(rawActor: unknown, now: Date) {
+function roomAdminOrNull(rawActor: unknown, now: Date) {
   const actor = TrustedAdminFoundationActorSchema.safeParse(rawActor);
+  return actor.success && actor.data.expiresAt > now ? actor.data : null;
+}
+
+function bookingActorOrNull(rawActor: unknown, now: Date) {
+  const actor = BookingActorSchema.safeParse(rawActor);
   return actor.success && actor.data.expiresAt > now ? actor.data : null;
 }
 
@@ -450,7 +478,7 @@ export async function listRooms(
   rawQuery: unknown,
   now = new Date(),
 ) {
-  if (!actorOrNull(rawActor, now)) return {ok: false as const, code: "SESSION_INVALID" as const};
+  if (!roomAdminOrNull(rawActor, now)) return {ok: false as const, code: "SESSION_INVALID" as const};
   const parsed = ROOM_LIST_QUERY_SCHEMA.safeParse(rawQuery);
   if (!parsed.success) return {ok: false as const, code: "REQUEST_INVALID" as const};
   const query = parsed.data;
@@ -513,7 +541,7 @@ export async function getRoomDetail(
   roomId: string,
   now = new Date(),
 ) {
-  if (!actorOrNull(rawActor, now)) return {ok: false as const, code: "NOT_FOUND" as const};
+  if (!roomAdminOrNull(rawActor, now)) return {ok: false as const, code: "NOT_FOUND" as const};
   try {
     const row = await prisma.room.findUnique({
       where: {id: roomId},
@@ -729,7 +757,7 @@ export async function executeRoomCommand(
   rawCommand: unknown,
   now = new Date(),
 ) {
-  const actor = actorOrNull(rawActor, now);
+  const actor = roomAdminOrNull(rawActor, now);
   if (!actor) return {ok: false as const, code: "SESSION_INVALID" as const};
 
   const parsed = ROOM_COMMAND_SCHEMA.safeParse(rawCommand);
@@ -835,6 +863,64 @@ export async function checkRoomAvailability(
   }
 }
 
+export async function listBookings(
+  prisma: BookingDatabase,
+  rawActor: unknown,
+  rawQuery: unknown,
+  now = new Date(),
+) {
+  if (!bookingActorOrNull(rawActor, now)) return {ok: false as const, code: "SESSION_INVALID" as const};
+  const parsed = BOOKING_ADMIN_LIST_QUERY_SCHEMA.safeParse(rawQuery);
+  if (!parsed.success) return {ok: false as const, code: "REQUEST_INVALID" as const};
+  const query = parsed.data;
+  const where: Prisma.BookingWhereInput = query.status === "ALL" ? {} : {status: query.status};
+
+  try {
+    const [rows, total] = await prisma.$transaction([
+      prisma.booking.findMany({
+        where,
+        orderBy: [{createdAt: "desc"}, {id: "desc"}],
+        skip: (query.page - 1) * query.pageSize,
+        take: query.pageSize,
+        include: {
+          room: {include: {translations: {where: {status: "PUBLISHED"}}}},
+        },
+      }),
+      prisma.booking.count({where}),
+    ]);
+    return {
+      ok: true as const,
+      data: {
+        items: rows.map((booking) => {
+          const roomTranslation = resolvedTranslation(
+            booking.room.translations as Array<{locale: Locale; status: string; name: string; location: string | null}>,
+            "id",
+          );
+          return {
+            id: booking.id,
+            bookingNumber: booking.bookingNumber,
+            roomName: roomTranslation?.name ?? booking.room.slug,
+            requesterName: booking.requesterName,
+            requesterEmail: booking.requesterEmail,
+            organization: booking.organization,
+            purpose: booking.purpose,
+            participantCount: booking.participantCount,
+            status: booking.status,
+            version: booking.version,
+            startTime: toJakartaISO(booking.startTime),
+            endTime: toJakartaISO(booking.endTime),
+            createdAt: toJakartaISO(booking.createdAt),
+            cancelReason: booking.cancelReason,
+          };
+        }),
+        page: pageMetadata(query.page, query.pageSize, total),
+      },
+    };
+  } catch {
+    return {ok: false as const, code: "UNAVAILABLE" as const};
+  }
+}
+
 export async function submitBooking(
   prisma: BookingDatabase,
   rawInput: unknown,
@@ -935,7 +1021,7 @@ export async function executeBookingCommand(
   rawCommand: unknown,
   now = new Date(),
 ) {
-  const actor = actorOrNull(rawActor, now);
+  const actor = bookingActorOrNull(rawActor, now);
   if (!actor) return {ok: false as const, code: "SESSION_INVALID" as const};
 
   const parsed = BOOKING_ADMIN_COMMAND_SCHEMA.safeParse(rawCommand);
@@ -1113,6 +1199,65 @@ export async function getPublicBooking(
   }
 }
 
+export async function cancelPublicBooking(
+  prisma: BookingDatabase,
+  rawInput: unknown,
+  now = new Date(),
+) {
+  const parsed = PUBLIC_BOOKING_CANCEL_SCHEMA.safeParse(rawInput);
+  if (!parsed.success) return BOOKING_PUBLIC_CANCEL_RESULT_SCHEMA.parse({ok: false, code: "REQUEST_INVALID"});
+
+  try {
+    const secret = getTrackingTokenSecret();
+    return await prisma.$transaction(async (tx) => {
+      const booking = await tx.booking.findUnique({
+        where: {bookingNumber: parsed.data.bookingNumber},
+        select: {
+          id: true,
+          bookingNumber: true,
+          trackingTokenHash: true,
+          status: true,
+        },
+      });
+      if (!booking || !verifyTrackingTokenDigest(parsed.data.token, booking.trackingTokenHash, secret, "BOOKING")) {
+        return BOOKING_PUBLIC_CANCEL_RESULT_SCHEMA.parse({ok: false, code: "NOT_FOUND"});
+      }
+      if (!["MENUNGGU", "DISETUJUI"].includes(booking.status)) {
+        return BOOKING_PUBLIC_CANCEL_RESULT_SCHEMA.parse({ok: false, code: "INVALID_STATE"});
+      }
+      await tx.booking.update({
+        where: {id: booking.id},
+        data: {
+          status: "DIBATALKAN",
+          version: {increment: 1},
+          cancelledAt: now,
+          cancelReason: parsed.data.reason ?? null,
+        },
+      });
+      await tx.bookingHistory.create({
+        data: {
+          bookingId: booking.id,
+          fromStatus: booking.status,
+          toStatus: "DIBATALKAN",
+          reason: parsed.data.reason ?? null,
+          createdAt: now,
+        },
+      });
+      await tx.activityLog.create({
+        data: {
+          action: "UPDATE",
+          resourceType: "Booking",
+          resourceId: booking.id,
+          metadata: {action: "PUBLIC_CANCEL", fromStatus: booking.status},
+        },
+      });
+      return BOOKING_PUBLIC_CANCEL_RESULT_SCHEMA.parse({ok: true, bookingNumber: booking.bookingNumber});
+    }, {isolationLevel: PrismaNamespace.TransactionIsolationLevel.Serializable});
+  } catch {
+    return BOOKING_PUBLIC_CANCEL_RESULT_SCHEMA.parse({ok: false, code: "UNAVAILABLE"});
+  }
+}
+
 export function bookingHttpStatus(result: {ok: boolean; code?: string}) {
   if (result.ok) return 200;
   if (result.code === "SESSION_INVALID") return 401;
@@ -1127,3 +1272,5 @@ export type RoomListQuery = z.infer<typeof ROOM_LIST_QUERY_SCHEMA>;
 export type RoomMutationResult = z.infer<typeof ROOM_MUTATION_RESULT_SCHEMA>;
 export type BookingPublicSubmitResult = z.infer<typeof BOOKING_PUBLIC_SUBMIT_RESULT_SCHEMA>;
 export type BookingAdminResult = z.infer<typeof BOOKING_ADMIN_RESULT_SCHEMA>;
+export type BookingAdminListQuery = z.infer<typeof BOOKING_ADMIN_LIST_QUERY_SCHEMA>;
+export type BookingPublicCancelResult = z.infer<typeof BOOKING_PUBLIC_CANCEL_RESULT_SCHEMA>;

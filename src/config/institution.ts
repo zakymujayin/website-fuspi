@@ -6,5 +6,7 @@ export const institution = {
     {code: "IAT", slug: "ilmu-al-quran-dan-tafsir", name: "Ilmu Al-Qur’an dan Tafsir"},
     {code: "IH", slug: "ilmu-hadis", name: "Ilmu Hadis"},
     {code: "AFI", slug: "aqidah-dan-filsafat-islam", name: "Aqidah dan Filsafat Islam"},
+    {code: "SAA", slug: "studi-agama-agama", name: "Studi Agama-Agama"},
+    {code: "TASPI", slug: "tasawuf-dan-psikoterapi", name: "Tasawuf dan Psikoterapi"},
   ],
 } as const;

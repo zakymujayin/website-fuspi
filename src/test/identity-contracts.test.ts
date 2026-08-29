@@ -25,8 +25,8 @@ describe("FUSPI identity contract", () => {
     }
   });
 
-  it("has exactly three active study programs", () => {
-    expect(institution.studyPrograms).toHaveLength(3);
+  it("has exactly five active study programs", () => {
+    expect(institution.studyPrograms).toHaveLength(5);
   });
 
   it("has study programs in the correct order", () => {
@@ -34,6 +34,8 @@ describe("FUSPI identity contract", () => {
       "IAT",
       "IH",
       "AFI",
+      "SAA",
+      "TASPI",
     ]);
   });
 

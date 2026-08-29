@@ -1,7 +1,9 @@
 import {describe, expect, it} from "vitest";
+import {strToU8, zipSync} from "fflate";
 
 import {
   parseLecturerCsv,
+  parseLecturerImportFile,
   slugifyName,
   LECTURER_CSV_COLUMNS,
 } from "@/features/academic/lecturer-csv-import";
@@ -10,6 +12,8 @@ const PROGRAMS = new Map([
   ["IAT", "program-iat"],
   ["IH", "program-ih"],
   ["AFI", "program-afi"],
+  ["SAA", "program-saa"],
+  ["TASPI", "program-taspi"],
 ]);
 
 const HEADER = LECTURER_CSV_COLUMNS.join(",");
@@ -36,6 +40,61 @@ function row(overrides: Partial<Record<string, string>> = {}) {
     ...overrides,
   };
   return LECTURER_CSV_COLUMNS.map((column) => values[column] ?? "").join(",");
+}
+
+function xml(value: string) {
+  return value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+}
+
+function columnName(index: number) {
+  let value = "";
+  let remaining = index + 1;
+  while (remaining > 0) {
+    const modulo = (remaining - 1) % 26;
+    value = String.fromCharCode(65 + modulo) + value;
+    remaining = Math.floor((remaining - modulo) / 26);
+  }
+  return value;
+}
+
+function worksheet(rows: string[][]) {
+  const sheetRows = rows.map((cells, rowIndex) => {
+    const rowNumber = rowIndex + 1;
+    const sheetCells = cells.map((value, cellIndex) => {
+      const ref = `${columnName(cellIndex)}${rowNumber}`;
+      return `<c r="${ref}" t="inlineStr"><is><t>${xml(value)}</t></is></c>`;
+    }).join("");
+    return `<row r="${rowNumber}">${sheetCells}</row>`;
+  }).join("");
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <sheetData>${sheetRows}</sheetData>
+</worksheet>`;
+}
+
+function xlsx(rows: string[][]) {
+  return zipSync({
+    "[Content_Types].xml": strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+</Types>`),
+    "_rels/.rels": strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`),
+    "xl/workbook.xml": strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets><sheet name="Dosen" sheetId="1" r:id="rId1"/></sheets>
+</workbook>`),
+    "xl/_rels/workbook.xml.rels": strToU8(`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+</Relationships>`),
+    "xl/worksheets/sheet1.xml": strToU8(worksheet(rows)),
+  });
 }
 
 describe("lecturer CSV import", () => {
@@ -114,6 +173,21 @@ describe("lecturer CSV import", () => {
     expect(result.rows[1]?.payload.studyProgramId).toBeNull();
   });
 
+  it("accepts all five v1 FUSPI study program codes", () => {
+    const result = parseLecturerCsv(csv(
+      row({nama: "Dosen IAT", prodi: "IAT"}),
+      row({nama: "Dosen IH", prodi: "IH"}),
+      row({nama: "Dosen AFI", prodi: "AFI"}),
+      row({nama: "Dosen SAA", prodi: "SAA"}),
+      row({nama: "Dosen TASPI", prodi: "TASPI"}),
+    ), PROGRAMS);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.rows.map(({payload}) => payload.studyProgramId)).toEqual([
+      "program-iat", "program-ih", "program-afi", "program-saa", "program-taspi",
+    ]);
+  });
+
   it("flags a slug repeated inside the same file", () => {
     const result = parseLecturerCsv(csv(row(), row()), PROGRAMS);
     expect(result.ok).toBe(true);
@@ -149,6 +223,27 @@ describe("lecturer CSV import", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.rows[0]?.payload.name).toBe("Halimah Nur Azizah");
+  });
+
+  it("parses an XLSX upload through the same row contract", async () => {
+    const result = await parseLecturerImportFile({
+      bytes: xlsx([
+        [" Nama ", "PRODI", "Email", "Jabatan"],
+        ["Zulfa Kamila", "SAA", "zulfa@fuspi.uinbanten.ac.id", "Lektor"],
+      ]),
+      filename: "dosen.xlsx",
+      declaredMime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    }, PROGRAMS, 12);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0]?.rowNumber).toBe(2);
+    expect(result.rows[0]?.payload).toMatchObject({
+      name: "Zulfa Kamila",
+      email: "zulfa@fuspi.uinbanten.ac.id",
+      studyProgramId: "program-saa",
+      order: 12,
+    });
   });
 });
 

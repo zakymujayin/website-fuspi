@@ -1,6 +1,12 @@
 import {afterAll, beforeAll, describe, expect, it} from "vitest";
 
-import {bookingHttpStatus, getPublicBooking, submitBooking} from "@/features/booking/domain";
+import {
+  bookingHttpStatus,
+  cancelPublicBooking,
+  getPublicBooking,
+  listBookings,
+  submitBooking,
+} from "@/features/booking/domain";
 import {createPrismaClient} from "@/lib/db/client";
 
 const runDatabaseTests = process.env.RUN_PLATFORM_DB_TESTS === "true";
@@ -122,6 +128,29 @@ suite("public booking flow on PostgreSQL", () => {
     if (found.ok) expect(found.purpose).toBe("Seminar metodologi tafsir.");
   });
 
+  it("lets PETUGAS list booking requests without room-admin privileges", async () => {
+    const listed = await listBookings(prisma, {
+      userId: "synthetic-petugas",
+      role: "PETUGAS",
+      isActive: true,
+      mustChangePassword: false,
+      expiresAt: new Date(Date.now() + 3_600_000),
+    }, {});
+    expect(listed.ok).toBe(true);
+    if (listed.ok) {
+      expect(listed.data.items.some((item) => item.bookingNumber === bookingNumber)).toBe(true);
+    }
+
+    const denied = await listBookings(prisma, {
+      userId: "synthetic-dosen",
+      role: "DOSEN",
+      isActive: true,
+      mustChangePassword: false,
+      expiresAt: new Date(Date.now() + 3_600_000),
+    }, {});
+    expect(denied).toEqual({ok: false, code: "SESSION_INVALID"});
+  });
+
   /* Regression: `createTrackingTokenDigest` parses with `.parse`, so a
      well-formed but non-canonical base64url token threw and surfaced as
      UNAVAILABLE, answering 503 for what is simply a wrong code. */
@@ -136,5 +165,29 @@ suite("public booking flow on PostgreSQL", () => {
   it("refuses an unknown booking number without revealing the difference", async () => {
     const result = await getPublicBooking(prisma, {bookingNumber: "FUSPI-B-2099-9999", token});
     expect(result).toEqual({ok: false, code: "NOT_FOUND"});
+  });
+
+  it("lets the requester cancel a waiting booking with the tracking token", async () => {
+    const submitted = await submitBooking(prisma, request({...slot("13:30", "14:30")}));
+    expect(submitted.ok).toBe(true);
+    if (!submitted.ok) return;
+    bookingNumbers.push(submitted.bookingNumber);
+
+    const cancelled = await cancelPublicBooking(prisma, {
+      bookingNumber: submitted.bookingNumber,
+      token: submitted.trackingToken,
+      reason: "Agenda pemohon dibatalkan.",
+    });
+    expect(cancelled).toEqual({ok: true, bookingNumber: submitted.bookingNumber});
+
+    const tracked = await getPublicBooking(prisma, {
+      bookingNumber: submitted.bookingNumber,
+      token: submitted.trackingToken,
+    });
+    expect(tracked.ok).toBe(true);
+    if (tracked.ok) {
+      expect(tracked.status).toBe("DIBATALKAN");
+      expect(tracked.cancelReason).toBe("Agenda pemohon dibatalkan.");
+    }
   });
 });

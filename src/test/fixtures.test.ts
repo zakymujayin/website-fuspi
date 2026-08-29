@@ -132,7 +132,7 @@ describe("fixture factories", () => {
   describe("StudyProgram fixtures", () => {
     it("creates a study program with valid code", () => {
       const prog = createStudyProgram();
-      expect(["IAT", "IH", "AFI"]).toContain(prog.code);
+      expect(["IAT", "IH", "AFI", "SAA", "TASPI"]).toContain(prog.code);
     });
 
     it("creates study program with translations", () => {
@@ -142,7 +142,7 @@ describe("fixture factories", () => {
 
     it("createAllFiveStudyPrograms returns exactly the active study programs", () => {
       const all = createAllFiveStudyPrograms();
-      expect(all).toHaveLength(3);
+      expect(all).toHaveLength(5);
     });
 
     it("createAllFiveStudyPrograms covers all active codes", () => {
@@ -150,6 +150,8 @@ describe("fixture factories", () => {
       expect(codes).toContain("IAT");
       expect(codes).toContain("IH");
       expect(codes).toContain("AFI");
+      expect(codes).toContain("SAA");
+      expect(codes).toContain("TASPI");
     });
   });
 

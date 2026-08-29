@@ -37,7 +37,16 @@ suite("public complaint flow on PostgreSQL", () => {
   });
 
   afterAll(async () => {
-    await prisma.ticket.deleteMany({where: {ticketNumber: {in: created}}});
+    const ids = (await prisma.ticket.findMany({
+      where: {ticketNumber: {in: created}},
+      select: {id: true},
+    })).map(({id}) => id);
+    if (ids.length) {
+      await prisma.ticketAccessLog.deleteMany({where: {ticketId: {in: ids}}});
+      await prisma.ticketReply.deleteMany({where: {ticketId: {in: ids}}});
+      await prisma.ticketHistory.deleteMany({where: {ticketId: {in: ids}}});
+      await prisma.ticket.deleteMany({where: {id: {in: ids}}});
+    }
     await prisma.$disconnect();
   });
 

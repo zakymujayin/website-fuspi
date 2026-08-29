@@ -1,12 +1,13 @@
 import {cookies} from "next/headers";
 
 import type {
+  AuthRole,
   ProtectedRouteDecision,
   SessionInvalidResult,
 } from "@/contracts/auth";
 import type {AppLocale} from "@/i18n/routing";
 import {getSessionCookieName} from "@/lib/auth/runtime/cookie";
-import {normalizeAuthRedirect} from "@/lib/auth/runtime/redirect";
+import {normalizeAuthRedirect, resolvePostLoginDestination} from "@/lib/auth/runtime/redirect";
 import {
   validateDatabaseSession,
   type SessionValidationResult,
@@ -50,6 +51,7 @@ export function decideProtectedRoute(
   session: SessionValidationResult,
   locale: AppLocale,
   requestedPath: unknown,
+  options: Readonly<{roles?: readonly AuthRole[]}> = {},
 ): ProtectedRouteDecision {
   const destination = normalizeAuthRedirect(requestedPath, locale);
   if (!session.ok) {
@@ -62,6 +64,12 @@ export function decideProtectedRoute(
     return {
       allow: false,
       redirectTo: `/${locale}/change-password?next=${encodeURIComponent(destination)}`,
+    };
+  }
+  if (options.roles && !options.roles.includes(session.session.role)) {
+    return {
+      allow: false,
+      redirectTo: resolvePostLoginDestination(session.session.role, null, locale),
     };
   }
   return {allow: true};

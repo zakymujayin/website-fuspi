@@ -36,7 +36,12 @@ export default async function PortalDosenLayout({
   const appLocale = parseAppLocale(locale);
 
   const session = await getRequestSession();
-  const decision = decideProtectedRoute(session, appLocale, `/${appLocale}/portal-dosen`);
+  const decision = decideProtectedRoute(
+    session,
+    appLocale,
+    `/${appLocale}/portal-dosen`,
+    {roles: ["DOSEN"]},
+  );
   if (!decision.allow) redirect(decision.redirectTo);
 
   /* A signed-in account that is not a lecturer has no business here. The load

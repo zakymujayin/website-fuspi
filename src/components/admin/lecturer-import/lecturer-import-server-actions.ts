@@ -4,7 +4,7 @@ import {revalidatePath} from "next/cache";
 
 import {provisionLecturerAccounts, type ProvisionedAccount} from "@/features/academic/lecturer-account-provisioning";
 import {executeAcademicPeopleImport} from "@/features/academic/editor-import";
-import {parseLecturerCsv, type LecturerCsvIssue} from "@/features/academic/lecturer-csv-import";
+import {parseLecturerImportFile, type LecturerCsvIssue} from "@/features/academic/lecturer-csv-import";
 import {getRequestSession} from "@/lib/auth/runtime/request-session";
 import {getPrismaClient} from "@/lib/db/client";
 
@@ -13,7 +13,7 @@ const MAX_CSV_BYTES = 1_048_576;
 
 export type LecturerImportState =
   | {status: "idle"}
-  | {status: "preview"; ready: number; issues: LecturerCsvIssue[]; csv: string}
+  | {status: "preview"; ready: number; issues: LecturerCsvIssue[]}
   | {status: "imported"; created: number; accounts: ProvisionedAccount[]; skipped: {
       existingAccount: number; missingEmail: number; emailTaken: number;
     } | null}
@@ -37,24 +37,32 @@ export async function importLecturersFromCsvAction(
   const actor = session.ok ? session.session : null;
   if (!actor) return {status: "error", code: "SESSION_INVALID"};
 
-  const csv = form.get("csv");
-  if (typeof csv !== "string" || csv === "") return {status: "error", code: "FILE_REQUIRED"};
+  const file = form.get("file");
+  if (!(file instanceof File) || file.size === 0) return {status: "error", code: "FILE_REQUIRED"};
   /* Measured in bytes, not characters: a multi-byte name must not slip past a
      length check that only counts code units. */
-  if (Buffer.byteLength(csv, "utf8") > MAX_CSV_BYTES) return {status: "error", code: "FILE_TOO_LARGE"};
+  if (file.size > MAX_CSV_BYTES) return {status: "error", code: "FILE_TOO_LARGE"};
 
   const commit = form.get("intent") === "commit";
   const provision = form.get("provision") === "on";
 
   let parsed;
   try {
-    parsed = parseLecturerCsv(csv, await programIdByCode(), await nextLecturerOrder());
+    parsed = await parseLecturerImportFile(
+      {
+        bytes: new Uint8Array(await file.arrayBuffer()),
+        filename: file.name,
+        declaredMime: file.type,
+      },
+      await programIdByCode(),
+      await nextLecturerOrder(),
+    );
   } catch {
     return {status: "error", code: "UNAVAILABLE"};
   }
   if (!parsed.ok) return {status: "error", code: parsed.code};
-  if (parsed.rows.length === 0) return {status: "preview", ready: 0, issues: parsed.issues, csv};
-  if (!commit) return {status: "preview", ready: parsed.rows.length, issues: parsed.issues, csv};
+  if (parsed.rows.length === 0) return {status: "preview", ready: 0, issues: parsed.issues};
+  if (!commit) return {status: "preview", ready: parsed.rows.length, issues: parsed.issues};
 
   const prisma = getPrismaClient();
   const result = await executeAcademicPeopleImport(prisma, actor, {

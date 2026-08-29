@@ -25,6 +25,8 @@ export type PpksFormLabels = {
   descriptionHint: string;
   identity: string;
   identityHint: string;
+  attachments: string;
+  attachmentsHint: string;
   danger: string;
   dangerHint: string;
   submit: string;
@@ -127,6 +129,18 @@ export function PpksReportForm({labels}: {labels: PpksFormLabels}) {
           <FieldLabel htmlFor="reporterIdentity">{labels.identity}</FieldLabel>
           <Textarea id="reporterIdentity" name="reporterIdentity" maxLength={2000} rows={3} dir="auto" />
           <FieldDescription>{labels.identityHint}</FieldDescription>
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor="attachments">{labels.attachments}</FieldLabel>
+          <Input
+            id="attachments"
+            name="attachments"
+            type="file"
+            multiple
+            accept="image/jpeg,image/png,image/webp,application/pdf"
+          />
+          <FieldDescription>{labels.attachmentsHint}</FieldDescription>
         </Field>
       </FieldGroup>
 

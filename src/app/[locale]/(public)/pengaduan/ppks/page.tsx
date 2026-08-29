@@ -37,6 +37,8 @@ export default async function PpksReportPage({params}: {params: Promise<{locale:
     descriptionHint: t("hintDescription"),
     identity: t("fieldIdentity"),
     identityHint: t("hintIdentity"),
+    attachments: t("fieldAttachments"),
+    attachmentsHint: t("hintAttachments"),
     danger: t("fieldDanger"),
     dangerHint: t("hintDanger"),
     submit: t("submit"),

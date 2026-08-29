@@ -1,12 +1,12 @@
 "use server";
 
-import {getPublicBooking, submitBooking} from "@/features/booking/domain";
+import {cancelPublicBooking, getPublicBooking, submitBooking} from "@/features/booking/domain";
 import {getPrismaClient} from "@/lib/db/client";
 
 export type BookingFailureCode =
   | "REQUEST_INVALID" | "ROOM_NOT_FOUND" | "ROOM_INACTIVE" | "TIME_INVALID"
   | "TIME_OVERLAP" | "CAPACITY_EXCEEDED" | "OPERATING_HOURS" | "BLACKOUT"
-  | "NOT_FOUND" | "UNAVAILABLE";
+  | "NOT_FOUND" | "INVALID_STATE" | "UNAVAILABLE";
 
 export type BookingSubmitState =
   | {status: "idle"}
@@ -54,7 +54,7 @@ function orNull(form: FormData, key: string): string | null {
 const CODES = new Set<BookingFailureCode>([
   "REQUEST_INVALID", "ROOM_NOT_FOUND", "ROOM_INACTIVE", "TIME_INVALID",
   "TIME_OVERLAP", "CAPACITY_EXCEEDED", "OPERATING_HOURS", "BLACKOUT",
-  "NOT_FOUND", "UNAVAILABLE",
+  "NOT_FOUND", "INVALID_STATE", "UNAVAILABLE",
 ]);
 
 function failureCode(code: unknown): BookingFailureCode {
@@ -108,8 +108,17 @@ export async function trackBookingAction(
   form: FormData,
 ): Promise<BookingTrackState> {
   const token = text(form, "token");
+  const bookingNumber = text(form, "bookingNumber");
+  if (text(form, "intent") === "cancel") {
+    const cancelled = await cancelPublicBooking(getPrismaClient(), {
+      bookingNumber,
+      token,
+      reason: orNull(form, "cancelReason"),
+    });
+    if (!cancelled.ok) return {status: "error", code: failureCode(cancelled.code)};
+  }
   const result = await getPublicBooking(getPrismaClient(), {
-    bookingNumber: text(form, "bookingNumber"),
+    bookingNumber,
     token,
   });
   if (!result.ok) return {status: "error", code: failureCode(result.code)};

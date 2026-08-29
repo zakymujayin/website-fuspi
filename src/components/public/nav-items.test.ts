@@ -39,11 +39,13 @@ const navKeys = [
 ];
 
 describe("public navigation", () => {
-  it("exposes the three active v1 study programs in contract order", () => {
+  it("exposes the five active v1 study programs in contract order", () => {
     expect(studyProgramLinks.map((link) => link.key)).toEqual([
       "program.IAT",
       "program.IH",
       "program.AFI",
+      "program.SAA",
+      "program.TASPI",
     ]);
 
     expect(studyProgramLinks.map((link) => link.href)).toEqual(

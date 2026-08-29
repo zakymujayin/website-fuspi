@@ -34,6 +34,10 @@ export default async function BookingTrackPage({params}: {params: Promise<{local
     purposeLabel: t("fieldPurpose"),
     submittedLabel: t("labelSubmitted"),
     cancelReasonLabel: t("labelCancelReason"),
+    cancelTitle: t("cancelTitle"),
+    cancelHint: t("cancelHint"),
+    cancelSubmit: t("cancelSubmit"),
+    cancelling: t("cancelling"),
     historyLabel: t("labelHistory"),
     participantUnit: t("participantUnit"),
     statuses: Object.fromEntries(
@@ -42,6 +46,7 @@ export default async function BookingTrackPage({params}: {params: Promise<{local
     errorCodes: {
       REQUEST_INVALID: t("errorTrackInvalid"),
       NOT_FOUND: t("errorNotFound"),
+      INVALID_STATE: t("errorInvalidState"),
       UNAVAILABLE: t("errorUnavailable"),
     },
   } satisfies BookingTrackLabels;

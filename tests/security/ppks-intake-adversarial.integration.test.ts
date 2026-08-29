@@ -1,8 +1,12 @@
 import {randomUUID} from "node:crypto";
+import {mkdtemp, readFile, rm} from "node:fs/promises";
+import {tmpdir} from "node:os";
+import path from "node:path";
 
 import {afterAll, beforeAll, describe, expect, it} from "vitest";
 
 import {PpksTicketDetailSchema} from "@/contracts/ticket";
+import {PpksAttachmentCryptoMetadataSchema} from "@/contracts/storage";
 import {createTicketQueryBoundary} from "@/features/tickets/query-isolation";
 import {
   addPublicReply,
@@ -13,6 +17,12 @@ import {
   submitPublicTicket,
 } from "@/features/tickets/workflow";
 import {createPrismaClient} from "@/lib/db/client";
+import {
+  decryptPpksAttachment,
+  parseStorageRoots,
+  validatePpksAttachmentUpload,
+} from "@/lib/storage";
+import {resolveStoragePath} from "@/lib/storage/paths";
 import {createPpksKeyResolver, getPpksSealingKey} from "@/lib/tickets/ppks-encryption";
 
 const runDatabaseTests = process.env.RUN_PLATFORM_DB_TESTS === "true";
@@ -35,7 +45,9 @@ suite("PPKS intake adversarial PostgreSQL boundary", () => {
     resolveKey,
     trackingHmacSecret: TRACKING_SECRET,
   });
+  const notificationRecipient = `${marker}-satgas@example.test`;
 
+  const temporaryDirectories: string[] = [];
   const userIds: string[] = [];
   const ticketNumbers: string[] = [];
   let satgasSession = "";
@@ -56,6 +68,23 @@ suite("PPKS intake adversarial PostgreSQL boundary", () => {
     return sessionToken;
   }
 
+  async function temporaryStorageRoots() {
+    const base = await mkdtemp(path.join(tmpdir(), "fuspi-ppks-intake-"));
+    temporaryDirectories.push(base);
+    return parseStorageRoots({
+      PUBLIC: path.join(base, "public"),
+      PRIVATE: path.join(base, "private"),
+      PPKS_PRIVATE: path.join(base, "ppks-private"),
+    });
+  }
+
+  function pdfAttachmentBytes(secret = "lampiran-rahasia-ppks") {
+    return Buffer.from(
+      `%PDF-1.7\n1 0 obj\n<< /Type /Catalog /Synthetic (${secret}) >>\nendobj\nstartxref\n0\n%%EOF\n`,
+      "latin1",
+    );
+  }
+
   beforeAll(async () => {
     await prisma.$connect();
     satgasSession = await signIn("SATGAS_PPKS");
@@ -68,6 +97,7 @@ suite("PPKS intake adversarial PostgreSQL boundary", () => {
       IP_SECRET,
       TRACKING_SECRET,
       sealingKey,
+      {notificationRecipient},
     );
     if (!result.ok) throw new Error(`intake failed: ${result.code}`);
     ppksNumber = result.data.ticketNumber;
@@ -79,17 +109,20 @@ suite("PPKS intake adversarial PostgreSQL boundary", () => {
   });
 
   afterAll(async () => {
+    await prisma.notificationOutbox.deleteMany({where: {recipient: notificationRecipient}});
     const ids = (await prisma.ticket.findMany({
       where: {ticketNumber: {in: ticketNumbers}}, select: {id: true},
     })).map(({id}) => id);
     if (ids.length) {
       await prisma.ticketAccessLog.deleteMany({where: {ticketId: {in: ids}}});
       await prisma.ticketReply.deleteMany({where: {ticketId: {in: ids}}});
+      await prisma.ticketAttachment.deleteMany({where: {ticketId: {in: ids}}});
       await prisma.ticketHistory.deleteMany({where: {ticketId: {in: ids}}});
       await prisma.ticket.deleteMany({where: {id: {in: ids}}});
     }
     await prisma.session.deleteMany({where: {userId: {in: userIds}}});
     await prisma.user.deleteMany({where: {id: {in: userIds}}});
+    await Promise.all(temporaryDirectories.map((directory) => rm(directory, {recursive: true, force: true})));
     await prisma.$disconnect();
   });
 
@@ -101,6 +134,105 @@ suite("PPKS intake adversarial PostgreSQL boundary", () => {
     expect(row.category).toBe("PELECEHAN_SEKSUAL");
     expect(row.priority).toBe("TINGGI");
     expect(row.keyVersion).toBe(1);
+  });
+
+  it("queues a content-free notification for a new PPKS report", async () => {
+    const row = await prisma.notificationOutbox.findFirstOrThrow({
+      where: {recipient: notificationRecipient, template: "ppks-report-received"},
+      select: {
+        type: true,
+        recipient: true,
+        template: true,
+        payload: true,
+        payloadEncrypted: true,
+        payloadCiphertext: true,
+      },
+    });
+    expect(row).toMatchObject({
+      type: "SENSITIVE_REPORT",
+      recipient: notificationRecipient,
+      template: "ppks-report-received",
+      payload: {},
+      payloadEncrypted: false,
+      payloadCiphertext: null,
+    });
+    const stored = JSON.stringify(row);
+    expect(stored).not.toContain(DESCRIPTION);
+    expect(stored).not.toContain(IDENTITY);
+    expect(stored).not.toContain(ppksNumber);
+    expect(stored).not.toContain(ppksToken);
+  });
+
+  it("stores PPKS attachments only as encrypted private objects", async () => {
+    const secret = "bukti-berisi-identitas-pelapor";
+    const storageRoots = await temporaryStorageRoots();
+    const attachment = await validatePpksAttachmentUpload({
+      bytes: pdfAttachmentBytes(secret),
+      originalName: "Nama Pelapor Bukti.pdf",
+      declaredMime: "application/pdf",
+      now: new Date("2026-07-15T00:00:00.000Z"),
+    });
+    const result = await submitPpksReport(
+      prisma,
+      {description: "Laporan dengan lampiran bukti privat yang cukup panjang."},
+      "198.51.100.31",
+      IP_SECRET,
+      TRACKING_SECRET,
+      sealingKey,
+      {attachments: [attachment], storageRoots},
+    );
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    ticketNumbers.push(result.data.ticketNumber);
+    const row = await prisma.ticket.findUniqueOrThrow({
+      where: {ticketNumber: result.data.ticketNumber},
+      select: {
+        id: true,
+        attachments: {
+          select: {
+            id: true,
+            storageKey: true,
+            storageClass: true,
+            originalName: true,
+            mimeType: true,
+            size: true,
+            checksumSha256: true,
+            encryptionNonce: true,
+            encryptionTag: true,
+            keyVersion: true,
+          },
+        },
+      },
+    });
+    expect(row.attachments).toHaveLength(1);
+    const storedAttachment = row.attachments[0]!;
+    expect(storedAttachment).toMatchObject({
+      storageClass: "PPKS_PRIVATE",
+      originalName: "lampiran.pdf",
+      mimeType: "application/pdf",
+    });
+    expect(JSON.stringify(storedAttachment)).not.toContain("Nama Pelapor");
+
+    const ciphertext = await readFile(resolveStoragePath(storageRoots.PPKS_PRIVATE, storedAttachment.storageKey));
+    expect(ciphertext.toString("latin1")).not.toContain(secret);
+    const metadata = PpksAttachmentCryptoMetadataSchema.parse({
+      storageKey: storedAttachment.storageKey,
+      storageClass: storedAttachment.storageClass,
+      originalName: storedAttachment.originalName,
+      mimeType: storedAttachment.mimeType,
+      size: storedAttachment.size,
+      checksumSha256: storedAttachment.checksumSha256,
+      encryptionNonce: storedAttachment.encryptionNonce,
+      encryptionTag: storedAttachment.encryptionTag,
+      keyVersion: storedAttachment.keyVersion,
+    });
+    expect(decryptPpksAttachment({
+      ciphertext,
+      metadata,
+      ticketId: row.id,
+      attachmentId: storedAttachment.id,
+      resolveKey,
+    }).toString("latin1")).toContain(secret);
   });
 
   /* The point of the whole subsystem: someone reading the table directly, with a

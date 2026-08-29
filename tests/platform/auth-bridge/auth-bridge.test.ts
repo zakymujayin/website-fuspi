@@ -16,9 +16,12 @@ import {
   readSessionToken,
 } from "@/lib/auth/runtime/request-session";
 
-const activeSession = (mustChangePassword = false): ActiveDatabaseSession => ({
+const activeSession = (
+  mustChangePassword = false,
+  role: ActiveDatabaseSession["role"] = "ADMIN",
+): ActiveDatabaseSession => ({
   userId: "server-only-user-id",
-  role: "ADMIN",
+  role,
   isActive: true,
   mustChangePassword,
   expiresAt: new Date("2030-01-01T00:00:00.000Z"),
@@ -103,5 +106,26 @@ describe("M2 auth bridge", () => {
     expect(allowed).toEqual({allow: true});
     expect(ProtectedRouteDecisionSchema.parse(invalid)).toEqual(invalid);
     expect(JSON.stringify([invalid, forced, allowed])).not.toContain("server-only-user-id");
+  });
+
+  it("enforces role lists inside the shared protected-route decision", () => {
+    expect(decideProtectedRoute(
+      {ok: true, session: activeSession(false, "DOSEN")},
+      "id",
+      "/id/portal-dosen",
+      {roles: ["DOSEN"]},
+    )).toEqual({allow: true});
+    expect(decideProtectedRoute(
+      {ok: true, session: activeSession(false, "ADMIN")},
+      "id",
+      "/id/portal-dosen",
+      {roles: ["DOSEN"]},
+    )).toEqual({allow: false, redirectTo: "/id/admin"});
+    expect(decideProtectedRoute(
+      {ok: true, session: activeSession(false, "DOSEN")},
+      "id",
+      "/id/admin",
+      {roles: ["ADMIN", "EDITOR", "PETUGAS", "SATGAS_PPKS"]},
+    )).toEqual({allow: false, redirectTo: "/id/portal-dosen"});
   });
 });

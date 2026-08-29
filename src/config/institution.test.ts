@@ -8,11 +8,13 @@ describe("FUSPI identity contract", () => {
     expect(institution.name).toBe("Fakultas Ushuluddin dan Pemikiran Islam");
   });
 
-  it("contains exactly the three currently active study programs in order", () => {
+  it("contains exactly the five active study programs in order", () => {
     expect(institution.studyPrograms.map(({code}) => code)).toEqual([
       "IAT",
       "IH",
       "AFI",
+      "SAA",
+      "TASPI",
     ]);
   });
 });
