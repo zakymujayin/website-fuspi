@@ -88,6 +88,7 @@ export default async function AdminLayout({
       homeSlider: t("items.homeSlider"),
       homeStatistic: t("items.homeStatistic"),
       homeSection: t("items.homeSection"),
+      homeVideo: t("items.homeVideo"),
       homeSettings: t("items.homeSettings"),
       facilities: t("items.facilities"),
       beranda: t("items.beranda"),

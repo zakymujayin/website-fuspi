@@ -119,6 +119,10 @@ export const PpksReplyViewSchema = z
   .object({
     id: z.string().min(1).max(191),
     authorId: z.string().min(1).max(191).nullable(),
+    /* Carried into the view so Satgas can tell a note from a reply the reporter
+       can see. Without it the two are indistinguishable once written, which is
+       the mistake docs/14 line 77 asks to be designed against. */
+    isInternal: z.boolean(),
     body: z.string().min(1).max(1_048_576),
     createdAt: z.date(),
   })

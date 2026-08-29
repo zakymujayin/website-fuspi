@@ -4,9 +4,8 @@ import {readSessionToken} from "@/lib/auth/runtime/request-session";
 import {getPrismaClient} from "@/lib/db/client";
 import {createPpksKeyResolver} from "@/lib/tickets/ppks-encryption";
 import {createTicketQueryBoundary} from "@/features/tickets/query-isolation";
+import {getTicketTrackingSecret} from "@/lib/tickets/tracking-secret";
 
-const TRACKING_HMAC_SECRET = process.env.TRACKING_HMAC_SECRET
-  ?? "dev-tracking-hmac-secret-min-32-chars!!";
 
 /**
  * The single construction point for the ticket query boundary.
@@ -20,7 +19,7 @@ export function getTicketQueryBoundary() {
   return createTicketQueryBoundary({
     database: getPrismaClient(),
     resolveKey: createPpksKeyResolver(),
-    trackingHmacSecret: TRACKING_HMAC_SECRET,
+    trackingHmacSecret: getTicketTrackingSecret(),
   });
 }
 

@@ -6,11 +6,11 @@ import {createTicketQueryBoundary} from "@/features/tickets/query-isolation";
 import {addPublicReply, getPublicTicket, submitPublicTicket} from "@/features/tickets/workflow";
 import {getPrismaClient} from "@/lib/db/client";
 import {createPpksKeyResolver} from "@/lib/tickets/ppks-encryption";
+import {getTicketTrackingSecret} from "@/lib/tickets/tracking-secret";
 
 /* Mirrors the public ticket route: the same secrets and the same client-address
    derivation, so the rate limit counts a submitter identically whichever entry
    point they arrive through. */
-const TRACKING_HMAC_SECRET = process.env.TRACKING_HMAC_SECRET ?? "dev-tracking-hmac-secret-min-32-chars!!";
 const IP_HMAC_SECRET = process.env.IP_HMAC_SECRET ?? "dev-ip-hmac-secret-minimum-32chars!!";
 
 async function clientIp(): Promise<string> {
@@ -82,7 +82,7 @@ export async function submitComplaintAction(
     },
     await clientIp(),
     IP_HMAC_SECRET,
-    TRACKING_HMAC_SECRET,
+    getTicketTrackingSecret(),
   );
 
   if (!result.ok) return {status: "error", code: failureCode(result.code)};
@@ -143,7 +143,7 @@ async function trackStatusOnly(
     const boundary = createTicketQueryBoundary({
       database: getPrismaClient(),
       resolveKey: ppksResolver(),
-      trackingHmacSecret: TRACKING_HMAC_SECRET,
+      trackingHmacSecret: getTicketTrackingSecret(),
     });
     const tracked = await boundary.tracking({ticketNumber, token});
     if (!tracked.ok) return null;
@@ -167,8 +167,8 @@ export async function trackComplaintAction(
   const prisma = getPrismaClient();
 
   const result = text(form, "intent") === "reply"
-    ? await addPublicReply(prisma, ticketNumber, token, text(form, "body"), TRACKING_HMAC_SECRET)
-    : await getPublicTicket(prisma, ticketNumber, token, TRACKING_HMAC_SECRET);
+    ? await addPublicReply(prisma, ticketNumber, token, text(form, "body"), getTicketTrackingSecret())
+    : await getPublicTicket(prisma, ticketNumber, token, getTicketTrackingSecret());
 
   if (result.ok) return {status: "found", ticket: serialise(result.data), token};
 

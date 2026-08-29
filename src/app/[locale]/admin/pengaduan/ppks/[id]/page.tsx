@@ -3,9 +3,12 @@ import type {Metadata} from "next";
 import {notFound} from "next/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
+import {PpksCaseActions, type PpksCaseActionLabels} from "@/components/admin/ppks/ppks-case-actions";
+import {PpksReplyComposer, type PpksReplyLabels} from "@/components/admin/ppks/ppks-reply-composer";
 import {PpksTicketDetailSchema} from "@/contracts/ticket";
 import {Link} from "@/i18n/navigation";
 import {currentSessionToken, getTicketQueryBoundary} from "@/features/tickets/boundary";
+import {getPrismaClient} from "@/lib/db/client";
 import {isPpksEncryptionConfigured} from "@/lib/tickets/ppks-encryption";
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
@@ -44,6 +47,55 @@ export default async function AdminPpksDetailPage({
   const stamp = new Intl.DateTimeFormat(locale, {
     dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Jakarta",
   });
+
+  /* Only Satgas members can be assigned. Offering the wider staff list would
+     invite handing a PPKS case to an account that cannot even open it. */
+  const assignees = await getPrismaClient().user.findMany({
+    where: {role: "SATGAS_PPKS", isActive: true},
+    select: {id: true, name: true},
+    orderBy: {name: "asc"},
+  });
+
+  const errors = {
+    SESSION_INVALID: t("errorSession"),
+    REQUEST_INVALID: t("errorRequestInvalid"),
+    NOT_FOUND: t("errorNotFound"),
+    VALIDATION_FAILED: t("errorRequestInvalid"),
+    UNAVAILABLE: t("errorUnavailable"),
+  };
+  const statuses = Object.fromEntries(
+    (["BARU", "DIVERIFIKASI", "DIPROSES", "MENUNGGU_PELAPOR", "SELESAI", "DITOLAK"] as const)
+      .map((value) => [value, t(`status${value}` as "statusBARU")]),
+  );
+  const priorities = Object.fromEntries(
+    (["RENDAH", "SEDANG", "TINGGI", "URGENT"] as const)
+      .map((value) => [value, t(`priority${value}` as "priorityRENDAH")]),
+  );
+
+  const replyLabels = {
+    title: t("composerTitle"),
+    publicTab: t("replyPublicTab"), internalTab: t("replyInternalTab"),
+    publicHint: t("replyPublicHint"), internalHint: t("replyInternalHint"),
+    bodyLabel: t("replyBody"),
+    sendPublic: t("replySendPublic"), sendInternal: t("replySendInternal"),
+    sending: t("saving"),
+    savedPublic: t("replySavedPublic"), savedInternal: t("replySavedInternal"),
+    errors,
+  } satisfies PpksReplyLabels;
+
+  const actionLabels = {
+    statusTitle: t("statusTitle"), statusField: t("statusField"),
+    statusReason: t("statusReason"), statusSubmit: t("statusSubmit"),
+    priorityTitle: t("priorityTitle"), priorityField: t("priorityField"),
+    priorityReason: t("priorityReason"), priorityReasonHint: t("priorityReasonHint"),
+    prioritySubmit: t("prioritySubmit"),
+    assignTitle: t("assignTitle"), assignField: t("assignField"),
+    assignSubmit: t("assignSubmit"), assignEmpty: t("assignEmpty"),
+    closeTitle: t("closeTitle"), closeField: t("closeField"),
+    closeHint: t("closeHint"), closeSubmit: t("closeSubmit"),
+    saving: t("saving"), saved: t("saved"), optional: t("optional"),
+    errors, statuses, priorities,
+  } satisfies PpksCaseActionLabels;
 
   return (
     <div className="max-w-3xl">
@@ -132,9 +184,23 @@ export default async function AdminPpksDetailPage({
           <p className="mt-2 text-sm text-slate-500">{t("repliesEmpty")}</p>
         ) : (
           <ol className="mt-3 space-y-4">
+            {/* An internal note is marked and tinted so it can never be mistaken
+                for something the reporter has already read. */}
             {ticket.replies.map((reply) => (
-              <li key={reply.id} className="border-s-2 border-slate-200 ps-4">
-                <p className="font-mono text-xs text-slate-400">{stamp.format(reply.createdAt)}</p>
+              <li
+                key={reply.id}
+                className={`border-s-2 ps-4 ${
+                  reply.isInternal ? "border-warning bg-warning-surface/40 py-2" : "border-slate-200"
+                }`}
+              >
+                <p className="flex flex-wrap items-center gap-2">
+                  <span className="font-mono text-xs text-slate-400">{stamp.format(reply.createdAt)}</span>
+                  <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                    reply.isInternal ? "bg-warning-surface text-slate-900" : "bg-royal-50 text-royal-700"
+                  }`}>
+                    {reply.isInternal ? t("replyInternalBadge") : t("replyPublicBadge")}
+                  </span>
+                </p>
                 <p dir="auto" className="mt-1 text-sm whitespace-pre-wrap text-slate-700">{reply.body}</p>
               </li>
             ))}
@@ -151,7 +217,25 @@ export default async function AdminPpksDetailPage({
         </section>
       ) : null}
 
-      <p className="mt-10 text-xs text-slate-500">{t("actionsPending")}</p>
+      <section aria-labelledby="ppks-compose" className="mt-10 border-t border-slate-200 pt-8">
+        <h2 id="ppks-compose" className="font-display text-lg font-semibold text-slate-900">
+          {t("composerTitle")}
+        </h2>
+        <PpksReplyComposer ticketId={ticket.id} labels={replyLabels} />
+      </section>
+
+      <section aria-labelledby="ppks-actions" className="mt-10 border-t border-slate-200 pt-8">
+        <h2 id="ppks-actions" className="font-display text-lg font-semibold text-slate-900">
+          {t("actionsTitle")}
+        </h2>
+        <PpksCaseActions
+          ticketId={ticket.id}
+          currentStatus={ticket.status}
+          currentPriority={ticket.priority}
+          assignees={assignees}
+          labels={actionLabels}
+        />
+      </section>
     </div>
   );
 }

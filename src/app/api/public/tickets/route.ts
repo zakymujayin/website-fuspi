@@ -1,9 +1,9 @@
 import {submitPublicTicket, getPublicTicket, addPublicReply, ticketWorkflowHttpStatus} from "@/features/tickets/workflow";
 import {getPrismaClient} from "@/lib/db/client";
+import {getTicketTrackingSecret} from "@/lib/tickets/tracking-secret";
 
 const MAX_JSON_BYTES = 1_048_576;
 
-const TRACKING_HMAC_SECRET = process.env.TRACKING_HMAC_SECRET ?? "dev-tracking-hmac-secret-min-32-chars!!";
 const IP_HMAC_SECRET = process.env.IP_HMAC_SECRET ?? "dev-ip-hmac-secret-minimum-32chars!!";
 
 function json(value: unknown, status = 200) {
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
       getPrismaClient(),
       String(input.ticketNumber ?? ""),
       String(input.token ?? ""),
-      TRACKING_HMAC_SECRET,
+      getTicketTrackingSecret(),
     );
     return json(result.ok ? result.data : result, ticketWorkflowHttpStatus(result));
   }
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
       String(input.ticketNumber ?? ""),
       String(input.token ?? ""),
       String(input.body ?? ""),
-      TRACKING_HMAC_SECRET,
+      getTicketTrackingSecret(),
     );
     return json(result.ok ? result.data : result, ticketWorkflowHttpStatus(result));
   }
@@ -87,7 +87,7 @@ export async function POST(request: Request) {
     input,
     clientIp(request),
     IP_HMAC_SECRET,
-    TRACKING_HMAC_SECRET,
+    getTicketTrackingSecret(),
   );
   return json(result.ok ? result.data : result, ticketWorkflowHttpStatus(result));
 }
@@ -98,7 +98,7 @@ export async function GET(request: Request) {
     getPrismaClient(),
     url.searchParams.get("ticketNumber") ?? "",
     url.searchParams.get("token") ?? "",
-    TRACKING_HMAC_SECRET,
+    getTicketTrackingSecret(),
   );
   return json(result.ok ? result.data : result, ticketWorkflowHttpStatus(result));
 }

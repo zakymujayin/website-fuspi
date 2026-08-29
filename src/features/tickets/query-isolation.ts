@@ -78,6 +78,7 @@ const PPKS_DETAIL_SELECT = {
     select: {
       id: true,
       authorId: true,
+      isInternal: true,
       bodyCiphertext: true,
       createdAt: true,
     },
@@ -212,6 +213,7 @@ function projectPpksDetail(
     replies: row.replies.map((reply) => ({
       id: reply.id,
       authorId: reply.authorId,
+      isInternal: reply.isInternal,
       body: openPpksReplyBody(
         reply.bodyCiphertext,
         row.id,

@@ -5,8 +5,8 @@ import {headers} from "next/headers";
 import {submitPpksReport} from "@/features/tickets/workflow";
 import {getPrismaClient} from "@/lib/db/client";
 import {getPpksSealingKey} from "@/lib/tickets/ppks-encryption";
+import {getTicketTrackingSecret} from "@/lib/tickets/tracking-secret";
 
-const TRACKING_HMAC_SECRET = process.env.TRACKING_HMAC_SECRET ?? "dev-tracking-hmac-secret-min-32-chars!!";
 const IP_HMAC_SECRET = process.env.IP_HASH_SECRET ?? "dev-ip-hmac-secret-minimum-32chars!!";
 
 /* Only the HMAC of the address is ever stored, per docs/14 D5: never a raw IP. */
@@ -56,7 +56,7 @@ export async function submitPpksReportAction(
     },
     await clientIp(),
     IP_HMAC_SECRET,
-    TRACKING_HMAC_SECRET,
+    getTicketTrackingSecret(),
     sealingKey,
   );
 
