@@ -106,6 +106,7 @@ export default async function AdminLayout({
       testimoni: t("items.testimoni"),
       fasilitas: t("items.fasilitas"),
       lecturerImport: t("items.lecturerImport"),
+      ppksReports: t("items.ppksReports"),
       new: t("items.new"),
       baru: t("items.baru"),
       edit: t("items.edit"),
