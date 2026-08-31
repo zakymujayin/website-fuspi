@@ -98,6 +98,58 @@ Kegagalan provider, state, akun belum diprovision, atau outage diarahkan kembali
 ke halaman login dengan pesan generik. Tidak ada email, NIM/NIP/NIDN, access
 token, id token, atau claim SILA yang dikirim ke UI, log, analytics, atau CMS.
 
+### Reverse handoff FUSPI ke SILA
+
+Untuk kebutuhan pegawai yang sudah login di website FUSPI lalu membuka SILA
+tanpa memasukkan username/password lagi, arah integrasinya berbeda: FUSPI
+menjadi issuer handoff dan SILA menjadi consumer.
+
+FUSPI menyediakan:
+
+```text
+GET /api/auth/sila/launch?locale=id&next=/dashboard
+```
+
+Route ini:
+
+- membaca session database FUSPI;
+- bila user belum login FUSPI, membuka `NEXT_PUBLIC_SILA_URL` biasa;
+- bila user aktif dan role termasuk allowlist, membuat token HS256 60 detik;
+- redirect ke `SILA_HANDOFF_URL` dengan `token` dan `next=/dashboard`;
+- tidak mengirim password, session cookie FUSPI, atau database token FUSPI.
+
+Env FUSPI:
+
+```env
+SILA_HANDOFF_ENABLED=true
+SILA_HANDOFF_URL=https://sila.example.ac.id/api/auth/fuspi/callback
+SILA_HANDOFF_SHARED_SECRET=...
+SILA_HANDOFF_ISSUER=fuspi-web
+SILA_HANDOFF_AUDIENCE=sila
+SILA_HANDOFF_TTL_SECONDS=60
+SILA_HANDOFF_ALLOWED_ROLES=ADMIN,PETUGAS,STAF_UMUM,DEKAN,WADEK,KABAG,DOSEN
+```
+
+Payload token:
+
+```json
+{
+  "iss": "fuspi-web",
+  "aud": "sila",
+  "sub": "fuspi-user-id",
+  "email": "user@example.ac.id",
+  "name": "Nama Pengguna",
+  "role": "DOSEN",
+  "iat": 1788155538,
+  "exp": 1788155598,
+  "jti": "opaque-random-id"
+}
+```
+
+SILA wajib memverifikasi signature, `iss`, `aud`, `exp`, allowlist role,
+akun aktif yang cocok dengan email, dan `jti` one-time-use sebelum menerbitkan
+session SILA. Token handoff tidak boleh dicatat di log atau disimpan mentah.
+
 ## F. Ownership dan perubahan kontrak
 
 - Owner SILA: tim layanan akademik/teknis SILA.

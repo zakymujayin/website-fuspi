@@ -1,15 +1,17 @@
 import { ArrowRight, ArrowUpRight, BookOpen, DoorOpen, FileText, Headset } from "lucide-react";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/public/reveal";
 import { Link } from "@/i18n/navigation";
+import { isSilaHandoffAvailable } from "@/lib/auth/runtime/sila-handoff";
 
 type ServiceCard = {
   key: "sila" | "ejournal" | "booking" | "complaints";
   icon: typeof FileText;
   href: string;
   external: boolean;
+  newTab?: boolean;
 };
 
 /**
@@ -17,14 +19,18 @@ type ServiceCard = {
  * E-Journal has no dedicated route in this build — both fall back to the
  * general services hub rather than a guessed destination (see AGENTS.md).
  */
-function buildServices(): readonly ServiceCard[] {
+function buildServices(locale: string): readonly ServiceCard[] {
   const silaUrl = process.env.NEXT_PUBLIC_SILA_URL;
+  const silaHandoffEnabled = isSilaHandoffAvailable();
   return [
     {
       key: "sila",
       icon: FileText,
-      href: silaUrl && silaUrl.length > 0 ? silaUrl : "/layanan",
-      external: Boolean(silaUrl && silaUrl.length > 0),
+      href: silaHandoffEnabled
+        ? `/api/auth/sila/launch?locale=${encodeURIComponent(locale)}&next=${encodeURIComponent("/dashboard")}`
+        : silaUrl && silaUrl.length > 0 ? silaUrl : "/layanan",
+      external: silaHandoffEnabled || Boolean(silaUrl && silaUrl.length > 0),
+      newTab: !silaHandoffEnabled && Boolean(silaUrl && silaUrl.length > 0),
     },
     { key: "ejournal", icon: BookOpen, href: "/layanan", external: false },
     { key: "booking", icon: DoorOpen, href: "/peminjaman", external: false },
@@ -34,7 +40,8 @@ function buildServices(): readonly ServiceCard[] {
 
 export async function ServicesSection() {
   const t = await getTranslations("Home");
-  const services = buildServices();
+  const locale = await getLocale();
+  const services = buildServices(locale);
 
   return (
     <section className="bg-gradient-to-b from-slate-50 to-royal-50/40 py-14 md:py-20">
@@ -90,7 +97,12 @@ export async function ServicesSection() {
             return (
               <Reveal key={service.key} index={index}>
                 {service.external ? (
-                  <a href={service.href} target="_blank" rel="noopener noreferrer" className="block h-full">
+                  <a
+                    href={service.href}
+                    target={service.newTab ? "_blank" : undefined}
+                    rel={service.newTab ? "noopener noreferrer" : undefined}
+                    className="block h-full"
+                  >
                     {content}
                   </a>
                 ) : (
