@@ -3,7 +3,7 @@
 - Task: `M4-GPT-LECTURER-PORTAL-LOGIN-REDIRECT`
 - Branch: `feat/lecturer-portal-complaint-booking`
 - Base SHA: `3a7fc8e905b38c0a081212f2a9c52ec864defb65`
-- Head SHA: `496bd2e310e0b008bc6c9fc89f1bbd236298d955`
+- Head SHA: `67896cdcb38884c6ae91a280ef07e90f70ccf14b`
 
 ## Summary
 
@@ -69,7 +69,7 @@ of login/password responses is unchanged; only safe redirect selection changed.
   - Passed.
 - `TASK_MANIFEST=coordination/tasks/M4-GPT-LECTURER-PORTAL-LOGIN-REDIRECT.md TASK_BASE=3a7fc8e905b38c0a081212f2a9c52ec864defb65 npm run check:scope`
   - Pre-commit escalated run passed but reported 0 committed files because changes were still in the working tree.
-  - Final post-commit result must be recorded after commit.
+  - Final post-commit escalated run passed: 6 changed files are within lease.
 
 ## Untested Areas / Risks / Follow-ups
 
