@@ -13,8 +13,8 @@ import {
   validateRequestSession,
 } from "@/lib/auth/runtime/request-session";
 import {
-  normalizeAuthRedirect,
   parseAppLocale,
+  resolveActiveLoginSessionDestination,
 } from "@/lib/auth/runtime/redirect";
 import { isSilaSsoAvailable } from "@/lib/auth/runtime/sila-sso";
 
@@ -52,10 +52,11 @@ export default async function LoginPage({ params, searchParams }: LoginPageProps
     try {
       const session = await validateRequestSession(getPrismaClient(), cookieStore);
       if (session.ok) {
-        const destination = normalizeAuthRedirect(destinationCandidate, appLocale);
-        activeSessionDestination = session.session.mustChangePassword
-          ? `/${appLocale}/change-password?next=${encodeURIComponent(destination)}`
-          : destination;
+        activeSessionDestination = resolveActiveLoginSessionDestination(
+          session.session,
+          destinationCandidate,
+          appLocale,
+        );
       } else {
         sessionInvalid = true;
       }

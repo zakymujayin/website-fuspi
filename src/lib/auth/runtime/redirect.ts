@@ -88,6 +88,17 @@ export function resolvePostLoginDestination(
     : destination;
 }
 
+export function resolveActiveLoginSessionDestination(
+  session: Readonly<{role: unknown; mustChangePassword: boolean}>,
+  candidate: unknown,
+  locale: AppLocale,
+): string {
+  const destination = resolvePostLoginDestination(session.role, candidate, locale);
+  return session.mustChangePassword
+    ? `/${locale}/change-password?next=${encodeURIComponent(destination)}`
+    : destination;
+}
+
 export function createPostPasswordLoginRedirect(
   locale: AppLocale,
   destination: unknown,

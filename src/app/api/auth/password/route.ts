@@ -7,7 +7,7 @@ import {
 import {getSessionCookieName} from "@/lib/auth/runtime/cookie";
 import {isSameOriginRequest} from "@/lib/auth/runtime/csrf";
 import {changeOwnPassword} from "@/lib/auth/runtime/password";
-import {normalizeAuthRedirect, parseAppLocale} from "@/lib/auth/runtime/redirect";
+import {parseAppLocale, resolvePostLoginDestination} from "@/lib/auth/runtime/redirect";
 import {createDatabaseSession} from "@/lib/auth/runtime/session";
 import {getPrismaClient} from "@/lib/db/client";
 import type {SessionCookieDefinition} from "@/lib/auth/runtime/cookie";
@@ -63,8 +63,11 @@ export async function POST(request: NextRequest) {
 
   const prisma = getPrismaClient();
   let issuedCookie: SessionCookieDefinition | undefined;
+  let changedUserRole: unknown;
   const result = await changeOwnPassword(prisma, sessionToken, input, {
     async afterSessionRevocation(tx, userId) {
+      const user = await tx.user.findUnique({where: {id: userId}, select: {role: true}});
+      changedUserRole = user?.role;
       const issued = await createDatabaseSession(tx, userId);
       issuedCookie = issued.cookie;
     },
@@ -73,7 +76,8 @@ export async function POST(request: NextRequest) {
     const response = createResponse(
       {
         ok: true,
-        redirectTo: normalizeAuthRedirect(
+        redirectTo: resolvePostLoginDestination(
+          changedUserRole,
           requestUrl.searchParams.get("redirectTo"),
           locale,
         ),

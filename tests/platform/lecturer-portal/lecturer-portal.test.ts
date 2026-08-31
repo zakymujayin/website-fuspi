@@ -5,7 +5,10 @@ import {
   LecturerProfileInputSchema,
   TrustedLecturerActorSchema,
 } from "@/contracts/lecturer-portal";
-import {resolvePostLoginDestination} from "@/lib/auth/runtime/redirect";
+import {
+  resolveActiveLoginSessionDestination,
+  resolvePostLoginDestination,
+} from "@/lib/auth/runtime/redirect";
 
 const FUTURE = new Date("2027-01-01T00:00:00.000Z");
 
@@ -109,6 +112,24 @@ describe("post-login destination", () => {
     expect(resolvePostLoginDestination("DOSEN", null, "id")).toBe("/id/portal-dosen");
     expect(resolvePostLoginDestination("DOSEN", "/id/admin", "id")).toBe("/id/portal-dosen");
     expect(resolvePostLoginDestination("DOSEN", "/id/admin/posts", "id")).toBe("/id/portal-dosen");
+  });
+
+  it("keeps active lecturer sessions on the portal path, including password rotation", () => {
+    expect(resolveActiveLoginSessionDestination(
+      {role: "DOSEN", mustChangePassword: false},
+      null,
+      "id",
+    )).toBe("/id/portal-dosen");
+    expect(resolveActiveLoginSessionDestination(
+      {role: "DOSEN", mustChangePassword: true},
+      null,
+      "id",
+    )).toBe("/id/change-password?next=%2Fid%2Fportal-dosen");
+    expect(resolveActiveLoginSessionDestination(
+      {role: "DOSEN", mustChangePassword: true},
+      "/id/admin/posts",
+      "id",
+    )).toBe("/id/change-password?next=%2Fid%2Fportal-dosen");
   });
 
   it("leaves every other role on its existing destination", () => {
