@@ -3,7 +3,7 @@
 - Task: `M4-GPT-HOMEPAGE-CMS-DYNAMIC-RENDERING`
 - Branch: `feat/lecturer-portal-complaint-booking`
 - Base SHA: `13909c53f04c91871ed3af70381460908e82b373`
-- Head SHA: `602ed2e85c16dc777fe3b3ae24d0c13b5b8622fc`
+- Head SHA: `341b5805f2ab95e4a78a686d8ccfff8457573b32`
 
 ## Summary
 
@@ -51,7 +51,7 @@ None. No API, Prisma schema, migration, auth, crypto, or env contract changes.
   - Passed.
 - `TASK_MANIFEST=coordination/tasks/M4-GPT-HOMEPAGE-CMS-DYNAMIC-RENDERING.md TASK_BASE=13909c53f04c91871ed3af70381460908e82b373 npm run check:scope`
   - Pre-commit sandbox run failed with `spawnSync git EPERM`; escalated run succeeded pre-commit but reported 0 committed files because changes were still in working tree.
-  - Final post-commit result must be recorded after commit.
+  - Final post-commit escalated run passed: 4 changed files are within lease.
 
 ## Untested Areas / Risks / Follow-ups
 
