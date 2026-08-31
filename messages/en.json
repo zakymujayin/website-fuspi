@@ -21,6 +21,12 @@
       "INVALID_CREDENTIALS": "Incorrect email or password. Check your details and try again.",
       "TRY_AGAIN_LATER": "Too many sign-in attempts. Try again in a few minutes.",
       "AUTH_UNAVAILABLE": "The sign-in service is unavailable right now. Please try again shortly."
+    },
+    "sila": {
+      "divider": "or",
+      "submit": "Sign in with SILA",
+      "note": "SILA access is available only after the official SSO contract is configured.",
+      "failure": "SILA sign-in could not be completed. Use a local account or contact the faculty admin."
     }
   },
   "PasswordChange": {

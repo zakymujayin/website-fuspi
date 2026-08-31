@@ -21,6 +21,12 @@
       "INVALID_CREDENTIALS": "Email atau kata sandi salah. Periksa kembali dan coba lagi.",
       "TRY_AGAIN_LATER": "Terlalu banyak percobaan masuk. Coba lagi dalam beberapa menit.",
       "AUTH_UNAVAILABLE": "Layanan masuk sedang tidak tersedia. Coba lagi beberapa saat lagi."
+    },
+    "sila": {
+      "divider": "atau",
+      "submit": "Masuk dengan SILA",
+      "note": "Akses SILA hanya aktif setelah kontrak SSO resmi dikonfigurasi.",
+      "failure": "Login SILA belum dapat diselesaikan. Gunakan akun lokal atau hubungi admin fakultas."
     }
   },
   "PasswordChange": {

@@ -1,17 +1,19 @@
 "use client";
 
-import { AlertCircleIcon, InfoIcon } from "lucide-react";
+import { AlertCircleIcon, InfoIcon, KeyRoundIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { clearAuthDraft, peekAuthDraft, useAuthDraft } from "@/components/auth/auth-draft";
 import { PasswordField } from "@/components/auth/password-field";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { LoginResultSchema, type LoginResult } from "@/contracts/auth";
+import { cn } from "@/lib/utils";
 
 type PublicLoginFailureCode = Extract<LoginResult, { ok: false }>["code"];
 
@@ -21,6 +23,8 @@ type LoginFormProps = {
   next?: string;
   /** Set only after the server found a cookie and rejected its database session. */
   sessionInvalid?: boolean;
+  silaSsoEnabled?: boolean;
+  ssoFailure?: string;
 };
 
 type Failure = {
@@ -29,7 +33,13 @@ type Failure = {
   attempt: number;
 };
 
-export function LoginForm({ locale, next, sessionInvalid = false }: LoginFormProps) {
+export function LoginForm({
+  locale,
+  next,
+  sessionInvalid = false,
+  silaSsoEnabled = false,
+  ssoFailure,
+}: LoginFormProps) {
   const t = useTranslations("Auth");
   const router = useRouter();
 
@@ -135,6 +145,10 @@ export function LoginForm({ locale, next, sessionInvalid = false }: LoginFormPro
   const busy = submitting;
   const locked = busy || rateLimited;
 
+  const destination = next ?? `/${locale}/admin`;
+  const ssoUrl = `/api/auth/sila/start?locale=${encodeURIComponent(locale)}&next=${encodeURIComponent(destination)}`;
+  const showSsoFailure = Boolean(ssoFailure);
+
   return (
     <form onSubmit={handleSubmit} aria-labelledby="login-title" aria-busy={busy} noValidate>
       {sessionInvalid ? (
@@ -175,6 +189,16 @@ export function LoginForm({ locale, next, sessionInvalid = false }: LoginFormPro
       <div aria-live="polite" className="sr-only">
         {busy ? t("submittingStatus") : ""}
       </div>
+
+      {showSsoFailure ? (
+        <div
+          role="status"
+          className="mb-5 flex items-start gap-2 rounded-lg bg-info-surface p-3 text-sm text-foreground"
+        >
+          <InfoIcon aria-hidden className="mt-0.5 size-4 shrink-0 text-info" />
+          <span>{t("sila.failure")}</span>
+        </div>
+      ) : null}
 
       <FieldGroup>
         <Field>
@@ -233,6 +257,23 @@ export function LoginForm({ locale, next, sessionInvalid = false }: LoginFormPro
           )}
         </Button>
       </FieldGroup>
+
+      {silaSsoEnabled ? (
+        <div className="mt-6 flex flex-col gap-4">
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <Separator className="flex-1" />
+            <span>{t("sila.divider")}</span>
+            <Separator className="flex-1" />
+          </div>
+          <a href={ssoUrl} className={cn(buttonVariants({ variant: "outline", size: "lg" }), "w-full")}>
+            <KeyRoundIcon data-icon="inline-start" />
+            {t("sila.submit")}
+          </a>
+          <p className="text-center text-xs leading-relaxed text-muted-foreground">
+            {t("sila.note")}
+          </p>
+        </div>
+      ) : null}
     </form>
   );
 }

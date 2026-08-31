@@ -106,6 +106,13 @@ export const PasswordChangeResultSchema = z.discriminatedUnion("ok", [
     .strict(),
 ]);
 
+export const SilaSsoCallbackFailureCodeSchema = z.enum([
+  "STATE_INVALID",
+  "PROVIDER_REJECTED",
+  "UNPROVISIONED",
+  "AUTH_UNAVAILABLE",
+]);
+
 export const ProtectedRouteDecisionSchema = z.discriminatedUnion("allow", [
   z.object({allow: z.literal(true)}).strict(),
   z
@@ -171,6 +178,7 @@ export type LoginCredentials = z.infer<typeof LoginCredentialsSchema>;
 export type LoginResult = z.infer<typeof LoginResultSchema>;
 export type SessionInvalidResult = z.infer<typeof SessionInvalidResultSchema>;
 export type PasswordChangeResult = z.infer<typeof PasswordChangeResultSchema>;
+export type SilaSsoCallbackFailureCode = z.infer<typeof SilaSsoCallbackFailureCodeSchema>;
 export type ProtectedRouteDecision = z.infer<typeof ProtectedRouteDecisionSchema>;
 export type PasswordChangeInput = z.infer<typeof PasswordChangeInputSchema>;
 export type ActiveDatabaseSession = z.infer<typeof ActiveDatabaseSessionSchema>;

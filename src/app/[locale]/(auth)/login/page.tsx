@@ -16,6 +16,7 @@ import {
   normalizeAuthRedirect,
   parseAppLocale,
 } from "@/lib/auth/runtime/redirect";
+import { isSilaSsoAvailable } from "@/lib/auth/runtime/sila-sso";
 
 type LoginPageProps = {
   params: Promise<{ locale: string }>;
@@ -38,7 +39,9 @@ export default async function LoginPage({ params, searchParams }: LoginPageProps
 
   const t = await getTranslations("Auth");
   const next = (await searchParams).next;
+  const sso = (await searchParams).sso;
   const destinationCandidate = typeof next === "string" ? next : undefined;
+  const ssoFailure = typeof sso === "string" ? sso : undefined;
   const appLocale = parseAppLocale(locale);
   const cookieStore = await cookies();
   const hasSessionCookie = Boolean(readSessionToken(cookieStore));
@@ -103,6 +106,8 @@ export default async function LoginPage({ params, searchParams }: LoginPageProps
           locale={locale}
           next={destinationCandidate}
           sessionInvalid={sessionInvalid}
+          silaSsoEnabled={isSilaSsoAvailable()}
+          ssoFailure={ssoFailure}
         />
       </div>
     </div>

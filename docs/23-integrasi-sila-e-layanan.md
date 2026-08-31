@@ -63,6 +63,41 @@ SSO hanya dilakukan bila universitas/SILA menyediakan OIDC atau SAML resmi.
 - Logout lokal dan SSO, session revocation, MFA, offboarding, serta fallback emergency admin wajib didesain sebelum aktivasi.
 - Sampai fase ini disetujui, Auth.js website dan Auth.js SILA sepenuhnya terpisah.
 
+### Kontrak implementasi FUSPI
+
+Website FUSPI menyediakan bridge OIDC yang **nonaktif secara default**. Route
+`/api/auth/sila/start` dan `/api/auth/sila/callback` hanya hidup bila seluruh
+env berikut valid:
+
+- `SILA_SSO_ENABLED=true`
+- `SILA_SSO_AUTHORIZATION_URL`
+- `SILA_SSO_TOKEN_URL`
+- `SILA_SSO_USERINFO_URL`
+- `SILA_SSO_CLIENT_ID`
+- `SILA_SSO_CLIENT_SECRET`
+- `SILA_SSO_SCOPES` default `openid profile email`
+- `SILA_SSO_EMAIL_CLAIM` default `email`
+- `SILA_SSO_IDENTIFIER_CLAIM` default `sub`
+- `SILA_SSO_TIMEOUT_MS` default `5000`
+
+FUSPI memakai authorization code + PKCE, menyimpan `state` dalam cookie
+HttpOnly yang ditandatangani `AUTH_SECRET`, menukar code di server, lalu
+membaca userinfo lewat bearer token. Callback **tidak membuat akun dan tidak
+menaikkan role**. Login berhasil hanya bila email claim SILA cocok dengan akun
+FUSPI yang sudah aktif; role tetap dibaca dari database FUSPI. Sesi yang
+diterbitkan tetap session database FUSPI dengan cookie opaque FUSPI sendiri.
+
+SILA perlu menyediakan endpoint OIDC resmi yang kompatibel dengan flow di atas,
+callback URL allowlist:
+
+```text
+{AUTH_URL}/api/auth/sila/callback
+```
+
+Kegagalan provider, state, akun belum diprovision, atau outage diarahkan kembali
+ke halaman login dengan pesan generik. Tidak ada email, NIM/NIP/NIDN, access
+token, id token, atau claim SILA yang dikirim ke UI, log, analytics, atau CMS.
+
 ## F. Ownership dan perubahan kontrak
 
 - Owner SILA: tim layanan akademik/teknis SILA.
