@@ -4,8 +4,39 @@ export const AuthRoleSchema = z.enum([
   "ADMIN",
   "EDITOR",
   "PETUGAS",
+  "STAF_UMUM",
+  "DEKAN",
+  "WADEK",
+  "KABAG",
   "SATGAS_PPKS",
   "DOSEN",
+]);
+
+export const AdminShellRoleSchema = z.enum([
+  "ADMIN",
+  "EDITOR",
+  "PETUGAS",
+  "STAF_UMUM",
+  "DEKAN",
+  "WADEK",
+  "KABAG",
+  "SATGAS_PPKS",
+]);
+
+export const BookingAdminRoleSchema = z.enum([
+  "ADMIN",
+  "PETUGAS",
+  "STAF_UMUM",
+  "DEKAN",
+  "WADEK",
+  "KABAG",
+]);
+
+export const BookingOnlyAdminRoleSchema = z.enum([
+  "STAF_UMUM",
+  "DEKAN",
+  "WADEK",
+  "KABAG",
 ]);
 
 export const LoginCredentialsSchema = z
@@ -134,6 +165,8 @@ export const AuthorizationContextSchema = z
   .strict();
 
 export type AuthRole = z.infer<typeof AuthRoleSchema>;
+export type AdminShellRole = z.infer<typeof AdminShellRoleSchema>;
+export type BookingAdminRole = z.infer<typeof BookingAdminRoleSchema>;
 export type LoginCredentials = z.infer<typeof LoginCredentialsSchema>;
 export type LoginResult = z.infer<typeof LoginResultSchema>;
 export type SessionInvalidResult = z.infer<typeof SessionInvalidResultSchema>;

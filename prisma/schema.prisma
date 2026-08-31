@@ -32,6 +32,10 @@ enum Role {
   ADMIN
   EDITOR
   PETUGAS
+  STAF_UMUM
+  DEKAN
+  WADEK
+  KABAG
   SATGAS_PPKS
   DOSEN
 }

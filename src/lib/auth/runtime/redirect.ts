@@ -1,4 +1,4 @@
-import {SafeInternalPathSchema} from "@/contracts/auth";
+import {BookingOnlyAdminRoleSchema, SafeInternalPathSchema} from "@/contracts/auth";
 import {routing, type AppLocale} from "@/i18n/routing";
 
 const INTERNAL_ORIGIN = "https://fuspi.invalid";
@@ -75,6 +75,12 @@ export function resolvePostLoginDestination(
   locale: AppLocale,
 ): string {
   const destination = normalizeAuthRedirect(candidate, locale);
+  if (BookingOnlyAdminRoleSchema.safeParse(role).success) {
+    const adminRoot = `/${locale}/admin`;
+    return destination === adminRoot || destination.startsWith(`${adminRoot}/`)
+      ? `/${locale}/admin/peminjaman`
+      : destination;
+  }
   if (role !== "DOSEN") return destination;
   const adminRoot = `/${locale}/admin`;
   return destination === adminRoot || destination.startsWith(`${adminRoot}/`)

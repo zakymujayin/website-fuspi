@@ -2,6 +2,7 @@ import {readFile} from "node:fs/promises";
 
 import {z} from "zod";
 
+import {BookingAdminRoleSchema} from "@/contracts/auth";
 import {getRequestSession} from "@/lib/auth/runtime/request-session";
 import {getPrismaClient} from "@/lib/db/client";
 import {parseStorageRoots} from "@/lib/storage";
@@ -32,7 +33,7 @@ export async function GET(
   if (!parsedId.success) return notFound();
 
   const session = await getRequestSession();
-  if (!session.ok || !["ADMIN", "PETUGAS"].includes(session.session.role)) return notFound();
+  if (!session.ok || !BookingAdminRoleSchema.safeParse(session.session.role).success) return notFound();
 
   try {
     const prisma = getPrismaClient();

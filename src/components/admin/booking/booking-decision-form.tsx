@@ -7,6 +7,7 @@ import {
   executeBookingAdminAction,
   type BookingAdminActionState,
 } from "@/components/admin/booking/booking-admin-actions";
+import type {AuthRole} from "@/contracts/auth";
 import {Field, FieldDescription, FieldLabel} from "@/components/ui/field";
 import {Textarea} from "@/components/ui/textarea";
 
@@ -28,25 +29,36 @@ export type BookingDecisionLabels = {
 };
 
 const INITIAL: BookingAdminActionState = {status: "idle"};
+const STAFF_ROLES = ["ADMIN", "PETUGAS", "STAF_UMUM"];
+const DEAN_ROLES = ["ADMIN", "PETUGAS", "DEKAN"];
+const FOLLOWUP_ROLES = ["ADMIN", "PETUGAS", "WADEK", "KABAG"];
+const REVIEW_ROLES = ["ADMIN", "PETUGAS", "STAF_UMUM", "DEKAN", "WADEK", "KABAG"];
+
+function hasRole(role: AuthRole, allowed: readonly string[]) {
+  return allowed.includes(role);
+}
 
 export function BookingDecisionForm({
   bookingId,
   expectedVersion,
   status,
+  actorRole,
   labels,
 }: {
   bookingId: string;
   expectedVersion: number;
   status: string;
+  actorRole: AuthRole;
   labels: BookingDecisionLabels;
 }) {
   const [state, action, pending] = useActionState(executeBookingAdminAction, INITIAL);
-  const canVerify = status === "DIAJUKAN" || status === "MENUNGGU";
-  const canDispose = status === "DISPOSISI_DEKAN";
-  const canDecide = status === "CEK_KETERSEDIAAN";
-  const canRequestRevision = status === "DISPOSISI_DEKAN" || status === "CEK_KETERSEDIAAN";
-  const canReject = ["DIAJUKAN", "DISPOSISI_DEKAN", "CEK_KETERSEDIAAN", "PERLU_REVISI", "MENUNGGU"].includes(status);
-  const canCancel = canReject || status === "DISETUJUI";
+  const canVerify = hasRole(actorRole, STAFF_ROLES) && (status === "DIAJUKAN" || status === "MENUNGGU");
+  const canDispose = hasRole(actorRole, DEAN_ROLES) && status === "DISPOSISI_DEKAN";
+  const canDecide = hasRole(actorRole, FOLLOWUP_ROLES) && status === "CEK_KETERSEDIAAN";
+  const canRequestRevision = hasRole(actorRole, REVIEW_ROLES) && (status === "DISPOSISI_DEKAN" || status === "CEK_KETERSEDIAAN");
+  const canReject = hasRole(actorRole, REVIEW_ROLES)
+    && ["DIAJUKAN", "DISPOSISI_DEKAN", "CEK_KETERSEDIAAN", "PERLU_REVISI", "MENUNGGU"].includes(status);
+  const canCancel = hasRole(actorRole, REVIEW_ROLES) && (canReject || status === "DISETUJUI");
 
   if (!canVerify && !canDispose && !canDecide && !canRequestRevision && !canReject && !canCancel) return null;
 

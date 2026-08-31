@@ -61,10 +61,10 @@ suite("public booking flow on PostgreSQL", () => {
     return booking;
   }
 
-  function actor() {
+  function actor(role: "ADMIN" | "PETUGAS" | "STAF_UMUM" | "DEKAN" | "WADEK" | "KABAG" = "PETUGAS") {
     return {
       userId: actorId,
-      role: "PETUGAS",
+      role,
       isActive: true,
       mustChangePassword: false,
       expiresAt: new Date(Date.now() + 3_600_000),
@@ -207,6 +207,71 @@ suite("public booking flow on PostgreSQL", () => {
     expect(rejectedBySchedule).toMatchObject({ok: false, code: "TIME_OVERLAP"});
   });
 
+  it("enforces institutional role boundaries across the disposition workflow", async () => {
+    const submitted = await submitBooking(prisma, request({
+      ...slot("15:30", "16:00"),
+      requesterEmail: `${marker}-rbac@example.test`,
+    }));
+    expect(submitted.ok).toBe(true);
+    if (!submitted.ok) return;
+    bookingNumbers.push(submitted.bookingNumber);
+
+    let booking = await bookingByNumber(submitted.bookingNumber);
+    const dekanCannotVerify = await executeBookingCommand(prisma, actor("DEKAN"), {
+      action: "VERIFY_STAFF",
+      bookingId: booking.id,
+      expectedVersion: booking.version,
+      reason: "Melompati staf umum.",
+    });
+    expect(dekanCannotVerify).toMatchObject({ok: false, code: "SESSION_INVALID"});
+
+    const verified = await executeBookingCommand(prisma, actor("STAF_UMUM"), {
+      action: "VERIFY_STAFF",
+      bookingId: booking.id,
+      expectedVersion: booking.version,
+      reason: "Surat permohonan lengkap.",
+    });
+    expect(verified.ok).toBe(true);
+
+    booking = await bookingByNumber(submitted.bookingNumber);
+    expect(booking.status).toBe("DISPOSISI_DEKAN");
+    const staffCannotDispose = await executeBookingCommand(prisma, actor("STAF_UMUM"), {
+      action: "DISPOSE",
+      bookingId: booking.id,
+      expectedVersion: booking.version,
+      target: "WADEK_I",
+      reason: "Bukan kewenangan staf.",
+    });
+    expect(staffCannotDispose).toMatchObject({ok: false, code: "SESSION_INVALID"});
+
+    const disposed = await executeBookingCommand(prisma, actor("DEKAN"), {
+      action: "DISPOSE",
+      bookingId: booking.id,
+      expectedVersion: booking.version,
+      target: "WADEK_I",
+      reason: "Mohon tindak lanjut ketersediaan ruangan.",
+    });
+    expect(disposed.ok).toBe(true);
+
+    booking = await bookingByNumber(submitted.bookingNumber);
+    expect(booking.status).toBe("CEK_KETERSEDIAAN");
+    for (const role of ["STAF_UMUM", "DEKAN"] as const) {
+      const denied = await executeBookingCommand(prisma, actor(role), {
+        action: "APPROVE",
+        bookingId: booking.id,
+        expectedVersion: booking.version,
+      });
+      expect(denied).toMatchObject({ok: false, code: "SESSION_INVALID"});
+    }
+
+    const approved = await executeBookingCommand(prisma, actor("WADEK"), {
+      action: "APPROVE",
+      bookingId: booking.id,
+      expectedVersion: booking.version,
+    });
+    expect(approved.ok).toBe(true);
+  });
+
   it("refuses a group larger than the room", async () => {
     const result = await submitBooking(prisma, request({roomId: smallRoomId, participantCount: 500, ...slot("14:00", "15:00")}));
     expect(result).toMatchObject({ok: false, code: "CAPACITY_EXCEEDED"});
@@ -268,7 +333,7 @@ suite("public booking flow on PostgreSQL", () => {
   });
 
   it("lets the requester cancel a waiting booking with the tracking token", async () => {
-    const submitted = await submitBooking(prisma, request({...slot("16:00", "16:30")}));
+    const submitted = await submitBooking(prisma, request({...slot("16:30", "16:45")}));
     expect(submitted.ok).toBe(true);
     if (!submitted.ok) return;
     bookingNumbers.push(submitted.bookingNumber);

@@ -11,6 +11,7 @@ import {
   normalizeAdminUserSearchParams,
   normalizeTaxonomySearchParams,
 } from "@/contracts/admin-foundation";
+import {AuthRoleSchema} from "@/contracts/auth";
 
 const now = "2026-08-04T03:00:00.000Z";
 const workflow = {locale: "id", status: "DRAFT", sourceVersion: 1, translatorId: "admin-1", reviewerId: null, reviewedAt: null} as const;
@@ -40,6 +41,33 @@ describe("ADMIN user contracts", () => {
     expect(parsed.payload).toMatchObject({name: "Admin Baru", email: "admin.baru@example.com", mustChangePassword: true});
     expect(AdminUserCommandSchema.safeParse({action: "CREATE", payload: {name: "Admin", email: "admin@example.com", initialPassword: "short", confirmPassword: "short", role: "ADMIN"}}).success).toBe(false);
     expect(AdminUserCommandSchema.safeParse({action: "CREATE", payload: {name: "Admin", email: "admin@example.com", initialPassword: "unique-password-2026", confirmPassword: "different-password", role: "ADMIN"}}).success).toBe(false);
+  });
+
+  it("accepts institutional booking roles as application roles", () => {
+    expect(AuthRoleSchema.options).toEqual([
+      "ADMIN",
+      "EDITOR",
+      "PETUGAS",
+      "STAF_UMUM",
+      "DEKAN",
+      "WADEK",
+      "KABAG",
+      "SATGAS_PPKS",
+      "DOSEN",
+    ]);
+    for (const role of ["STAF_UMUM", "DEKAN", "WADEK", "KABAG"] as const) {
+      expect(AdminUserCommandSchema.safeParse({
+        action: "CREATE",
+        payload: {
+          name: `User ${role}`,
+          email: `${role.toLowerCase()}@example.com`,
+          initialPassword: "unique-password-2026",
+          confirmPassword: "unique-password-2026",
+          role,
+          isActive: true,
+        },
+      }).success).toBe(true);
+    }
   });
 
   it("supports optimistic updatedAt changes and exposes no delete command", () => {

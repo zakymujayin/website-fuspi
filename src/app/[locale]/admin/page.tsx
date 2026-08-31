@@ -23,6 +23,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Link } from "@/i18n/navigation";
+import { BookingOnlyAdminRoleSchema } from "@/contracts/auth";
 import { decideProtectedRoute, getRequestSession } from "@/lib/auth/runtime/request-session";
 import { parseAppLocale } from "@/lib/auth/runtime/redirect";
 
@@ -77,12 +78,16 @@ export default async function AdminPage({ params }: AdminPageProps) {
   const { locale } = await params;
   setRequestLocale(locale);
   const appLocale = parseAppLocale(locale);
+  const session = await getRequestSession();
   const decision = decideProtectedRoute(
-    await getRequestSession(),
+    session,
     appLocale,
     `/${appLocale}/admin`,
   );
   if (!decision.allow) redirect(decision.redirectTo);
+  if (session.ok && BookingOnlyAdminRoleSchema.safeParse(session.session.role).success) {
+    redirect(`/${appLocale}/admin/peminjaman`);
+  }
 
   const t = await getTranslations("AdminLanding");
 

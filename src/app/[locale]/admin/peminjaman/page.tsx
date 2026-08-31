@@ -4,7 +4,7 @@ import {redirect} from "next/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {BookingDecisionForm, type BookingDecisionLabels} from "@/components/admin/booking/booking-decision-form";
-import {listBookings} from "@/features/booking/domain";
+import {BOOKING_ADMIN_ROLES, listBookings} from "@/features/booking/domain";
 import {parseAppLocale} from "@/lib/auth/runtime/redirect";
 import {decideProtectedRoute, getRequestSession} from "@/lib/auth/runtime/request-session";
 import {getPrismaClient} from "@/lib/db/client";
@@ -62,9 +62,10 @@ export default async function AdminBookingPage({params}: Props) {
     session,
     appLocale,
     `/${appLocale}/admin/peminjaman`,
-    {roles: ["ADMIN", "PETUGAS"]},
+    {roles: BOOKING_ADMIN_ROLES},
   );
   if (!decision.allow) redirect(decision.redirectTo);
+  const actorRole = session.ok ? session.session.role : "PETUGAS";
 
   const t = await getTranslations("AdminBooking");
   const result = await listBookings(getPrismaClient(), session.ok ? session.session : null, {});
@@ -216,6 +217,7 @@ export default async function AdminBookingPage({params}: Props) {
                 bookingId={item.id}
                 expectedVersion={item.version}
                 status={item.status}
+                actorRole={actorRole}
                 labels={actionLabels}
               />
             </li>

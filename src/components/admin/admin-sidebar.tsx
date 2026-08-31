@@ -3,6 +3,7 @@
 import { Link, usePathname } from "@/i18n/navigation";
 
 import { SIDEBAR_MENU_GROUPS } from "@/components/admin/admin-sidebar-data";
+import { BookingOnlyAdminRoleSchema, type AuthRole } from "@/contracts/auth";
 import {
   Sidebar,
   SidebarContent,
@@ -33,15 +34,18 @@ function isActive(itemHref: string, currentPath: string) {
 
 export function AdminSidebarServer({
   translations,
+  userRole,
 }: {
   translations: {
     sidebarLabel: TranslationValue;
     groups: Record<string, TranslationValue>;
     items: Record<string, TranslationValue>;
   };
+  userRole: AuthRole;
 }) {
   const pathname = usePathname();
   const activePath = getActivePath(pathname);
+  const bookingOnly = BookingOnlyAdminRoleSchema.safeParse(userRole).success;
 
   return (
     <Sidebar collapsible="icon" variant="sidebar">
@@ -57,6 +61,10 @@ export function AdminSidebarServer({
       </SidebarHeader>
       <SidebarContent>
         {SIDEBAR_MENU_GROUPS.map((group) => {
+          const items = bookingOnly
+            ? group.items.filter((item) => item.href === "/admin/peminjaman")
+            : group.items;
+          if (items.length === 0) return null;
           const groupLabel =
             translations.groups[group.labelKey] || group.labelKey;
           return (
@@ -64,7 +72,7 @@ export function AdminSidebarServer({
               <SidebarGroupLabel>{groupLabel}</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {group.items.map((item) => {
+                  {items.map((item) => {
                     const active = isActive(item.href, activePath);
                     const label = translations.items[item.labelKey] || item.labelKey;
                     return (

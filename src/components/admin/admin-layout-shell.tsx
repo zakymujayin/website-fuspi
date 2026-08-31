@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AdminSidebarServer } from "@/components/admin/admin-sidebar";
 import { AdminHeader } from "@/components/admin/admin-header";
+import type { AuthRole } from "@/contracts/auth";
 
 type TranslationGroup = Record<string, string>;
 
@@ -14,6 +15,7 @@ interface AdminLayoutShellProps {
     groups: TranslationGroup;
     items: TranslationGroup;
   };
+  userRole: AuthRole;
   userDisplayName: string;
   userInitial: string;
   headerTranslations: {
@@ -28,6 +30,7 @@ interface AdminLayoutShellProps {
 export function AdminLayoutShell({
   children,
   translations,
+  userRole,
   userDisplayName,
   userInitial,
   headerTranslations,
@@ -36,7 +39,7 @@ export function AdminLayoutShell({
   return (
     <TooltipProvider delay={300}>
       <SidebarProvider defaultOpen={true}>
-        <AdminSidebarServer translations={translations} />
+        <AdminSidebarServer translations={translations} userRole={userRole} />
         <div className="flex w-full flex-1 flex-col bg-background md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:ms-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow-sm md:peer-data-[variant=inset]:peer-data-[state=collapsed]:ms-2">
           <AdminHeader
             userDisplayName={userDisplayName}

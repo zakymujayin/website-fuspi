@@ -118,6 +118,13 @@ describe("post-login destination", () => {
     }
   });
 
+  it("sends booking-only institutional roles to the borrowing queue", () => {
+    for (const role of ["STAF_UMUM", "DEKAN", "WADEK", "KABAG"] as const) {
+      expect(resolvePostLoginDestination(role, "/id/admin/posts", "id")).toBe("/id/admin/peminjaman");
+      expect(resolvePostLoginDestination(role, null, "id")).toBe("/id/admin/peminjaman");
+    }
+  });
+
   it("still refuses an off-site redirect for a lecturer", () => {
     expect(resolvePostLoginDestination("DOSEN", "https://evil.test/steal", "id")).toBe("/id/portal-dosen");
     expect(resolvePostLoginDestination("DOSEN", "//evil.test", "id")).toBe("/id/portal-dosen");

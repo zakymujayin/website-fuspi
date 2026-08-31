@@ -1,10 +1,12 @@
 import { Amiri, IBM_Plex_Sans_Arabic, Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { signOut } from "@/auth";
 import { AdminLayoutShell } from "@/components/admin/admin-layout-shell";
 import { SkipLink } from "@/components/public/skip-link";
+import { AdminShellRoleSchema, BookingOnlyAdminRoleSchema } from "@/contracts/auth";
 import { parseAppLocale } from "@/lib/auth/runtime/redirect";
 import {
   decideProtectedRoute,
@@ -32,6 +34,11 @@ const arabicQuote = Amiri({
 });
 const FONT_VARIABLES = `${display.variable} ${body.variable} ${arabicUi.variable} ${arabicQuote.variable}`;
 
+function isBookingAdminPath(pathname: string, locale: string) {
+  const prefix = `/${locale}/admin/peminjaman`;
+  return pathname === prefix || pathname.startsWith(`${prefix}/`);
+}
+
 export default async function AdminLayout({
   children,
   params,
@@ -44,13 +51,21 @@ export default async function AdminLayout({
   const appLocale = parseAppLocale(locale);
 
   const session = await getRequestSession();
+  const requestPathname = (await headers()).get("x-fuspi-pathname") ?? `/${appLocale}/admin`;
   const decision = decideProtectedRoute(
     session,
     appLocale,
     `/${appLocale}/admin`,
-    {roles: ["ADMIN", "EDITOR", "PETUGAS", "SATGAS_PPKS"]},
+    {roles: AdminShellRoleSchema.options},
   );
   if (!decision.allow) redirect(decision.redirectTo);
+  if (
+    session.ok
+    && BookingOnlyAdminRoleSchema.safeParse(session.session.role).success
+    && !isBookingAdminPath(requestPathname, appLocale)
+  ) {
+    redirect(`/${appLocale}/admin/peminjaman`);
+  }
 
   const t = await getTranslations({ locale, namespace: "AdminSidebar" });
 
@@ -144,6 +159,7 @@ export default async function AdminLayout({
       <SkipLink />
       <AdminLayoutShell
         translations={sidebarTranslations}
+        userRole={session.ok ? session.session.role : "EDITOR"}
         userDisplayName={userDisplayName}
         userInitial={userInitial}
         headerTranslations={headerTranslations}

@@ -1,7 +1,7 @@
 import {z} from "zod";
 
 import {TrustedAdminFoundationActorSchema} from "@/contracts/admin-foundation";
-import {ActiveDatabaseSessionSchema} from "@/contracts/auth";
+import {ActiveDatabaseSessionSchema, BookingAdminRoleSchema} from "@/contracts/auth";
 import {
   CmsPageMetadataSchema,
   collectDuplicateAwareSearchParams,
@@ -41,9 +41,14 @@ const REVIEW_STATUSES = ["DIAJUKAN", "DISPOSISI_DEKAN", "CEK_KETERSEDIAAN", "PER
 const CANCELABLE_STATUSES = [...REVIEW_STATUSES, "DISETUJUI"] as const;
 const DISPOSITION_TARGET_SCHEMA = z.enum(["WADEK_I", "WADEK_II", "WADEK_III", "KABAG"]);
 const BOOKING_NOTE_SCHEMA = z.string().trim().min(1).max(500).refine((v) => !UNSAFE_TEXT_PATTERN.test(v)).nullable().optional();
+export const BOOKING_ADMIN_ROLES = BookingAdminRoleSchema.options;
+const BOOKING_STAFF_ROLES = ["ADMIN", "PETUGAS", "STAF_UMUM"] as const;
+const BOOKING_DEAN_ROLES = ["ADMIN", "PETUGAS", "DEKAN"] as const;
+const BOOKING_FOLLOWUP_ROLES = ["ADMIN", "PETUGAS", "WADEK", "KABAG"] as const;
+const BOOKING_REVISION_ROLES = ["ADMIN", "PETUGAS", "STAF_UMUM", "DEKAN", "WADEK", "KABAG"] as const;
 
 const BookingActorSchema = ActiveDatabaseSessionSchema.extend({
-  role: z.enum(["ADMIN", "PETUGAS"]),
+  role: z.enum(BOOKING_ADMIN_ROLES),
   mustChangePassword: z.literal(false),
 }).strict();
 
@@ -296,6 +301,10 @@ function bookingActorOrNull(rawActor: unknown, now: Date) {
 
 function isOneOfStatus(status: string, statuses: readonly string[]) {
   return statuses.includes(status);
+}
+
+function actorCan(actor: {role: string}, allowedRoles: readonly string[]) {
+  return allowedRoles.includes(actor.role);
 }
 
 function pageMetadata(page: number, pageSize: 10 | 20 | 50, total: number) {
@@ -1104,6 +1113,7 @@ export async function executeBookingCommand(
       const fromStatus = booking.status;
 
       if (command.action === "VERIFY_STAFF") {
+        if (!actorCan(actor, BOOKING_STAFF_ROLES)) throw {ok: false as const, code: "SESSION_INVALID" as const};
         if (!["DIAJUKAN", "MENUNGGU"].includes(fromStatus)) {
           throw {ok: false as const, code: "INVALID_STATE" as const};
         }
@@ -1127,6 +1137,7 @@ export async function executeBookingCommand(
           },
         });
       } else if (command.action === "DISPOSE") {
+        if (!actorCan(actor, BOOKING_DEAN_ROLES)) throw {ok: false as const, code: "SESSION_INVALID" as const};
         if (fromStatus !== "DISPOSISI_DEKAN") throw {ok: false as const, code: "INVALID_STATE" as const};
 
         await tx.booking.update({
@@ -1148,6 +1159,7 @@ export async function executeBookingCommand(
           },
         });
       } else if (command.action === "REQUEST_REVISION") {
+        if (!actorCan(actor, BOOKING_REVISION_ROLES)) throw {ok: false as const, code: "SESSION_INVALID" as const};
         if (!isOneOfStatus(fromStatus, REVIEW_STATUSES)) throw {ok: false as const, code: "INVALID_STATE" as const};
 
         await tx.booking.update({
@@ -1169,6 +1181,7 @@ export async function executeBookingCommand(
           },
         });
       } else if (command.action === "APPROVE") {
+        if (!actorCan(actor, BOOKING_FOLLOWUP_ROLES)) throw {ok: false as const, code: "SESSION_INVALID" as const};
         if (!["CEK_KETERSEDIAAN", "MENUNGGU"].includes(fromStatus)) {
           throw {ok: false as const, code: "INVALID_STATE" as const};
         }
@@ -1205,6 +1218,7 @@ export async function executeBookingCommand(
           },
         });
       } else if (command.action === "REJECT") {
+        if (!actorCan(actor, BOOKING_REVISION_ROLES)) throw {ok: false as const, code: "SESSION_INVALID" as const};
         if (!isOneOfStatus(fromStatus, REVIEW_STATUSES)) throw {ok: false as const, code: "INVALID_STATE" as const};
 
         await tx.booking.update({
@@ -1226,6 +1240,7 @@ export async function executeBookingCommand(
           },
         });
       } else {
+        if (!actorCan(actor, BOOKING_REVISION_ROLES)) throw {ok: false as const, code: "SESSION_INVALID" as const};
         if (!isOneOfStatus(fromStatus, CANCELABLE_STATUSES)) {
           throw {ok: false as const, code: "INVALID_STATE" as const};
         }

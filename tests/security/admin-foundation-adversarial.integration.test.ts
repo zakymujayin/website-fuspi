@@ -4,7 +4,15 @@ import type {ActiveDatabaseSession} from "@/contracts/auth";
 import {executeAdminUserCommand, executeTaxonomyCommand, listAdminUsers, listTaxonomies, type AdminFoundationDatabase} from "@/features/admin/foundation";
 
 const now = new Date("2026-08-04T03:00:00.000Z");
-const invalidActors: ActiveDatabaseSession[] = ["EDITOR", "PETUGAS", "SATGAS_PPKS"].map((role) => ({userId: `${role.toLowerCase()}-1`, role: role as ActiveDatabaseSession["role"], isActive: true, mustChangePassword: false, expiresAt: new Date("2026-08-04T04:00:00.000Z")}));
+const invalidActors: ActiveDatabaseSession[] = [
+  "EDITOR",
+  "PETUGAS",
+  "STAF_UMUM",
+  "DEKAN",
+  "WADEK",
+  "KABAG",
+  "SATGAS_PPKS",
+].map((role) => ({userId: `${role.toLowerCase()}-1`, role: role as ActiveDatabaseSession["role"], isActive: true, mustChangePassword: false, expiresAt: new Date("2026-08-04T04:00:00.000Z")}));
 const forbiddenDatabase = new Proxy({}, {get() { throw new Error("database access would disclose record existence"); }}) as AdminFoundationDatabase;
 
 describe("ADMIN foundation adversarial boundary", () => {
