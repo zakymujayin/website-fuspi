@@ -31,8 +31,15 @@ export async function executeBookingAdminAction(
   const bookingId = text(form, "bookingId");
   const version = Number.isSafeInteger(expectedVersion) ? expectedVersion : Number.NaN;
   const reason = optionalText(form, "reason");
+  const target = text(form, "target");
   const command =
-    actionName === "APPROVE"
+    actionName === "VERIFY_STAFF"
+      ? {action: "VERIFY_STAFF" as const, bookingId, expectedVersion: version, reason}
+      : actionName === "DISPOSE"
+        ? {action: "DISPOSE" as const, bookingId, expectedVersion: version, target, reason}
+        : actionName === "REQUEST_REVISION"
+          ? {action: "REQUEST_REVISION" as const, bookingId, expectedVersion: version, reason}
+          : actionName === "APPROVE"
       ? {action: "APPROVE" as const, bookingId, expectedVersion: version}
       : actionName === "REJECT"
         ? {action: "REJECT" as const, bookingId, expectedVersion: version, reason}

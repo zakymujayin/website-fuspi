@@ -47,6 +47,8 @@ export default async function BookingRequestPage({params}: {params: Promise<{loc
     participantCount: t("fieldParticipantCount"),
     purpose: t("fieldPurpose"),
     purposeHint: t("hintPurpose"),
+    applicationLetter: t("fieldApplicationLetter"),
+    applicationLetterHint: t("hintApplicationLetter"),
     requesterSection: t("sectionRequester"),
     bookingSection: t("sectionBooking"),
     requesterName: t("fieldRequesterName"),

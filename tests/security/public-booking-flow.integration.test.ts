@@ -1,8 +1,11 @@
+import {createHash} from "node:crypto";
+
 import {afterAll, beforeAll, describe, expect, it} from "vitest";
 
 import {
   bookingHttpStatus,
   cancelPublicBooking,
+  executeBookingCommand,
   getPublicBooking,
   listBookings,
   submitBooking,
@@ -28,6 +31,11 @@ suite("public booking flow on PostgreSQL", () => {
   let smallRoomId = "";
   let bookingNumber = "";
   let token = "";
+  let actorId = "";
+
+  function applicationStorageKey(label: string) {
+    return `2026/09/${createHash("sha256").update(`${marker}-${label}`).digest("hex")}.pdf`;
+  }
 
   function request(overrides: Record<string, unknown> = {}) {
     return {
@@ -39,12 +47,62 @@ suite("public booking flow on PostgreSQL", () => {
       purpose: "Seminar metodologi tafsir.",
       participantCount: 20,
       ...slot("09:00", "11:00"),
+      applicationStorageKey: applicationStorageKey(String(overrides.startTime ?? "default")),
       ...overrides,
     };
   }
 
+  async function bookingByNumber(number: string) {
+    const booking = await prisma.booking.findUnique({
+      where: {bookingNumber: number},
+      select: {id: true, version: true, status: true},
+    });
+    if (!booking) throw new Error(`missing booking ${number}`);
+    return booking;
+  }
+
+  function actor() {
+    return {
+      userId: actorId,
+      role: "PETUGAS",
+      isActive: true,
+      mustChangePassword: false,
+      expiresAt: new Date(Date.now() + 3_600_000),
+    };
+  }
+
+  async function advanceToAvailability(number: string) {
+    let booking = await bookingByNumber(number);
+    const verified = await executeBookingCommand(prisma, actor(), {
+      action: "VERIFY_STAFF",
+      bookingId: booking.id,
+      expectedVersion: booking.version,
+      reason: "Surat lengkap.",
+    });
+    expect(verified.ok).toBe(true);
+
+    booking = await bookingByNumber(number);
+    const disposed = await executeBookingCommand(prisma, actor(), {
+      action: "DISPOSE",
+      bookingId: booking.id,
+      expectedVersion: booking.version,
+      target: "KABAG",
+      reason: "Mohon cek ruangan.",
+    });
+    expect(disposed.ok).toBe(true);
+    return bookingByNumber(number);
+  }
+
   beforeAll(async () => {
     await prisma.$connect();
+    actorId = (await prisma.user.create({
+      data: {
+        name: `${marker} Petugas`,
+        email: `${marker}-petugas@example.test`,
+        role: "PETUGAS",
+        isActive: true,
+      },
+    })).id;
     const room = await prisma.room.create({
       data: {
         slug: `${marker}-besar`,
@@ -80,31 +138,73 @@ suite("public booking flow on PostgreSQL", () => {
       await prisma.bookingHistory.deleteMany({where: {bookingId: {in: ids}}});
       await prisma.booking.deleteMany({where: {id: {in: ids}}});
     }
+    await prisma.activityLog.deleteMany({where: {actorId}});
     await prisma.room.deleteMany({where: {id: {in: [roomId, smallRoomId]}}});
+    await prisma.user.deleteMany({where: {id: actorId}});
     await prisma.$disconnect();
   });
 
-  it("issues a booking number and a canonical tracking token, waiting for review", () => {
+  it("issues a booking number and a canonical tracking token with submitted status", async () => {
     expect(bookingNumber).toMatch(/^FUSPI-B-\d{4}-\d{4,}$/u);
     expect(token).toMatch(/^[A-Za-z0-9_-]{43}$/u);
+    const found = await getPublicBooking(prisma, {bookingNumber, token});
+    expect(found.ok).toBe(true);
+    if (found.ok) expect(found.status).toBe("DIAJUKAN");
   });
 
-  it("refuses a request that overlaps an existing one", async () => {
+  it("allows overlapping pending requests for administrative review", async () => {
     const result = await submitBooking(prisma, request({...slot("10:00", "12:00")}));
+    expect(result.ok).toBe(true);
+    if (result.ok) bookingNumbers.push(result.bookingNumber);
+  });
+
+  it("refuses public submission that overlaps an approved booking", async () => {
+    const approved = await submitBooking(prisma, request({...slot("10:00", "11:00")}));
+    expect(approved.ok).toBe(true);
+    if (!approved.ok) return;
+    bookingNumbers.push(approved.bookingNumber);
+
+    const booking = await advanceToAvailability(approved.bookingNumber);
+    const approvedCommand = await executeBookingCommand(prisma, actor(), {
+      action: "APPROVE",
+      bookingId: booking.id,
+      expectedVersion: booking.version,
+    });
+    expect(approvedCommand.ok).toBe(true);
+
+    const result = await submitBooking(prisma, request({...slot("10:15", "10:45")}));
     expect(result).toMatchObject({ok: false, code: "TIME_OVERLAP"});
   });
 
-  /* The room carries a 30 minute turnaround, so a request starting immediately
-     after the first one ends still collides. */
-  it("honours the turnaround buffer between two bookings", async () => {
-    const result = await submitBooking(prisma, request({...slot("11:00", "12:00")}));
-    expect(result).toMatchObject({ok: false, code: "TIME_OVERLAP"});
-  });
-
-  it("accepts a slot that clears the buffer", async () => {
+  it("accepts a slot that clears the approved booking buffer", async () => {
     const result = await submitBooking(prisma, request({...slot("11:45", "12:45")}));
     expect(result.ok).toBe(true);
     if (result.ok) bookingNumbers.push(result.bookingNumber);
+  });
+
+  it("rechecks conflicts when the final approval is made", async () => {
+    const first = await submitBooking(prisma, request({...slot("14:00", "15:00")}));
+    const second = await submitBooking(prisma, request({...slot("14:10", "14:50"), requesterEmail: `${marker}-second@example.test`}));
+    expect(first.ok).toBe(true);
+    expect(second.ok).toBe(true);
+    if (!first.ok || !second.ok) return;
+    bookingNumbers.push(first.bookingNumber, second.bookingNumber);
+
+    let booking = await advanceToAvailability(first.bookingNumber);
+    const approved = await executeBookingCommand(prisma, actor(), {
+      action: "APPROVE",
+      bookingId: booking.id,
+      expectedVersion: booking.version,
+    });
+    expect(approved.ok).toBe(true);
+
+    booking = await advanceToAvailability(second.bookingNumber);
+    const rejectedBySchedule = await executeBookingCommand(prisma, actor(), {
+      action: "APPROVE",
+      bookingId: booking.id,
+      expectedVersion: booking.version,
+    });
+    expect(rejectedBySchedule).toMatchObject({ok: false, code: "TIME_OVERLAP"});
   });
 
   it("refuses a group larger than the room", async () => {
@@ -168,7 +268,7 @@ suite("public booking flow on PostgreSQL", () => {
   });
 
   it("lets the requester cancel a waiting booking with the tracking token", async () => {
-    const submitted = await submitBooking(prisma, request({...slot("13:30", "14:30")}));
+    const submitted = await submitBooking(prisma, request({...slot("16:00", "16:30")}));
     expect(submitted.ok).toBe(true);
     if (!submitted.ok) return;
     bookingNumbers.push(submitted.bookingNumber);

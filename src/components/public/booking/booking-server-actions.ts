@@ -2,6 +2,7 @@
 
 import {cancelPublicBooking, getPublicBooking, submitBooking} from "@/features/booking/domain";
 import {getPrismaClient} from "@/lib/db/client";
+import {parseStorageRoots, stageUpload, validateAndTransformUpload} from "@/lib/storage";
 
 export type BookingFailureCode =
   | "REQUEST_INVALID" | "ROOM_NOT_FOUND" | "ROOM_INACTIVE" | "TIME_INVALID"
@@ -51,6 +52,11 @@ function orNull(form: FormData, key: string): string | null {
   return value === "" ? null : value;
 }
 
+function fileOrNull(form: FormData, key: string): File | null {
+  const value = form.get(key);
+  return value instanceof File && value.size > 0 ? value : null;
+}
+
 const CODES = new Set<BookingFailureCode>([
   "REQUEST_INVALID", "ROOM_NOT_FOUND", "ROOM_INACTIVE", "TIME_INVALID",
   "TIME_OVERLAP", "CAPACITY_EXCEEDED", "OPERATING_HOURS", "BLACKOUT",
@@ -83,24 +89,51 @@ export async function submitBookingAction(
     return {status: "error", code: "TIME_INVALID"};
   }
 
-  const result = await submitBooking(getPrismaClient(), {
-    roomId: text(form, "roomId"),
-    requesterName: text(form, "requesterName"),
-    requesterEmail: text(form, "requesterEmail"),
-    requesterPhone: orNull(form, "requesterPhone"),
-    organization: orNull(form, "organization"),
-    purpose: text(form, "purpose"),
-    participantCount: Number.isFinite(participantCount) ? participantCount : Number.NaN,
-    startTime: jakartaIso(date, startTime),
-    endTime: jakartaIso(date, endTime),
-  });
+  const applicationLetter = fileOrNull(form, "applicationLetter");
+  if (!applicationLetter) return {status: "error", code: "REQUEST_INVALID"};
 
-  if (!result.ok) return {status: "error", code: failureCode(result.code)};
-  return {
-    status: "submitted",
-    bookingNumber: result.bookingNumber,
-    trackingToken: result.trackingToken,
-  };
+  let staged: Awaited<ReturnType<typeof stageUpload>> | null = null;
+  try {
+    const validated = await validateAndTransformUpload({
+      bytes: new Uint8Array(await applicationLetter.arrayBuffer()),
+      originalName: applicationLetter.name,
+      declaredMime: applicationLetter.type,
+      policy: "BOOKING_DOCUMENT",
+    });
+    staged = await stageUpload(validated, parseStorageRoots({
+      PUBLIC: process.env.UPLOAD_DIR ?? "",
+      PRIVATE: process.env.UPLOAD_PRIVATE_DIR ?? "",
+      PPKS_PRIVATE: process.env.PPKS_PRIVATE_DIR ?? "",
+    }));
+
+    const result = await submitBooking(getPrismaClient(), {
+      roomId: text(form, "roomId"),
+      requesterName: text(form, "requesterName"),
+      requesterEmail: text(form, "requesterEmail"),
+      requesterPhone: orNull(form, "requesterPhone"),
+      organization: orNull(form, "organization"),
+      purpose: text(form, "purpose"),
+      participantCount: Number.isFinite(participantCount) ? participantCount : Number.NaN,
+      startTime: jakartaIso(date, startTime),
+      endTime: jakartaIso(date, endTime),
+      applicationStorageKey: staged.storageKey,
+    });
+
+    if (!result.ok) {
+      await staged.discard().catch(() => undefined);
+      return {status: "error", code: failureCode(result.code)};
+    }
+
+    await staged.commit();
+    return {
+      status: "submitted",
+      bookingNumber: result.bookingNumber,
+      trackingToken: result.trackingToken,
+    };
+  } catch {
+    if (staged) await staged.discard().catch(() => undefined);
+    return {status: "error", code: "UNAVAILABLE"};
+  }
 }
 
 export async function trackBookingAction(

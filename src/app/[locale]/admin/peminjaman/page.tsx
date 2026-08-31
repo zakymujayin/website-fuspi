@@ -1,4 +1,4 @@
-import {CalendarCheckIcon} from "lucide-react";
+import {CalendarCheckIcon, CheckCircle2Icon, CircleDashedIcon, FileTextIcon} from "lucide-react";
 import type {Metadata} from "next";
 import {redirect} from "next/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
@@ -13,7 +13,18 @@ type Props = {
   params: Promise<{locale: string}>;
 };
 
-const STATUSES = ["MENUNGGU", "DISETUJUI", "DITOLAK", "DIBATALKAN", "SELESAI"] as const;
+const STATUSES = [
+  "DIAJUKAN",
+  "DISPOSISI_DEKAN",
+  "CEK_KETERSEDIAAN",
+  "PERLU_REVISI",
+  "MENUNGGU",
+  "DISETUJUI",
+  "DITOLAK",
+  "DIBATALKAN",
+  "SELESAI",
+] as const;
+const FLOW_STEPS = ["DIAJUKAN", "DISPOSISI_DEKAN", "CEK_KETERSEDIAAN", "DISETUJUI"] as const;
 
 export async function generateMetadata({params}: Props): Promise<Metadata> {
   const {locale} = await params;
@@ -31,6 +42,15 @@ function formatDate(locale: string, iso: string) {
 
 function formatRange(locale: string, startIso: string, endIso: string) {
   return `${formatDate(locale, startIso)} - ${formatDate(locale, endIso)} WIB`;
+}
+
+function flowState(currentStatus: string, step: string) {
+  const currentIndex = FLOW_STEPS.findIndex((value) => value === currentStatus);
+  const stepIndex = FLOW_STEPS.findIndex((value) => value === step);
+  if (currentIndex < 0 || stepIndex < 0) return "pending";
+  if (currentIndex > stepIndex) return "done";
+  if (currentIndex === stepIndex) return "active";
+  return "pending";
 }
 
 export default async function AdminBookingPage({params}: Props) {
@@ -52,9 +72,20 @@ export default async function AdminBookingPage({params}: Props) {
     STATUSES.map((value) => [value, t(`status${value}` as "statusMENUNGGU")]),
   );
   const actionLabels = {
+    verifyStaff: t("verifyStaff"),
+    dispose: t("dispose"),
+    requestRevision: t("requestRevision"),
     approve: t("approve"),
     reject: t("reject"),
     cancel: t("cancel"),
+    dispositionTarget: t("dispositionTarget"),
+    dispositionTargetHint: t("dispositionTargetHint"),
+    targets: {
+      WADEK_I: t("targetWadekI"),
+      WADEK_II: t("targetWadekII"),
+      WADEK_III: t("targetWadekIII"),
+      KABAG: t("targetKabag"),
+    },
     reason: t("reason"),
     reasonHint: t("reasonHint"),
     saved: t("saved"),
@@ -65,6 +96,8 @@ export default async function AdminBookingPage({params}: Props) {
       NOT_FOUND: t("errorNotFound"),
       VERSION_CONFLICT: t("errorVersion"),
       INVALID_STATE: t("errorInvalidState"),
+      APPLICATION_REQUIRED: t("errorApplicationRequired"),
+      TIME_OVERLAP: t("errorTimeOverlap"),
       UNAVAILABLE: t("errorUnavailable"),
     },
   } satisfies BookingDecisionLabels;
@@ -95,7 +128,49 @@ export default async function AdminBookingPage({params}: Props) {
                 </span>
               </div>
 
-              <dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
+              <div className="mt-5 flex flex-wrap items-center gap-3">
+                {item.hasApplicationLetter ? (
+                  <a
+                    href={`/api/admin/bookings/${item.id}/application`}
+                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-300 px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                  >
+                    <FileTextIcon aria-hidden data-icon strokeWidth={1.5} />
+                    {t("downloadApplication")}
+                  </a>
+                ) : (
+                  <span className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-danger px-3 text-sm font-semibold text-danger">
+                    <FileTextIcon aria-hidden data-icon strokeWidth={1.5} />
+                    {t("missingApplication")}
+                  </span>
+                )}
+              </div>
+
+              <ol className="mt-5 grid gap-2 text-xs sm:grid-cols-4" aria-label={t("workflowAria")}>
+                {FLOW_STEPS.map((step) => {
+                  const state = flowState(item.status, step);
+                  return (
+                    <li
+                      key={step}
+                      className={
+                        state === "done"
+                          ? "flex items-center gap-2 rounded-lg bg-success/10 px-3 py-2 font-medium text-success"
+                          : state === "active"
+                            ? "flex items-center gap-2 rounded-lg bg-royal-50 px-3 py-2 font-medium text-royal-700"
+                            : "flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-slate-500"
+                      }
+                    >
+                      {state === "done" ? (
+                        <CheckCircle2Icon aria-hidden className="size-4 shrink-0" strokeWidth={1.5} />
+                      ) : (
+                        <CircleDashedIcon aria-hidden className="size-4 shrink-0" strokeWidth={1.5} />
+                      )}
+                      {statuses[step] ?? step}
+                    </li>
+                  );
+                })}
+              </ol>
+
+              <dl className="mt-5 grid gap-3 border-t border-slate-200 pt-4 text-sm sm:grid-cols-2">
                 <div>
                   <dt className="text-xs text-slate-400 uppercase">{t("schedule")}</dt>
                   <dd className="text-slate-700">{formatRange(locale, item.startTime, item.endTime)}</dd>
@@ -119,6 +194,23 @@ export default async function AdminBookingPage({params}: Props) {
                   <dd dir="auto" className="whitespace-pre-wrap text-slate-700">{item.purpose}</dd>
                 </div>
               </dl>
+
+              {item.history.length > 0 ? (
+                <div className="mt-5 border-t border-slate-200 pt-4">
+                  <h3 className="text-xs font-semibold tracking-wide text-slate-400 uppercase">{t("history")}</h3>
+                  <ol className="mt-2 grid gap-2 text-sm text-slate-600">
+                    {item.history.slice(-4).map((historyItem) => (
+                      <li key={`${historyItem.toStatus}-${historyItem.createdAt}`} className="flex flex-wrap gap-2">
+                        <span className="font-medium text-slate-800">
+                          {statuses[historyItem.toStatus] ?? historyItem.toStatus}
+                        </span>
+                        <span>{formatDate(locale, historyItem.createdAt)}</span>
+                        {historyItem.reason ? <span dir="auto">- {historyItem.reason}</span> : null}
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ) : null}
 
               <BookingDecisionForm
                 bookingId={item.id}

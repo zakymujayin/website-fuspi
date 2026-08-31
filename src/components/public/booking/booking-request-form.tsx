@@ -1,6 +1,6 @@
 "use client";
 
-import {CircleAlert, KeyRound} from "lucide-react";
+import {CircleAlert, KeyRound, UploadIcon} from "lucide-react";
 import {useActionState} from "react";
 
 import {
@@ -29,6 +29,8 @@ export type BookingRequestLabels = {
   participantCount: string;
   purpose: string;
   purposeHint: string;
+  applicationLetter: string;
+  applicationLetterHint: string;
   requesterSection: string;
   bookingSection: string;
   requesterName: string;
@@ -101,7 +103,7 @@ export function BookingRequestForm({
   }
 
   return (
-    <form action={action} className="max-w-2xl">
+    <form action={action} className="max-w-2xl" encType="multipart/form-data">
       <FieldSet>
         <legend className="font-display text-sm font-semibold text-slate-900">{labels.bookingSection}</legend>
         <FieldGroup className="mt-4">
@@ -159,6 +161,22 @@ export function BookingRequestForm({
             <FieldLabel htmlFor="purpose">{labels.purpose}</FieldLabel>
             <Textarea id="purpose" name="purpose" required minLength={1} maxLength={5000} rows={4} dir="auto" />
             <FieldDescription>{labels.purposeHint}</FieldDescription>
+          </Field>
+
+          <Field>
+            <FieldLabel htmlFor="applicationLetter">{labels.applicationLetter}</FieldLabel>
+            <div className="flex items-center gap-3 rounded-lg border border-slate-300 bg-white px-3 py-2.5">
+              <UploadIcon aria-hidden className="size-4 shrink-0 text-slate-500" strokeWidth={1.5} />
+              <Input
+                id="applicationLetter"
+                name="applicationLetter"
+                type="file"
+                accept="application/pdf,.pdf"
+                required
+                className="h-auto border-0 bg-transparent p-0 shadow-none file:me-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-slate-700 hover:file:bg-slate-200"
+              />
+            </div>
+            <FieldDescription>{labels.applicationLetterHint}</FieldDescription>
           </Field>
         </FieldGroup>
       </FieldSet>
