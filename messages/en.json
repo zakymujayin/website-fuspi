@@ -45,6 +45,8 @@
     "submit": "Update password",
     "submitting": "Updating…",
     "submittingStatus": "Updating password",
+    "success": "Your password has been updated. You will be redirected with a new session.",
+    "successButton": "Updated",
     "error": {
       "SESSION_INVALID": "Your session is no longer valid. Sign in again to continue.",
       "INVALID_CREDENTIALS": "The current password is incorrect. Check it and try again.",

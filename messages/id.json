@@ -45,6 +45,8 @@
     "submit": "Perbarui kata sandi",
     "submitting": "Memperbarui…",
     "submittingStatus": "Sedang memperbarui kata sandi",
+    "success": "Kata sandi berhasil diperbarui. Anda akan diarahkan ke halaman tujuan dengan sesi baru.",
+    "successButton": "Berhasil diperbarui",
     "error": {
       "SESSION_INVALID": "Sesi Anda sudah tidak berlaku. Silakan masuk kembali untuk melanjutkan.",
       "INVALID_CREDENTIALS": "Kata sandi saat ini tidak sesuai. Periksa kembali dan coba lagi.",

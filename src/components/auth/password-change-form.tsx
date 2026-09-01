@@ -1,8 +1,7 @@
 "use client";
 
-import { AlertCircleIcon } from "lucide-react";
+import { AlertCircleIcon, CheckCircleIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 
 import { PasswordField } from "@/components/auth/password-field";
@@ -27,7 +26,6 @@ type Failure = { code: PasswordFailureCode; attempt: number };
 
 export function PasswordChangeForm({ locale, next }: PasswordChangeFormProps) {
   const t = useTranslations("PasswordChange");
-  const router = useRouter();
   const currentId = useId();
   const newId = useId();
   const confirmationId = useId();
@@ -39,6 +37,7 @@ export function PasswordChangeForm({ locale, next }: PasswordChangeFormProps) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
   const [failure, setFailure] = useState<Failure | null>(null);
 
   useEffect(() => {
@@ -55,12 +54,14 @@ export function PasswordChangeForm({ locale, next }: PasswordChangeFormProps) {
 
     const input = { currentPassword, newPassword, confirmPassword };
     if (!PasswordChangeInputSchema.safeParse(input).success) {
+      setSuccess(false);
       announceFailure("PASSWORD_POLICY");
       return;
     }
 
     inFlight.current = true;
     setSubmitting(true);
+    setSuccess(false);
     setFailure(null);
 
     let result: PasswordChangeResult;
@@ -88,9 +89,13 @@ export function PasswordChangeForm({ locale, next }: PasswordChangeFormProps) {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      router.replace(result.redirectTo);
-      // Keep the guard locked until navigation unmounts this form. Releasing it
-      // here would allow a forced click during a slow transition to issue a
+      setSubmitting(false);
+      setSuccess(true);
+      window.setTimeout(() => {
+        window.location.assign(result.redirectTo);
+      }, 600);
+      // Keep the guard locked until navigation unloads this document. Releasing
+      // it here would allow a forced click during a slow transition to issue a
       // second password mutation.
       return;
     }
@@ -137,6 +142,17 @@ export function PasswordChangeForm({ locale, next }: PasswordChangeFormProps) {
         {submitting ? t("submittingStatus") : ""}
       </div>
 
+      {success ? (
+        <div
+          role="status"
+          aria-live="polite"
+          className="mb-5 flex items-start gap-2 rounded-lg border border-success/30 bg-success/10 p-3 text-sm text-foreground"
+        >
+          <CheckCircleIcon aria-hidden className="mt-0.5 size-4 shrink-0 text-success" />
+          <span>{t("success")}</span>
+        </div>
+      ) : null}
+
       <FieldGroup>
         <PasswordField
           id={currentId}
@@ -175,7 +191,7 @@ export function PasswordChangeForm({ locale, next }: PasswordChangeFormProps) {
         <Button
           type="submit"
           size="lg"
-          aria-disabled={submitting}
+          aria-disabled={submitting || success}
           aria-describedby={failure ? errorId : undefined}
           className="w-full"
         >
@@ -184,6 +200,8 @@ export function PasswordChangeForm({ locale, next }: PasswordChangeFormProps) {
               <Spinner data-icon="inline-start" />
               {t("submitting")}
             </>
+          ) : success ? (
+            t("successButton")
           ) : (
             t("submit")
           )}
