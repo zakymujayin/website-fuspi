@@ -8,6 +8,7 @@ import {
 } from "@/contracts/lecturer-portal";
 import {sanitizeRichTextHtml} from "@/lib/security/sanitize";
 import type {getPrismaClient} from "@/lib/db/client";
+import type {Prisma} from "@/generated/prisma/client";
 
 export type LecturerPortalDatabase = ReturnType<typeof getPrismaClient>;
 
@@ -42,6 +43,27 @@ function actorOrNull(rawActor: unknown, now: Date) {
 async function ownLecturerId(prisma: LecturerPortalDatabase, userId: string) {
   const row = await prisma.lecturer.findFirst({where: {userId}, select: {id: true}});
   return row?.id ?? null;
+}
+
+type ProfileMediaValidation =
+  | {ok: true}
+  | {ok: false; code: "NOT_FOUND" | "VALIDATION_FAILED"};
+
+async function validateProfileMedia(
+  transaction: Prisma.TransactionClient,
+  actorUserId: string,
+  mediaId: string | null,
+  expectedMimeType: "image/webp" | "application/pdf",
+): Promise<ProfileMediaValidation> {
+  if (mediaId === null) return {ok: true};
+  const media = await transaction.media.findFirst({
+    where: {id: mediaId, uploaderId: actorUserId, storageClass: "PUBLIC"},
+    select: {mimeType: true},
+  });
+  if (!media) return {ok: false, code: "NOT_FOUND"};
+  return media.mimeType === expectedMimeType
+    ? {ok: true}
+    : {ok: false, code: "VALIDATION_FAILED"};
 }
 
 export async function loadLecturerPortalProfile(
@@ -156,7 +178,11 @@ export async function executeLecturerPortalCommand(
 
     switch (command.action) {
       case "PROFILE_UPDATE": {
-        await prisma.$transaction(async (tx) => {
+        const txResult = await prisma.$transaction(async (tx) => {
+          const photo = await validateProfileMedia(tx, actor.userId, command.payload.photoMediaId, "image/webp");
+          if (!photo.ok) return photo;
+          const cv = await validateProfileMedia(tx, actor.userId, command.payload.cvMediaId, "application/pdf");
+          if (!cv.ok) return cv;
           await tx.lecturer.update({where: {id: lecturerId}, data: profileWrite(command.payload)});
           const translation = await tx.lecturerTranslation.findFirst({
             where: {lecturerId, locale: "id"},
@@ -172,7 +198,9 @@ export async function executeLecturerPortalCommand(
               data: {lecturerId, locale: "id", status: "PUBLISHED", ...translationWrite(command.payload)},
             });
           }
+          return {ok: true as const};
         });
+        if (!txResult.ok) return {ok: false, code: txResult.code};
         return {ok: true, action: command.action};
       }
 

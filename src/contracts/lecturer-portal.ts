@@ -2,6 +2,7 @@ import {z} from "zod";
 
 import {ActiveDatabaseSessionSchema} from "@/contracts/auth";
 import {CmsHttpsExternalUrlSchema, CmsIdentifierSchema} from "@/contracts/cms";
+import {MediaIdSchema} from "@/contracts/media";
 import {PublicationType as PrismaPublicationType} from "@/generated/prisma/enums";
 
 const UNSAFE_TEXT_PATTERN = /[\u0000-\u001f\u007f-\u009f]/u;
@@ -89,6 +90,31 @@ export const LecturerPortalMutationResultSchema = z.discriminatedUnion("ok", [
   z.object({ok: z.literal(false), code: LecturerPortalFailureCodeSchema}).strict(),
 ]);
 
+export const LecturerPortalMediaUploadKindSchema = z.enum(["PHOTO", "CV"]);
+
+export const LecturerPortalMediaUploadResponseSchema = z.discriminatedUnion("ok", [
+  z.object({
+    ok: z.literal(true),
+    kind: LecturerPortalMediaUploadKindSchema,
+    mediaId: MediaIdSchema,
+    url: z.string().min(1).max(2_048),
+    originalName: z.string().min(1).max(120),
+    mimeType: z.enum(["image/webp", "application/pdf"]),
+  }).strict(),
+  z.object({
+    ok: z.literal(false),
+    code: z.enum([
+      "SESSION_INVALID",
+      "CSRF_INVALID",
+      "REQUEST_INVALID",
+      "NO_LECTURER_PROFILE",
+      "VALIDATION_FAILED",
+      "UPLOAD_FAILED",
+      "UNAVAILABLE",
+    ]),
+  }).strict(),
+]);
+
 export type TrustedLecturerActor = z.infer<typeof TrustedLecturerActorSchema>;
 export type LecturerProfileInput = z.infer<typeof LecturerProfileInputSchema>;
 export type LecturerEducationInput = z.infer<typeof LecturerEducationInputSchema>;
@@ -96,3 +122,5 @@ export type LecturerPublicationInput = z.infer<typeof LecturerPublicationInputSc
 export type LecturerPortalCommand = z.infer<typeof LecturerPortalCommandSchema>;
 export type LecturerPortalFailureCode = z.infer<typeof LecturerPortalFailureCodeSchema>;
 export type LecturerPortalMutationResult = z.infer<typeof LecturerPortalMutationResultSchema>;
+export type LecturerPortalMediaUploadKind = z.infer<typeof LecturerPortalMediaUploadKindSchema>;
+export type LecturerPortalMediaUploadResponse = z.infer<typeof LecturerPortalMediaUploadResponseSchema>;

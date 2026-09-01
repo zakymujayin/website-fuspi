@@ -15,6 +15,7 @@ suite("lecturer portal adversarial PostgreSQL boundary", () => {
   const marker = `portal-adversarial-${Date.now()}`;
   const userIds: string[] = [];
   const lecturerIds: string[] = [];
+  const mediaIds: string[] = [];
 
   let userA = "";
   let userB = "";
@@ -23,6 +24,9 @@ suite("lecturer portal adversarial PostgreSQL boundary", () => {
   let lecturerB = "";
   let educationB = "";
   let publicationB = "";
+  let photoA = "";
+  let cvA = "";
+  let photoB = "";
 
   function actor(userId: string, role: ActiveDatabaseSession["role"] = "DOSEN"): ActiveDatabaseSession {
     return {
@@ -31,6 +35,16 @@ suite("lecturer portal adversarial PostgreSQL boundary", () => {
       isActive: true,
       mustChangePassword: false,
       expiresAt: new Date(Date.now() + 3_600_000),
+    };
+  }
+
+  function profilePayload(overrides: Record<string, unknown> = {}) {
+    return {
+      position: "Dosen", expertise: null, bio: null, quote: null, officeHours: null, officeLocation: null,
+      phone: null, googleScholarUrl: null, sintaUrl: null, scopusUrl: null,
+      linkedinUrl: null, instagramUrl: null, twitterUrl: null,
+      photoMediaId: null, cvMediaId: null,
+      ...overrides,
     };
   }
 
@@ -57,10 +71,59 @@ suite("lecturer portal adversarial PostgreSQL boundary", () => {
     ]);
     educationB = edu.id;
     publicationB = pub.id;
+
+    const media = await Promise.all([
+      prisma.media.create({
+        data: {
+          storageKey: `2026/01/${marker}-photo-a.webp`,
+          storageClass: "PUBLIC",
+          checksumSha256: "a".repeat(64),
+          originalName: "photo-a.webp",
+          mimeType: "image/webp",
+          size: 512,
+          alt: "Foto A",
+          isDecorative: false,
+          width: 256,
+          height: 256,
+          uploaderId: userA,
+        },
+      }),
+      prisma.media.create({
+        data: {
+          storageKey: `2026/01/${marker}-cv-a.pdf`,
+          storageClass: "PUBLIC",
+          checksumSha256: "b".repeat(64),
+          originalName: "cv-a.pdf",
+          mimeType: "application/pdf",
+          size: 512,
+          alt: "",
+          isDecorative: false,
+          uploaderId: userA,
+        },
+      }),
+      prisma.media.create({
+        data: {
+          storageKey: `2026/01/${marker}-photo-b.webp`,
+          storageClass: "PUBLIC",
+          checksumSha256: "c".repeat(64),
+          originalName: "photo-b.webp",
+          mimeType: "image/webp",
+          size: 512,
+          alt: "Foto B",
+          isDecorative: false,
+          width: 256,
+          height: 256,
+          uploaderId: userB,
+        },
+      }),
+    ]);
+    [photoA, cvA, photoB] = media.map(({id}) => id);
+    mediaIds.push(...media.map(({id}) => id));
   });
 
   afterAll(async () => {
     await prisma.lecturer.deleteMany({where: {id: {in: lecturerIds}}});
+    await prisma.media.deleteMany({where: {id: {in: mediaIds}}});
     await prisma.user.deleteMany({where: {id: {in: userIds}}});
     await prisma.$disconnect();
   });
@@ -126,13 +189,9 @@ suite("lecturer portal adversarial PostgreSQL boundary", () => {
   it("strips dangerous markup from a biography before it is stored", async () => {
     const result = await executeLecturerPortalCommand(prisma, actor(userA), {
       action: "PROFILE_UPDATE",
-      payload: {
-        position: "Dosen", expertise: null, quote: null, officeHours: null, officeLocation: null,
-        phone: null, googleScholarUrl: null, sintaUrl: null, scopusUrl: null,
-        linkedinUrl: null, instagramUrl: null, twitterUrl: null,
-        photoMediaId: null, cvMediaId: null,
+      payload: profilePayload({
         bio: "<p>Aman</p><script>alert(1)</script><img src=x onerror=alert(1)>",
-      },
+      }),
     });
     expect(result.ok).toBe(true);
 
@@ -143,6 +202,53 @@ suite("lecturer portal adversarial PostgreSQL boundary", () => {
     expect(translation?.bio).toContain("Aman");
     expect(translation?.bio ?? "").not.toContain("<script");
     expect(translation?.bio ?? "").not.toContain("onerror");
+  });
+
+  it("allows a lecturer to attach only its own correctly typed profile media", async () => {
+    const result = await executeLecturerPortalCommand(prisma, actor(userA), {
+      action: "PROFILE_UPDATE",
+      payload: profilePayload({photoMediaId: photoA, cvMediaId: cvA}),
+    });
+    expect(result.ok).toBe(true);
+
+    const row = await prisma.lecturer.findUnique({where: {id: lecturerA}, select: {photoMediaId: true, cvMediaId: true}});
+    expect(row).toEqual({photoMediaId: photoA, cvMediaId: cvA});
+  });
+
+  it("does not let a lecturer attach media uploaded by another account", async () => {
+    const before = await prisma.lecturer.findUnique({
+      where: {id: lecturerA},
+      select: {photoMediaId: true, cvMediaId: true},
+    });
+    const result = await executeLecturerPortalCommand(prisma, actor(userA), {
+      action: "PROFILE_UPDATE",
+      payload: profilePayload({photoMediaId: photoB, cvMediaId: cvA}),
+    });
+    expect(result).toEqual({ok: false, code: "NOT_FOUND"});
+
+    const after = await prisma.lecturer.findUnique({
+      where: {id: lecturerA},
+      select: {photoMediaId: true, cvMediaId: true},
+    });
+    expect(after).toEqual(before);
+  });
+
+  it("does not let a lecturer attach media with the wrong profile slot type", async () => {
+    const before = await prisma.lecturer.findUnique({
+      where: {id: lecturerA},
+      select: {photoMediaId: true, cvMediaId: true},
+    });
+    const result = await executeLecturerPortalCommand(prisma, actor(userA), {
+      action: "PROFILE_UPDATE",
+      payload: profilePayload({photoMediaId: cvA, cvMediaId: photoA}),
+    });
+    expect(result).toEqual({ok: false, code: "VALIDATION_FAILED"});
+
+    const after = await prisma.lecturer.findUnique({
+      where: {id: lecturerA},
+      select: {photoMediaId: true, cvMediaId: true},
+    });
+    expect(after).toEqual(before);
   });
 
   it("rejects an expired session before touching the database", async () => {

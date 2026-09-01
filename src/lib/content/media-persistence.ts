@@ -17,7 +17,7 @@ import type {StagedUpload} from "@/lib/storage/staged-file";
 export type MediaPersistenceDatabase = ReturnType<typeof createPrismaClient>;
 export type MediaPersistenceClock = () => Date;
 
-type MediaActor = ActiveDatabaseSession & {role: "ADMIN" | "EDITOR"};
+type MediaActor = ActiveDatabaseSession & {role: "ADMIN" | "EDITOR" | "DOSEN"};
 type MediaFailure = Extract<MediaPersistenceResult, {ok: false}>;
 
 const SYSTEM_CLOCK: MediaPersistenceClock = () => new Date();
@@ -42,10 +42,14 @@ function failure(
 
 function actorFromSession(rawSession: unknown, now: Date): MediaActor | MediaFailure {
   const parsed = ActiveDatabaseSessionSchema.safeParse(rawSession);
-  if (!parsed.success || parsed.data.expiresAt.getTime() <= now.getTime()) {
+  if (
+    !parsed.success
+    || parsed.data.expiresAt.getTime() <= now.getTime()
+    || parsed.data.mustChangePassword
+  ) {
     return failure("UNAUTHENTICATED", "NOT_STAGED");
   }
-  if (parsed.data.role !== "ADMIN" && parsed.data.role !== "EDITOR") {
+  if (parsed.data.role !== "ADMIN" && parsed.data.role !== "EDITOR" && parsed.data.role !== "DOSEN") {
     return failure("FORBIDDEN", "NOT_STAGED");
   }
   const actor = {...parsed.data, role: parsed.data.role};

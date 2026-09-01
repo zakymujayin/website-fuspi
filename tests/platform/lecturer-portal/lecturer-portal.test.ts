@@ -2,6 +2,7 @@ import {describe, expect, it} from "vitest";
 
 import {
   LecturerPortalCommandSchema,
+  LecturerPortalMediaUploadResponseSchema,
   LecturerProfileInputSchema,
   TrustedLecturerActorSchema,
 } from "@/contracts/lecturer-portal";
@@ -104,6 +105,43 @@ describe("lecturer portal input validation", () => {
         lecturerId: "someone-else",
       }).success,
     ).toBe(false);
+  });
+});
+
+describe("lecturer portal media upload contract", () => {
+  it("accepts the fixed success shape returned by the portal upload endpoint", () => {
+    expect(LecturerPortalMediaUploadResponseSchema.safeParse({
+      ok: true,
+      kind: "PHOTO",
+      mediaId: "media-dosen-1",
+      url: "/uploads/2026/01/profile.webp",
+      originalName: "profile.webp",
+      mimeType: "image/webp",
+    }).success).toBe(true);
+    expect(LecturerPortalMediaUploadResponseSchema.safeParse({
+      ok: true,
+      kind: "CV",
+      mediaId: "media-dosen-2",
+      url: "/uploads/2026/01/cv.pdf",
+      originalName: "cv.pdf",
+      mimeType: "application/pdf",
+    }).success).toBe(true);
+  });
+
+  it("rejects extra data and unsupported upload kinds", () => {
+    expect(LecturerPortalMediaUploadResponseSchema.safeParse({
+      ok: true,
+      kind: "AVATAR",
+      mediaId: "media-dosen-1",
+      url: "/uploads/2026/01/profile.webp",
+      originalName: "profile.webp",
+      mimeType: "image/webp",
+    }).success).toBe(false);
+    expect(LecturerPortalMediaUploadResponseSchema.safeParse({
+      ok: false,
+      code: "VALIDATION_FAILED",
+      debug: "bad mime",
+    }).success).toBe(false);
   });
 });
 

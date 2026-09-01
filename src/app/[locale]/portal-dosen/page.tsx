@@ -4,9 +4,21 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {ProfileForm, type ProfileFormLabels} from "@/components/portal/profile-form";
 import {loadLecturerPortalProfile} from "@/features/lecturer-portal/domain";
+import {StorageKeySchema} from "@/contracts/storage";
 import {parseAppLocale} from "@/lib/auth/runtime/redirect";
 import {getRequestSession} from "@/lib/auth/runtime/request-session";
 import {getPrismaClient} from "@/lib/db/client";
+
+function uploadRoot(raw: string) {
+  return raw.replace(/\/+$/u, "") || "/uploads";
+}
+
+function publicMediaUrl(storageKey: string | null | undefined) {
+  const parsed = StorageKeySchema.safeParse(storageKey);
+  return parsed.success
+    ? `${uploadRoot(process.env.UPLOAD_PUBLIC_URL ?? "/uploads")}/${parsed.data}`
+    : "";
+}
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
@@ -48,6 +60,23 @@ export default async function PortalProfilePage({params}: {params: Promise<{loca
     identitySection: t("sectionIdentity"),
     contactSection: t("sectionContact"),
     linksSection: t("sectionLinks"),
+    mediaSection: t("sectionMedia"),
+    photoLabel: t("fieldPhoto"),
+    photoHint: t("hintPhoto"),
+    photoEmpty: t("emptyPhoto"),
+    photoChoose: t("choosePhoto"),
+    photoUploading: t("uploadingPhoto"),
+    photoReady: t("readyPhoto"),
+    cvLabel: t("fieldCv"),
+    cvHint: t("hintCv"),
+    cvEmpty: t("emptyCv"),
+    cvChoose: t("chooseCv"),
+    cvUploading: t("uploadingCv"),
+    cvReady: t("readyCv"),
+    clearMedia: t("clearMedia"),
+    uploadErrorValidation: t("uploadErrorValidation"),
+    uploadErrorSession: t("uploadErrorSession"),
+    uploadErrorUnavailable: t("uploadErrorUnavailable"),
     bioHint: t("hintBio"),
     quoteHint: t("hintQuote"),
     urlHint: t("hintUrl"),
@@ -81,7 +110,11 @@ export default async function PortalProfilePage({params}: {params: Promise<{loca
             instagramUrl: profile.data.instagramUrl ?? "",
             twitterUrl: profile.data.twitterUrl ?? "",
             photoMediaId: profile.data.photoMediaId ?? "",
+            photoUrl: publicMediaUrl(profile.data.photoMedia?.storageKey),
+            photoAlt: profile.data.photoMedia?.alt ?? t("fieldPhoto"),
             cvMediaId: profile.data.cvMediaId ?? "",
+            cvUrl: publicMediaUrl(profile.data.cvMedia?.storageKey),
+            cvName: profile.data.cvMedia?.originalName ?? "",
           }}
         />
       </div>

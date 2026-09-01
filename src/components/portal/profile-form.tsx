@@ -1,12 +1,19 @@
 "use client";
 
-import {useActionState, useState} from "react";
+import {useActionState, useRef, useState} from "react";
+import {FileTextIcon, ImageIcon, UploadIcon, XIcon} from "lucide-react";
 
 import {PageRichTextField} from "@/components/admin/pages/page-rich-text-field";
 import {saveProfileAction, type PortalFormState} from "@/components/portal/lecturer-portal-server-actions";
 import {PortalFormStatus, PortalSubmitButton} from "@/components/portal/portal-form-status";
+import {Button} from "@/components/ui/button";
 import {Field, FieldDescription, FieldGroup, FieldLabel, FieldSet} from "@/components/ui/field";
 import {Input} from "@/components/ui/input";
+import {Spinner} from "@/components/ui/spinner";
+import {
+  LecturerPortalMediaUploadResponseSchema,
+  type LecturerPortalMediaUploadKind,
+} from "@/contracts/lecturer-portal";
 
 export type ProfileFormValues = {
   position: string;
@@ -22,22 +29,169 @@ export type ProfileFormValues = {
   linkedinUrl: string;
   instagramUrl: string;
   twitterUrl: string;
-  /* Carried through untouched: the portal has no media picker yet, and
-     omitting these would clear the stored photo and CV on every save. */
   photoMediaId: string;
+  photoUrl: string;
+  photoAlt: string;
   cvMediaId: string;
+  cvUrl: string;
+  cvName: string;
 };
 
 export type ProfileFormLabels = Record<
-  /* The media ids ride along as hidden inputs, so they need no label. */
-  | Exclude<keyof ProfileFormValues, "photoMediaId" | "cvMediaId">
+  | Exclude<keyof ProfileFormValues, "photoMediaId" | "photoUrl" | "photoAlt" | "cvMediaId" | "cvUrl" | "cvName">
   | "identitySection" | "contactSection" | "linksSection"
+  | "mediaSection" | "photoLabel" | "photoHint" | "photoEmpty" | "photoChoose" | "photoUploading" | "photoReady"
+  | "cvLabel" | "cvHint" | "cvEmpty" | "cvChoose" | "cvUploading" | "cvReady"
+  | "clearMedia" | "uploadErrorValidation" | "uploadErrorSession" | "uploadErrorUnavailable"
   | "bioHint" | "quoteHint" | "urlHint" | "save" | "saving" | "saved"
   | "errorValidation" | "errorSession" | "errorUnavailable",
   string
 >;
 
 const INITIAL: PortalFormState = {status: "idle"};
+const ACCEPTED_PHOTO = "image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp";
+const ACCEPTED_CV = "application/pdf,.pdf";
+
+type UploadedMedia = {
+  mediaId: string;
+  url: string;
+  name: string;
+  alt: string;
+};
+
+function uploadErrorLabel(code: string, labels: ProfileFormLabels) {
+  if (code === "SESSION_INVALID" || code === "CSRF_INVALID") return labels.uploadErrorSession;
+  if (code === "VALIDATION_FAILED" || code === "REQUEST_INVALID") return labels.uploadErrorValidation;
+  return labels.uploadErrorUnavailable;
+}
+
+function initialPhoto(values: ProfileFormValues, labels: ProfileFormLabels): UploadedMedia | null {
+  return values.photoMediaId && values.photoUrl
+    ? {mediaId: values.photoMediaId, url: values.photoUrl, name: labels.photoLabel, alt: values.photoAlt}
+    : null;
+}
+
+function initialCv(values: ProfileFormValues, labels: ProfileFormLabels): UploadedMedia | null {
+  return values.cvMediaId && values.cvUrl
+    ? {mediaId: values.cvMediaId, url: values.cvUrl, name: values.cvName || labels.cvLabel, alt: ""}
+    : null;
+}
+
+function ProfileMediaUpload({
+  kind,
+  media,
+  labels,
+  onChange,
+}: {
+  kind: LecturerPortalMediaUploadKind;
+  media: UploadedMedia | null;
+  labels: ProfileFormLabels;
+  onChange: (media: UploadedMedia | null) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [status, setStatus] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const isPhoto = kind === "PHOTO";
+  const label = isPhoto ? labels.photoLabel : labels.cvLabel;
+  const hint = isPhoto ? labels.photoHint : labels.cvHint;
+  const empty = isPhoto ? labels.photoEmpty : labels.cvEmpty;
+  const choose = isPhoto ? labels.photoChoose : labels.cvChoose;
+  const uploading = isPhoto ? labels.photoUploading : labels.cvUploading;
+  const ready = isPhoto ? labels.photoReady : labels.cvReady;
+
+  async function upload(file: File) {
+    setBusy(true);
+    setError(null);
+    setStatus(uploading);
+    try {
+      const formData = new FormData();
+      formData.set("kind", kind);
+      formData.set("file", file);
+      const response = await fetch("/api/portal/lecturer/media/upload", {
+        method: "POST",
+        body: formData,
+        credentials: "same-origin",
+      });
+      const parsed = LecturerPortalMediaUploadResponseSchema.safeParse(await response.json());
+      if (!parsed.success) {
+        setError(uploadErrorLabel("UNAVAILABLE", labels));
+        setStatus(null);
+        return;
+      }
+      if (!parsed.data.ok) {
+        setError(uploadErrorLabel(parsed.data.code, labels));
+        setStatus(null);
+        return;
+      }
+      onChange({
+        mediaId: parsed.data.mediaId,
+        url: parsed.data.url,
+        name: parsed.data.originalName,
+        alt: isPhoto ? label : "",
+      });
+      setStatus(ready);
+    } catch {
+      setError(labels.uploadErrorUnavailable);
+      setStatus(null);
+    } finally {
+      setBusy(false);
+      if (inputRef.current) inputRef.current.value = "";
+    }
+  }
+
+  return (
+    <Field className="rounded-lg border border-slate-200 bg-white p-4">
+      <div className="flex items-start gap-4">
+        <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-md border border-slate-200 bg-slate-50">
+          {media?.url && isPhoto ? (
+            /* eslint-disable-next-line @next/next/no-img-element -- portal previews use runtime upload storage URLs. */
+            <img src={media.url} alt={media.alt || label} className="size-full object-cover" />
+          ) : media?.url ? (
+            <FileTextIcon aria-hidden className="size-8 text-slate-500" strokeWidth={1.5} />
+          ) : isPhoto ? (
+            <ImageIcon aria-hidden className="size-8 text-slate-400" strokeWidth={1.5} />
+          ) : (
+            <FileTextIcon aria-hidden className="size-8 text-slate-400" strokeWidth={1.5} />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <FieldLabel htmlFor={`portal-${kind.toLowerCase()}-upload`}>{label}</FieldLabel>
+          <FieldDescription className="mt-1">{hint}</FieldDescription>
+          <p className="mt-2 truncate text-sm text-slate-700">{media?.name || empty}</p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <Input
+              ref={inputRef}
+              id={`portal-${kind.toLowerCase()}-upload`}
+              type="file"
+              accept={isPhoto ? ACCEPTED_PHOTO : ACCEPTED_CV}
+              className="sr-only"
+              disabled={busy}
+              onChange={(event) => {
+                const file = event.currentTarget.files?.[0];
+                if (file) void upload(file);
+              }}
+            />
+            <Button type="button" size="sm" variant="outline" disabled={busy} onClick={() => inputRef.current?.click()}>
+              {busy ? <Spinner data-icon /> : <UploadIcon data-icon />}
+              {choose}
+            </Button>
+            {media ? (
+              <Button type="button" size="sm" variant="ghost" disabled={busy} onClick={() => onChange(null)}>
+                <XIcon data-icon />
+                {labels.clearMedia}
+              </Button>
+            ) : null}
+          </div>
+          <div aria-live="polite" className="mt-2 min-h-5 text-sm">
+            {error ? <span className="text-destructive">{error}</span> : null}
+            {!error && status ? <span className="text-emerald-700">{status}</span> : null}
+          </div>
+        </div>
+      </div>
+    </Field>
+  );
+}
 
 export function ProfileForm({values, labels}: {values: ProfileFormValues; labels: ProfileFormLabels}) {
   const [state, action, pending] = useActionState(saveProfileAction, INITIAL);
@@ -45,13 +199,24 @@ export function ProfileForm({values, labels}: {values: ProfileFormValues; labels
      the lecturer raw markup, so the shared rich-text field owns the value and a
      hidden input carries it into the form action. */
   const [bio, setBio] = useState(values.bio);
+  const [photo, setPhoto] = useState<UploadedMedia | null>(() => initialPhoto(values, labels));
+  const [cv, setCv] = useState<UploadedMedia | null>(() => initialCv(values, labels));
 
   return (
-    <form action={action} className="max-w-3xl">
-      <input type="hidden" name="photoMediaId" value={values.photoMediaId} />
-      <input type="hidden" name="cvMediaId" value={values.cvMediaId} />
+    <form action={action} className="max-w-4xl">
+      <input type="hidden" name="photoMediaId" value={photo?.mediaId ?? ""} />
+      <input type="hidden" name="cvMediaId" value={cv?.mediaId ?? ""} />
       <FieldSet>
-        <FieldGroup>
+        <legend className="font-display text-sm font-semibold text-slate-900">{labels.mediaSection}</legend>
+        <FieldGroup className="mt-4 grid gap-4 md:grid-cols-2">
+          <ProfileMediaUpload kind="PHOTO" media={photo} labels={labels} onChange={setPhoto} />
+          <ProfileMediaUpload kind="CV" media={cv} labels={labels} onChange={setCv} />
+        </FieldGroup>
+      </FieldSet>
+
+      <FieldSet className="mt-10">
+        <legend className="font-display text-sm font-semibold text-slate-900">{labels.identitySection}</legend>
+        <FieldGroup className="mt-4">
           <Field>
             <FieldLabel htmlFor="position">{labels.position}</FieldLabel>
             <Input id="position" name="position" defaultValue={values.position} maxLength={200} />

@@ -115,6 +115,11 @@ export const TrustedMediaActorScopeSchema = z.discriminatedUnion("role", [
     userId: MediaIdSchema,
     ownership: z.literal("OWN"),
   }).strict(),
+  z.object({
+    role: z.literal("DOSEN"),
+    userId: MediaIdSchema,
+    ownership: z.literal("OWN"),
+  }).strict(),
 ]);
 
 export const MediaListQuerySchema = z.object({
