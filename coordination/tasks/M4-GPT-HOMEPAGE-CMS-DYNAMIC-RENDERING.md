@@ -3,7 +3,7 @@ id: M4-GPT-HOMEPAGE-CMS-DYNAMIC-RENDERING
 milestone: M4
 owner: gpt
 base_branch: feat/lecturer-portal-complaint-booking
-base_sha: 13909c53f04c91871ed3af70381460908e82b373
+base_sha: 5ea3e30f015801b85325a12139b43fb08403ca36
 allowed_paths:
   - "coordination/tasks/M4-GPT-HOMEPAGE-CMS-DYNAMIC-RENDERING.md"
   - "coordination/handoffs/M4-GPT-HOMEPAGE-CMS-DYNAMIC-RENDERING-gpt.md"
@@ -32,7 +32,7 @@ acceptance_commands:
   - npm run test
   - npm run build
   - git diff --check
-  - "TASK_MANIFEST=coordination/tasks/M4-GPT-HOMEPAGE-CMS-DYNAMIC-RENDERING.md TASK_BASE=13909c53f04c91871ed3af70381460908e82b373 npm run check:scope"
+  - "TASK_MANIFEST=coordination/tasks/M4-GPT-HOMEPAGE-CMS-DYNAMIC-RENDERING.md TASK_BASE=5ea3e30f015801b85325a12139b43fb08403ca36 npm run check:scope"
 risk: medium
 token_class: S
 status: active

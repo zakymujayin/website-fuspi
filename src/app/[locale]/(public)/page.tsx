@@ -1,4 +1,5 @@
 import type {Metadata} from "next";
+import {connection} from "next/server";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {AchievementsSection} from "@/components/public/achievements-section";
@@ -46,6 +47,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 export default async function HomePage({params}: {params: Promise<{locale: AppLocale}>}) {
   const {locale} = await params;
   setRequestLocale(locale);
+  await connection();
   const t = await getTranslations("Home");
 
   const prisma = getPrismaClient();
