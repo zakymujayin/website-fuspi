@@ -63,7 +63,7 @@ None. No API, Prisma schema, migration, auth, crypto, or env contract changes.
   - Passed.
 - `TASK_MANIFEST=coordination/tasks/M4-GPT-HOMEPAGE-CMS-DYNAMIC-RENDERING.md TASK_BASE=5ea3e30f015801b85325a12139b43fb08403ca36 npm run check:scope`
   - Pre-commit sandbox run failed with `spawnSync git EPERM`; escalated pre-commit run reported 0 committed files because changes were still in working tree.
-  - Final post-commit result is recorded below.
+  - Final post-commit escalated run passed: 4 changed files are within lease.
 
 ## Untested Areas / Risks / Follow-ups
 
