@@ -67,3 +67,10 @@ active_leases:
       - tests/m4/ui/page-admin/**
       - e2e/m4/page-admin.spec.ts
       - coordination/handoffs/M4-CLAUDE-PAGE-ADMIN-UI-claude.md
+  - task: M4-GPT-HISTORY-PAGE-NARRATIVE
+    owner: gpt
+    paths:
+      - src/app/[locale]/(public)/profil/sejarah/page.tsx
+      - coordination/tasks/M4-GPT-HISTORY-PAGE-NARRATIVE.md
+      - coordination/handoffs/M4-GPT-HISTORY-PAGE-NARRATIVE-gpt.md
+      - coordination/ownership.yml
