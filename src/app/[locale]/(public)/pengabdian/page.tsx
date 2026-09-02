@@ -1,5 +1,5 @@
 import type {Metadata} from "next";
-import {BookMarked, HandHeart, MessagesSquare, Stethoscope} from "lucide-react";
+import {BookMarked, HandHeart, MessagesSquare} from "lucide-react";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {SectionHeading} from "@/components/public/section-heading";
@@ -31,19 +31,6 @@ const PROGRAMS = [
       id: "Dialog lintas iman dan penguatan wawasan kebangsaan di wilayah rawan polarisasi sosial-keagamaan.",
       en: "Interfaith dialogue and civic education in areas prone to religious and social polarization.",
       ar: "حوار بين الأديان وتعزيز الوعي الوطني في مناطق معرضة للاستقطاب الديني والاجتماعي.",
-    },
-  },
-  {
-    icon: Stethoscope,
-    title: {
-      id: "Bimbingan Rohani dan Konseling Spiritual",
-      en: "Spiritual Guidance and Counseling",
-      ar: "الإرشاد الروحي والاستشارة النفسية",
-    },
-    description: {
-      id: "Layanan konseling berbasis tasawuf bagi masyarakat terdampak bencana dan kelompok rentan.",
-      en: "Sufism-informed counseling services for disaster-affected communities and vulnerable groups.",
-      ar: "خدمات إرشادية قائمة على التصوف للمجتمعات المتضررة من الكوارث والفئات الضعيفة.",
     },
   },
   {

@@ -7,7 +7,6 @@ import { StickyHeader } from "@/components/public/shell/sticky-header";
 import { UtilityLink } from "@/components/public/shell/utility-link";
 import { TopBar } from "@/components/public/top-bar";
 import {getPublicSiteSetting} from "@/features/home-nav/public-query";
-import { Link } from "@/i18n/navigation";
 import {getPrismaClient} from "@/lib/db/client";
 import {getLocale, getTranslations} from "next-intl/server";
 
@@ -44,14 +43,15 @@ export async function SiteHeader() {
               bluLogo={siteSetting?.bluLogo ?? null}
             />
             <DesktopNav primary={restNav} />
-            <div className="hidden shrink-0 items-center gap-1 lg:flex">
+            <div className="hidden shrink-0 items-center gap-1 xl:flex">
               <HeaderSearch />
-              <Link
-                href={ppidLink.href}
-                className="inline-flex h-10 shrink-0 items-center whitespace-nowrap rounded-lg border border-brass-500 px-3 text-[13px] font-semibold text-[#7d5621] transition-colors hover:bg-brass-500/10 xl:px-4 xl:text-sm"
-              >
-                {t(ppidLink.key)}
-              </Link>
+              <UtilityLink
+                url={ppidLink.url}
+                label={t(ppidLink.key)}
+                externalHint={externalHint}
+                showIcon={false}
+                className="h-10 shrink-0 whitespace-nowrap rounded-lg border border-brass-500 px-3 text-[13px] font-semibold text-[#7d5621] transition-colors hover:bg-brass-500/10 xl:px-4 xl:text-sm"
+              />
               <UtilityLink
                 url={pmbLink.url}
                 label={t(pmbLink.key)}

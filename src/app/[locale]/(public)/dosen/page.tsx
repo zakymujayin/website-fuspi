@@ -6,9 +6,13 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {Breadcrumb} from "@/components/public/breadcrumb";
 import {SectionHeading} from "@/components/public/section-heading";
 import {Container} from "@/components/ui/container";
+import {institution} from "@/config/institution";
 import {Link} from "@/i18n/navigation";
 import {getPrismaClient} from "@/lib/db/client";
 import type {AppLocale} from "@/i18n/routing";
+
+const PUBLIC_STUDY_PROGRAM_CODES: string[] = institution.studyPrograms.map((item) => item.code);
+const PUBLIC_STUDY_PROGRAM_CODE_SET = new Set<string>(PUBLIC_STUDY_PROGRAM_CODES);
 
 const LECTURER_SELECT = {
   id: true, slug: true, name: true, studyProgramId: true,
@@ -59,6 +63,7 @@ export default async function DosenPage({
 
   const search = readParam(query.q);
   const program = readParam(query.prodi);
+  const selectedProgram = PUBLIC_STUDY_PROGRAM_CODE_SET.has(program) ? program : "";
 
   let rows: LecturerRow[] = [];
   let programs: ProgramRow[] = [];
@@ -69,7 +74,7 @@ export default async function DosenPage({
         where: {
           isActive: true,
           ...(search ? {name: {contains: search, mode: "insensitive" as const}} : {}),
-          ...(program ? {studyProgram: {code: program}} : {}),
+          ...(selectedProgram ? {studyProgram: {code: selectedProgram, isActive: true}} : {}),
         },
         /* `order` is an editorial hint and is not unique, so name breaks the tie.
            Without it the directory can reshuffle between page loads. */
@@ -77,7 +82,7 @@ export default async function DosenPage({
         select: LECTURER_SELECT,
       }) as Promise<LecturerRow[]>,
       prisma.studyProgram.findMany({
-        where: {isActive: true},
+        where: {isActive: true, code: {in: PUBLIC_STUDY_PROGRAM_CODES}},
         orderBy: {order: "asc"},
         select: {id: true, code: true},
       }) as Promise<ProgramRow[]>,
@@ -133,7 +138,7 @@ export default async function DosenPage({
             <select
               id="lecturer-program"
               name="prodi"
-              defaultValue={program}
+              defaultValue={selectedProgram}
               className="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 focus:border-royal-500 focus:outline-2 focus:outline-offset-0 focus:outline-royal-500"
             >
               <option value="">{tp("allPrograms")}</option>
@@ -177,7 +182,7 @@ export default async function DosenPage({
                     )}
                   </div>
                   <div className="flex flex-1 flex-col p-5">
-                    {d.studyProgram ? (
+                    {d.studyProgram && PUBLIC_STUDY_PROGRAM_CODE_SET.has(d.studyProgram.code) ? (
                       <p className="text-xs font-medium tracking-wide text-royal-600 uppercase">
                         {d.studyProgram.code}
                       </p>

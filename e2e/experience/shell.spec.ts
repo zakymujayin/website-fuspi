@@ -12,7 +12,7 @@ const horizontalOverflow = (page: Page) =>
 
 test.describe("public shell", () => {
   for (const locale of LOCALES) {
-    test(`${locale}: renders the shell landmarks and the five study programs`, async ({
+    test(`${locale}: renders the shell landmarks and the three study programs`, async ({
       page,
     }) => {
       await page.goto(`/${locale}/prodi`);
@@ -28,7 +28,7 @@ test.describe("public shell", () => {
       await expect(page.getByRole("main")).toBeVisible();
       await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
-      await expect(page.getByRole("main").getByRole("listitem")).toHaveCount(5);
+      await expect(page.getByRole("main").getByRole("listitem")).toHaveCount(3);
       await expect(page.getByText(/FUDA/i)).toHaveCount(0);
     });
 
@@ -59,7 +59,8 @@ test.describe("public shell", () => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto("/id/prodi");
 
-    await page.getByRole("link", { name: "English" }).first().click();
+    await page.getByRole("navigation", { name: "Pilih bahasa" }).getByRole("button").click();
+    await page.getByRole("menuitem", { name: /English/ }).click();
 
     await expect(page).toHaveURL(/\/en\/prodi$/);
     await expect(page.getByRole("heading", { level: 1 })).toHaveText("Study Programs");
@@ -128,8 +129,8 @@ test.describe("public shell", () => {
 
       const selectors = {
         utility: 'nav[aria-label="Layanan sistem"] a',
-        switcher: 'header nav[aria-label="Pilih bahasa"] a:not([aria-current])',
-        content: 'nav[aria-label="Kanal konten"] a',
+        switcher: 'header nav[aria-label="Pilih bahasa"] button',
+        content: 'nav[aria-labelledby="footer-content"] a',
         footer: "footer nav a",
       };
 

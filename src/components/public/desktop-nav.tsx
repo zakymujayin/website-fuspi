@@ -29,11 +29,11 @@ export function DesktopNav({ primary }: { primary: readonly NavGroup[] }) {
   const [openKey, setOpenKey] = useState<string | null>(null);
 
   return (
-    // Below lg the longest locale (EN) overflows a 768px line, so the drawer
-    // stays in charge up to lg rather than md.
+    // Below xl the utility/action cluster and longer localized labels compete
+    // for the same row, so the drawer stays in charge through tablet widths.
     <nav
       aria-label={t("primaryLabel")}
-      className="hidden shrink-0 items-center gap-0.5 lg:flex 2xl:gap-1"
+      className="hidden shrink-0 items-center gap-0.5 xl:flex 2xl:gap-1"
     >
       {primary.map((item) => {
         if (!item.children) {

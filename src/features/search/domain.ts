@@ -1,5 +1,6 @@
 import {z} from "zod";
 
+import {institution} from "@/config/institution";
 import type {Prisma} from "@/generated/prisma/client";
 import type {createPrismaClient} from "@/lib/db/client";
 
@@ -22,6 +23,7 @@ const RESOURCE_TYPE_SCHEMA = z.enum([
 export type SearchResourceType = z.infer<typeof RESOURCE_TYPE_SCHEMA>;
 
 const SEARCHABLE_POST_TYPES = ["BERITA", "PENGUMUMAN", "KOLOM"] as const;
+const PUBLIC_STUDY_PROGRAM_CODES: string[] = institution.studyPrograms.map((program) => program.code);
 
 const SEARCH_QUERY_SCHEMA = z.object({
   query: z.string().trim().min(1).max(200),
@@ -139,6 +141,7 @@ async function searchStudyPrograms(
 ): Promise<{items: SearchResultItem[]; total: number}> {
   const where: Prisma.StudyProgramWhereInput = {
     isActive: true,
+    code: {in: PUBLIC_STUDY_PROGRAM_CODES},
     translations: {
       some: {
         status: "PUBLISHED",

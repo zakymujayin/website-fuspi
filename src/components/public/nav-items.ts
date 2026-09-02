@@ -86,22 +86,22 @@ export const primaryNav: readonly NavGroup[] = [
 export type ExternalLink = { key: string; url: string };
 
 export const utilityLinks: readonly ExternalLink[] = [
-  { key: "siakad", url: "https://siakad.uinbanten.ac.id" },
-  { key: "elearning", url: "https://elearning.uinbanten.ac.id" },
-  { key: "gkm", url: "https://gkm.uinbanten.ac.id" },
+  { key: "siakad", url: "https://neosiakad.uinbanten.ac.id" },
+  { key: "elearning", url: "https://fuspi.uinbanten.ac.id/e-learning" },
+  { key: "gkm", url: "https://gkm-fuda.uinbanten.ac.id/" },
 ] as const;
 
 /** PMB (external admissions portal). Surfaced as a prominent header button, not the topbar. */
-export const pmbLink: ExternalLink = { key: "pmb", url: "https://pmb.uinbanten.ac.id" } as const;
+export const pmbLink: ExternalLink = { key: "pmb", url: "https://pmb.uinbanten.ac.id/" } as const;
 
-/** PPID (internal route). Surfaced as a prominent header button, not the topbar. */
-export const ppidLink: NavLink = { key: "ppid", href: "/ppid" } as const;
+/** PPID (external FUSPI PPID site). Surfaced as a prominent header button, not the topbar. */
+export const ppidLink: ExternalLink = { key: "ppid", url: "https://fuspi-ppid.uinbanten.ac.id/" } as const;
 
-export const quickLinks: readonly NavLink[] = [
+export const quickLinks: readonly (NavLink | ExternalLink)[] = [
   { key: "services", href: "/layanan" },
   { key: "complaints", href: "/pengaduan" },
   { key: "booking", href: "/peminjaman" },
-  { key: "ppid", href: "/ppid" },
+  ppidLink,
   { key: "faq", href: "/faq" },
   { key: "contact", href: "/kontak" },
 ] as const;

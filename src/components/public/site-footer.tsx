@@ -2,7 +2,7 @@ import { MapPin } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
 import { BrandMark } from "@/components/public/brand-mark";
-import { contentNav, quickLinks, studyProgramLinks } from "@/components/public/nav-items";
+import { contentNav, quickLinks, studyProgramLinks, type ExternalLink, type NavLink } from "@/components/public/nav-items";
 import { Container } from "@/components/ui/container";
 import { institution } from "@/config/institution";
 import { Link } from "@/i18n/navigation";
@@ -36,9 +36,14 @@ const LINK_CLASS =
 const LEGAL_LINK_CLASS =
   "inline-flex min-h-11 items-center text-[13px] text-slate-400 transition-colors hover:text-white";
 
+function isExternalLink(item: NavLink | ExternalLink): item is ExternalLink {
+  return "url" in item;
+}
+
 export async function SiteFooter() {
   const t = await getTranslations("Footer");
   const tNav = await getTranslations("Nav");
+  const externalHint = tNav("externalLinkHint");
 
   return (
     <footer className="border-t border-white/10 bg-navy-950 pt-16 text-slate-300">
@@ -109,9 +114,21 @@ export async function SiteFooter() {
             <ul className="flex flex-col gap-2">
               {quickLinks.map((item) => (
                 <li key={item.key}>
-                  <Link href={item.href} className={LINK_CLASS}>
-                    {tNav(item.key)}
-                  </Link>
+                  {isExternalLink(item) ? (
+                    <a
+                      href={item.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={LINK_CLASS}
+                    >
+                      {tNav(item.key)}
+                      <span className="sr-only">{externalHint}</span>
+                    </a>
+                  ) : (
+                    <Link href={item.href} className={LINK_CLASS}>
+                      {tNav(item.key)}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

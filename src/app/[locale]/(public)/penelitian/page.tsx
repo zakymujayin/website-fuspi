@@ -1,5 +1,5 @@
 import type {Metadata} from "next";
-import {BookOpen, Brain, Compass, HeartHandshake, Scale} from "lucide-react";
+import {BookOpen, Brain, Scale} from "lucide-react";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {SectionHeading} from "@/components/public/section-heading";
@@ -44,32 +44,6 @@ const FOCUS_AREAS = [
       id: "Penelitian pemikiran rasional Islam dalam merespons wacana filsafat dan sains modern.",
       en: "Research on rational Islamic thought in dialogue with modern philosophy and science.",
       ar: "بحث في الفكر الإسلامي العقلاني في تفاعله مع الفلسفة والعلوم الحديثة.",
-    },
-  },
-  {
-    icon: Compass,
-    title: {
-      id: "Dialog dan Moderasi Beragama",
-      en: "Interfaith Dialogue and Religious Moderation",
-      ar: "الحوار بين الأديان والاعتدال الديني",
-    },
-    description: {
-      id: "Studi perbandingan agama dan penguatan moderasi beragama dalam masyarakat majemuk.",
-      en: "Comparative religion studies and strengthening religious moderation in pluralistic society.",
-      ar: "دراسات مقارنة للأديان وتعزيز الاعتدال الديني في مجتمع تعددي.",
-    },
-  },
-  {
-    icon: HeartHandshake,
-    title: {
-      id: "Tasawuf dan Kesehatan Mental",
-      en: "Sufism and Mental Health",
-      ar: "التصوف والصحة النفسية",
-    },
-    description: {
-      id: "Penelitian praktik spiritual tasawuf sebagai pendekatan komplementer psikoterapi modern.",
-      en: "Research on Sufi spiritual practice as a complementary approach to modern psychotherapy.",
-      ar: "بحث في الممارسة الروحية الصوفية كنهج تكميلي للعلاج النفسي الحديث.",
     },
   },
 ] as const;

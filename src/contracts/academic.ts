@@ -32,7 +32,7 @@ function localizedInput<T extends z.ZodType>(translation: T) {
 
 const TranslationWorkflowViewSchema = CmsTranslationWorkflowSchema;
 
-export const StudyProgramCodeSchema = z.enum(["IAT", "IH", "AFI", "SAA", "TASPI"]);
+export const StudyProgramCodeSchema = z.enum(["IAT", "IH", "AFI"]);
 const studyProgramIdentity = new Map<string, {code: string; slug: string; name: string; order: number}>(
   institution.studyPrograms.map((program, order) => [program.code, {...program, order}]),
 );
@@ -61,7 +61,7 @@ export const StudyProgramInputSchema = z.object({
   curriculumDocumentId: CmsIdentifierSchema.nullable(),
   brochureDocumentId: CmsIdentifierSchema.nullable(),
   isActive: z.boolean(),
-  order: z.number().int().min(0).max(4),
+  order: z.number().int().min(0).max(2),
   contentOwnerId: CmsIdentifierSchema.nullable(),
   translations: localizedInput(StudyProgramTranslationInputSchema),
 }).strict().superRefine((value, context) => {

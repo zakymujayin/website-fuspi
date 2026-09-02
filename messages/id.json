@@ -124,9 +124,7 @@
     "program": {
       "IAT": "Ilmu Al-Qur’an dan Tafsir",
       "IH": "Ilmu Hadis",
-      "AFI": "Aqidah dan Filsafat Islam",
-      "SAA": "Studi Agama-Agama",
-      "TASPI": "Tasawuf dan Psikoterapi"
+      "AFI": "Aqidah dan Filsafat Islam"
     },
     "history": "Sejarah",
     "visionMission": "Visi dan Misi",
@@ -1297,7 +1295,7 @@
   },
   "Home": {
     "heroTitle": "Fakultas Ushuluddin dan Pemikiran Islam",
-    "heroSubtitle": "Mengembangkan kajian Al-Qur'an, hadis, aqidah, filsafat Islam, studi agama-agama, serta tasawuf dan psikoterapi dalam lingkungan akademik yang kredibel dan berwibawa.",
+    "heroSubtitle": "Mengembangkan kajian Al-Qur'an, hadis, aqidah, dan filsafat Islam dalam lingkungan akademik yang kredibel dan berwibawa.",
     "heroCtaPrimary": "Profil Fakultas",
     "heroCtaSecondary": "Program Studi",
     "quickLinksLabel": "Akses cepat",
@@ -1423,18 +1421,6 @@
       "aqidah": {
         "title": "Aqidah & Filsafat Islam",
         "description": "Kajian rasional-teologis"
-      },
-      "religions": {
-        "title": "Studi Agama-Agama",
-        "description": "Dialog dan pemahaman lintas iman"
-      },
-      "sufism": {
-        "title": "Tasawuf & Psikoterapi",
-        "description": "Spiritualitas dan kesejahteraan"
-      },
-      "integrated": {
-        "title": "Pendidikan Integratif",
-        "description": "Ilmu keislaman dan keterampilan zaman"
       }
     }
   },

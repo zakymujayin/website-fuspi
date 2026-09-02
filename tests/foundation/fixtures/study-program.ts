@@ -73,7 +73,7 @@ export function createStudyProgramWithTranslations(
   return prodi;
 }
 
-export function createAllFiveStudyPrograms(): FixtureStudyProgram[] {
+export function createAllStudyPrograms(): FixtureStudyProgram[] {
   resetStudyProgramIdCounter();
   return programs.map(() => createStudyProgramWithTranslations());
 }

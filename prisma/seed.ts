@@ -406,6 +406,10 @@ async function main() {
       },
     });
   }
+  await prisma.studyProgram.updateMany({
+    where: { code: { notIn: institution.studyPrograms.map((program) => program.code) } },
+    data: { isActive: false },
+  });
 
   for (const [slug, name] of [["berita", "Berita"], ["pengumuman", "Pengumuman"], ["kolom", "Kolom"]]) {
     await prisma.category.upsert({
@@ -466,9 +470,13 @@ async function main() {
     ["Layanan", "/layanan"],
     ["Pengaduan", "/pengaduan"],
     ["Survei", "/survei"],
-    ["Peminjaman Ruangan", "/peminjaman-ruangan"],
-    ["PMB", "https://pmb.uinbanten.ac.id"],
-    ["E-Learning", "https://elearning.uinbanten.ac.id"],
+    ["Peminjaman Ruangan", "/peminjaman"],
+    ["PMB", "https://pmb.uinbanten.ac.id/"],
+    ["SIAKAD", "https://neosiakad.uinbanten.ac.id"],
+    ["PPID", "https://fuspi-ppid.uinbanten.ac.id/"],
+    ["GKM", "https://gkm-fuda.uinbanten.ac.id/"],
+    ["E-Learning", "https://fuspi.uinbanten.ac.id/e-learning"],
+    ["E-Layanan", "https://fuspi.uinbanten.ac.id/e-layanan"],
   ] as const;
   // Seeded once — admins reorder, relabel, and add their own quick links.
   if ((await prisma.quickLink.count()) === 0) {
@@ -487,9 +495,9 @@ async function main() {
     {
       id: "slider-1",
       label: "FUSPI",
-      id_: { title: "Fakultas Ushuluddin dan Pemikiran Islam", subtitle: "Mengembangkan kajian Al-Qur'an, hadis, aqidah, filsafat Islam, studi agama-agama, serta tasawuf dan psikoterapi.", ctaLabel: "Profil Fakultas" },
-      en_: { title: "Faculty of Ushuluddin and Islamic Thought", subtitle: "Developing Qur'anic, hadith, aqidah, Islamic philosophy, religious studies, and Sufism/psychotherapy scholarship.", ctaLabel: "Faculty Profile" },
-      ar_: { title: "كلية أصول الدين والفكر الإسلامي", subtitle: "تطوير دراسات القرآن والحديث والعقيدة والفلسفة الإسلامية ودراسات الأديان والتصوف والعلاج النفسي.", ctaLabel: "ملف الكلية" },
+      id_: { title: "Fakultas Ushuluddin dan Pemikiran Islam", subtitle: "Mengembangkan kajian Al-Qur'an, hadis, aqidah, dan filsafat Islam.", ctaLabel: "Profil Fakultas" },
+      en_: { title: "Faculty of Ushuluddin and Islamic Thought", subtitle: "Developing Qur'anic, hadith, aqidah, and Islamic philosophy scholarship.", ctaLabel: "Faculty Profile" },
+      ar_: { title: "كلية أصول الدين والفكر الإسلامي", subtitle: "تطوير دراسات القرآن والحديث والعقيدة والفلسفة الإسلامية.", ctaLabel: "ملف الكلية" },
       ctaUrl: "/profil",
     },
     {
@@ -506,7 +514,7 @@ async function main() {
       id_: { title: "Jadi Bagian dari FUSPI", subtitle: "Bergabunglah dengan komunitas pembelajar yang mendalam dalam ilmu keislaman.", ctaLabel: "Daftar PMB" },
       en_: { title: "Become Part of FUSPI", subtitle: "Join a community of learners deeply rooted in Islamic knowledge.", ctaLabel: "Apply for Admission" },
       ar_: { title: "كن جزءاً من الكلية", subtitle: "انضم إلى مجتمع من المتعلمين المتجذرين في المعرفة الإسلامية.", ctaLabel: "التقديم للقبول" },
-      ctaUrl: "https://pmb.uinbanten.ac.id",
+      ctaUrl: "https://pmb.uinbanten.ac.id/",
     },
   ];
   // Seeded once as demo content. Re-running the seed must never overwrite the image,

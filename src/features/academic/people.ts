@@ -21,6 +21,7 @@ import {
 } from "@/contracts/cms";
 import {PublicMediaViewSchema} from "@/contracts/media";
 import {StorageKeySchema} from "@/contracts/storage";
+import {institution} from "@/config/institution";
 import type {Prisma} from "@/generated/prisma/client";
 import {Prisma as PrismaNamespace} from "@/generated/prisma/client";
 import type {createPrismaClient} from "@/lib/db/client";
@@ -36,6 +37,8 @@ type StaffInput = z.infer<typeof StaffInputSchema>;
 type Locale = "id" | "en" | "ar";
 
 const SUPPORTED_RESOURCES = new Set<SupportedResource>(["STUDY_PROGRAM", "LECTURER", "STAFF"]);
+const PUBLIC_STUDY_PROGRAM_CODES: string[] = institution.studyPrograms.map((program) => program.code);
+const PUBLIC_STUDY_PROGRAM_CODE_SET = new Set<string>(PUBLIC_STUDY_PROGRAM_CODES);
 const RAW_LIST_QUERY_SCHEMA = z.object({
   page: z.string().regex(/^(?:[1-9]\d{0,3}|10000)$/u).optional(),
   pageSize: z.enum(["10", "20", "50"]).optional(),
@@ -718,6 +721,7 @@ export async function listPublicAcademicPeople(
     if (query.resource === "STUDY_PROGRAM") {
       const where: Prisma.StudyProgramWhereInput = {
         isActive: true,
+        code: {in: PUBLIC_STUDY_PROGRAM_CODES},
         translations: {some: {status: "PUBLISHED", locale: {in: locale === "id" ? ["id"] : [locale, "id"]}}},
         ...(query.search === "" ? {} : {OR: [
           {code: {contains: query.search, mode: "insensitive"}},
@@ -777,7 +781,9 @@ export async function listPublicAcademicPeople(
           id: row.id, resource: "LECTURER", slug: row.slug, name: row.name,
           secondaryText: translation.position ?? translation.expertise,
           institutionalEmail: row.email, photo: publicMedia(row.photoMedia, rawUploadBase),
-          studyProgram: row.studyProgram?.isActive ? resolvedStudyProgram(row.studyProgram, locale) : null,
+          studyProgram: row.studyProgram?.isActive && PUBLIC_STUDY_PROGRAM_CODE_SET.has(row.studyProgram.code)
+            ? resolvedStudyProgram(row.studyProgram, locale)
+            : null,
         });
         return item.success ? [item.data] : [];
       });

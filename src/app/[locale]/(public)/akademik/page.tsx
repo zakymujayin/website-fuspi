@@ -7,6 +7,8 @@ import {Container} from "@/components/ui/container";
 import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
 
+const E_LAYANAN_URL = "https://fuspi.uinbanten.ac.id/e-layanan";
+
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
   const t = await getTranslations({locale, namespace: "Nav"});
@@ -18,9 +20,6 @@ export default async function AcademicPage({params}: {params: Promise<{locale: A
   setRequestLocale(locale);
   const t = await getTranslations("Pages");
   const tHome = await getTranslations("Home");
-
-  const silaUrl = process.env.NEXT_PUBLIC_SILA_URL;
-  const hasSila = Boolean(silaUrl && silaUrl.length > 0);
 
   const hubs = [
     {
@@ -45,8 +44,8 @@ export default async function AcademicPage({params}: {params: Promise<{locale: A
       description: t("agendaEventsDesc"),
     },
     {
-      href: hasSila ? (silaUrl as string) : "/layanan",
-      external: hasSila,
+      href: E_LAYANAN_URL,
+      external: true,
       icon: LayoutDashboard,
       title: tHome("service.sila.title"),
       description: tHome("service.sila.description"),

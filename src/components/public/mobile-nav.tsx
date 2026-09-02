@@ -52,7 +52,7 @@ export function MobileNav({ primary, content, utility, actions, externalHint }: 
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger
         aria-label={t("openMenu")}
-        className="grid size-11 shrink-0 place-items-center rounded-lg text-slate-700 hover:bg-slate-100 lg:hidden"
+        className="grid size-11 shrink-0 place-items-center rounded-lg text-slate-700 hover:bg-slate-100 xl:hidden"
       >
         <Menu aria-hidden className="size-6" strokeWidth={1.5} />
       </Dialog.Trigger>

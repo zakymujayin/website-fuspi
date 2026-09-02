@@ -39,13 +39,11 @@ const navKeys = [
 ];
 
 describe("public navigation", () => {
-  it("exposes the five active v1 study programs in contract order", () => {
+  it("exposes the three active study programs in contract order", () => {
     expect(studyProgramLinks.map((link) => link.key)).toEqual([
       "program.IAT",
       "program.IH",
       "program.AFI",
-      "program.SAA",
-      "program.TASPI",
     ]);
 
     expect(studyProgramLinks.map((link) => link.href)).toEqual(
@@ -62,6 +60,6 @@ describe("public navigation", () => {
   it("never links to FUDA identity or domains", () => {
     const surface = JSON.stringify({ primaryNav, contentNav, utilityLinks, quickLinks });
 
-    expect(surface).not.toMatch(/fuda/i);
+    expect(surface).not.toMatch(/"key":"fuda"|"href":"[^"]*fuda|"url":"https:\/\/fuda\./i);
   });
 });

@@ -12,8 +12,6 @@ const PROGRAMS = new Map([
   ["IAT", "program-iat"],
   ["IH", "program-ih"],
   ["AFI", "program-afi"],
-  ["SAA", "program-saa"],
-  ["TASPI", "program-taspi"],
 ]);
 
 const HEADER = LECTURER_CSV_COLUMNS.join(",");
@@ -173,18 +171,16 @@ describe("lecturer CSV import", () => {
     expect(result.rows[1]?.payload.studyProgramId).toBeNull();
   });
 
-  it("accepts all five v1 FUSPI study program codes", () => {
+  it("accepts all three active FUSPI study program codes", () => {
     const result = parseLecturerCsv(csv(
       row({nama: "Dosen IAT", prodi: "IAT"}),
       row({nama: "Dosen IH", prodi: "IH"}),
       row({nama: "Dosen AFI", prodi: "AFI"}),
-      row({nama: "Dosen SAA", prodi: "SAA"}),
-      row({nama: "Dosen TASPI", prodi: "TASPI"}),
     ), PROGRAMS);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     expect(result.rows.map(({payload}) => payload.studyProgramId)).toEqual([
-      "program-iat", "program-ih", "program-afi", "program-saa", "program-taspi",
+      "program-iat", "program-ih", "program-afi",
     ]);
   });
 
@@ -229,7 +225,7 @@ describe("lecturer CSV import", () => {
     const result = await parseLecturerImportFile({
       bytes: xlsx([
         [" Nama ", "PRODI", "Email", "Jabatan"],
-        ["Zulfa Kamila", "SAA", "zulfa@fuspi.uinbanten.ac.id", "Lektor"],
+        ["Zulfa Kamila", "AFI", "zulfa@fuspi.uinbanten.ac.id", "Lektor"],
       ]),
       filename: "dosen.xlsx",
       declaredMime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -241,7 +237,7 @@ describe("lecturer CSV import", () => {
     expect(result.rows[0]?.payload).toMatchObject({
       name: "Zulfa Kamila",
       email: "zulfa@fuspi.uinbanten.ac.id",
-      studyProgramId: "program-saa",
+      studyProgramId: "program-afi",
       order: 12,
     });
   });

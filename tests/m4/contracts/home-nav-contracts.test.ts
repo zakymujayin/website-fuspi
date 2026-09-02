@@ -198,14 +198,14 @@ describe("home and navigation frozen contracts", () => {
     expect(withGallery({showProfileVideoInGallery: false}).success).toBe(false);
   });
 
-  it("requires the five study programs in the institutional order when present", () => {
-    const program = (code: "IAT" | "IH" | "AFI" | "SAA" | "TASPI") => ({id: `program-${code}`, code,
+  it("requires the three study programs in the institutional order when present", () => {
+    const program = (code: "IAT" | "IH" | "AFI") => ({id: `program-${code}`, code,
       slug: code.toLowerCase(), name: code, degree: "S1", accreditation: null, logo: null, translation: resolution});
-    const ordered = ["IAT", "IH", "AFI", "SAA", "TASPI"].map((code) => program(code as "IAT" | "IH" | "AFI" | "SAA" | "TASPI"));
-    const section = {id: "section-prodi", key: "PRODI", order: 0, itemLimit: 5, cta: null, background: null,
+    const ordered = ["IAT", "IH", "AFI"].map((code) => program(code as "IAT" | "IH" | "AFI"));
+    const section = {id: "section-prodi", key: "PRODI", order: 0, itemLimit: 3, cta: null, background: null,
       translation: {...resolution, title: "Program Studi", subtitle: null, ctaLabel: null}};
     expect(PublicHomeSnapshotSchema.safeParse({...emptySnapshot, sections: [section], content: {...emptySnapshot.content, studyPrograms: ordered}}).success).toBe(true);
     expect(PublicHomeSnapshotSchema.safeParse({...emptySnapshot, sections: [section], content: {...emptySnapshot.content, studyPrograms: [...ordered].reverse()}}).success).toBe(false);
-    expect(PublicHomeSnapshotSchema.safeParse({...emptySnapshot, sections: [section], content: {...emptySnapshot.content, studyPrograms: ordered.slice(0, 4)}}).success).toBe(false);
+    expect(PublicHomeSnapshotSchema.safeParse({...emptySnapshot, sections: [section], content: {...emptySnapshot.content, studyPrograms: ordered.slice(0, 2)}}).success).toBe(false);
   });
 });

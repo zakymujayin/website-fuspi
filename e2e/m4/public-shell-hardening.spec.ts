@@ -27,12 +27,6 @@ const EXTERNAL_HINT = {
   ar: "(موقع خارجي، يُفتح في تبويب جديد)",
 } as const;
 
-/**
- * The one site-relative entry in the frozen utility contract (`/gkm`). It is
- * matched by its translated accessible name, and its href is asserted as an
- * exact locale-prefixed path — `href$="/gkm"` would pass even if the locale
- * segment were missing, which is the bug this covers.
- */
 const GKM_LABEL = {
   id: "GKM",
   en: "Quality Assurance",
@@ -328,7 +322,7 @@ test.describe("public shell hardening — keyboard and focus", () => {
     const menu = page.getByRole("menu");
     await expect(menu).toBeVisible();
     await expect(trigger).toHaveAttribute("aria-expanded", "true");
-    await expect(menu.getByRole("menuitem")).toHaveCount(5);
+    await expect(menu.getByRole("menuitem")).toHaveCount(3);
 
     await page.keyboard.press("ArrowDown");
     expect(
@@ -508,41 +502,26 @@ test.describe("public shell hardening — external destinations", () => {
         expect(name).toContain(EXTERNAL_HINT[locale]);
       }
 
-      // The one site-relative entry stays a plain same-tab link.
-      const internal = utility.getByRole("link", { name: GKM_LABEL[locale], exact: true });
-      await expect(internal).toHaveCount(1);
-      expect(await internal.getAttribute("target")).toBeNull();
-      expect(await internal.textContent()).not.toContain(EXTERNAL_HINT[locale]);
-    });
-
-    test(`${locale}: the site-relative utility entry carries the active locale prefix`, async ({
-      page,
-    }) => {
-      await page.setViewportSize({ width: 1440, height: 900 });
-      await page.goto(`/${locale}${SHELL_PATH}`);
-
-      const gkm = page
-        .getByRole("navigation", { name: UTILITY_NAV })
-        .getByRole("link", { name: GKM_LABEL[locale], exact: true });
-
-      // Exact, not a suffix match: `/gkm` alone would satisfy href$="/gkm"
-      // while silently dropping the locale that `localePrefix: "always"` owes.
-      await expect(gkm).toHaveAttribute("href", `/${locale}/gkm`);
+      const gkm = utility.getByRole("link", { name: new RegExp(`^${GKM_LABEL[locale]}`) });
+      await expect(gkm).toHaveCount(1);
+      await expect(gkm).toHaveAttribute("href", "https://gkm-fuda.uinbanten.ac.id/");
+      await expect(gkm).toHaveAttribute("target", "_blank");
     });
   }
 
   for (const locale of LOCALES) {
-    test(`${locale}: the drawer's site-relative utility entry is locale-prefixed too`, async ({
+    test(`${locale}: the drawer's GKM utility entry is external too`, async ({
       page,
     }) => {
       await page.setViewportSize({ width: 390, height: 780 });
       await page.goto(`/${locale}${SHELL_PATH}`);
       const drawer = await openDrawer(page, locale);
 
-      const gkm = drawer.getByRole("link", { name: GKM_LABEL[locale], exact: true });
+      const gkm = drawer.getByRole("link", { name: new RegExp(`^${GKM_LABEL[locale]}`) });
 
       await expect(gkm).toHaveCount(1);
-      await expect(gkm).toHaveAttribute("href", `/${locale}/gkm`);
+      await expect(gkm).toHaveAttribute("href", "https://gkm-fuda.uinbanten.ac.id/");
+      await expect(gkm).toHaveAttribute("target", "_blank");
     });
   }
 
@@ -566,32 +545,7 @@ test.describe("public shell hardening — external destinations", () => {
     await opened.close();
   });
 
-  test("activating the internal utility entry navigates locale-correctly and leaves no drawer open", async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 390, height: 780 });
-    await page.goto(`/id${SHELL_PATH}`);
-    const drawer = await openDrawer(page, "id");
-
-    // A locale-less /gkm still lands on /id/gkm because the proxy redirects it,
-    // so the final URL alone cannot tell the two apart. Recording redirects is
-    // what distinguishes "linked correctly" from "rescued by the proxy".
-    const redirects: string[] = [];
-    page.on("response", (response) => {
-      if (response.status() >= 300 && response.status() < 400) {
-        redirects.push(new URL(response.url()).pathname);
-      }
-    });
-
-    await drawer.getByRole("link", { name: GKM_LABEL.id, exact: true }).click();
-
-    await page.waitForURL("**/id/gkm");
-    expect(new URL(page.url()).pathname).toBe("/id/gkm");
-    expect(redirects, "the link must not need a locale redirect").not.toContain("/gkm");
-    await expect(page.getByRole("dialog")).toBeHidden();
-  });
-
-  test("no shell surface links to a guessed integration domain", async ({ page }) => {
+  test("no shell surface links to the old FUDA faculty identity", async ({ page }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(`/id${SHELL_PATH}`);
 
@@ -603,8 +557,7 @@ test.describe("public shell hardening — external destinations", () => {
     );
 
     for (const host of hosts) {
-      expect(host).not.toMatch(/fuda/i);
-      expect(host).not.toMatch(/sila/i);
+      expect(host).not.toBe("fuda.uinbanten.ac.id");
     }
     expect(await page.getByText(/FUDA/i).count()).toBe(0);
   });

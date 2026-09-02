@@ -124,9 +124,7 @@
     "program": {
       "IAT": "Qur’anic Studies and Exegesis",
       "IH": "Hadith Studies",
-      "AFI": "Islamic Theology and Philosophy",
-      "SAA": "Religious Studies",
-      "TASPI": "Sufism and Psychotherapy"
+      "AFI": "Islamic Theology and Philosophy"
     },
     "history": "History",
     "visionMission": "Vision and Mission",
@@ -1297,7 +1295,7 @@
   },
   "Home": {
     "heroTitle": "Faculty of Ushuluddin and Islamic Thought",
-    "heroSubtitle": "Developing Quranic studies, hadith, aqidah, Islamic philosophy, religious studies, and Sufism & psychotherapy in a credible and authoritative academic environment.",
+    "heroSubtitle": "Developing Quranic studies, hadith, aqidah, and Islamic philosophy in a credible and authoritative academic environment.",
     "heroCtaPrimary": "Faculty Profile",
     "heroCtaSecondary": "Study Programs",
     "quickLinksLabel": "Quick access",
@@ -1423,18 +1421,6 @@
       "aqidah": {
         "title": "Aqidah & Islamic Philosophy",
         "description": "Rational-theological studies"
-      },
-      "religions": {
-        "title": "Religious Studies",
-        "description": "Interfaith dialogue and understanding"
-      },
-      "sufism": {
-        "title": "Sufism & Psychotherapy",
-        "description": "Spirituality and wellbeing"
-      },
-      "integrated": {
-        "title": "Integrative Education",
-        "description": "Islamic knowledge and contemporary skills"
       }
     }
   },

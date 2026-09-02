@@ -1,10 +1,11 @@
 import { ArrowRight, ArrowUpRight, BookOpen, DoorOpen, FileText, Headset } from "lucide-react";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 
 import { Container } from "@/components/ui/container";
 import { Reveal } from "@/components/public/reveal";
 import { Link } from "@/i18n/navigation";
-import { isSilaHandoffAvailable } from "@/lib/auth/runtime/sila-handoff";
+
+const E_LAYANAN_URL = "https://fuspi.uinbanten.ac.id/e-layanan";
 
 type ServiceCard = {
   key: "sila" | "ejournal" | "booking" | "complaints";
@@ -15,24 +16,18 @@ type ServiceCard = {
 };
 
 /**
- * SILA has no configured public URL yet (`NEXT_PUBLIC_SILA_URL` is unset) and
- * E-Journal has no dedicated route in this build — both fall back to the
- * general services hub rather than a guessed destination (see AGENTS.md).
+ * E-Layanan is the FUSPI-owned entry point for SILA and related public services.
  */
-function buildServices(locale: string): readonly ServiceCard[] {
-  const silaUrl = process.env.NEXT_PUBLIC_SILA_URL;
-  const silaHandoffEnabled = isSilaHandoffAvailable();
+function buildServices(): readonly ServiceCard[] {
   return [
     {
       key: "sila",
       icon: FileText,
-      href: silaHandoffEnabled
-        ? `/api/auth/sila/launch?locale=${encodeURIComponent(locale)}&next=${encodeURIComponent("/dashboard")}`
-        : silaUrl && silaUrl.length > 0 ? silaUrl : "/layanan",
-      external: silaHandoffEnabled || Boolean(silaUrl && silaUrl.length > 0),
-      newTab: !silaHandoffEnabled && Boolean(silaUrl && silaUrl.length > 0),
+      href: E_LAYANAN_URL,
+      external: true,
+      newTab: true,
     },
-    { key: "ejournal", icon: BookOpen, href: "/layanan", external: false },
+    { key: "ejournal", icon: BookOpen, href: E_LAYANAN_URL, external: true, newTab: true },
     { key: "booking", icon: DoorOpen, href: "/peminjaman", external: false },
     { key: "complaints", icon: Headset, href: "/pengaduan", external: false },
   ] as const;
@@ -40,8 +35,7 @@ function buildServices(locale: string): readonly ServiceCard[] {
 
 export async function ServicesSection() {
   const t = await getTranslations("Home");
-  const locale = await getLocale();
-  const services = buildServices(locale);
+  const services = buildServices();
 
   return (
     <section className="bg-gradient-to-b from-slate-50 to-royal-50/40 py-14 md:py-20">

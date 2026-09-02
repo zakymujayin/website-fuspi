@@ -247,7 +247,7 @@ export const PublicSiteSettingSchema = z.object({
   translation: CmsTranslationResolutionSchema,
 }).strict();
 
-const StudyProgramCodeSchema = z.enum(["IAT", "IH", "AFI", "SAA", "TASPI"]);
+const StudyProgramCodeSchema = z.enum(["IAT", "IH", "AFI"]);
 export const PublicHomeStudyProgramSchema = z.object({
   id: CmsIdentifierSchema, code: StudyProgramCodeSchema, slug: RequiredText(191), name: RequiredText(500),
   degree: RequiredText(120), accreditation: OptionalText(255), logo: PublicMediaViewSchema.nullable(),
@@ -274,7 +274,7 @@ export const PublicHomeSnapshotSchema = z.object({
   sliders: z.array(PublicHomeSliderSchema).max(12), homeVideos: z.array(PublicHomeVideoSchema).max(12), quickLinks: z.array(PublicQuickLinkSchema).max(12),
   statistics: z.array(PublicStatisticSchema).max(12), siteSetting: PublicSiteSettingSchema,
   content: z.object({
-    studyPrograms: z.array(PublicHomeStudyProgramSchema).max(5), news: z.array(PublicNewsCardSchema).max(12),
+    studyPrograms: z.array(PublicHomeStudyProgramSchema).max(3), news: z.array(PublicNewsCardSchema).max(12),
     announcements: z.array(PublicAnnouncementCardSchema).max(12), columns: z.array(PublicColumnCardSchema).max(12),
     services: z.array(PublicServiceCardSchema).max(12), partnerships: z.array(PublicPartnershipCardSchema).max(12),
     events: z.array(PublicEventCardSchema).max(12), testimonials: z.array(PublicTestimonialCardSchema).max(12),
@@ -291,8 +291,8 @@ export const PublicHomeSnapshotSchema = z.object({
     }
   }
   const programCodes = value.content.studyPrograms.map(({code}) => code);
-  const expected = ["IAT", "IH", "AFI", "SAA", "TASPI"];
-  if (programCodes.length !== 0 && (programCodes.length !== 5 || programCodes.some((code, index) => code !== expected[index]))) {
+  const expected = ["IAT", "IH", "AFI"];
+  if (programCodes.length !== 0 && (programCodes.length !== 3 || programCodes.some((code, index) => code !== expected[index]))) {
     context.addIssue({code: "custom", path: ["content", "studyPrograms"], message: "Study programs must use the FUSPI contract order."});
   }
   const populated = [

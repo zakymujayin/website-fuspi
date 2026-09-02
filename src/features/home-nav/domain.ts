@@ -30,6 +30,7 @@ import {
 } from "@/contracts/home-nav";
 import {PublicMediaViewSchema} from "@/contracts/media";
 import {StorageKeySchema} from "@/contracts/storage";
+import {institution} from "@/config/institution";
 import type {Prisma} from "@/generated/prisma/client";
 import {Prisma as PrismaNamespace} from "@/generated/prisma/client";
 import type {createPrismaClient} from "@/lib/db/client";
@@ -50,6 +51,7 @@ type TranslationRow = {
 const SUPPORTED_RESOURCES = new Set<HomeNavResource>([
   "MENU_ITEM", "QUICK_LINK", "EXTERNAL_LINK", "HOME_SLIDER", "HOME_SECTION", "STATISTIC", "SITE_SETTING", "HOME_VIDEO",
 ]);
+const PUBLIC_STUDY_PROGRAM_CODES: string[] = institution.studyPrograms.map((program) => program.code);
 
 const MEDIA_SELECT = {
   id: true,
@@ -927,7 +929,7 @@ export async function getPublicHomeSnapshot(
         include: {translations: {where: {status: "PUBLISHED", locale: {in: locale === "id" ? ["id"] : [locale, "id"]}}}}}),
 
             // Study programs in contract order
-      prisma.studyProgram.findMany({where: {isActive: true},
+      prisma.studyProgram.findMany({where: {isActive: true, code: {in: PUBLIC_STUDY_PROGRAM_CODES}},
         orderBy: [{order: "asc"}, {id: "asc"}],
         include: {translations: {where: {status: "PUBLISHED", locale: {in: locale === "id" ? ["id"] : [locale, "id"]}}},
           logoMedia: {select: MEDIA_SELECT}, curriculumDocument: {include: {translations: {where: {status: "PUBLISHED"}}}}} }),

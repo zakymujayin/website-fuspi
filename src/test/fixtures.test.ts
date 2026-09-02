@@ -23,7 +23,7 @@ import {
 import {
   createStudyProgram,
   createStudyProgramWithTranslations,
-  createAllFiveStudyPrograms,
+  createAllStudyPrograms,
   resetStudyProgramIdCounter,
 } from "@/../tests/foundation/fixtures/study-program";
 import {
@@ -132,7 +132,7 @@ describe("fixture factories", () => {
   describe("StudyProgram fixtures", () => {
     it("creates a study program with valid code", () => {
       const prog = createStudyProgram();
-      expect(["IAT", "IH", "AFI", "SAA", "TASPI"]).toContain(prog.code);
+      expect(["IAT", "IH", "AFI"]).toContain(prog.code);
     });
 
     it("creates study program with translations", () => {
@@ -140,18 +140,16 @@ describe("fixture factories", () => {
       expect(prog.translations).toHaveLength(3);
     });
 
-    it("createAllFiveStudyPrograms returns exactly the active study programs", () => {
-      const all = createAllFiveStudyPrograms();
-      expect(all).toHaveLength(5);
+    it("createAllStudyPrograms returns exactly the active study programs", () => {
+      const all = createAllStudyPrograms();
+      expect(all).toHaveLength(3);
     });
 
-    it("createAllFiveStudyPrograms covers all active codes", () => {
-      const codes = createAllFiveStudyPrograms().map((p) => p.code);
+    it("createAllStudyPrograms covers all active codes", () => {
+      const codes = createAllStudyPrograms().map((p) => p.code);
       expect(codes).toContain("IAT");
       expect(codes).toContain("IH");
       expect(codes).toContain("AFI");
-      expect(codes).toContain("SAA");
-      expect(codes).toContain("TASPI");
     });
   });
 

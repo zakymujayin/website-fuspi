@@ -101,10 +101,10 @@ describe("external destination classification", () => {
   });
 
   it("treats http(s) origins as external", () => {
-    expect(classifyNavUrl("https://pmb.uinbanten.ac.id")).toBe("external");
-    expect(classifyNavUrl("http://siakad.uinbanten.ac.id/login")).toBe("external");
-    expect(classifyNavUrl("  https://elearning.uinbanten.ac.id  ")).toBe("external");
-    expect(classifyNavUrl("HTTPS://elearning.uinbanten.ac.id")).toBe("external");
+    expect(classifyNavUrl("https://pmb.uinbanten.ac.id/")).toBe("external");
+    expect(classifyNavUrl("http://neosiakad.uinbanten.ac.id/login")).toBe("external");
+    expect(classifyNavUrl("  https://fuspi.uinbanten.ac.id/e-learning  ")).toBe("external");
+    expect(classifyNavUrl("HTTPS://fuspi.uinbanten.ac.id/e-learning")).toBe("external");
   });
 
   it("refuses every destination it cannot vouch for", () => {
@@ -154,9 +154,9 @@ describe("UtilityLink semantics", () => {
     );
 
   it("announces an external destination and isolates the new tab", () => {
-    const anchor = render("https://siakad.uinbanten.ac.id").querySelector("a");
+    const anchor = render("https://neosiakad.uinbanten.ac.id").querySelector("a");
 
-    expect(anchor?.getAttribute("href")).toBe("https://siakad.uinbanten.ac.id");
+    expect(anchor?.getAttribute("href")).toBe("https://neosiakad.uinbanten.ac.id");
     expect(anchor?.getAttribute("target")).toBe("_blank");
     expect(anchor?.getAttribute("rel")?.split(/\s+/)).toEqual(
       expect.arrayContaining(["noopener", "noreferrer"]),
@@ -184,14 +184,14 @@ describe("UtilityLink semantics", () => {
   it("never routes an external destination through the localized Link", () => {
     // Prefixing an absolute origin would corrupt it, so the external branch
     // must stay a raw anchor.
-    const anchor = render("https://siakad.uinbanten.ac.id").querySelector("a");
+    const anchor = render("https://neosiakad.uinbanten.ac.id").querySelector("a");
 
     expect(anchor?.getAttribute("data-localized-link")).toBeNull();
-    expect(anchor?.getAttribute("href")).toBe("https://siakad.uinbanten.ac.id");
+    expect(anchor?.getAttribute("href")).toBe("https://neosiakad.uinbanten.ac.id");
   });
 
   it("forwards a click handler on both link branches so the drawer can close", () => {
-    for (const url of ["/gkm", "https://siakad.uinbanten.ac.id"]) {
+    for (const url of ["/gkm", "https://neosiakad.uinbanten.ac.id"]) {
       const onClick = vi.fn();
       const container = markupToContainer(
         renderToStaticMarkup(
@@ -419,11 +419,11 @@ describe("shell i18n", () => {
     expect(hints[2]).toMatch(/[؀-ۿ]/);
   });
 
-  it("keeps FUSPI identity and the five programs in contract order", () => {
+  it("keeps FUSPI identity and the three programs in contract order", () => {
     for (const locale of LOCALES) {
       const nav = catalogs[locale].Nav as { program: Record<string, string> };
 
-      expect(Object.keys(nav.program)).toEqual(["IAT", "IH", "AFI", "SAA", "TASPI"]);
+      expect(Object.keys(nav.program)).toEqual(["IAT", "IH", "AFI"]);
       expect(JSON.stringify(nav)).not.toMatch(/fuda/i);
     }
   });

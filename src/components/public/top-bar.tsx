@@ -25,7 +25,7 @@ export async function TopBar() {
 
         <nav
           aria-label={t("utilityLabel")}
-          className="flex items-center gap-1"
+          className="hidden items-center gap-1 sm:flex"
         >
           {utilityLinks.map((item) => (
             <UtilityLink

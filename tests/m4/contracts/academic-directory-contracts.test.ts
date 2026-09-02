@@ -25,7 +25,7 @@ const emptyProgramTranslation = {
 };
 
 describe("academic directory contracts", () => {
-  it("accepts only the exact five FUSPI study-program identities and order", () => {
+  it("accepts only the exact three FUSPI study-program identities and order", () => {
     const base = {code: "IAT", slug: "ilmu-al-quran-dan-tafsir", degree: "S1", accreditation: null, accreditationExpiry: null, externalUrl: null, email: null, phone: null, logoMediaId: null, curriculumDocumentId: null, brochureDocumentId: null, isActive: true, order: 0, contentOwnerId: null, translations: {id: emptyProgramTranslation}};
     expect(StudyProgramInputSchema.safeParse(base).success).toBe(true);
     expect(StudyProgramInputSchema.safeParse({...base, code: "PAI"}).success).toBe(false);

@@ -251,7 +251,7 @@ suite("academic people PostgreSQL runtime", () => {
     ])).toEqual(before);
   });
 
-  it("enforces optimistic program updates and preserves the five-program identity", async () => {
+  it("enforces optimistic program updates and preserves the three-program identity", async () => {
     const updated = await executeAcademicPeopleCommand(prisma, actor(), {
       action: "UPDATE", resource: "STUDY_PROGRAM",
       mutation: {id: programId, expectedVersion: 1},

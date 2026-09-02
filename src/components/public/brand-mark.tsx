@@ -1,6 +1,10 @@
+import Image from "next/image";
+
 import { institution } from "@/config/institution";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+
+const UIN_LOGO_SRC = "/images/pattern/LOGO UIN BANTEN-06.jpeg";
 
 type BrandMarkProps = {
   tone?: "light" | "dark";
@@ -23,16 +27,22 @@ export function BrandMark({ tone = "light", className, showLabel = true }: Brand
       dir="ltr"
     >
       <span
-        aria-hidden
         className={cn(
-          "grid shrink-0 place-items-center rounded-lg font-display font-bold tracking-tight",
-          showLabel ? "size-11 text-sm" : "size-11 text-base",
-          tone === "light"
-            ? "bg-royal-500 text-white"
-            : "bg-white/10 text-white ring-1 ring-white/20",
+          "relative grid shrink-0 place-items-center overflow-hidden rounded-lg bg-black ring-1",
+          showLabel ? "h-11 w-10" : "h-16 w-14",
+          tone === "light" ? "ring-slate-200" : "ring-white/20",
         )}
       >
-        {institution.shortName.slice(0, 2)}
+        <Image
+          src={UIN_LOGO_SRC}
+          alt=""
+          aria-hidden
+          width={1594}
+          height={1842}
+          sizes={showLabel ? "40px" : "56px"}
+          className="h-full w-full object-contain"
+          priority={showLabel}
+        />
       </span>
       {showLabel ? (
         <span className="flex min-w-0 flex-col leading-tight">

@@ -48,7 +48,7 @@ export function UtilityLink({
   }
 
   // Site-relative destinations go through the localized Link so `localePrefix:
-  // "always"` emits /id, /en, or /ar. A bare <a href="/gkm"> would drop the
+  // "always"` emits /id, /en, or /ar. A bare <a href="/berita"> would drop the
   // prefix and lean on a proxy redirect. The destination itself is passed
   // through untouched; only the locale segment routing adds is applied.
   if (kind === "internal") {
