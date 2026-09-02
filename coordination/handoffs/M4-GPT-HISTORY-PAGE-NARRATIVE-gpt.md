@@ -42,6 +42,7 @@ global style changes.
 | `npm run lint` | pass |
 | `npm run typecheck` | pass |
 | `npm run test` | pass; 115 files, 1388 tests |
+| `TASK_MANIFEST=coordination/tasks/M4-GPT-HISTORY-PAGE-NARRATIVE.md TASK_BASE=HEAD~1 npm run check:scope` | blocked by sandbox `spawnSync git EPERM`; rerun with escalation passed, 4 changed files within lease |
 
 ## Untested areas
 
