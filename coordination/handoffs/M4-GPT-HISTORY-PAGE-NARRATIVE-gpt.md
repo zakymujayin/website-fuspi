@@ -13,9 +13,9 @@ Ushuluddin dan Adab into FUSPI and Fakultas Adab dan Humaniora, and presents
 Dr. Masykur, M.Hum. as the first dean in a narrative note.
 
 After owner visual review, the page was refined again to remove the large
-highlight panel, two boxed fact cards, and dean portrait aside. The final page
-uses a simple institutional profile layout: a left section label, two-column
-history narrative, a compact first-dean note, and a structured chronology.
+highlight panel, boxed fact cards, dean portrait aside, and chronology list.
+The final page is a simple institutional profile article: a section label,
+short narrative subsections, and the first dean included as part of the story.
 
 The external profile page was used only as a visual/content-structure reference.
 No public copy, identity, program list, contact data, or claims were copied from
@@ -25,8 +25,8 @@ that source.
 
 - `src/app/[locale]/(public)/profil/sejarah/page.tsx` — replaced invented
   placeholder milestones with ID/EN/AR localized FUSPI history copy; refined
-  the page into a simple two-column narrative layout and removed the portrait
-  block.
+  the page into a simple narrative article and removed the portrait, cards, and
+  chronology blocks.
 - `coordination/tasks/M4-GPT-HISTORY-PAGE-NARRATIVE.md` — task manifest with
   allowed paths, acceptance criteria, and verification commands.
 - `coordination/ownership.yml` — added a non-overlapping active lease for this

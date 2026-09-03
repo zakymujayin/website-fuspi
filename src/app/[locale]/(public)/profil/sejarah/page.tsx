@@ -6,93 +6,10 @@ import {Container} from "@/components/ui/container";
 import type {AppLocale} from "@/i18n/routing";
 import {deanProfile} from "@/lib/data/dummy-dean";
 
-const MILESTONES = [
-  {
-    year: {
-      id: "Sebelum 2026",
-      en: "Before 2026",
-      ar: "قبل 2026",
-    },
-    title: {
-      id: "Satu Rumah Keilmuan",
-      en: "One Academic Home",
-      ar: "بيت علمي واحد",
-    },
-    description: {
-      id: "Kajian ushuluddin, pemikiran Islam, adab, dan humaniora sebelumnya berada dalam satu lingkungan akademik di Fakultas Ushuluddin dan Adab. Dari ruang bersama inilah tradisi keilmuan, layanan pendidikan, dan jaringan akademik berkembang.",
-      en: "Ushuluddin, Islamic thought, adab, and humanities studies previously shared one academic environment in the Faculty of Ushuluddin and Adab. From that shared setting, scholarly traditions, educational services, and academic networks developed.",
-      ar: "كانت دراسات أصول الدين والفكر الإسلامي والأدب والإنسانيات في السابق ضمن بيئة أكاديمية واحدة في كلية أصول الدين والآداب. ومن هذا الفضاء المشترك نمت التقاليد العلمية والخدمات التعليمية والشبكات الأكاديمية.",
-    },
-  },
-  {
-    year: {
-      id: "1 Juli 2026",
-      en: "1 July 2026",
-      ar: "1 يوليو 2026",
-    },
-    title: {
-      id: "FUSPI Resmi Berdiri",
-      en: "FUSPI Officially Established",
-      ar: "تأسيس الكلية رسمياً",
-    },
-    description: {
-      id: "Fakultas Ushuluddin dan Pemikiran Islam berdiri sebagai fakultas yang memusatkan mandat akademiknya pada ilmu-ilmu ushuluddin, kajian pemikiran Islam, dan penguatan tradisi keilmuan yang relevan bagi masyarakat.",
-      en: "The Faculty of Ushuluddin and Islamic Thought was established as a faculty focused on ushuluddin sciences, Islamic thought studies, and the strengthening of scholarly traditions that remain relevant to society.",
-      ar: "تأسست كلية أصول الدين والفكر الإسلامي كليةً تركز رسالتها الأكاديمية على علوم أصول الدين ودراسات الفكر الإسلامي وتعزيز التقاليد العلمية ذات الصلة بالمجتمع.",
-    },
-  },
-  {
-    year: {
-      id: "2026",
-      en: "2026",
-      ar: "2026",
-    },
-    title: {
-      id: "Pemisahan Adab dan Humaniora",
-      en: "Adab and Humanities Separation",
-      ar: "استقلال الأدب والإنسانيات",
-    },
-    description: {
-      id: "Pembentukan Fakultas Adab dan Humaniora sebagai fakultas baru menandai penataan kelembagaan yang lebih fokus. FUSPI melanjutkan mandat ushuluddin dan pemikiran Islam, sementara bidang adab dan humaniora memperoleh rumah akademik tersendiri.",
-      en: "The establishment of the Faculty of Adab and Humanities as a new faculty marked a more focused institutional structure. FUSPI continued the ushuluddin and Islamic thought mandate, while adab and humanities gained their own academic home.",
-      ar: "مثّل تأسيس كلية الأدب والإنسانيات كليةً جديدة تنظيماً مؤسسياً أكثر تركيزاً. وواصلت كلية أصول الدين والفكر الإسلامي رسالتها في أصول الدين والفكر الإسلامي، بينما أصبح للأدب والإنسانيات بيت أكاديمي مستقل.",
-    },
-  },
-  {
-    year: {
-      id: "Periode Awal",
-      en: "Early Period",
-      ar: "الفترة الأولى",
-    },
-    title: {
-      id: "Kepemimpinan Dekan Pertama",
-      en: "First Dean's Leadership",
-      ar: "قيادة العميد الأول",
-    },
-    description: {
-      id: "Dr. Masykur, M.Hum. menjadi dekan pertama FUSPI. Pada fase awal ini, fakultas menata tata kelola, layanan akademik, dan arah pengembangan keilmuan agar identitas baru FUSPI hadir dengan jelas dan bertanggung jawab.",
-      en: "Dr. Masykur, M.Hum. became FUSPI's first dean. In this early phase, the faculty organized governance, academic services, and scholarly direction so FUSPI's new identity could stand clearly and responsibly.",
-      ar: "تولى الدكتور مسكور، الماجستير في العلوم الإنسانية، منصب العميد الأول للكلية. وفي هذه المرحلة الأولى رتبت الكلية الحوكمة والخدمات الأكاديمية واتجاه التطوير العلمي لكي تظهر هوية الكلية الجديدة بوضوح ومسؤولية.",
-    },
-  },
-] as const;
-
 const HISTORY_INTRO = {
   id: "Sejarah FUSPI adalah cerita tentang penataan mandat keilmuan. Fakultas ini lahir bukan sebagai pemutusan tradisi, melainkan sebagai penguatan fokus akademik agar ilmu-ilmu ushuluddin dan pemikiran Islam memiliki ruang pengembangan yang lebih terarah.",
   en: "FUSPI's history is a story of clarifying an academic mandate. The faculty was born not as a break from tradition, but as a stronger focus so ushuluddin sciences and Islamic thought have a more directed space for development.",
   ar: "تاريخ الكلية هو قصة إعادة تنظيم للرسالة العلمية. فقد ولدت الكلية لا بوصفها انقطاعاً عن التقليد، بل تعميقاً للتركيز حتى تجد علوم أصول الدين والفكر الإسلامي فضاءً أوضح للتطور.",
-} as const;
-
-const ESTABLISHMENT_NOTE = {
-  id: "Berdiri pada 1 Juli 2026",
-  en: "Established on 1 July 2026",
-  ar: "تأسست في 1 يوليو 2026",
-} as const;
-
-const DEAN_LABEL = {
-  id: "Dekan Pertama",
-  en: "First Dean",
-  ar: "العميد الأول",
 } as const;
 
 const SECTION_LABELS = {
@@ -100,11 +17,6 @@ const SECTION_LABELS = {
     id: "Sejarah",
     en: "History",
     ar: "التاريخ",
-  },
-  milestones: {
-    id: "Tonggak penting",
-    en: "Key milestones",
-    ar: "المحطات الرئيسية",
   },
 } as const;
 
@@ -157,7 +69,6 @@ export default async function HistoryPage({params}: {params: Promise<{locale: Ap
   const {locale} = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Pages");
-  const deanPosition = deanProfile.position[locale] ?? deanProfile.position.id;
 
   return (
     <Container className="py-12 md:py-20">
@@ -190,59 +101,22 @@ export default async function HistoryPage({params}: {params: Promise<{locale: Ap
                   </p>
                 </div>
               ))}
-            </div>
-          </div>
-        </section>
-
-        <section
-          className="border-b border-slate-200 py-10"
-          aria-labelledby="first-dean-title"
-        >
-          <div className="grid gap-6 lg:grid-cols-[14rem_minmax(0,1fr)]">
-            <div>
-              <p className="text-xs font-medium uppercase tracking-[0.16em] text-royal-600">
-                {ESTABLISHMENT_NOTE[locale] ?? ESTABLISHMENT_NOTE.id}
-              </p>
-              <h2 id="first-dean-title" className="mt-2 font-display text-xl font-semibold text-slate-950">
-                {DEAN_LABEL[locale] ?? DEAN_LABEL.id}
-              </h2>
-            </div>
-            <div>
-              <p className="font-display text-lg font-semibold text-slate-950">{deanProfile.name}</p>
-              <p className="mt-1 text-sm leading-7 text-slate-600">{deanPosition}</p>
+              <div>
+                <h3 className="font-display text-base font-semibold text-slate-950">
+                  {locale === "en" ? "The first dean" : locale === "ar" ? "العميد الأول" : "Dekan pertama"}
+                </h3>
+                <p className="mt-2 text-sm leading-7 text-slate-600">
+                  {locale === "en"
+                    ? `${deanProfile.name} became FUSPI's first dean. In its early period, the faculty began arranging governance, academic services, and scholarly direction around its clarified identity.`
+                    : locale === "ar"
+                      ? `تولى ${deanProfile.name} منصب العميد الأول للكلية. وفي مرحلتها الأولى بدأت الكلية بتنظيم الحوكمة والخدمات الأكاديمية واتجاه التطوير العلمي حول هويتها الواضحة.`
+                      : `${deanProfile.name} menjadi dekan pertama FUSPI. Pada periode awal, fakultas mulai menata tata kelola, layanan akademik, dan arah pengembangan keilmuan sesuai dengan identitasnya yang lebih jelas.`}
+                </p>
+              </div>
             </div>
           </div>
         </section>
       </article>
-
-      <section className="mt-12" aria-labelledby="history-milestones-title">
-        <div className="grid gap-8 lg:grid-cols-[14rem_minmax(0,1fr)]">
-          <div>
-            <h2 id="history-milestones-title" className="font-display text-2xl font-semibold text-slate-950">
-              {SECTION_LABELS.milestones[locale] ?? SECTION_LABELS.milestones.id}
-            </h2>
-            <span aria-hidden className="mt-3 block h-0.5 w-16 bg-brass-500" />
-          </div>
-
-          <ol className="divide-y divide-slate-200 border-y border-slate-200">
-            {MILESTONES.map((milestone) => (
-              <li key={milestone.title.id} className="grid gap-4 py-6 md:grid-cols-[11rem_minmax(0,1fr)]">
-                <span className="font-display text-base font-semibold text-royal-700">
-                  {milestone.year[locale] ?? milestone.year.id}
-                </span>
-                <div>
-                  <h3 className="font-display text-base font-semibold text-slate-950">
-                    {milestone.title[locale] ?? milestone.title.id}
-                  </h3>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">
-                    {milestone.description[locale] ?? milestone.description.id}
-                  </p>
-                </div>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
     </Container>
   );
 }
