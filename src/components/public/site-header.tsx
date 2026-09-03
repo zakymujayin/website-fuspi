@@ -37,11 +37,13 @@ export async function SiteHeader() {
             reading column does. */}
         <div className="mx-auto h-full w-full max-w-[1440px] px-4 sm:px-6">
           <div className="flex h-full items-center justify-between gap-3">
-            <IdentityBadges
-              logo={siteSetting?.logo ?? null}
-              accreditationLogo={siteSetting?.accreditationLogo ?? null}
-              bluLogo={siteSetting?.bluLogo ?? null}
-            />
+            <div className="shrink-0 [&>a>*:first-child]:!h-[60px] [&>a>*:first-child]:!w-[60px]">
+              <IdentityBadges
+                logo={siteSetting?.logo ?? null}
+                accreditationLogo={siteSetting?.accreditationLogo ?? null}
+                bluLogo={siteSetting?.bluLogo ?? null}
+              />
+            </div>
             <DesktopNav primary={primaryNav} />
             <div className="hidden shrink-0 items-center gap-1 xl:flex">
               <HeaderSearch />
