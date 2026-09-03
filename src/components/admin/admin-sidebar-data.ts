@@ -21,6 +21,7 @@ import {
   SlidersHorizontalIcon,
   TrophyIcon,
   UserPlusIcon,
+  UserRoundIcon,
   UsersIcon,
   VideoIcon,
 } from "lucide-react";
@@ -87,7 +88,8 @@ export const SIDEBAR_MENU_GROUPS = [
     labelNamespace: "Nav",
     items: [
       { href: "/admin/program-studi", icon: GraduationCapIcon, labelKey: "studyPrograms", labelNamespace: "Nav" },
-      { href: "/admin/impor-dosen", icon: UserPlusIcon, labelKey: "lecturers", labelNamespace: "Nav" },
+      { href: "/admin/dosen", icon: UserRoundIcon, labelKey: "lecturers", labelNamespace: "Nav" },
+      { href: "/admin/impor-dosen", icon: UserPlusIcon, labelKey: "lecturerImport" },
       { href: "/admin/dokumen", icon: FileDownIcon, labelKey: "academicDocs", labelNamespace: "Nav" },
     ],
   },

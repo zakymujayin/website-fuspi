@@ -17,7 +17,7 @@ describe("taxonomy admin UI wiring", () => {
     expect(form).toContain('router.push(listHref)');
   });
 
-  it("exposes taxonomy in the admin sidebar without reintroducing dead academic links", () => {
+  it("exposes taxonomy and the lecturer directory in the admin sidebar", () => {
     const sidebar = readFileSync(
       path.join(process.cwd(), "src/components/admin/admin-sidebar-data.ts"),
       "utf8",
@@ -25,7 +25,8 @@ describe("taxonomy admin UI wiring", () => {
 
     expect(sidebar).toContain('/admin/taksonomi');
     expect(sidebar).toContain('labelKey: "taxonomies"');
-    expect(sidebar).not.toContain('/admin/dosen');
+    expect(sidebar).toContain('/admin/dosen');
+    expect(sidebar).toContain('labelKey: "lecturers"');
     expect(sidebar).not.toContain('/admin/menu');
   });
 
