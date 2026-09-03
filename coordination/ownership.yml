@@ -137,3 +137,11 @@ active_leases:
       - coordination/tasks/M4-GPT-PUBLIC-FORMS-MEDIA-REDESIGN.md
       - coordination/handoffs/M4-GPT-PUBLIC-FORMS-MEDIA-REDESIGN-gpt.md
       - coordination/ownership.yml
+  - task: M4-GPT-ACCREDITATION-SAVE-TRANSLATION-FIX
+    owner: gpt
+    paths:
+      - src/components/admin/academic/program-studi-editor-form.tsx
+      - tests/m4/ui/accreditation-page.test.tsx
+      - coordination/tasks/M4-GPT-ACCREDITATION-SAVE-TRANSLATION-FIX.md
+      - coordination/handoffs/M4-GPT-ACCREDITATION-SAVE-TRANSLATION-FIX-gpt.md
+      - coordination/ownership.yml

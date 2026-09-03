@@ -31,4 +31,11 @@ describe("accreditation CMS surface", () => {
     expect(page).not.toContain("originalName: true");
     expect(page).toContain("t(\"accreditationCertificate\")");
   });
+
+  it("uses an existing localized label while saving the accreditation form", () => {
+    const form = readFileSync(path.join(process.cwd(), "src/components/admin/academic/program-studi-editor-form.tsx"), "utf8");
+    expect(form).toContain('useTranslations("AdminPageEditor")');
+    expect(form).toContain('tAdminEditor("submitting")');
+    expect(form).not.toContain('tAdmin("saving")');
+  });
 });

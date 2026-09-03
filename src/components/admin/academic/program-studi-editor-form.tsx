@@ -65,6 +65,7 @@ export function ProgramStudioEditorForm({
 }: {initialDraft: ProgramStudioDraft; initialCertificate: CertificatePreview | null}) {
   const t = useTranslations("StudyPrograms");
   const tAdmin = useTranslations("AdminHomeNav");
+  const tAdminEditor = useTranslations("AdminPageEditor");
   const router = useRouter();
   const formId = useId();
   const [draft, setDraft] = useState(initialDraft);
@@ -278,7 +279,7 @@ export function ProgramStudioEditorForm({
         </Button>
         <Button type="submit" disabled={submitting}>
           {submitting ? <Spinner data-icon /> : null}
-          {submitting ? tAdmin("saving") : tAdmin("updateAction")}
+          {submitting ? tAdminEditor("submitting") : tAdmin("updateAction")}
         </Button>
       </div>
     </form>
