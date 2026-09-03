@@ -573,7 +573,6 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
               course: tAcademic("courseName"),
               program: tAcademic("scheduleProgram"),
               credits: tAcademic("courseCredits"),
-              navigationLabel: t("navigationLabel"),
             }}
           />
 

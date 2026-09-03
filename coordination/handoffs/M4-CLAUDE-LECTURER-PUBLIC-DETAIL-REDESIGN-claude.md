@@ -112,3 +112,15 @@ Verification: `npm run lint`, `npx tsc --noEmit`, `npm run test`
 screenshotted: this worktree has no `.env`/database, so `/dosen/[id]` cannot
 render locally here; the change was checked against the JSX and existing
 structural test.
+
+### Second follow-up — drop the in-page section nav
+
+User still found the wrapped pill nav weak ("blends into the background", the
+`0` count badges advertise emptiness). Removed the `<nav>` from
+`LecturerAcademicRecords` entirely — the four sections render directly below
+their own headings, so the jump links were redundant chrome. Also removed the
+now-unused `navigationLabel` label (from the component's `Labels` type and the
+page's `labels` object; the `LecturerProfile.navigationLabel` message key is
+left in place, unused). Added `rounded-lg` to the four section-header icon
+badges (were sharp squares). `#lecturer-*` anchors unchanged. Same
+verification commands, all green.
