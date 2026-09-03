@@ -37,7 +37,6 @@ type AcademicTopicShellProps = {
 export async function AcademicTopicShell({resourceKey, meta, children}: AcademicTopicShellProps) {
   const t = await getTranslations("Pages");
   const tNav = await getTranslations("Nav");
-  const tAcademic = await getTranslations("Academic");
 
   const Icon = ACADEMIC_RESOURCE_ICONS[resourceKey];
   const siblings = academicResources.filter((item) => item.key !== resourceKey);

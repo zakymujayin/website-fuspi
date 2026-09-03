@@ -163,3 +163,10 @@ active_leases:
       - coordination/tasks/M4-GPT-HEADER-LCP-IMAGE-FIX.md
       - coordination/handoffs/M4-GPT-HEADER-LCP-IMAGE-FIX-gpt.md
       - coordination/ownership.yml
+  - task: M4-GPT-ACADEMIC-TOPIC-WARNING-FIX
+    owner: gpt
+    paths:
+      - src/components/public/academic-topic-shell.tsx
+      - coordination/tasks/M4-GPT-ACADEMIC-TOPIC-WARNING-FIX.md
+      - coordination/handoffs/M4-GPT-ACADEMIC-TOPIC-WARNING-FIX-gpt.md
+      - coordination/ownership.yml
