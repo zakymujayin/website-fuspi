@@ -70,7 +70,7 @@ export function LecturerImportForm({
             type="file"
             accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             onChange={onFileChange}
-            className="mt-2 block w-full rounded-lg border border-slate-300 bg-white p-2.5 text-sm text-slate-900 file:me-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-slate-700 focus:border-royal-500 focus:outline-2 focus:outline-offset-0 focus:outline-royal-500"
+            className="mt-2 block w-full rounded-lg border border-slate-300 bg-white p-2.5 text-sm text-slate-900 file:me-3 file:inline-flex file:h-8 file:min-h-8 file:items-center file:align-middle file:box-border file:cursor-pointer file:rounded-lg file:border-0 file:bg-royal-500 file:px-4 file:py-1.5 file:font-semibold file:leading-5 file:text-white file:transition-colors hover:file:bg-royal-600 focus:border-royal-500 focus:outline-2 focus:outline-offset-0 focus:outline-royal-500"
           />
           <p className="mt-2 text-sm text-slate-500">{labels.fileHint}</p>
           <p className="mt-1 text-xs text-slate-400">

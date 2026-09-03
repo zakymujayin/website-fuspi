@@ -139,7 +139,13 @@ export function ProgramCertificatePicker({value, onChange, initialCertificate}: 
       ) : null}
       <Field>
         <FieldLabel htmlFor={`${id}-file`}>{preview ? "Ganti sertifikat" : "Pilih file PDF"}</FieldLabel>
-        <Input id={`${id}-file`} ref={inputRef} type="file" accept="application/pdf" />
+        <Input
+          id={`${id}-file`}
+          ref={inputRef}
+          type="file"
+          accept="application/pdf"
+          className="h-auto min-h-12 cursor-pointer rounded-xl border-2 border-dashed border-royal-200 bg-royal-50/40 px-3 py-2.5 text-sm text-slate-600 transition-colors file:me-3 file:inline-flex file:h-8 file:min-h-8 file:items-center file:align-middle file:box-border file:cursor-pointer file:rounded-lg file:border-0 file:bg-royal-500 file:px-4 file:py-1.5 file:font-semibold file:leading-5 file:text-white file:transition-colors hover:border-royal-400 hover:bg-royal-50/70 hover:file:bg-royal-600 focus-visible:border-royal-500 focus-visible:ring-3 focus-visible:ring-royal-500/25"
+        />
         <FieldDescription>Maksimal 20 MB.</FieldDescription>
       </Field>
       {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : null}

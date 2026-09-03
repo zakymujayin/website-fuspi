@@ -145,3 +145,12 @@ active_leases:
       - coordination/tasks/M4-GPT-ACCREDITATION-SAVE-TRANSLATION-FIX.md
       - coordination/handoffs/M4-GPT-ACCREDITATION-SAVE-TRANSLATION-FIX-gpt.md
       - coordination/ownership.yml
+  - task: M4-GPT-FILE-INPUT-ALIGNMENT
+    owner: gpt
+    paths:
+      - src/components/admin/academic/program-certificate-picker.tsx
+      - src/components/admin/lecturer-import/lecturer-import-form.tsx
+      - tests/m4/ui/file-input-alignment.test.ts
+      - coordination/tasks/M4-GPT-FILE-INPUT-ALIGNMENT.md
+      - coordination/handoffs/M4-GPT-FILE-INPUT-ALIGNMENT-gpt.md
+      - coordination/ownership.yml
