@@ -18,4 +18,10 @@ describe("accreditation CMS surface", () => {
     expect(page).toContain("certificate ? (");
     expect(page).toContain("t(\"accreditationUnavailable\")");
   });
+
+  it("uses the shared navy table header color for program cards", () => {
+    const page = readFileSync(path.join(process.cwd(), "src/app/[locale]/(public)/akademik/akreditasi/page.tsx"), "utf8");
+    expect(page).toContain("border-navy-700 bg-navy-800");
+    expect(page).toContain("text-white md:text-3xl");
+  });
 });

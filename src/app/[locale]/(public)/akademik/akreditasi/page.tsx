@@ -118,19 +118,19 @@ export default async function AccreditationPage({params}: {params: Promise<{loca
               return (
                 <li key={program.id}>
                   <article className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition-shadow hover:shadow-[0_20px_45px_-30px_rgba(15,23,42,0.7)]">
-                    <header className="flex flex-wrap items-start justify-between gap-5 border-b border-slate-100 bg-slate-50/80 px-6 py-6 md:px-8">
+                    <header className="flex flex-wrap items-start justify-between gap-5 border-b border-navy-700 bg-navy-800 px-6 py-6 text-white md:px-8">
                       <div className="flex min-w-0 items-start gap-4">
-                        <span className="pt-1 font-display text-sm font-semibold tabular-nums tracking-[0.14em] text-brass-600">{String(index + 1).padStart(2, "0")}</span>
+                        <span className="pt-1 font-display text-sm font-semibold tabular-nums tracking-[0.14em] text-brass-300">{String(index + 1).padStart(2, "0")}</span>
                         <div className="min-w-0">
-                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-royal-600">{program.code}</p>
-                          <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">
+                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/70">{program.code}</p>
+                          <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-white md:text-3xl">
                             {translation?.name ?? contract?.name ?? program.code}
                           </h3>
                         </div>
                       </div>
                       <Link
                         href={`/prodi/${program.slug}`}
-                        className="inline-flex items-center gap-1.5 text-sm font-medium text-royal-700 transition-colors hover:text-royal-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-royal-500"
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-white transition-colors hover:text-brass-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass-300"
                       >
                         {tNav("studyPrograms")}
                         <ArrowUpRight aria-hidden className="size-4" strokeWidth={1.5} />
