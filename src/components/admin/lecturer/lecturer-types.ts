@@ -46,6 +46,8 @@ export type LecturerListItem = {
   isActive: boolean;
   photoUrl: string | null;
   photoAlt: string | null;
+  educationCount: number;
+  publicationCount: number;
 };
 
 export const EMPTY_LECTURER_TRANSLATION: LecturerTranslationDraft = {

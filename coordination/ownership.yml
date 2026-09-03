@@ -163,3 +163,18 @@ active_leases:
       - coordination/tasks/M4-GPT-HEADER-LCP-IMAGE-FIX.md
       - coordination/handoffs/M4-GPT-HEADER-LCP-IMAGE-FIX-gpt.md
       - coordination/ownership.yml
+  - task: M4-GPT-LECTURER-ADMIN-PROFILE-EDITOR
+    owner: gpt
+    paths:
+      - src/features/academic/lecturer-relations.ts
+      - src/components/admin/lecturer/lecturer-relations-actions.ts
+      - src/components/admin/lecturer/lecturer-relations-manager.tsx
+      - src/components/admin/lecturer/lecturer-types.ts
+      - src/components/admin/lecturer/lecturer-list.tsx
+      - src/app/[locale]/admin/dosen/page.tsx
+      - src/app/[locale]/admin/dosen/[id]/edit/page.tsx
+      - tests/m4/ui/admin-lecturer-profile-editor.test.tsx
+      - tests/m4/runtime/admin-lecturer-relations.test.ts
+      - coordination/tasks/M4-GPT-LECTURER-ADMIN-PROFILE-EDITOR.md
+      - coordination/handoffs/M4-GPT-LECTURER-ADMIN-PROFILE-EDITOR-gpt.md
+      - coordination/ownership.yml
