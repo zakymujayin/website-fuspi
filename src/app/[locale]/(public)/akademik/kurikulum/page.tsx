@@ -33,22 +33,22 @@ export default async function CurriculumPage({params}: {params: Promise<{locale:
       <div className="grid gap-12">
         {dummyCurricula.map((curriculum) => (
           <section key={curriculum.program} aria-labelledby={`curriculum-${curriculum.program}`}>
-            <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-4">
+            <div className="flex flex-wrap items-center justify-between gap-4 rounded-t-xl border border-navy-800 bg-navy-800 px-5 py-4 text-white sm:px-6">
               <h2
                 id={`curriculum-${curriculum.program}`}
-                className="font-display text-xl font-semibold text-slate-950"
+                className="font-display text-xl font-semibold text-white"
               >
                 {tNav(`program.${curriculum.program}` as never)}
               </h2>
               <Link
                 href={`/prodi/${slugOf(curriculum.program)}`}
-                className="text-sm font-medium text-royal-600 transition-colors hover:text-royal-700"
+                className="text-sm font-medium text-white transition-colors hover:text-brass-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brass-300"
               >
                 {tPages("readMore")}
               </Link>
             </div>
 
-            <dl className="mt-6 grid gap-px bg-slate-200 sm:grid-cols-2 lg:grid-cols-5">
+            <dl className="grid gap-px overflow-hidden rounded-b-xl border border-slate-200 border-t-0 bg-slate-200 sm:grid-cols-2 lg:grid-cols-5">
               {[
                 {label: t("curriculumTotalCredits"), value: `${curriculum.totalCredits} ${t("creditsUnit")}`},
                 {label: t("curriculumCoreCredits"), value: `${curriculum.coreCredits} ${t("creditsUnit")}`},

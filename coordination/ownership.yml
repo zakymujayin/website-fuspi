@@ -108,3 +108,11 @@ active_leases:
       - coordination/tasks/M4-GPT-ACCREDITATION-PRESENTATION-FIX.md
       - coordination/handoffs/M4-GPT-ACCREDITATION-PRESENTATION-FIX-gpt.md
       - coordination/ownership.yml
+  - task: M4-GPT-CURRICULUM-COLOR-REFINEMENT
+    owner: gpt
+    paths:
+      - src/app/[locale]/(public)/akademik/kurikulum/page.tsx
+      - tests/m4/ui/curriculum-page.test.tsx
+      - coordination/tasks/M4-GPT-CURRICULUM-COLOR-REFINEMENT.md
+      - coordination/handoffs/M4-GPT-CURRICULUM-COLOR-REFINEMENT-gpt.md
+      - coordination/ownership.yml
