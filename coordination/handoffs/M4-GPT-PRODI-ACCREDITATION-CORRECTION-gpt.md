@@ -3,7 +3,7 @@
 - task ID: `M4-GPT-PRODI-ACCREDITATION-CORRECTION`
 - branch: `ai/gpt/m4-public-ia-menu-remap`
 - base SHA: `b24437a`
-- head SHA: `be42f62`
+- head SHA: `9a5b96b`
 
 ## Summary
 
