@@ -19,7 +19,7 @@ const PROGRAM_SELECT = {
   accreditationDecreeNumber: true,
   accreditationExpiry: true,
   accreditationCertificateMedia: {
-    select: {storageKey: true, storageClass: true, mimeType: true, originalName: true},
+    select: {storageKey: true, storageClass: true, mimeType: true},
   },
   translations: {
     where: {status: "PUBLISHED" as const},
@@ -42,7 +42,7 @@ function formatDate(value: Date | null, locale: AppLocale) {
 }
 
 function certificateUrl(
-  media: {storageKey: string; storageClass: string; mimeType: string; originalName: string} | null,
+  media: {storageKey: string; storageClass: string; mimeType: string} | null,
   uploadBase: string,
 ) {
   if (
@@ -53,7 +53,6 @@ function certificateUrl(
   ) return null;
   return {
     href: `${uploadBase.replace(/\/+$/u, "") || "/uploads"}/${media.storageKey}`,
-    name: media.originalName,
   };
 }
 
@@ -162,7 +161,6 @@ export default async function AccreditationPage({params}: {params: Promise<{loca
                             <FileCheck2 aria-hidden className="size-7 text-royal-600" strokeWidth={1.5} />
                             <span className="mt-8">
                               <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-royal-700">{t("accreditationCertificate")}</span>
-                              <span className="mt-2 block truncate text-sm font-medium text-slate-800">{certificate.name}</span>
                             </span>
                           </a>
                         ) : (

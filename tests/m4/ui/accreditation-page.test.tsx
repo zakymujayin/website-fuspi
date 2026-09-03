@@ -24,4 +24,11 @@ describe("accreditation CMS surface", () => {
     expect(page).toContain("border-navy-700 bg-navy-800");
     expect(page).toContain("text-white md:text-3xl");
   });
+
+  it("does not expose the certificate filename on the public page", () => {
+    const page = readFileSync(path.join(process.cwd(), "src/app/[locale]/(public)/akademik/akreditasi/page.tsx"), "utf8");
+    expect(page).not.toContain("certificate.name");
+    expect(page).not.toContain("originalName: true");
+    expect(page).toContain("t(\"accreditationCertificate\")");
+  });
 });
