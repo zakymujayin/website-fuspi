@@ -3,14 +3,14 @@
 - Task ID: `M4-GPT-PUBLIC-FORMS-MEDIA-REDESIGN`
 - Branch: `ai/gpt/m4-public-ia-menu-remap`
 - Base SHA: `25f98e5`
-- Head SHA: `f8fd5b4`
+- Head SHA: `04e1102`
 
 ## Result
 
 The general complaint, protected PPKS, and facility-booking submission forms
 now have clear card surfaces with royal-blue top accents. Booking and PPKS
 file inputs use a dashed, tinted upload surface with a prominent browser
-browse button and visible focus state; existing field names, accept rules,
+browse button with consistent 32px geometry and visible focus state; existing field names, accept rules,
 multipart behavior, and sensitive-flow behavior are unchanged.
 
 The admin Media Library now has a composed title surface, stronger upload card,
@@ -50,7 +50,7 @@ translation, schema, shared token, or API changes.
 | `npx vitest run tests/m4/ui/public-forms-media-redesign.test.tsx tests/m3/ui/admin-media-upload.test.tsx tests/m3/ui/admin-media-library-browse.test.tsx tests/m4/ui/admin-media-picker-pagination.test.ts` | Passed; 4 files, 82 tests |
 | `npm run lint` | Passed with one pre-existing warning in `src/components/public/academic-topic-shell.tsx:40` (`tAcademic` unused) |
 | `npm run typecheck` | Passed |
-| `npm run test` | Passed; 124 files, 1424 tests |
+| `npm run test` | Passed; 125 files, 1428 tests |
 | `npm run build` | Passed; Next.js 16.2.10 generated 350 static pages |
 | `git diff --check` | Passed |
 | `TASK_MANIFEST=coordination/tasks/M4-GPT-PUBLIC-FORMS-MEDIA-REDESIGN.md TASK_BASE=25f98e5 npm run check:scope` | Passed; 0 changed files outside the lease |
@@ -58,6 +58,7 @@ translation, schema, shared token, or API changes.
 ## Untested areas
 
 - No browser screenshot or authenticated media upload smoke test was run.
+- Native browser rendering can still vary slightly by browser/OS, but all visible project inputs now use the same browse-button dimensions and alignment classes.
 
 ## Risks and follow-ups
 
