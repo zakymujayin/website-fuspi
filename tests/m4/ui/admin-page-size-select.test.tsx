@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 const { AdminPageSizeSelect, ADMIN_PAGE_SIZE_OPTIONS } = await import(
-  "@/components/admin/shared/admin-page-size-select"
+  "@/components/admin/shared/admin-page-size-select-server"
 );
 
 function container(markup: string) {

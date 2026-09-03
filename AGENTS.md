@@ -3,7 +3,7 @@
 ## Identity contract
 
 - The product is **FUSPI — Fakultas Ushuluddin dan Pemikiran Islam**, not FUDA.
-- The only v1 study programs are, in order: IAT, IH, AFI, SAA, and TASPI. Use `src/config/institution.ts` as the code contract.
+- The only active v1 study programs are, in order: IAT, IH, and AFI. Use `src/config/institution.ts` as the code contract.
 - FUDA and `fuda.uinbanten.ac.id` may appear only when explicitly labeled as an external reference. Never copy FUDA identity, domain, email, programs, seed data, metadata, or public copy into FUSPI.
 - Do not guess the SILA public domain. Read it from `NEXT_PUBLIC_SILA_URL` when integration is authorized.
 

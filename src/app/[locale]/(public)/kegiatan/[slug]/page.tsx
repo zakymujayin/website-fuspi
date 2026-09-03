@@ -105,9 +105,10 @@ const tNav = await getTranslations("Nav");
         ) : null}
 
         {studentActivity.translation.description ? (
-          <section className="prose prose-slate max-w-none">
+          <section>
             <div
               lang={studentActivity.translation.resolvedLocale}
+              className="rich-text"
               dangerouslySetInnerHTML={{ __html: studentActivity.translation.description }}
             />
           </section>

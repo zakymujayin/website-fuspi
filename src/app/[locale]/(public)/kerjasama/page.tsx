@@ -7,5 +7,5 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
 }
 
 export default function PartnershipListPage(props: {params: Promise<{locale: string}>; searchParams: Promise<{page?: string | string[]}>}) {
-  return PublicContentListPage({config: {resource: "PARTNERSHIP", hasDetail: true}, ...props});
+  return PublicContentListPage({config: {resource: "PARTNERSHIP", hasDetail: true, mediaFit: "contain", cardLink: "detail"}, ...props});
 }

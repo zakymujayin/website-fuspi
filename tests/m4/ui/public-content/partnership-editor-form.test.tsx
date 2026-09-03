@@ -83,7 +83,7 @@ describe("PartnershipEditorForm", () => {
       <PartnershipEditorForm mode="create" listHref="/admin/kerjasama" />,
     );
     // The form uses field.partnerName as the translation key
-    expect(markup).toContain("t:field.partnerName");
+    expect(markup).toContain("t:PARTNERSHIP.field.partnerName");
   });
 
   it("renders level select", () => {
@@ -110,7 +110,7 @@ describe("PartnershipEditorForm", () => {
     );
     const el = $(markup);
     const cancelBtn = Array.from(el.querySelectorAll("button")).find(
-      (b) => b.textContent?.includes("t:cancel"),
+      (b) => b.textContent?.includes("t:PARTNERSHIP.cancel"),
     );
     expect(cancelBtn).toBeTruthy();
   });

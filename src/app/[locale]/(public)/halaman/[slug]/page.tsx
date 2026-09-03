@@ -85,7 +85,7 @@ export default async function PageDetail({params}: {params: Promise<{locale: App
       <article className="mx-auto max-w-3xl">
         <SectionHeading as="h1" title={tl.title} />
         <div
-          className="prose prose-slate mt-8 max-w-none"
+          className="rich-text mt-8"
           dangerouslySetInnerHTML={{__html: tl.content}}
         />
       </article>

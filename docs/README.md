@@ -33,7 +33,7 @@ Tidak ada transformasi skema yang diserahkan kepada implementer: skema di `02` a
 
 ## Ringkasan proyek
 
-Membangun website resmi FUSPI sebagai aplikasi Next.js dengan panel admin (CMS) untuk mengelola seluruh konten: berita, pengumuman, halaman statis, dosen, lima program studi, penelitian, kerjasama, dan lainnya. Tidak memakai Payload atau CMS pihak ketiga — panel admin dibangun kustom di atas stack yang sudah dikuasai tim.
+Membangun website resmi FUSPI sebagai aplikasi Next.js dengan panel admin (CMS) untuk mengelola seluruh konten: berita, pengumuman, halaman statis, dosen, tiga program studi aktif v1, penelitian, kerjasama, dan lainnya. Tidak memakai Payload atau CMS pihak ketiga — panel admin dibangun kustom di atas stack yang sudah dikuasai tim.
 
 **Tujuan utama:**
 

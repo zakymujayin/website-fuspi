@@ -301,7 +301,7 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
               </h2>
               <div
                 dir="auto"
-                className="prose prose-slate mt-3 max-w-none"
+                className="rich-text mt-3"
                 dangerouslySetInnerHTML={{__html: sanitizedBio}}
               />
             </section>

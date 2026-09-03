@@ -95,9 +95,10 @@ export default async function ScholarshipDetailPage({ params }: PageProps) {
         ) : null}
 
         {scholarship.translation.description ? (
-          <section className="prose prose-slate max-w-none mb-8">
+          <section className="mb-8">
             <div
               lang={scholarship.translation.resolvedLocale}
+              className="rich-text"
               dangerouslySetInnerHTML={{ __html: scholarship.translation.description }}
             />
           </section>

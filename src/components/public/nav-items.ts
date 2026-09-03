@@ -1,4 +1,8 @@
 import { institution } from "@/config/institution";
+import {
+  academicResourceHref,
+  academicResources,
+} from "@/components/public/academic-resources";
 
 /**
  * Typed navigation mock for the public shell. The CMS-backed navigation
@@ -48,17 +52,18 @@ export const profileNav: readonly NavGroup[] = [
 
 const studyProgramIndexHref = "/prodi";
 
-/** Academic navigation is intentionally resource-first: no homepage shortcuts here. */
+/**
+ * Academic navigation is intentionally resource-first: no homepage shortcuts
+ * here, and every topic resolves to its own page rather than an anchor on the
+ * hub, so the menu lands on the content the label promises.
+ */
 export const academicNav: readonly NavLink[] = [
   { key: "studyPrograms", href: studyProgramIndexHref },
   ...studyProgramNav,
-  { key: "lectureSchedule", href: "/akademik#jadwal-perkuliahan" },
-  { key: "academicCalendar", href: "/akademik#kalender-akademik" },
-  { key: "curriculum", href: "/akademik#kurikulum" },
-  { key: "courseCatalog", href: "/akademik#mata-kuliah" },
-  { key: "academicDocs", href: "/akademik#dokumen-akademik" },
-  { key: "accreditation", href: "/akademik#akreditasi" },
-  { key: "academicGuidelines", href: "/akademik#pedoman-akademik" },
+  ...academicResources.map((resource) => ({
+    key: resource.key,
+    href: academicResourceHref(resource),
+  })),
 ] as const;
 
 const academicByKey = new Map(academicNav.map((item) => [item.key, item] as const));

@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
+import { HomeMediaPicker } from "@/components/admin/home-nav/home-media-picker";
+import type { CoverPreview } from "@/components/admin/posts/post-cover-picker";
 import {
   Field,
   FieldError,
@@ -33,6 +35,7 @@ type AchievementDraft = {
   studentName: string;
   level: string;
   achievedAt: string;
+  imageMediaId: string | null;
   translations: Record<EditorLocale, AchievementTranslationDraft>;
 };
 
@@ -47,6 +50,7 @@ function emptyDraft(): AchievementDraft {
     studentName: "",
     level: "INTERNASIONAL",
     achievedAt: "",
+    imageMediaId: null,
     translations: {
       id: { ...EMPTY_TRANSLATION },
       en: { ...EMPTY_TRANSLATION },
@@ -65,6 +69,8 @@ type EditorFormProps = {
   initialData?: Record<string, unknown>;
   pageId?: string;
   expectedVersion?: number;
+  initialImage?: CoverPreview | null;
+  uploadPublicUrl?: string;
 };
 
 export function AchievementEditorForm({
@@ -73,19 +79,24 @@ export function AchievementEditorForm({
   initialData,
   pageId,
   expectedVersion,
+  initialImage = null,
+  uploadPublicUrl = "/uploads",
 }: EditorFormProps) {
   const t = useTranslations("AdminPublicContent");
   const router = useRouter();
   const formId = useId();
   const [draft, setDraft] = useState<AchievementDraft>(() => {
     if (initialData) {
-      const tr = initialData.translations as Record<string, Record<string, string>> | undefined;
-      const input = initialData as Record<string, unknown>;
+      const input = initialData.input && typeof initialData.input === "object"
+        ? initialData.input as Record<string, unknown>
+        : initialData;
+      const tr = input.translations as Record<string, Record<string, string | null>> | undefined;
       return {
         slug: (input.slug as string) ?? "",
         studentName: (input.studentName as string) ?? "",
         level: (input.level as string) ?? "INTERNASIONAL",
         achievedAt: (input.achievedAt as string) ?? "",
+        imageMediaId: (input.imageMediaId as string | null) ?? null,
         translations: {
           id: {
             title: tr?.id?.title ?? "",
@@ -140,7 +151,7 @@ export function AchievementEditorForm({
       studentName: draft.studentName.trim(),
       level: draft.level,
       achievedAt: draft.achievedAt ? new Date(draft.achievedAt).toISOString() : null,
-      imageMediaId: null,
+      imageMediaId: draft.imageMediaId,
       translations,
     };
   }
@@ -152,6 +163,16 @@ export function AchievementEditorForm({
     setFormError(null);
 
     const payload = buildPayload();
+
+    const nextFieldErrors: Record<string, string> = {};
+    if (!payload.slug) nextFieldErrors.slug = t("ACHIEVEMENT.error.REQUIRED");
+    if (!payload.studentName) nextFieldErrors.studentName = t("ACHIEVEMENT.error.REQUIRED");
+    if (!payload.translations.id.title) nextFieldErrors["translations.id.title"] = t("ACHIEVEMENT.error.REQUIRED");
+    if (Object.keys(nextFieldErrors).length > 0) {
+      setFieldErrors(nextFieldErrors);
+      setFormError(t("ACHIEVEMENT.error.VALIDATION_FAILED"));
+      return;
+    }
 
     const command: Record<string, unknown> = mode === "create"
       ? { action: "CREATE", resource: "ACHIEVEMENT", payload }
@@ -168,10 +189,39 @@ export function AchievementEditorForm({
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const message = t(`error.${result.code}` as any, { defaultValue: t("error.UNAVAILABLE") });
+      const message = t(`ACHIEVEMENT.error.${result.code}` as any, { defaultValue: t("ACHIEVEMENT.error.UNAVAILABLE") });
       setFormError(message);
     } catch {
-      setFormError(t("error.UNAVAILABLE"));
+      setFormError(t("ACHIEVEMENT.error.UNAVAILABLE"));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!pageId || !window.confirm(t("ACHIEVEMENT.deleteConfirm"))) return;
+    setSubmitting(true);
+    setFieldErrors({});
+    setFormError(null);
+    try {
+      const result: PublicContentMutationResult = await executePublicContentAdminCommand({
+        action: "DELETE",
+        resource: "ACHIEVEMENT",
+        id: pageId,
+        expectedVersion: expectedVersion ?? null,
+      });
+      if (result.ok) {
+        router.push(listHref);
+        router.refresh();
+        return;
+      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const message = t(`ACHIEVEMENT.error.${result.code}` as any, {
+        defaultValue: t("ACHIEVEMENT.error.UNAVAILABLE"),
+      });
+      setFormError(message);
+    } catch {
+      setFormError(t("ACHIEVEMENT.error.UNAVAILABLE"));
     } finally {
       setSubmitting(false);
     }
@@ -196,7 +246,7 @@ export function AchievementEditorForm({
 
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor={`${formId}-slug`}>{t("field.slug")}</FieldLabel>
+          <FieldLabel htmlFor={`${formId}-slug`}>{t("ACHIEVEMENT.field.slug")}</FieldLabel>
           <Input
             id={`${formId}-slug`}
             name="slug"
@@ -209,7 +259,7 @@ export function AchievementEditorForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={`${formId}-studentName`}>{t("field.studentName")}</FieldLabel>
+          <FieldLabel htmlFor={`${formId}-studentName`}>{t("ACHIEVEMENT.field.studentName")}</FieldLabel>
           <Input
             id={`${formId}-studentName`}
             name="studentName"
@@ -222,7 +272,7 @@ export function AchievementEditorForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={`${formId}-level`}>{t("field.level")}</FieldLabel>
+          <FieldLabel htmlFor={`${formId}-level`}>{t("ACHIEVEMENT.field.level")}</FieldLabel>
           <select
             id={`${formId}-level`}
             name="level"
@@ -240,7 +290,7 @@ export function AchievementEditorForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={`${formId}-achievedAt`}>{t("field.achievedAt")}</FieldLabel>
+          <FieldLabel htmlFor={`${formId}-achievedAt`}>{t("ACHIEVEMENT.field.achievedAt")}</FieldLabel>
           <Input
             id={`${formId}-achievedAt`}
             name="achievedAt"
@@ -253,9 +303,28 @@ export function AchievementEditorForm({
         </Field>
       </FieldGroup>
 
+      <HomeMediaPicker
+        value={draft.imageMediaId}
+        onChange={(imageMediaId) => setDraft((current) => ({ ...current, imageMediaId }))}
+        initialMedia={initialImage}
+        uploadPublicUrl={uploadPublicUrl}
+        label={t("ACHIEVEMENT.field.image")}
+        description={t("ACHIEVEMENT.imageDescription")}
+        chooseLabel={t("ACHIEVEMENT.picker.choose")}
+        changeLabel={t("ACHIEVEMENT.picker.change")}
+        clearLabel={t("ACHIEVEMENT.picker.clear")}
+        selectedLabel={t("ACHIEVEMENT.picker.selected")}
+        noneLabel={t("ACHIEVEMENT.picker.none")}
+        loadingLabel={t("ACHIEVEMENT.picker.loading")}
+        loadErrorLabel={t("ACHIEVEMENT.picker.loadError")}
+        emptyLabel={t("ACHIEVEMENT.picker.empty")}
+        listLabel={t("ACHIEVEMENT.picker.listLabel")}
+        loadMoreLabel={t("ACHIEVEMENT.picker.loadMore")}
+      />
+
       <FieldSet className="gap-4">
-        <FieldLegend>{t("translationsTitle")}</FieldLegend>
-        <div role="tablist" aria-label={t("localeTabsAriaLabel")} className="flex gap-1">
+        <FieldLegend>{t("ACHIEVEMENT.translationsTitle")}</FieldLegend>
+        <div role="tablist" aria-label={t("ACHIEVEMENT.localeTabsAriaLabel")} className="flex gap-1">
           {EDITOR_LOCALES.map((locale) => (
             <button
               key={locale}
@@ -273,7 +342,7 @@ export function AchievementEditorForm({
             >
               {locale.toUpperCase()}
               {hasTranslation[locale] ? null : (
-                <span className="text-[10px] opacity-70">({t("localeOptional")})</span>
+                <span className="text-[10px] opacity-70">({t("ACHIEVEMENT.localeOptional")})</span>
               )}
             </button>
           ))}
@@ -295,12 +364,12 @@ export function AchievementEditorForm({
               <FieldGroup>
                 <Field>
                   <FieldLabel htmlFor={`${formId}-${locale}-title`}>
-                    {t("field.title")}
+                    {t("ACHIEVEMENT.field.title")}
                     {required ? (
                       <span className="ms-1 text-red-500">*</span>
                     ) : (
                       <span className="ms-1 text-sm font-normal text-muted-foreground">
-                        {t("localeOptional")}
+                        {t("ACHIEVEMENT.localeOptional")}
                       </span>
                     )}
                   </FieldLabel>
@@ -319,7 +388,7 @@ export function AchievementEditorForm({
 
                 <Field>
                   <FieldLabel htmlFor={`${formId}-${locale}-description`}>
-                    {t("field.description")}
+                    {t("ACHIEVEMENT.field.description")}
                   </FieldLabel>
                   <Textarea
                     id={`${formId}-${locale}-description`}
@@ -343,14 +412,19 @@ export function AchievementEditorForm({
         <Button type="submit" disabled={submitting}>
           {submitting ? <Spinner data-icon /> : null}
           {submitting
-            ? t("submitting")
+            ? t("ACHIEVEMENT.submitting")
             : mode === "create"
-              ? t("submitCreate")
-              : t("submitUpdate")}
+              ? t("ACHIEVEMENT.submitCreate")
+              : t("ACHIEVEMENT.submitUpdate")}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.push(listHref)}>
-          {t("cancel")}
+          {t("ACHIEVEMENT.cancel")}
         </Button>
+        {mode === "edit" ? (
+          <Button type="button" variant="destructive" onClick={handleDelete} disabled={submitting}>
+            {t("ACHIEVEMENT.deleteAction")}
+          </Button>
+        ) : null}
       </div>
     </form>
   );

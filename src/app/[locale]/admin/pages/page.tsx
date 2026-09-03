@@ -16,7 +16,7 @@ import {
   toAdminPageTransportQuery,
   totalPagesFor,
 } from "@/components/admin/pages/page-query";
-import { AdminPageSizeSelect } from "@/components/admin/shared/admin-page-size-select";
+import { AdminPageSizeSelect } from "@/components/admin/shared/admin-page-size-select-server";
 import { loadAdminPagesSafely } from "@/components/admin/pages/page-safe-load";
 import { AdminPageStateNotice } from "@/components/admin/pages/page-state-notice";
 import type { AdminPagePublicationState } from "@/components/admin/pages/page-status-badge";

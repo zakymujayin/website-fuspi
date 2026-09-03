@@ -78,7 +78,7 @@ describe("public navigation", () => {
     ]);
   });
 
-  it("routes academic document topics to the academic page context first", () => {
+  it("routes academic document topics to their own pages, not hub anchors", () => {
     expect(
       academicNav
         .filter((item) =>
@@ -94,13 +94,13 @@ describe("public navigation", () => {
         )
         .map((item) => item.href),
     ).toEqual([
-      "/akademik#jadwal-perkuliahan",
-      "/akademik#kalender-akademik",
-      "/akademik#kurikulum",
-      "/akademik#mata-kuliah",
-      "/akademik#dokumen-akademik",
-      "/akademik#akreditasi",
-      "/akademik#pedoman-akademik",
+      "/akademik/jadwal-perkuliahan",
+      "/akademik/kalender-akademik",
+      "/akademik/kurikulum",
+      "/akademik/mata-kuliah",
+      "/akademik/dokumen-akademik",
+      "/akademik/akreditasi",
+      "/akademik/pedoman-akademik",
     ]);
   });
 

@@ -18,7 +18,7 @@ export default async function AccessibilityPage({params}: {params: Promise<{loca
   return (
     <Container className="py-12 md:py-20">
       <SectionHeading as="h1" title={t("accessibilityTitle")} />
-      <div className="prose prose-slate mx-auto mt-12 max-w-3xl">
+      <div className="rich-text mx-auto mt-12 max-w-3xl">
         <p>{t("accessibilityContent")}</p>
       </div>
     </Container>

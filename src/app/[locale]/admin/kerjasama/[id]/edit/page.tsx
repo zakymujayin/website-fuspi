@@ -3,6 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 
 import { PartnershipEditorForm } from "@/components/admin/public-content/partnership-editor-form";
+import { listAttachableDocuments } from "@/features/public-content/administration";
+import { getPrismaClient } from "@/lib/db/client";
 import { getPublicContentAdminDetailAction } from "@/components/admin/public-content/public-content-server-actions";
 import { decideProtectedRoute, getRequestSession } from "@/lib/auth/runtime/request-session";
 import { parseAppLocale } from "@/lib/auth/runtime/redirect";
@@ -33,6 +35,12 @@ export default async function EditPartnershipPage({ params }: Props) {
   if (!result.ok) notFound();
 
   const data = result.data as Record<string, unknown>;
+  const input = data.input as Record<string, unknown>;
+  const logoAsset = Array.isArray(data.assets)
+    ? (data.assets as Array<{kind?: string; media?: Record<string, unknown>}>).find((asset) => asset.kind === "MEDIA")?.media
+    : undefined;
+  const uploadPublicUrl = process.env.UPLOAD_PUBLIC_URL ?? "/uploads";
+  const documentOptions = await listAttachableDocuments(getPrismaClient());
 
   return (
     <section aria-labelledby="admin-partnership-edit-title" className="flex flex-col gap-6">
@@ -45,9 +53,12 @@ export default async function EditPartnershipPage({ params }: Props) {
       <PartnershipEditorForm
         mode="edit"
         listHref="/admin/kerjasama"
-        initialData={data}
+        initialData={input}
         pageId={data.id as string}
         expectedVersion={data.version as number | undefined}
+        initialLogo={(logoAsset as never) ?? null}
+        uploadPublicUrl={uploadPublicUrl}
+        documentOptions={documentOptions}
       />
     </section>
   );

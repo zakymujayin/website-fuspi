@@ -4,6 +4,7 @@ import {ArrowRightIcon} from "lucide-react";
 import Image from "next/image";
 
 import {Link} from "@/i18n/navigation";
+import {cn} from "@/lib/utils";
 
 export type PublicContentCardData = {
   id: string;
@@ -26,6 +27,14 @@ type PublicContentCardProps = {
   badgeLabel?: string;
   readMoreLabel: string;
   hasDetail: boolean;
+  /** Logos must fit whole inside the frame; photos may be cropped to fill it. */
+  mediaFit?: "cover" | "contain";
+  /**
+   * When a resource carries both a configured link and a detail page, the card
+   * follows the configured link by default. Resources whose detail page holds
+   * more than the link does (partnership: the agreement document) opt out.
+   */
+  cardLink?: "configured" | "detail";
 };
 
 export {PublicContentCardSkeleton} from "./public-content-card-skeleton";
@@ -37,21 +46,33 @@ export function PublicContentCard({
   badgeLabel,
   readMoreLabel,
   hasDetail,
+  mediaFit = "cover",
+  cardLink = "configured",
 }: PublicContentCardProps) {
-  const link = item.link;
+  const link = cardLink === "detail" && hasDetail ? null : item.link;
   const targetHref = link ? link.href : detailHref;
   const isExternal = link?.kind === "EXTERNAL";
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
       {item.media ? (
-        <div className="aspect-video overflow-hidden">
+        <div
+          className={cn(
+            "aspect-video overflow-hidden",
+            mediaFit === "contain" ? "flex items-center justify-center bg-white p-6" : null,
+          )}
+        >
           <Image
             src={item.media.url}
             alt={item.media.isDecorative ? "" : item.media.alt}
             width={item.media.width ?? 640}
             height={item.media.height ?? 360}
-            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            className={cn(
+              "h-full w-full",
+              mediaFit === "contain"
+                ? "object-contain"
+                : "object-cover transition-transform duration-300 group-hover:scale-105",
+            )}
             loading="lazy"
           />
         </div>

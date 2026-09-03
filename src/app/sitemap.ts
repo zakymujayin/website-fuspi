@@ -6,9 +6,15 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fuspi.uinbanten.ac
 
 const STATIC_ROUTES = [
   "", "/profil", "/akademik", "/riset", "/kontak",
+  "/akademik/jadwal-perkuliahan", "/akademik/kalender-akademik", "/akademik/kurikulum",
+  "/akademik/mata-kuliah", "/akademik/dokumen-akademik", "/akademik/akreditasi",
+  "/akademik/pedoman-akademik",
   "/berita", "/pengumuman", "/kolom", "/agenda", "/album", "/dokumen",
   "/prodi", "/layanan", "/kerjasama", "/beasiswa", "/prestasi", "/kegiatan",
-  "/faq", "/testimoni",
+  "/penelitian", "/pengabdian", "/faq", "/testimoni", "/calon-mahasiswa",
+  "/pengaduan", "/pengaduan/baru", "/pengaduan/lacak", "/pengaduan/ppks",
+  "/peminjaman", "/peminjaman/ajukan", "/peminjaman/lacak",
+  "/ppid", "/privasi", "/aksesibilitas", "/sitemap",
 ];
 
 async function getPublishedSlugs(model: "post" | "service" | "event" | "page"): Promise<string[]> {

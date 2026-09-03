@@ -14,8 +14,8 @@ import {
   PUBLIC_CONTENT_SLUG_MAP,
   PUBLIC_CONTENT_SEARCH_MAX_LENGTH,
 } from "@/components/admin/public-content/public-content-query";
-import { AdminListSearch } from "@/components/admin/shared/admin-list-search";
-import { AdminPageSizeSelect } from "@/components/admin/shared/admin-page-size-select";
+import { AdminListSearch } from "@/components/admin/shared/admin-list-search-server";
+import { AdminPageSizeSelect } from "@/components/admin/shared/admin-page-size-select-server";
 import { PublicContentStateNotice } from "@/components/admin/public-content/public-content-state-notice";
 import { PublicContentPagination } from "@/components/admin/public-content/public-content-pagination";
 import { PublicContentStatusBadge } from "@/components/admin/public-content/public-content-status-badge";

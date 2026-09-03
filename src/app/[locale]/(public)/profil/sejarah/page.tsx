@@ -1,10 +1,14 @@
 import type {Metadata} from "next";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
+import {DeanAvatarPlate} from "@/components/public/dean-avatar-plate";
+import {ImageWithFallback} from "@/components/public/image-with-fallback";
 import {SectionHeading} from "@/components/public/section-heading";
 import {Container} from "@/components/ui/container";
 import type {AppLocale} from "@/i18n/routing";
 import {deanProfile} from "@/lib/data/dummy-dean";
+import {getPrismaClient} from "@/lib/db/client";
+import {getPublicSiteSetting} from "@/features/home-nav/public-query";
 
 const HISTORY_INTRO = {
   id: "Sejarah FUSPI adalah cerita tentang penataan mandat keilmuan. Fakultas ini lahir bukan sebagai pemutusan tradisi, melainkan sebagai penguatan fokus akademik agar ilmu-ilmu ushuluddin dan pemikiran Islam memiliki ruang pengembangan yang lebih terarah.",
@@ -12,15 +16,16 @@ const HISTORY_INTRO = {
   ar: "تاريخ الكلية هو قصة إعادة تنظيم للرسالة العلمية. فقد ولدت الكلية لا بوصفها انقطاعاً عن التقليد، بل تعميقاً للتركيز حتى تجد علوم أصول الدين والفكر الإسلامي فضاءً أوضح للتطور.",
 } as const;
 
-const SECTION_LABELS = {
-  history: {
-    id: "Sejarah",
-    en: "History",
-    ar: "التاريخ",
-  },
-} as const;
+type NarrativeSection = {
+  title: Record<AppLocale, string>;
+  body: Record<AppLocale, string>;
+};
 
-const NARRATIVE_SECTIONS = [
+/**
+ * Ordered chronologically and rendered in a single column: the narrative is
+ * read top to bottom, so a two-column grid would zigzag the timeline.
+ */
+const NARRATIVE_SECTIONS: readonly NarrativeSection[] = [
   {
     title: {
       id: "Dari rumah keilmuan bersama",
@@ -57,7 +62,21 @@ const NARRATIVE_SECTIONS = [
       ar: "منح استقلال كلية الأدب والإنسانيات كليةً جديدة وضوحاً أكبر للبيتين العلميين. وواصلت كلية أصول الدين والفكر الإسلامي رسالتها في أصول الدين والفكر الإسلامي، بينما حصلت مجالات الأدب والإنسانيات على فضائها الخاص للتطور.",
     },
   },
-] as const;
+];
+
+const FIRST_DEAN_TITLE = {
+  id: "Dekan pertama",
+  en: "The first dean",
+  ar: "العميد الأول",
+} as const;
+
+function firstDeanBody(name: string) {
+  return {
+    id: `${name} menjadi dekan pertama FUSPI. Pada periode awal, fakultas mulai menata tata kelola, layanan akademik, dan arah pengembangan keilmuan sesuai dengan identitasnya yang lebih jelas.`,
+    en: `${name} became FUSPI's first dean. In its early period, the faculty began arranging governance, academic services, and scholarly direction around its clarified identity.`,
+    ar: `تولى ${name} منصب العميد الأول للكلية. وفي مرحلتها الأولى بدأت الكلية بتنظيم الحوكمة والخدمات الأكاديمية واتجاه التطوير العلمي حول هويتها الواضحة.`,
+  } as const;
+}
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
@@ -69,54 +88,78 @@ export default async function HistoryPage({params}: {params: Promise<{locale: Ap
   const {locale} = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Pages");
+  const siteSetting = await getPublicSiteSetting(
+    getPrismaClient(),
+    locale,
+    process.env.UPLOAD_PUBLIC_URL ?? "/uploads",
+  );
+  const dean = siteSetting?.dean;
+  const deanName = dean?.name ?? deanProfile.name;
+  const deanPhotoUrl = dean?.photo?.url ?? deanProfile.photoUrl;
+  const deanPosition = dean?.position ?? (deanProfile.position[locale] ?? deanProfile.position.id);
+  const deanBody = firstDeanBody(deanName);
 
   return (
     <Container className="py-12 md:py-20">
       <SectionHeading as="h1" title={t("history")} description={t("historyDesc")} />
 
-      <article className="mt-10">
-        <section
-          className="border-y border-slate-200 py-10"
-          aria-labelledby="history-narrative-title"
-        >
-          <div className="grid gap-8 lg:grid-cols-[14rem_minmax(0,1fr)]">
-            <div>
-              <h2 id="history-narrative-title" className="font-display text-2xl font-semibold text-slate-950">
-                {SECTION_LABELS.history[locale] ?? SECTION_LABELS.history.id}
-              </h2>
-              <span aria-hidden className="mt-3 block h-0.5 w-16 bg-brass-500" />
-            </div>
+      <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(19rem,25rem)] lg:gap-16">
+        <article className="border-t border-slate-200 pt-10">
+          <p className="max-w-4xl text-lg leading-8 text-slate-700">
+            {HISTORY_INTRO[locale] ?? HISTORY_INTRO.id}
+          </p>
 
-            <div className="grid gap-x-10 gap-y-7 md:grid-cols-2">
-              <p className="text-base leading-8 text-slate-700">
-                {HISTORY_INTRO[locale] ?? HISTORY_INTRO.id}
-              </p>
-              {NARRATIVE_SECTIONS.map((section) => (
-                <div key={section.title.id}>
-                  <h3 className="font-display text-base font-semibold text-slate-950">
-                    {section.title[locale] ?? section.title.id}
-                  </h3>
-                  <p className="mt-2 text-sm leading-7 text-slate-600">
-                    {section.body[locale] ?? section.body.id}
-                  </p>
-                </div>
-              ))}
-              <div>
-                <h3 className="font-display text-base font-semibold text-slate-950">
-                  {locale === "en" ? "The first dean" : locale === "ar" ? "العميد الأول" : "Dekan pertama"}
-                </h3>
-                <p className="mt-2 text-sm leading-7 text-slate-600">
-                  {locale === "en"
-                    ? `${deanProfile.name} became FUSPI's first dean. In its early period, the faculty began arranging governance, academic services, and scholarly direction around its clarified identity.`
-                    : locale === "ar"
-                      ? `تولى ${deanProfile.name} منصب العميد الأول للكلية. وفي مرحلتها الأولى بدأت الكلية بتنظيم الحوكمة والخدمات الأكاديمية واتجاه التطوير العلمي حول هويتها الواضحة.`
-                      : `${deanProfile.name} menjadi dekan pertama FUSPI. Pada periode awal, fakultas mulai menata tata kelola, layanan akademik, dan arah pengembangan keilmuan sesuai dengan identitasnya yang lebih jelas.`}
+          <div className="mt-12 grid gap-10 md:grid-cols-2 md:gap-x-12 md:gap-y-12">
+            {NARRATIVE_SECTIONS.map((section, index) => (
+              <section key={section.title.id} className={index === 0 ? "md:col-span-2" : ""}>
+                <p className="text-xs font-semibold tracking-[0.14em] text-royal-600 uppercase">
+                  {String(index + 1).padStart(2, "0")}
                 </p>
+                <h2 className="mt-3 font-display text-xl font-semibold text-slate-950">
+                  {section.title[locale] ?? section.title.id}
+                </h2>
+                <p className="mt-3 max-w-2xl text-base leading-8 text-slate-600">
+                  {section.body[locale] ?? section.body.id}
+                </p>
+              </section>
+            ))}
+          </div>
+        </article>
+
+        <aside className="border-t border-slate-200 pt-8 lg:border-s lg:border-t-0 lg:ps-10 lg:pt-10">
+          <div className="lg:sticky lg:top-24">
+            <p className="text-xs font-semibold tracking-[0.14em] text-royal-600 uppercase">
+              {t("dean")}
+            </p>
+            <figure className="mt-4">
+              <div className="relative aspect-[4/5] w-full max-w-sm overflow-hidden border border-slate-200 bg-slate-100">
+                {deanPhotoUrl ? (
+                  <ImageWithFallback
+                    src={deanPhotoUrl}
+                    alt={deanName}
+                    className="object-cover"
+                    sizes="(min-width: 1024px) 25rem, (min-width: 640px) 24rem, 100vw"
+                  />
+                ) : (
+                  <DeanAvatarPlate initials={deanProfile.initials} name={deanName} />
+                )}
               </div>
+              <figcaption className="mt-4 text-sm leading-relaxed text-slate-500">
+                <span className="block font-display text-lg font-semibold text-slate-950">{deanName}</span>
+                {deanPosition}
+              </figcaption>
+            </figure>
+            <div className="mt-8 border-t border-slate-200 pt-6">
+              <h2 className="font-display text-xl font-semibold text-slate-950">
+                {FIRST_DEAN_TITLE[locale] ?? FIRST_DEAN_TITLE.id}
+              </h2>
+              <p className="mt-3 text-base leading-8 text-slate-600">
+                {deanBody[locale] ?? deanBody.id}
+              </p>
             </div>
           </div>
-        </section>
-      </article>
+        </aside>
+      </div>
     </Container>
   );
 }

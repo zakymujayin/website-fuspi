@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { AdminListSearch } from "@/components/admin/shared/admin-list-search";
+import { AdminListSearchClient } from "@/components/admin/shared/admin-list-search";
 
 import { buildAdminPageHref, ADMIN_PAGE_SEARCH_MAX_LENGTH, type AdminPageSort, type AdminPageStatusFilter } from "./page-query";
 
@@ -17,10 +17,10 @@ export function AdminPageSearch({ initialSearch, status, sort, pageSize }: Admin
   const t = useTranslations("AdminPageList");
 
   return (
-    <AdminListSearch
+    <AdminListSearchClient
       initialSearch={initialSearch}
       maxLength={ADMIN_PAGE_SEARCH_MAX_LENGTH}
-      buildHref={(search) => buildAdminPageHref({ status, sort, search, page: 1, pageSize })}
+      href={buildAdminPageHref({ status, sort, search: "", page: 1, pageSize })}
       labels={{
         placeholder: t("searchPlaceholder"),
         ariaLabel: t("searchAriaLabel"),

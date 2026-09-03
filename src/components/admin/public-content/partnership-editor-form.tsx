@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
+import { HomeMediaPicker } from "@/components/admin/home-nav/home-media-picker";
+import type { CoverPreview } from "@/components/admin/posts/post-cover-picker";
 import {
   Field,
   FieldError,
@@ -18,6 +20,7 @@ import {
 } from "@/components/ui/field";
 
 import { type PublicContentMutationResult } from "@/contracts/public-content";
+import type { AttachableDocumentOption } from "@/features/public-content/administration";
 import { executePublicContentAdminCommand } from "@/components/admin/public-content/public-content-server-actions";
 
 type EditorLocale = "id" | "en" | "ar";
@@ -36,8 +39,11 @@ type PartnershipDraft = {
   startDate: string;
   endDate: string;
   websiteUrl: string;
+  legacyDocumentUrl: string;
   isActive: boolean;
   order: number;
+  logoMediaId: string | null;
+  documentId: string | null;
   translations: Record<EditorLocale, PartnershipTranslationDraft>;
 };
 
@@ -55,8 +61,11 @@ function emptyDraft(): PartnershipDraft {
     startDate: "",
     endDate: "",
     websiteUrl: "",
+    legacyDocumentUrl: "",
     isActive: true,
     order: 0,
+    logoMediaId: null,
+    documentId: null,
     translations: {
       id: { ...EMPTY_TRANSLATION },
       en: { ...EMPTY_TRANSLATION },
@@ -69,12 +78,25 @@ function hasTranslationContent(t: PartnershipTranslationDraft): boolean {
   return t.category.trim().length > 0 || t.description.trim().length > 0;
 }
 
+function generatedSlug(value: string): string {
+  return value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/gu, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gu, "-")
+    .replace(/^-+|-+$/gu, "")
+    .slice(0, 191);
+}
+
 type EditorFormProps = {
   mode: "create" | "edit";
   listHref: string;
   initialData?: Record<string, unknown>;
   pageId?: string;
   expectedVersion?: number;
+  initialLogo?: CoverPreview | null;
+  uploadPublicUrl?: string;
+  documentOptions?: AttachableDocumentOption[];
 };
 
 export function PartnershipEditorForm({
@@ -83,14 +105,20 @@ export function PartnershipEditorForm({
   initialData,
   pageId,
   expectedVersion,
+  initialLogo = null,
+  uploadPublicUrl = "/uploads",
+  documentOptions = [],
 }: EditorFormProps) {
   const t = useTranslations("AdminPublicContent");
   const router = useRouter();
   const formId = useId();
   const [draft, setDraft] = useState<PartnershipDraft>(() => {
     if (initialData) {
-      const tr = initialData.translations as Record<string, Record<string, string>> | undefined;
-      const input = initialData as Record<string, unknown>;
+      // Accept both the transport input object and the full admin detail shape.
+      const input = initialData.input && typeof initialData.input === "object"
+        ? initialData.input as Record<string, unknown>
+        : initialData;
+      const tr = input.translations as Record<string, Record<string, string | null>> | undefined;
       return {
         slug: (input.slug as string) ?? "",
         partnerName: (input.partnerName as string) ?? "",
@@ -99,8 +127,11 @@ export function PartnershipEditorForm({
         startDate: (input.startDate as string) ?? "",
         endDate: (input.endDate as string) ?? "",
         websiteUrl: (input.websiteUrl as string) ?? "",
+        legacyDocumentUrl: (input.legacyDocumentUrl as string) ?? "",
         isActive: (input.isActive as boolean) ?? true,
         order: (input.order as number) ?? 0,
+        logoMediaId: (input.logoMediaId as string | null) ?? null,
+        documentId: (input.documentId as string | null) ?? null,
         translations: {
           id: {
             category: tr?.id?.category ?? "",
@@ -151,16 +182,16 @@ export function PartnershipEditorForm({
     }
 
     return {
-      slug: draft.slug.trim(),
+      slug: draft.slug.trim() || (mode === "create" ? generatedSlug(draft.partnerName) : ""),
       partnerName: draft.partnerName.trim(),
       level: draft.level,
       country: draft.country.trim() || null,
       startDate,
       endDate,
-      documentId: null,
-      legacyDocumentUrl: null,
+      documentId: draft.documentId,
+      legacyDocumentUrl: draft.legacyDocumentUrl.trim() || null,
       websiteUrl: draft.websiteUrl.trim() || null,
-      logoMediaId: null,
+      logoMediaId: draft.logoMediaId,
       isActive: draft.isActive,
       order: draft.order,
       translations,
@@ -174,6 +205,16 @@ export function PartnershipEditorForm({
     setFormError(null);
 
     const payload = buildPayload();
+
+    // Keep the required ID fields from being sent as an opaque server error.
+    const nextFieldErrors: Record<string, string> = {};
+    if (!payload.slug) nextFieldErrors.slug = t("PARTNERSHIP.error.REQUIRED");
+    if (!payload.partnerName) nextFieldErrors.partnerName = t("PARTNERSHIP.error.REQUIRED");
+    if (Object.keys(nextFieldErrors).length > 0) {
+      setFieldErrors(nextFieldErrors);
+      setFormError(t("PARTNERSHIP.error.VALIDATION_FAILED"));
+      return;
+    }
 
     const command: Record<string, unknown> = mode === "create"
       ? { action: "CREATE", resource: "PARTNERSHIP", payload }
@@ -190,10 +231,10 @@ export function PartnershipEditorForm({
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const message = t(`error.${result.code}` as any, { defaultValue: t("error.UNAVAILABLE") });
+      const message = t(`PARTNERSHIP.error.${result.code}` as any, { defaultValue: t("PARTNERSHIP.error.UNAVAILABLE") });
       setFormError(message);
     } catch {
-      setFormError(t("error.UNAVAILABLE"));
+      setFormError(t("PARTNERSHIP.error.UNAVAILABLE"));
     } finally {
       setSubmitting(false);
     }
@@ -218,7 +259,7 @@ export function PartnershipEditorForm({
 
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor={`${formId}-slug`}>{t("field.slug")}</FieldLabel>
+          <FieldLabel htmlFor={`${formId}-slug`}>{t("PARTNERSHIP.field.slug")}</FieldLabel>
           <Input
             id={`${formId}-slug`}
             name="slug"
@@ -231,7 +272,7 @@ export function PartnershipEditorForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={`${formId}-partnerName`}>{t("field.partnerName")}</FieldLabel>
+          <FieldLabel htmlFor={`${formId}-partnerName`}>{t("PARTNERSHIP.field.partnerName")}</FieldLabel>
           <Input
             id={`${formId}-partnerName`}
             name="partnerName"
@@ -244,7 +285,7 @@ export function PartnershipEditorForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={`${formId}-level`}>{t("field.level")}</FieldLabel>
+          <FieldLabel htmlFor={`${formId}-level`}>{t("PARTNERSHIP.field.level")}</FieldLabel>
           <select
             id={`${formId}-level`}
             name="level"
@@ -261,7 +302,32 @@ export function PartnershipEditorForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={`${formId}-country`}>{t("field.country")}</FieldLabel>
+          <FieldLabel htmlFor={`${formId}-documentId`}>{t("PARTNERSHIP.field.document")}</FieldLabel>
+          <select
+            id={`${formId}-documentId`}
+            name="documentId"
+            value={draft.documentId ?? ""}
+            onChange={(e) => setDraft((c) => ({ ...c, documentId: e.target.value || null }))}
+            className="h-10 w-full rounded-lg border border-slate-300 px-3 text-sm"
+            aria-describedby={`${formId}-documentId-hint`}
+            aria-invalid={fieldErrors.documentId ? true : undefined}
+            disabled={documentOptions.length === 0}
+          >
+            <option value="">{t("PARTNERSHIP.documentNone")}</option>
+            {documentOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.category ? `${option.category} — ${option.title}` : option.title}
+              </option>
+            ))}
+          </select>
+          <p id={`${formId}-documentId-hint`} className="text-sm text-slate-500">
+            {documentOptions.length === 0 ? t("PARTNERSHIP.documentEmpty") : t("PARTNERSHIP.documentDescription")}
+          </p>
+          {fieldErrors.documentId ? <FieldError>{fieldErrors.documentId}</FieldError> : null}
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor={`${formId}-country`}>{t("PARTNERSHIP.field.country")}</FieldLabel>
           <Input
             id={`${formId}-country`}
             name="country"
@@ -274,7 +340,7 @@ export function PartnershipEditorForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={`${formId}-startDate`}>{t("field.startDate")}</FieldLabel>
+          <FieldLabel htmlFor={`${formId}-startDate`}>{t("PARTNERSHIP.field.startDate")}</FieldLabel>
           <Input
             id={`${formId}-startDate`}
             name="startDate"
@@ -287,7 +353,7 @@ export function PartnershipEditorForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={`${formId}-endDate`}>{t("field.endDate")}</FieldLabel>
+          <FieldLabel htmlFor={`${formId}-endDate`}>{t("PARTNERSHIP.field.endDate")}</FieldLabel>
           <Input
             id={`${formId}-endDate`}
             name="endDate"
@@ -300,7 +366,7 @@ export function PartnershipEditorForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={`${formId}-websiteUrl`}>{t("field.websiteUrl")}</FieldLabel>
+          <FieldLabel htmlFor={`${formId}-websiteUrl`}>{t("PARTNERSHIP.field.websiteUrl")}</FieldLabel>
           <Input
             id={`${formId}-websiteUrl`}
             name="websiteUrl"
@@ -313,7 +379,23 @@ export function PartnershipEditorForm({
         </Field>
 
         <Field>
-          <FieldLabel htmlFor={`${formId}-order`}>{t("field.order")}</FieldLabel>
+          <FieldLabel htmlFor={`${formId}-legacyDocumentUrl`}>{t("PARTNERSHIP.field.documentUrl")}</FieldLabel>
+          <Input
+            id={`${formId}-legacyDocumentUrl`}
+            name="legacyDocumentUrl"
+            type="url"
+            value={draft.legacyDocumentUrl}
+            onChange={(e) => setDraft((c) => ({ ...c, legacyDocumentUrl: e.target.value }))}
+            placeholder="https://drive.google.com/..."
+            aria-invalid={fieldErrors.legacyDocumentUrl ? true : undefined}
+            autoComplete="off"
+          />
+          <p className="text-sm text-slate-500">{t("PARTNERSHIP.documentUrlDescription")}</p>
+          {fieldErrors.legacyDocumentUrl ? <FieldError>{fieldErrors.legacyDocumentUrl}</FieldError> : null}
+        </Field>
+
+        <Field>
+          <FieldLabel htmlFor={`${formId}-order`}>{t("PARTNERSHIP.field.order")}</FieldLabel>
           <Input
             id={`${formId}-order`}
             name="order"
@@ -338,15 +420,34 @@ export function PartnershipEditorForm({
               className="size-4 rounded border-slate-300"
             />
             <FieldLabel htmlFor={`${formId}-isActive`} className="!m-0 cursor-pointer">
-              {t("field.isActive")}
+              {t("PARTNERSHIP.field.isActive")}
             </FieldLabel>
           </div>
         </Field>
       </FieldGroup>
 
+      <HomeMediaPicker
+        value={draft.logoMediaId}
+        onChange={(logoMediaId) => setDraft((current) => ({ ...current, logoMediaId }))}
+        initialMedia={initialLogo}
+        uploadPublicUrl={uploadPublicUrl}
+        label={t("PARTNERSHIP.field.logo")}
+        description={t("PARTNERSHIP.logoDescription")}
+        chooseLabel={t("PARTNERSHIP.picker.choose")}
+        changeLabel={t("PARTNERSHIP.picker.change")}
+        clearLabel={t("PARTNERSHIP.picker.clear")}
+        selectedLabel={t("PARTNERSHIP.picker.selected")}
+        noneLabel={t("PARTNERSHIP.picker.none")}
+        loadingLabel={t("PARTNERSHIP.picker.loading")}
+        loadErrorLabel={t("PARTNERSHIP.picker.loadError")}
+        emptyLabel={t("PARTNERSHIP.picker.empty")}
+        listLabel={t("PARTNERSHIP.picker.listLabel")}
+        loadMoreLabel={t("PARTNERSHIP.picker.loadMore")}
+      />
+
       <FieldSet className="gap-4">
-        <FieldLegend>{t("translationsTitle")}</FieldLegend>
-        <div role="tablist" aria-label={t("localeTabsAriaLabel")} className="flex gap-1">
+        <FieldLegend>{t("PARTNERSHIP.translationsTitle")}</FieldLegend>
+        <div role="tablist" aria-label={t("PARTNERSHIP.localeTabsAriaLabel")} className="flex gap-1">
           {EDITOR_LOCALES.map((locale) => (
             <button
               key={locale}
@@ -364,7 +465,7 @@ export function PartnershipEditorForm({
             >
               {locale.toUpperCase()}
               {hasTranslation[locale] ? null : (
-                <span className="text-[10px] opacity-70">({t("localeOptional")})</span>
+                <span className="text-[10px] opacity-70">({t("PARTNERSHIP.localeOptional")})</span>
               )}
             </button>
           ))}
@@ -386,10 +487,10 @@ export function PartnershipEditorForm({
               <FieldGroup>
                 <Field>
                   <FieldLabel htmlFor={`${formId}-${locale}-category`}>
-                    {t("field.category")}
+                    {t("PARTNERSHIP.field.category")}
                     {required ? null : (
                       <span className="ms-1 text-sm font-normal text-muted-foreground">
-                        {t("localeOptional")}
+                        {t("PARTNERSHIP.localeOptional")}
                       </span>
                     )}
                   </FieldLabel>
@@ -408,7 +509,7 @@ export function PartnershipEditorForm({
 
                 <Field>
                   <FieldLabel htmlFor={`${formId}-${locale}-description`}>
-                    {t("field.description")}
+                    {t("PARTNERSHIP.field.description")}
                   </FieldLabel>
                   <Textarea
                     id={`${formId}-${locale}-description`}
@@ -432,13 +533,13 @@ export function PartnershipEditorForm({
         <Button type="submit" disabled={submitting}>
           {submitting ? <Spinner data-icon /> : null}
           {submitting
-            ? t("submitting")
+            ? t("PARTNERSHIP.submitting")
             : mode === "create"
-              ? t("submitCreate")
-              : t("submitUpdate")}
+              ? t("PARTNERSHIP.submitCreate")
+              : t("PARTNERSHIP.submitUpdate")}
         </Button>
         <Button type="button" variant="outline" onClick={() => router.push(listHref)}>
-          {t("cancel")}
+          {t("PARTNERSHIP.cancel")}
         </Button>
       </div>
     </form>

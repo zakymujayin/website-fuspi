@@ -50,7 +50,7 @@ Melengkapi `03` (token) dengan **spesifikasi setiap komponen** — angka pasti, 
 - bg `navy-900`, teks `slate-300`, padding `64px 0 0`.
 - **4 kolom** (desktop) → 2 (tablet) → 1 (mobile), gap `32px`:
   1. Logo (putih) + nama fakultas + alamat 2 kampus + email + telepon.
-  2. Program Studi (6 tautan).
+  2. Program Studi (3 tautan).
   3. Tautan Cepat (Layanan, Pengaduan, Peminjaman, PPID, FAQ, Kontak).
   4. Website Terkait & Jurnal (dari `ExternalLink`) + ikon sosial media (`20px`, gap `12px`).
 - Judul kolom: `14px` `font-medium` putih, `margin-bottom: 16px`, dengan **garis brass 2px selebar 32px** di bawahnya (elemen signature).

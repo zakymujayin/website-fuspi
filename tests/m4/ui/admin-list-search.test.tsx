@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/i18n/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
-const { AdminListSearch } = await import("@/components/admin/shared/admin-list-search");
+const { AdminListSearch } = await import("@/components/admin/shared/admin-list-search-server");
 
 const LABELS = { placeholder: "Cari judul…", ariaLabel: "Cari", action: "Cari", clear: "Bersihkan" };
 

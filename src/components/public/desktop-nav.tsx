@@ -13,6 +13,13 @@ import { cn } from "@/lib/utils";
 const MEGA_THRESHOLD = 6;
 
 /**
+ * One panel row. 44px minimum target, generous inline padding so the label has
+ * room to breathe inside its column.
+ */
+const PANEL_ITEM_CLASS =
+  "flex min-h-11 cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-slate-700 outline-none transition-colors data-[highlighted]:bg-white data-[highlighted]:text-royal-700 data-[highlighted]:shadow-sm motion-reduce:transition-none";
+
+/**
  * `whitespace-nowrap` keeps a long EN or AR label on one line: the unified
  * header row is fixed at 72px, so a wrapped label would spill out of it.
  */
@@ -44,6 +51,7 @@ export function DesktopNav({ primary }: { primary: readonly NavGroup[] }) {
           );
         }
 
+        const { sections } = item;
         const isMega = item.children.length >= MEGA_THRESHOLD;
 
         return (
@@ -65,21 +73,50 @@ export function DesktopNav({ primary }: { primary: readonly NavGroup[] }) {
               <Menu.Positioner sideOffset={8} align="start" className="z-50">
                 <Menu.Popup
                   className={cn(
-                    "rounded-xl border border-slate-200/70 bg-slate-50/95 p-3 shadow-lg backdrop-blur-md outline-none",
-                    isMega
-                      ? "grid w-[440px] grid-cols-2 gap-x-2 gap-y-0.5"
-                      : "flex w-[240px] flex-col gap-0.5",
+                    "rounded-xl border border-slate-200/70 bg-slate-50/95 shadow-lg backdrop-blur-md outline-none",
+                    sections
+                      ? "grid w-[620px] grid-cols-2 p-5"
+                      : isMega
+                        ? "grid w-[440px] grid-cols-2 gap-x-2 gap-y-0.5 p-3"
+                        : "flex w-[240px] flex-col gap-0.5 p-3",
                   )}
                 >
-                  {item.children.map((child) => (
-                    <Menu.LinkItem
-                      key={child.key}
-                      render={<Link href={child.href} />}
-                      className="flex min-h-11 cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-slate-700 outline-none data-[highlighted]:bg-white data-[highlighted]:text-royal-700 data-[highlighted]:shadow-sm"
-                    >
-                      {t(child.key)}
-                    </Menu.LinkItem>
-                  ))}
+                  {sections
+                    ? sections.map((section, index) => (
+                        <Menu.Group
+                          key={section.key}
+                          className={cn(
+                            "flex flex-col gap-0.5",
+                            // A hairline between columns, on the inline-start
+                            // edge so it mirrors correctly in Arabic.
+                            index === 0
+                              ? "pe-6"
+                              : "border-s border-slate-200 ps-6",
+                          )}
+                        >
+                          <Menu.GroupLabel className="px-3 pb-2 text-[15px] font-semibold tracking-tight text-royal-800">
+                            {t(section.key)}
+                          </Menu.GroupLabel>
+                          {section.items.map((child) => (
+                            <Menu.LinkItem
+                              key={child.key}
+                              render={<Link href={child.href} />}
+                              className={PANEL_ITEM_CLASS}
+                            >
+                              {t(child.key)}
+                            </Menu.LinkItem>
+                          ))}
+                        </Menu.Group>
+                      ))
+                    : item.children.map((child) => (
+                        <Menu.LinkItem
+                          key={child.key}
+                          render={<Link href={child.href} />}
+                          className={PANEL_ITEM_CLASS}
+                        >
+                          {t(child.key)}
+                        </Menu.LinkItem>
+                      ))}
                 </Menu.Popup>
               </Menu.Positioner>
             </Menu.Portal>

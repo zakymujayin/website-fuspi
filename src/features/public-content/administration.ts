@@ -114,6 +114,31 @@ async function validImages(tx: Prisma.TransactionClient, ids: string[]) {
   return rows.length === unique.length && rows.every((row) => mediaView(row) !== null);
 }
 
+export type AttachableDocumentOption = {id: string; title: string; category: string | null};
+
+/**
+ * Documents an editor may attach to a partnership or scholarship. Mirrors the
+ * `validDocument` gate below so the picker cannot offer a document the write
+ * path would reject.
+ */
+export async function listAttachableDocuments(
+  prisma: PublicContentDatabase,
+  locale: Locale = "id",
+): Promise<AttachableDocumentOption[]> {
+  const rows = await prisma.document.findMany({
+    where: {storageClass: "PUBLIC", mimeType: "application/pdf", publishedAt: {not: null}},
+    orderBy: [{publishedAt: "desc"}, {id: "asc"}],
+    take: 200,
+    include: {translations: true},
+  });
+  const options: AttachableDocumentOption[] = [];
+  for (const row of rows) {
+    const view = documentView(row, locale);
+    if (view) options.push({id: view.id, title: view.translation.title, category: view.translation.category});
+  }
+  return options;
+}
+
 async function validDocument(tx: Prisma.TransactionClient, id: string | null) {
   if (id === null) return true;
   const row = await tx.document.findUnique({where: {id}, include: {translations: true}});

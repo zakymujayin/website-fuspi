@@ -8,7 +8,7 @@ Tambahkan route `/calon-mahasiswa` sebagai landing page yang mengarahkan keputus
 
 Konten:
 
-1. Ringkasan FUSPI dan lima prodi: IAT, IH, AFI, SAA, dan TASPI.
+1. Ringkasan FUSPI dan tiga prodi aktif v1: IAT, IH, dan AFI.
 2. Perbandingan prodi: fokus keilmuan, akreditasi, profil lulusan, prospek karier, dan CTA detail.
 3. Jalur masuk yang berlaku beserta periode; data dikelola CMS, bukan disalin otomatis dari PMB.
 4. Ringkasan UKT/biaya dengan tahun sumber dan disclaimer bahwa ketentuan final berada di portal universitas.

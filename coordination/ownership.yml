@@ -67,10 +67,27 @@ active_leases:
       - tests/m4/ui/page-admin/**
       - e2e/m4/page-admin.spec.ts
       - coordination/handoffs/M4-CLAUDE-PAGE-ADMIN-UI-claude.md
-  - task: M4-GPT-HISTORY-PAGE-NARRATIVE
+  - task: M4-GPT-PUBLIC-IA-MENU-REMAP
     owner: gpt
     paths:
-      - src/app/[locale]/(public)/profil/sejarah/page.tsx
-      - coordination/tasks/M4-GPT-HISTORY-PAGE-NARRATIVE.md
-      - coordination/handoffs/M4-GPT-HISTORY-PAGE-NARRATIVE-gpt.md
+      - AGENTS.md
+      - docs/README.md
+      - docs/02-database-schema.md
+      - docs/05-halaman-publik.md
+      - docs/17-komponen-ui-detail.md
+      - docs/20-test-acceptance-go-live.md
+      - docs/22-calon-mahasiswa-akademik-discoverability.md
+      - docs/24-implementation-plan-multi-model.md
+      - docs/26-fuspi-public-ia-design-brief.md
+      - src/components/public/nav-items.ts
+      - src/components/public/site-header.tsx
+      - src/components/public/nav-items.test.ts
+      - src/app/[locale]/(public)/akademik/page.tsx
+      - src/app/[locale]/(public)/sitemap/page.tsx
+      - src/app/sitemap.ts
+      - messages/id.json
+      - messages/en.json
+      - messages/ar.json
+      - coordination/tasks/M4-GPT-PUBLIC-IA-MENU-REMAP.md
+      - coordination/handoffs/M4-GPT-PUBLIC-IA-MENU-REMAP-gpt.md
       - coordination/ownership.yml

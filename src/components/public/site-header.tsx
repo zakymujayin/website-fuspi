@@ -14,13 +14,13 @@ import {getLocale, getTranslations} from "next-intl/server";
  * Two-tier header matching the reference pattern: a compact navy top bar for
  * utility systems (SIAKAD, E-Learning, GKM) and language switching, plus a
  * clean white main bar for primary navigation and the PPID/PMB entry points.
- * "Layanan" is not a header entry point — it has its own homepage section.
+ * Academic resources stay in one dropdown so the header does not duplicate
+ * homepage shortcuts or scatter documents across unrelated menus.
  */
 export async function SiteHeader() {
   const locale = await getLocale();
   const t = await getTranslations("Nav");
   const externalHint = t("externalLinkHint");
-  const restNav = primaryNav.filter((item) => item.key !== "services");
   const appLocale = locale === "en" || locale === "ar" ? locale : "id";
   const siteSetting = await getPublicSiteSetting(
     getPrismaClient(),
@@ -42,7 +42,7 @@ export async function SiteHeader() {
               accreditationLogo={siteSetting?.accreditationLogo ?? null}
               bluLogo={siteSetting?.bluLogo ?? null}
             />
-            <DesktopNav primary={restNav} />
+            <DesktopNav primary={primaryNav} />
             <div className="hidden shrink-0 items-center gap-1 xl:flex">
               <HeaderSearch />
               <UtilityLink

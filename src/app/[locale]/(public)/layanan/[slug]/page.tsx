@@ -83,9 +83,10 @@ const tNav = await getTranslations("Nav");
         </header>
 
         {service.translation.description ? (
-          <section className="prose prose-slate max-w-none">
+          <section>
             <div
               lang={service.translation.resolvedLocale}
+              className="rich-text"
               dangerouslySetInnerHTML={{ __html: service.translation.description }}
             />
           </section>

@@ -6,8 +6,8 @@ import {redirect} from "next/navigation";
 import {Link} from "@/i18n/navigation";
 import type {TaxonomyKind, TaxonomyListQuery} from "@/contracts/admin-foundation";
 import {normalizeTaxonomySearchParams} from "@/contracts/admin-foundation";
-import {AdminListSearch} from "@/components/admin/shared/admin-list-search";
-import {AdminPageSizeSelect} from "@/components/admin/shared/admin-page-size-select";
+import {AdminListSearch} from "@/components/admin/shared/admin-list-search-server";
+import {AdminPageSizeSelect} from "@/components/admin/shared/admin-page-size-select-server";
 import {
   buildTaxonomyHref,
   TAXONOMY_SEARCH_MAX_LENGTH,

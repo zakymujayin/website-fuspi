@@ -4,7 +4,7 @@ import { Container } from "@/components/ui/container";
 import type { AppLocale } from "@/i18n/routing";
 
 const VISION = {
-  id: "Menjadi fakultas ushuluddin dan pemikiran Islam yang kredibel, kontekstual, dan berdaya saing global pada tahun 2045.",
+  id: "Menjadi Fakultas Ushuluddin dan Pemikiran Islam yang unggul dalam pengembangan keilmuan dan pemikiran Islam berbasis kearifan lokal yang berdampak global.",
   en: "To become a faculty of ushuluddin and Islamic thought that is credible, contextual, and globally competitive by 2045.",
   ar: "أن تصبح كلية أصول الدين والفكر الإسلامي موثوقة وسياقية وتنافسية عالمياً بحلول عام 2045.",
 } as const;
@@ -44,7 +44,7 @@ export async function VisionMissionSection({locale}: {locale: AppLocale}) {
             <span className="text-xs font-medium tracking-wide text-royal-600 uppercase">
               {t("visionLabel")}
             </span>
-            <h2 className="mt-4 font-display text-2xl font-bold leading-tight text-royal-900 md:text-3xl">
+            <h2 className="mt-4 max-w-2xl font-display text-xl font-semibold leading-relaxed text-royal-900">
               {vision}
             </h2>
           </div>

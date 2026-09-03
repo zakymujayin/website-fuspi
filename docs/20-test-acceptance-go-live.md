@@ -133,12 +133,12 @@ Pipeline minimum: `prisma validate` → migration database kosong → seed → l
 ## G. Kesiapan konten awal manual
 
 - Pemilik konten menyetujui matriks menu, halaman wajib, owner, status materi, locale, dan tanggal review.
-- Profil, sejarah, visi, misi, tujuan, strategi, struktur organisasi, pimpinan, SDM, fasilitas, lima program studi, layanan, kontak, dokumen, dan akreditasi diisi melalui CMS dengan data resmi.
+- Profil, sejarah, visi, misi, tujuan, strategi, struktur organisasi, pimpinan, SDM, fasilitas, tiga program studi aktif, layanan, kontak, dokumen, dan akreditasi diisi melalui CMS dengan data resmi.
 - Sambutan dan foto Dekan, angka mahasiswa/dosen/tenaga kependidikan, media hero, quick links, serta CTA diverifikasi sebelum section terkait ditampilkan.
 - Berita dan modul dinamis boleh kosong saat go-live; section beranda terkait harus tersembunyi dan halaman arsip memberi empty state yang jujur.
 - Tidak ada seed/fixture yang tampil sebagai nama orang, angka, media, testimoni, mitra, atau klaim institusional nyata.
 - Semua media publik mempunyai sumber/hak penggunaan, alt text, dimensi, dan file yang dapat dibaca.
-- Sampling visual mencakup seluruh template profil, lima program studi, seluruh menu, layanan, dokumen, beranda desktop/mobile, dan locale ID/EN/AR.
+- Sampling visual mencakup seluruh template profil, tiga program studi aktif, seluruh menu, layanan, dokumen, beranda desktop/mobile, dan locale ID/EN/AR.
 - Crawl staging tidak menemukan internal 404, redirect chain/loop, mixed content, missing canonical, broken hreflang, atau tautan integrasi yang belum dikonfigurasi.
 
 ## H. Operasional, backup, dan deployment

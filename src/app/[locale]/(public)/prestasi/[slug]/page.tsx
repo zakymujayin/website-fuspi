@@ -100,9 +100,10 @@ const tNav = await getTranslations("Nav");
         ) : null}
 
         {achievement.translation.description ? (
-          <section className="prose prose-slate max-w-none">
+          <section>
             <div
               lang={achievement.translation.resolvedLocale}
+              className="rich-text"
               dangerouslySetInnerHTML={{ __html: achievement.translation.description }}
             />
           </section>

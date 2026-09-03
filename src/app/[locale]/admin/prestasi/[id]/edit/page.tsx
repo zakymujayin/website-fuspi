@@ -33,6 +33,11 @@ export default async function EditAchievementPage({ params }: Props) {
   if (!result.ok) notFound();
 
   const data = result.data as Record<string, unknown>;
+  const input = data.input as Record<string, unknown>;
+  const imageAsset = Array.isArray(data.assets)
+    ? (data.assets as Array<{kind?: string; media?: Record<string, unknown>}>).find((asset) => asset.kind === "MEDIA")?.media
+    : undefined;
+  const uploadPublicUrl = process.env.UPLOAD_PUBLIC_URL ?? "/uploads";
 
   return (
     <section aria-labelledby="admin-achievement-edit-title" className="flex flex-col gap-6">
@@ -45,9 +50,11 @@ export default async function EditAchievementPage({ params }: Props) {
       <AchievementEditorForm
         mode="edit"
         listHref="/admin/prestasi"
-        initialData={data}
+        initialData={input}
         pageId={data.id as string}
         expectedVersion={data.version as number | undefined}
+        initialImage={(imageAsset as never) ?? null}
+        uploadPublicUrl={uploadPublicUrl}
       />
     </section>
   );

@@ -198,7 +198,7 @@ model Page {
 model StudyProgram {
   id                 String      @id @default(cuid())
   name               String
-  code               String      @unique      // IAT, IH, AFI, SAA, TASPI
+  code               String      @unique      // active v1: IAT, IH, AFI
   degree             String      @default("S1")
   accreditation      String?                   // mis. "Unggul", "Baik Sekali"
   accreditationYear  Int?
@@ -906,7 +906,7 @@ Aturan delete/retention mengikuti `21`: revision/audit/export log tidak hard-del
 
 - **Post disatukan** (Berita/Pengumuman/Informasi/Kolom) karena strukturnya identik. Ini menyederhanakan editor & query; pembeda cukup field `type`. Kolom opini memakai `columnType` untuk memisah Dekan/Dosen/Mahasiswa.
 - **Page bersifat hierarkis** (`parentId`) supaya halaman seperti Profil bisa punya sub-halaman tanpa menambah tabel.
-- **StudyProgram punya `externalUrl`** sebagai ekstensi opsional bila suatu saat prodi memiliki situs terpisah. Seluruh lima prodi FUSPI v1 memakai halaman internal.
+- **StudyProgram punya `externalUrl`** sebagai ekstensi opsional bila suatu saat prodi memiliki situs terpisah. Seluruh tiga prodi aktif FUSPI v1 memakai halaman internal.
 - **Partnership** sengaja punya kolom `startDate`, `endDate`, `documentUrl`, `level`, dan `category` agar datanya bisa langsung dipakai untuk instrumen akreditasi.
 - **SiteSetting singleton** memakai id tetap `"singleton"` sehingga selalu satu baris; di admin cukup form edit, bukan CRUD.
 - **onDelete: SetNull** dipakai pada relasi author/category agar menghapus user/kategori tidak ikut menghapus konten.
@@ -916,7 +916,7 @@ Aturan delete/retention mengikuti `21`: revision/audit/export log tidak hard-del
 Isi minimal saat pertama deploy:
 
 1. **1 user ADMIN** dari `SEED_ADMIN_EMAIL`/`SEED_ADMIN_PASSWORD`; password tidak boleh di-hardcode, `mustChangePassword=true`, hash via bcrypt.
-2. **5 StudyProgram**: IAT, IH, AFI, SAA, dan TASPI; seluruhnya memakai halaman internal pada v1.
+2. **3 StudyProgram aktif v1**: IAT, IH, dan AFI; seluruhnya memakai halaman internal pada v1.
 3. **SiteSetting** singleton dengan data FUSPI (alamat 2 kampus, email `fuspi@uinbanten.ac.id`, dekan).
 4. **Kategori dasar**: Berita, Pengumuman.
 

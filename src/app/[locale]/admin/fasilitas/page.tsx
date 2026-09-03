@@ -4,8 +4,8 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {redirect} from "next/navigation";
 
 import {Link} from "@/i18n/navigation";
-import {AdminListSearch} from "@/components/admin/shared/admin-list-search";
-import {AdminPageSizeSelect} from "@/components/admin/shared/admin-page-size-select";
+import {AdminListSearch} from "@/components/admin/shared/admin-list-search-server";
+import {AdminPageSizeSelect} from "@/components/admin/shared/admin-page-size-select-server";
 import {
   buildFacilityHref,
   FACILITY_SEARCH_MAX_LENGTH,

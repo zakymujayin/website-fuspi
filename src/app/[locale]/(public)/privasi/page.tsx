@@ -18,7 +18,7 @@ export default async function PrivacyPage({params}: {params: Promise<{locale: st
   return (
     <Container className="py-12 md:py-20">
       <SectionHeading as="h1" title={t("privacyTitle")} />
-      <div className="prose prose-slate mx-auto mt-12 max-w-3xl">
+      <div className="rich-text mx-auto mt-12 max-w-3xl">
         <p>{t("privacyContent")}</p>
       </div>
     </Container>

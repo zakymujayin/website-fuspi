@@ -2,7 +2,7 @@
 
 Dokumen ini adalah rencana eksekusi v1 Website & CMS FUSPI oleh tiga agent CLI yang berjalan simultan. Tujuannya bukan membuat tiga model mengerjakan file yang sama, tetapi membangun tiga lane paralel dengan kontrak beku, kepemilikan path, review silang, dan merge queue tunggal.
 
-Kontrak identitas tidak boleh dinegosiasikan ulang: target adalah **FUSPI — Fakultas Ushuluddin dan Pemikiran Islam**, dengan tepat lima prodi **IAT, IH, AFI, SAA, TASPI**. Situs yang ditunjuk pemilik hanya referensi struktur informasi dan tidak boleh menjadi sumber identitas atau copy. Kontrak kode berada di `src/config/institution.ts`; CI wajib gagal bila daftar tersebut berubah tanpa keputusan pemilik proyek.
+Kontrak identitas tidak boleh dinegosiasikan ulang: target adalah **FUSPI — Fakultas Ushuluddin dan Pemikiran Islam**, dengan tepat tiga prodi aktif v1 **IAT, IH, dan AFI**. Situs yang ditunjuk pemilik hanya referensi struktur informasi dan tidak boleh menjadi sumber identitas atau copy. Kontrak kode berada di `src/config/institution.ts`; CI wajib gagal bila daftar tersebut berubah tanpa keputusan pemilik proyek.
 
 Target v1 mengikuti `README` dan mengecualikan Course/Curriculum, profil riset bibliografis penuh, API SILA read-only, serta SSO SILA yang sudah ditetapkan sebagai fase 2/3.
 

@@ -20,6 +20,10 @@ const PAGE_SIZE = 10;
 export type PublicContentListPageConfig = {
   resource: PublicContentResource;
   hasDetail: boolean;
+  /** Logo-based resources need "contain" so the mark is not cropped. */
+  mediaFit?: "cover" | "contain";
+  /** "detail" keeps the card on the detail page instead of the configured link. */
+  cardLink?: "configured" | "detail";
 };
 
 function detailHref(resource: PublicContentResource, slug: string | null, id: string): string {
@@ -112,6 +116,8 @@ export async function PublicContentListPage({config, params, searchParams}: Publ
                 badgeLabel={item.badge ?? undefined}
                 readMoreLabel={readMore}
                 hasDetail={config.hasDetail}
+                mediaFit={config.mediaFit}
+                cardLink={config.cardLink}
               />
             ))}
           </div>

@@ -67,7 +67,7 @@ export function RichTextField({ value, onChange, ariaLabel, dir }: RichTextField
         "aria-multiline": "true",
         "aria-label": ariaLabel,
         class:
-          "prose prose-slate max-w-none min-h-40 rounded-b-lg border border-t-0 border-input bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+          "rich-text min-h-40 rounded-b-lg border border-t-0 border-input bg-transparent px-3 py-2 text-base outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
         ...(dir ? { dir } : {}),
       },
     },

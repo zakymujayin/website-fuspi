@@ -3,6 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
 
 import { PartnershipEditorForm } from "@/components/admin/public-content/partnership-editor-form";
+import { listAttachableDocuments } from "@/features/public-content/administration";
+import { getPrismaClient } from "@/lib/db/client";
 import { decideProtectedRoute, getRequestSession } from "@/lib/auth/runtime/request-session";
 import { parseAppLocale } from "@/lib/auth/runtime/redirect";
 
@@ -26,6 +28,8 @@ export default async function NewPartnershipPage({ params }: Props) {
   if (!decision.allow) redirect(decision.redirectTo);
 
   const t = await getTranslations("AdminPublicContent");
+  const uploadPublicUrl = process.env.UPLOAD_PUBLIC_URL ?? "/uploads";
+  const documentOptions = await listAttachableDocuments(getPrismaClient());
 
   return (
     <section aria-labelledby="admin-partnership-create-title" className="flex flex-col gap-6">
@@ -35,7 +39,12 @@ export default async function NewPartnershipPage({ params }: Props) {
         </h1>
         <p className="mt-2 max-w-prose text-sm text-slate-500">{t("PARTNERSHIP.createDescription")}</p>
       </div>
-      <PartnershipEditorForm mode="create" listHref="/admin/kerjasama" />
+      <PartnershipEditorForm
+        mode="create"
+        listHref="/admin/kerjasama"
+        uploadPublicUrl={uploadPublicUrl}
+        documentOptions={documentOptions}
+      />
     </section>
   );
 }

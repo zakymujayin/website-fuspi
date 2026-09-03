@@ -16,7 +16,7 @@ Kategori informasi mengikuti kebutuhan yang ditemukan dalam audit referensi ekst
 ### Lapis 1 — Bar konten (paling atas, tipis)
 Tautan langsung ke arsip tiap tipe konten:
 ```
-Berita · Pengumuman · Kolom · Agenda · Album · Dokumen
+Berita · Pengumuman · Sorotan Akademik · Agenda · Album
 ```
 → `/berita` · `/pengumuman` · `/kolom` · `/agenda` · `/album` · `/dokumen`
 
@@ -42,11 +42,11 @@ Calon Mahasiswa · Portal PMB · SILA · SIAKAD · E-Learning · GKM        [ID 
    ├─ Program Studi
    │  ├─ Ilmu Al-Qur’an dan Tafsir (IAT)    /program-studi/iat
    │  ├─ Ilmu Hadis (IH)                    /program-studi/ih
-   │  ├─ Aqidah dan Filsafat Islam (AFI)    /program-studi/afi
-   │  ├─ Studi Agama-Agama (SAA)            /program-studi/saa
-   │  └─ Tasawuf dan Psikoterapi (TASPI)    /program-studi/taspi
-   ├─ Kurikulum                /halaman/kurikulum
-   ├─ Kalender Akademik        /halaman/kalender-akademik
+   │  └─ Aqidah dan Filsafat Islam (AFI)    /program-studi/afi
+   ├─ Jadwal Perkuliahan       /dokumen?kategori=jadwal-perkuliahan
+   ├─ Kalender Akademik        /dokumen?kategori=kalender-akademik
+   ├─ Kurikulum                /dokumen?kategori=kurikulum
+   ├─ Mata Kuliah per Tahun Ajaran /dokumen?kategori=mata-kuliah
    ├─ Monitoring & Evaluasi    /halaman/monev
    ├─ Pedoman Akademik         /dokumen?kategori=pedoman
    ├─ Tugas Akhir & Skripsi    /halaman/tugas-akhir
@@ -142,12 +142,12 @@ Seluruh urutan dan visibilitas dibaca dari `HomeSection`. Susunan awal mengikuti
 3. **Sambutan Dekan** — foto dekan + nama/jabatan + kutipan sambutan (dari `SiteSetting`). Layout 2 kolom.
 4. **Statistik** — mahasiswa, dosen, dan tenaga kependidikan; tampil hanya setelah angka diverifikasi.
 5. **Pengantar fakultas** — ringkasan profil dengan tautan ke profil, visi-misi, dan struktur organisasi.
-6. **Program Studi** — lima program resmi dalam urutan `src/config/institution.ts`.
+6. **Program Studi** — tiga program aktif dalam urutan `src/config/institution.ts`.
 7. **Pengumuman & Informasi** — daftar ringkas yang mengutamakan tanggal dan status.
 8. **Layanan** — pintasan layanan akademik, umum, laboratorium, dan pengaduan.
 9. **Berita Terbaru** — satu berita utama dan beberapa berita pendamping.
 10. **Kerja Sama** — logo/grid mitra (`Partnership` aktif) dengan aset resmi.
-11. **Sorotan Akademik / Kolom** — karya atau kolom Dekan, dosen, dan mahasiswa.
+11. **Sorotan Akademik** — karya atau opini Dekan, dosen, dan mahasiswa.
 12. **Video** — profil/tur/liputan resmi dengan poster image.
 13. **Agenda** — agenda mendatang dengan tanggal, lokasi, dan CTA detail.
 14. **Testimoni Alumni** — opsional dan tersembunyi sampai materi serta izin tersedia.

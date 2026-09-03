@@ -4,7 +4,11 @@ import { institution } from "@/config/institution";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
-const UIN_LOGO_SRC = "/images/pattern/LOGO UIN BANTEN-06.jpeg";
+/** Transparent-background marks; the navy variant is for light surfaces. */
+const UIN_LOGO_SRC = {
+  light: "/images/brand/uin-logo-navy.png",
+  dark: "/images/brand/uin-logo-white.png",
+} as const;
 
 type BrandMarkProps = {
   tone?: "light" | "dark";
@@ -28,17 +32,16 @@ export function BrandMark({ tone = "light", className, showLabel = true }: Brand
     >
       <span
         className={cn(
-          "relative grid shrink-0 place-items-center overflow-hidden rounded-lg bg-black ring-1",
+          "relative grid shrink-0 place-items-center",
           showLabel ? "h-11 w-10" : "h-16 w-14",
-          tone === "light" ? "ring-slate-200" : "ring-white/20",
         )}
       >
         <Image
-          src={UIN_LOGO_SRC}
+          src={UIN_LOGO_SRC[tone]}
           alt=""
           aria-hidden
-          width={1594}
-          height={1842}
+          width={1507}
+          height={1748}
           sizes={showLabel ? "40px" : "56px"}
           className="h-full w-full object-contain"
           priority={showLabel}

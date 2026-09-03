@@ -10,22 +10,34 @@ import { Input } from "@/components/ui/input";
 type AdminListSearchProps = {
   initialSearch: string;
   maxLength: number;
-  buildHref: (search: string) => string;
+  href: string;
   labels: { placeholder: string; ariaLabel: string; action: string; clear: string };
 };
 
-export function AdminListSearch({ initialSearch, maxLength, buildHref, labels }: AdminListSearchProps) {
+function withSearch(href: string, search: string): string {
+  const [pathname, query = ""] = href.split("?", 2);
+  const params = new URLSearchParams(query);
+
+  if (search) params.set("search", search);
+  else params.delete("search");
+  params.delete("page");
+
+  const nextQuery = params.toString();
+  return nextQuery ? `${pathname}?${nextQuery}` : pathname;
+}
+
+export function AdminListSearchClient({ initialSearch, maxLength, href, labels }: AdminListSearchProps) {
   const router = useRouter();
   const [search, setSearch] = useState(initialSearch);
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    router.push(buildHref(search.trim()));
+    router.push(withSearch(href, search.trim()));
   }
 
   function clear() {
     setSearch("");
-    if (initialSearch) router.push(buildHref(""));
+    if (initialSearch) router.push(withSearch(href, ""));
   }
 
   return (

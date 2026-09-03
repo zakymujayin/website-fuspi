@@ -18,8 +18,8 @@ import {
 import { loadAdminPostsSafely } from "@/components/admin/posts/post-safe-load";
 import { AdminPostStateNotice } from "@/components/admin/posts/post-state-notice";
 import type { AdminPostPublicationState } from "@/components/admin/posts/post-status-badge";
-import { AdminListSearch } from "@/components/admin/shared/admin-list-search";
-import { AdminPageSizeSelect } from "@/components/admin/shared/admin-page-size-select";
+import { AdminListSearch } from "@/components/admin/shared/admin-list-search-server";
+import { AdminPageSizeSelect } from "@/components/admin/shared/admin-page-size-select-server";
 import { decideProtectedRoute, getRequestSession } from "@/lib/auth/runtime/request-session";
 import { parseAppLocale } from "@/lib/auth/runtime/redirect";
 import { listAdminPosts } from "@/lib/content/post-admin-transport";

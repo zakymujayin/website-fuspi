@@ -7,7 +7,7 @@ Dokumen ini adalah sumber utama untuk struktur informasi, narasi beranda, dan ar
 1. Situs diluncurkan sebagai produk FUSPI yang baru. Konten awal dimasukkan manual melalui CMS dan disetujui pemilik konten.
 2. Tidak ada impor artikel, halaman, media, metadata, maupun daftar URL dari situs terdahulu sebagai syarat v1.
 3. Situs referensi eksternal dipakai hanya untuk memahami jenis informasi yang perlu mudah ditemukan. Identitas, teks, data, orang, kontak, statistik, program, media, URL, layout, tema, dan komposisi visualnya tidak boleh disalin.
-4. Lima program studi, dalam urutan resmi, adalah IAT, IH, AFI, SAA, dan TASPI. Nama lengkap dan metadata harus selalu dibaca dari `src/config/institution.ts`.
+4. Tiga program studi aktif v1, dalam urutan resmi, adalah IAT, IH, dan AFI. Nama lengkap dan metadata harus selalu dibaca dari `src/config/institution.ts`.
 5. Konten publik tidak boleh mengarang nama pimpinan, angka statistik, sejarah, capaian, akreditasi, alamat, kontak, atau klaim institusional.
 6. Semua bagian beranda dapat disusun ulang, disembunyikan, dan diedit dari admin. Bagian tanpa konten valid tidak boleh menampilkan data contoh seolah-olah nyata.
 
@@ -27,7 +27,7 @@ Navigasi dibagi menjadi tiga lapis agar kategori yang luas tetap mudah dipahami.
 
 ### 1. Bar konten
 
-`Berita · Pengumuman · Kolom · Agenda · Album · Dokumen`
+`Berita · Pengumuman · Sorotan Akademik · Agenda · Album · Dokumen`
 
 Bar ini memberi akses langsung ke konten yang sering diperbarui tanpa membebani menu institusional.
 
@@ -56,14 +56,16 @@ AKADEMIK
 ├── Program Studi
 │   ├── Ilmu Al-Qur'an dan Tafsir (IAT)
 │   ├── Ilmu Hadis (IH)
-│   ├── Aqidah dan Filsafat Islam (AFI)
-│   ├── Studi Agama-Agama (SAA)
-│   └── Tasawuf dan Psikoterapi (TASPI)
-├── Kurikulum & Mata Kuliah
-├── Jadwal & Kalender Akademik
+│   └── Aqidah dan Filsafat Islam (AFI)
+├── Jadwal Perkuliahan
+├── Kalender Akademik
+├── Kurikulum
+├── Mata Kuliah per Tahun Ajaran
 ├── Monitoring & Evaluasi
 ├── Tugas Akhir, Sidang & Yudisium
-└── Dokumen Akademik
+├── Dokumen Akademik
+├── Akreditasi
+└── Pedoman Akademik
 
 PENELITIAN & PKM
 ├── Penelitian Dosen
@@ -99,7 +101,7 @@ LAYANAN
 └── PPID
 ```
 
-`Layanan` adalah kategori eksplisit pengganti menu penampung yang ambigu. `Akreditasi` menjadi tautan utama karena kepentingannya tinggi, sedangkan lima program tetap muncul sebagai submenu Akademik dan akses cepat kontekstual pada beranda.
+`Layanan` adalah kategori eksplisit pengganti menu penampung yang ambigu. `Akreditasi` mudah ditemukan di bawah Akademik karena konteksnya melekat pada mutu pendidikan, sedangkan tiga program aktif tetap muncul sebagai submenu Akademik dan akses cepat kontekstual pada beranda.
 
 Pada mobile, ketiga lapis masuk ke satu drawer dengan bagian yang jelas, submenu accordion, target sentuh minimum 44 px, fokus keyboard terkelola, dan language switcher di bagian awal.
 
@@ -112,7 +114,7 @@ Beranda bukan daftar semua modul. Urutannya membentuk perjalanan dari pengenalan
 3. **Sambutan Dekan** — foto resmi, nama, jabatan, kutipan singkat, dan tautan ke sambutan lengkap.
 4. **FUSPI dalam angka** — minimal mahasiswa, dosen, dan tenaga kependidikan; hanya tampil setelah angkanya diverifikasi.
 5. **Pengantar fakultas** — ringkasan identitas dan arah ke profil, visi-misi, serta struktur organisasi.
-6. **Program studi** — lima program resmi dalam urutan kontrak, dengan deskripsi singkat dan CTA detail.
+6. **Program studi** — tiga program aktif dalam urutan kontrak, dengan deskripsi singkat dan CTA detail.
 7. **Informasi & pengumuman** — daftar ringkas yang mengutamakan keterbacaan tanggal dan status.
 8. **Layanan** — kelompok layanan akademik, umum, laboratorium, dan pengaduan berdasarkan kebutuhan pengguna.
 9. **Berita terbaru** — satu berita utama dan beberapa berita pendamping, bukan grid kartu identik.
@@ -155,7 +157,7 @@ Kelompokkan menurut fungsi. Setiap fasilitas memerlukan nama, deskripsi, media r
 
 ### Program studi
 
-Kelima halaman memakai kerangka konsisten: identitas, deskripsi, visi/keunggulan yang disetujui, kurikulum atau fokus kajian, profil lulusan, pengelola/kontak resmi, dokumen, berita terkait, dan CTA. Konten spesifik tidak boleh disalin antarprogram sebagai pengisi.
+Ketiga halaman memakai kerangka konsisten: identitas, deskripsi, visi/keunggulan yang disetujui, kurikulum atau fokus kajian, profil lulusan, pengelola/kontak resmi, dokumen, berita terkait, dan CTA. Konten spesifik tidak boleh disalin antarprogram sebagai pengisi.
 
 ### Akademik dan akreditasi
 
@@ -202,7 +204,7 @@ Sebelum go-live, pemilik konten memasukkan dan menyetujui:
 - identitas, profil, sejarah, visi, misi, tujuan, dan strategi;
 - nama, jabatan, foto, dan sambutan Dekan;
 - struktur organisasi, pimpinan, dosen, serta tenaga kependidikan yang boleh dipublikasikan;
-- lima program studi beserta deskripsi dan dokumen resminya;
+- tiga program studi aktif beserta deskripsi dan dokumen resminya;
 - angka mahasiswa, dosen, dan tenaga kependidikan beserta tanggal verifikasi;
 - fasilitas, layanan, kontak, dokumen akademik, dan akreditasi;
 - minimal media hero yang resmi, quick links, dan CTA yang tujuannya valid;
