@@ -11,9 +11,27 @@ export type NavLink = {
   href: string;
 };
 
+/** A labelled column inside a desktop mega panel. */
+export type NavSection = {
+  /** Key inside the `Nav` message namespace, rendered as the column heading. */
+  key: string;
+  items: readonly NavLink[];
+};
+
 export type NavGroup = NavLink & {
   children?: readonly NavLink[];
+  /**
+   * Optional column grouping for the desktop panel. `children` stays the flat
+   * source of truth (drawer, tests, sitemap); sections only decide how the
+   * same destinations are laid out.
+   */
+  sections?: readonly NavSection[];
 };
+
+const studyProgramNav = institution.studyPrograms.map((program) => ({
+  key: `program.${program.code}`,
+  href: `/prodi/${program.slug}`,
+}));
 
 export const profileNav: readonly NavGroup[] = [
   { key: "history", href: "/profil/sejarah" },
@@ -26,6 +44,55 @@ export const profileNav: readonly NavGroup[] = [
   { key: "testimonials", href: "/testimoni" },
   { key: "prospective", href: "/calon-mahasiswa" },
   { key: "contact", href: "/kontak" },
+] as const;
+
+const studyProgramIndexHref = "/prodi";
+
+/** Academic navigation is intentionally resource-first: no homepage shortcuts here. */
+export const academicNav: readonly NavLink[] = [
+  { key: "studyPrograms", href: studyProgramIndexHref },
+  ...studyProgramNav,
+  { key: "lectureSchedule", href: "/akademik#jadwal-perkuliahan" },
+  { key: "academicCalendar", href: "/akademik#kalender-akademik" },
+  { key: "curriculum", href: "/akademik#kurikulum" },
+  { key: "courseCatalog", href: "/akademik#mata-kuliah" },
+  { key: "academicDocs", href: "/akademik#dokumen-akademik" },
+  { key: "accreditation", href: "/akademik#akreditasi" },
+  { key: "academicGuidelines", href: "/akademik#pedoman-akademik" },
+] as const;
+
+const academicByKey = new Map(academicNav.map((item) => [item.key, item] as const));
+
+/** Reads back from `academicNav` so a column can never drift from the real href. */
+const pickAcademic = (...keys: readonly string[]): readonly NavLink[] =>
+  keys.flatMap((key) => academicByKey.get(key) ?? []);
+
+/**
+ * Column layout for the Akademik panel. Eleven links in one undifferentiated
+ * two-column flow read as noise, so they are split into the two questions a
+ * visitor actually arrives with: which programs exist, and where the study
+ * documents are.
+ */
+export const academicSections: readonly NavSection[] = [
+  {
+    key: "studyPrograms",
+    items: [
+      { key: "allStudyPrograms", href: studyProgramIndexHref },
+      ...studyProgramNav,
+    ],
+  },
+  {
+    key: "curriculumDocs",
+    items: pickAcademic(
+      "curriculum",
+      "courseCatalog",
+      "lectureSchedule",
+      "academicCalendar",
+      "academicDocs",
+      "academicGuidelines",
+      "accreditation",
+    ),
+  },
 ] as const;
 
 /** Beasiswa, prestasi, and student-activity pages grouped under one menu (docs/26). */
@@ -55,30 +122,21 @@ export const contentNav: readonly NavLink[] = [
   { key: "columns", href: "/kolom" },
   { key: "agenda", href: "/agenda" },
   { key: "albums", href: "/album" },
-  { key: "documents", href: "/dokumen" },
 ] as const;
 
-export const infoNav: NavGroup = {
-  key: "publication",
+export const newsInfoNav: NavGroup = {
+  key: "newsInfo",
   href: "/berita",
   children: contentNav,
 } as const;
 
 export const primaryNav: readonly NavGroup[] = [
   { key: "profile", href: "/profil", children: profileNav },
-  {
-    key: "studyPrograms",
-    href: "/prodi",
-    children: institution.studyPrograms.map((program) => ({
-      key: `program.${program.code}`,
-      href: `/prodi/${program.slug}`,
-    })),
-  },
-  { key: "academics", href: "/akademik" },
-  { key: "research", href: "/riset", children: researchNav },
+  { key: "academics", href: "/akademik", children: academicNav, sections: academicSections },
   { key: "studentAffairs", href: "/beasiswa", children: studentAffairsNav },
+  { key: "research", href: "/riset", children: researchNav },
+  newsInfoNav,
   { key: "services", href: "/layanan", children: servicesNav },
-  infoNav,
   { key: "contact", href: "/kontak" },
 ] as const;
 
