@@ -41,12 +41,12 @@ function programLabel(item: LecturerListItem, locale: AppLocale) {
 export function LecturerList({ locale, items, programs, search, programId, counts }: LecturerListProps) {
   const t = copy[locale];
   return (
-    <section aria-labelledby="admin-lecturers-title" className="flex flex-col gap-6">
-      <div className="flex flex-col gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_50px_-35px_rgba(15,23,42,0.35)] sm:p-7 lg:flex-row lg:items-end lg:justify-between">
+    <section aria-labelledby="admin-lecturers-title" className="mx-auto flex w-full max-w-[1180px] flex-col gap-6 pb-10">
+      <div className="flex flex-col gap-5 rounded-xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="max-w-2xl">
           <p className="text-[0.68rem] font-bold uppercase tracking-[0.2em] text-primary">{t.eyebrow}</p>
-          <h1 id="admin-lecturers-title" className="mt-3 font-display text-3xl tracking-tight text-slate-950 sm:text-4xl">{t.title}</h1>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-slate-500">{t.description}</p>
+          <h1 id="admin-lecturers-title" className="mt-2 font-display text-3xl tracking-tight text-slate-950 sm:text-4xl">{t.title}</h1>
+          <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">{t.description}</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" render={<Link href="/admin/impor-dosen" />} nativeButton={false}>
@@ -123,13 +123,13 @@ export function LecturerList({ locale, items, programs, search, programId, count
           </ul>
           <div className="hidden overflow-hidden rounded-xl border border-slate-200 bg-white md:block">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[50rem] text-start text-sm">
-              <thead className="bg-slate-50 text-xs uppercase tracking-[0.12em] text-slate-500"><tr><th className="px-5 py-3 text-start">{t.name}</th><th className="px-5 py-3 text-start">{t.program}</th><th className="px-5 py-3 text-start">{t.position}</th><th className="px-5 py-3 text-start">{t.records}</th><th className="px-5 py-3 text-start">{t.status}</th><th className="px-5 py-3 text-end">{t.actions}</th></tr></thead>
+            <table className="w-full min-w-[50rem] table-fixed text-start text-sm">
+              <colgroup><col className="w-[34%]" /><col className="w-[22%]" /><col className="w-[19%]" /><col className="w-[12%]" /><col className="w-[13%]" /></colgroup>
+              <thead className="bg-slate-50 text-xs uppercase tracking-[0.12em] text-slate-500"><tr><th className="px-5 py-3 text-start">{t.name}</th><th className="px-5 py-3 text-start">{t.program}</th><th className="px-5 py-3 text-start">{t.position}</th><th className="px-5 py-3 text-start">{t.status}</th><th className="px-5 py-3 text-end">{t.actions}</th></tr></thead>
               <tbody>{items.map((item) => <tr key={item.id} className="border-t border-slate-200 align-middle transition hover:bg-slate-50/70">
                 <td className="px-5 py-4"><div className="flex items-center gap-3"><div className="grid size-10 shrink-0 place-items-center overflow-hidden rounded-full bg-primary/10 font-display text-sm font-semibold text-primary">{item.photoUrl ? <Image src={item.photoUrl} alt={item.photoAlt ?? item.name} width={40} height={40} unoptimized className="size-full object-cover" /> : initials(item.name)}</div><div className="min-w-0"><p className="font-semibold text-slate-900">{item.name}</p><p className="mt-0.5 max-w-xs truncate text-xs text-slate-500">{item.email ?? item.slug}</p></div></div></td>
                 <td className="px-5 py-4"><span className="inline-flex rounded-full bg-primary/8 px-2.5 py-1 text-xs font-semibold text-primary">{programLabel(item, locale)}</span></td>
                 <td className="max-w-xs px-5 py-4 text-slate-600">{item.position ?? "—"}</td>
-                <td className="px-5 py-4 text-xs text-slate-500"><span className="font-medium text-slate-700">{item.educationCount}</span> {t.education} · <span className="font-medium text-slate-700">{item.publicationCount}</span> {t.publication}</td>
                 <td className="px-5 py-4"><span className={`inline-flex items-center gap-1.5 text-xs font-medium ${item.isActive ? "text-emerald-700" : "text-slate-500"}`}><span className={`size-1.5 rounded-full ${item.isActive ? "bg-emerald-500" : "bg-slate-400"}`} />{item.isActive ? t.active : t.inactive}</span></td>
                 <td className="px-5 py-4"><div className="flex items-center justify-end gap-1"><Button variant="ghost" size="sm" render={<Link href={`/admin/dosen/${item.id}/edit`} />} nativeButton={false}><PencilLineIcon data-icon="inline-start" />{t.edit}</Button><LecturerDeleteAction lecturerId={item.id} lecturerName={item.name} labels={{delete: t.delete, confirmTitle: t.confirmTitle, confirmDescription: t.confirmDescription, cancel: t.cancel, confirm: t.confirm, inUse: t.inUse, unavailable: t.unavailable}} /></div></td>
               </tr>)}</tbody>

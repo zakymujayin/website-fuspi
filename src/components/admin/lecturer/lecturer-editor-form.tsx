@@ -99,7 +99,7 @@ export function LecturerEditorForm({ locale, mode, initialDraft, programs }: Lec
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3"><Button type="button" variant="ghost" onClick={() => router.push("/admin/dosen")}>{t.back}</Button><div className="flex items-center gap-2 text-xs text-slate-500">{saved ? <><CheckCircle2Icon className="size-4 text-emerald-600" />{t.saved}</> : null}</div></div>
+      <div className="flex justify-end"><div className="flex items-center gap-2 text-xs text-slate-500">{saved ? <><CheckCircle2Icon className="size-4 text-emerald-600" />{t.saved}</> : null}</div></div>
       {error ? <p role="alert" className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</p> : null}
       <FieldSet className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_18px_50px_-35px_rgba(15,23,42,0.35)] sm:p-7">
         <FieldLegend className="font-display text-xl text-slate-950">{t.identity}</FieldLegend><FieldDescription>{t.identityHint}</FieldDescription>

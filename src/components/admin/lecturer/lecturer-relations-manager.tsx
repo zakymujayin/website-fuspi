@@ -99,7 +99,7 @@ export function LecturerRelationsManager({locale, lecturerId, relations}: {local
   const t = COPY[locale];
   const types = ["JURNAL", "BUKU", "BAB_BUKU", "PROSIDING", "ARTIKEL", "LAINNYA"].map((value) => ({value, label: value.replace("_", " ")}));
   return (
-    <section id="academic-records" aria-labelledby="admin-lecturer-records-title" className="mt-10 border-t border-slate-200 pt-10">
+    <section id="academic-records" aria-labelledby="admin-lecturer-records-title" className="pt-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
         <div><p className="text-[0.68rem] font-bold uppercase tracking-[0.2em] text-primary">{locale === "id" ? "KELENGKAPAN PROFIL" : locale === "en" ? "PROFILE COMPLETENESS" : "اكتمال الملف"}</p><h2 id="admin-lecturer-records-title" className="mt-2 font-display text-2xl tracking-tight text-slate-950">{locale === "id" ? "Rekam akademik" : locale === "en" ? "Academic record" : "السجل الأكاديمي"}</h2></div>
         <p className="text-sm text-slate-500">{relations.educations.length} {locale === "id" ? "pendidikan" : locale === "en" ? "education entries" : "مؤهلات"} · {relations.publications.length} {locale === "id" ? "publikasi" : locale === "en" ? "publications" : "منشورات"}</p>
