@@ -16,4 +16,10 @@ describe("academic accreditation runtime", () => {
     expect(source).not.toContain("accreditationFaculty");
     expect(source).not.toContain('scope === "faculty"');
   });
+
+  it("keeps a single page-level heading instead of a duplicate welcome banner", () => {
+    const source = readFileSync(path.join(process.cwd(), "src/app/[locale]/(public)/akademik/akreditasi/page.tsx"), "utf8");
+    expect(source).not.toContain("bg-slate-950");
+    expect(source).not.toContain("BadgeCheck");
+  });
 });

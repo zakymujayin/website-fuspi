@@ -1,5 +1,5 @@
 import type {Metadata} from "next";
-import {ArrowUpRight, BadgeCheck, FileCheck2} from "lucide-react";
+import {ArrowUpRight, FileCheck2} from "lucide-react";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {AcademicTopicShell} from "@/components/public/academic-topic-shell";
@@ -87,33 +87,16 @@ export default async function AccreditationPage({params}: {params: Promise<{loca
     // The public page keeps its composed empty state when the database is unavailable.
   }
 
-  const meta = [`${programs.length} ${tNav("studyPrograms")}`];
   const uploadBase = process.env.UPLOAD_PUBLIC_URL ?? "/uploads";
 
   return (
-    <AcademicTopicShell resourceKey="accreditation" meta={meta}>
-      <section className="relative overflow-hidden rounded-[1.75rem] bg-slate-950 px-6 py-8 text-white shadow-[0_22px_55px_-28px_rgba(15,23,42,0.65)] md:px-10 md:py-12">
-        <div aria-hidden className="pointer-events-none absolute -end-20 -top-28 size-80 rounded-full bg-royal-700/30 blur-3xl" />
-        <div className="relative max-w-3xl">
-          <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-brass-300">
-            <BadgeCheck aria-hidden className="size-4" strokeWidth={1.5} />
-            <span>{tNav("accreditation")}</span>
-          </div>
-          <h2 className="mt-5 max-w-2xl font-display text-3xl font-semibold tracking-tight text-balance md:text-4xl">
-            {tNav("studyPrograms")}
-          </h2>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300 md:text-base">
-            {tPages("accreditationDesc")}
-          </p>
-        </div>
-      </section>
-
+    <AcademicTopicShell resourceKey="accreditation">
       <section className="mt-12" aria-labelledby="accreditation-programs">
         <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-5">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-royal-600">{tNav("studyPrograms")}</p>
             <h2 id="accreditation-programs" className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">
-              {tNav("accreditation")}
+              {tNav("studyPrograms")}
             </h2>
           </div>
           <span className="font-display text-sm font-semibold tabular-nums text-slate-400">{String(programs.length).padStart(2, "0")}</span>
@@ -130,7 +113,7 @@ export default async function AccreditationPage({params}: {params: Promise<{loca
                 {label: t("accreditationAgency"), value: program.accreditationAgency},
                 {label: t("accreditationDecree"), value: program.accreditationDecreeNumber},
                 {label: t("accreditationValidUntil"), value: formatDate(program.accreditationExpiry, locale)},
-              ].filter((fact): fact is {label: string; value: string} => Boolean(fact.value?.trim()));
+              ];
 
               return (
                 <li key={program.id}>
@@ -156,18 +139,16 @@ export default async function AccreditationPage({params}: {params: Promise<{loca
 
                     <div className="grid gap-8 px-6 py-7 md:px-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-12">
                       <div>
-                        {facts.length > 0 ? (
-                          <dl className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
-                            {facts.map((fact) => (
-                              <div key={fact.label}>
-                                <dt className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-500">{fact.label}</dt>
-                                <dd className="mt-2 break-words text-sm font-medium leading-6 text-slate-800">{fact.value}</dd>
-                              </div>
-                            ))}
-                          </dl>
-                        ) : (
-                          <p className="text-sm leading-7 text-slate-500">{t("accreditationUnavailable")}</p>
-                        )}
+                        <dl className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
+                          {facts.map((fact) => (
+                            <div key={fact.label}>
+                              <dt className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-500">{fact.label}</dt>
+                              <dd className={`mt-2 break-words text-sm leading-6 ${fact.value ? "font-medium text-slate-800" : "italic text-slate-400"}`}>
+                                {fact.value ?? tPages("noContent")}
+                              </dd>
+                            </div>
+                          ))}
+                        </dl>
                       </div>
 
                       <div className="border-s border-slate-200 ps-0 lg:ps-8">
