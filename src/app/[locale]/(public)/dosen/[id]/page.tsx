@@ -1,5 +1,4 @@
 import {
-  Award,
   BookOpen,
   Clock,
   Download,
@@ -22,6 +21,7 @@ import {LecturerAcademicRecords} from "@/components/public/lecturer-academic-rec
 import {splitExpertiseTags} from "@/components/public/lecturer-profile-utils";
 import {sanitizeStoredContentOrNull} from "@/components/public/post/sanitize";
 import {Container} from "@/components/ui/container";
+import {institution} from "@/config/institution";
 import {CmsHttpsExternalUrlSchema} from "@/contracts/cms";
 import {Link} from "@/i18n/navigation";
 import {getPrismaClient} from "@/lib/db/client";
@@ -166,8 +166,11 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
   if (!lecturer) notFound();
 
   const tl = resolveLocale(lecturer.translations, locale);
-  const identifier = lecturer.nidn ? `NIDN ${lecturer.nidn}` : lecturer.nip ? `NIP ${lecturer.nip}` : null;
   const sanitizedBio = tl?.bio ? sanitizeStoredContentOrNull(tl.bio) : null;
+  const programName = lecturer.studyProgram
+    ? institution.studyPrograms.find((p) => p.code === lecturer.studyProgram!.code)?.name
+      ?? lecturer.studyProgram.code
+    : null;
 
   const scholarLinks = [
     {href: lecturer.googleScholarUrl, label: "Google Scholar", icon: Globe},
@@ -181,11 +184,6 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
   ].filter((link): link is {href: string; label: string; icon: typeof Linkedin} => Boolean(link.href));
 
   const expertiseTags = splitExpertiseTags(tl?.expertise ?? null);
-  const identityChips = [
-    lecturer.studyProgram ? {key: "program", label: lecturer.studyProgram.code, icon: GraduationCap} : null,
-    ...expertiseTags.map((tag, index) => ({key: `expertise-${index}`, label: tag, icon: BookOpen})),
-    tl?.position ? {key: "position", label: tl.position, icon: Award} : null,
-  ].filter((chip): chip is {key: string; label: string; icon: typeof GraduationCap} => chip !== null);
 
   /* Sorted here rather than in the query: the select is `as const`, which makes a
      multi-key Prisma `orderBy` readonly and therefore rejected. Ties are broken
@@ -256,23 +254,27 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
       />
 
       <div className="lecturer-hero mb-10 rounded-2xl bg-royal-50 px-6 py-8 md:px-10 md:py-10">
-        {identifier || lecturer.studyProgram ? (
-          <p className="text-xs font-semibold tracking-wide text-royal-700 uppercase">
-            {[lecturer.studyProgram?.code, identifier].filter(Boolean).join(" · ")}
-          </p>
-        ) : null}
-        <h1 className="mt-2 text-start font-display text-3xl font-bold tracking-tight text-navy-900 md:text-4xl">
+        <h1 className="text-start font-display text-3xl font-bold tracking-tight text-navy-900 md:text-4xl">
           <span dir="auto">{lecturer.name}</span>
         </h1>
-        {tl?.position ? <p className="mt-2 text-start text-lg text-royal-700"><span dir="auto">{tl.position}</span></p> : null}
+        {tl?.position ? (
+          <p className="mt-3 text-start text-lg text-royal-800"><span dir="auto">{tl.position}</span></p>
+        ) : null}
+        {lecturer.studyProgram ? (
+          <p className="mt-2 text-start text-sm text-royal-700">
+            {tAcademic("scheduleProgram")}
+            {": "}
+            <span className="font-semibold">{programName}</span>
+          </p>
+        ) : null}
       </div>
 
       <div className="grid gap-x-12 gap-y-10 lg:grid-cols-12">
         <aside className="order-1 lg:col-span-4 lg:col-start-1 lg:row-span-2 lg:row-start-1">
           <div className="lg:sticky lg:top-24 space-y-6">
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
-              <div className="relative aspect-[4/5] bg-slate-100">
-                {lecturer.photoMedia ? (
+              {lecturer.photoMedia ? (
+                <div className="relative aspect-[4/5] bg-slate-100">
                   <Image
                     src={`/uploads/${lecturer.photoMedia.storageKey}`}
                     alt={lecturer.photoMedia.alt ?? lecturer.name}
@@ -281,12 +283,14 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
                     sizes="(min-width: 1024px) 30vw, 100vw"
                     className="object-cover"
                   />
-                ) : (
-                  <span className="flex size-full items-center justify-center font-display text-6xl font-bold text-slate-300">
+                </div>
+              ) : (
+                <div className="flex items-center justify-center bg-slate-50 py-8">
+                  <span className="flex size-20 items-center justify-center rounded-full bg-royal-100 font-display text-2xl font-bold text-royal-500">
                     {lecturer.name.charAt(0)}
                   </span>
-                )}
-              </div>
+                </div>
+              )}
 
               <div className="space-y-4 p-6">
                 <p className="font-display text-base font-bold text-slate-900"><span dir="auto">{lecturer.name}</span></p>
@@ -308,18 +312,20 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
                   </dl>
                 ) : null}
 
-                {identityChips.length > 0 ? (
-                  <ul className="flex flex-wrap gap-2 border-t border-slate-100 pt-4">
-                    {identityChips.map(({key, label, icon: Icon}) => (
-                      <li
-                        key={key}
-                        className="inline-flex items-center gap-1.5 rounded-full bg-royal-50 px-3 py-1 text-xs font-medium text-royal-700"
-                      >
-                        <Icon aria-hidden className="size-3.5 shrink-0" strokeWidth={1.6} />
-                        <span dir="auto">{label}</span>
-                      </li>
-                    ))}
-                  </ul>
+                {expertiseTags.length > 0 ? (
+                  <div className="border-t border-slate-100 pt-4">
+                    <p className="text-xs text-slate-400">{t("expertise")}</p>
+                    <ul className="mt-2 flex flex-wrap gap-2">
+                      {expertiseTags.map((tag) => (
+                        <li
+                          key={tag}
+                          className="inline-flex items-center rounded-full bg-royal-50 px-3 py-1 text-xs font-medium text-royal-700"
+                        >
+                          <span dir="auto">{tag}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 ) : null}
 
                 {socialLinks.length > 0 ? (

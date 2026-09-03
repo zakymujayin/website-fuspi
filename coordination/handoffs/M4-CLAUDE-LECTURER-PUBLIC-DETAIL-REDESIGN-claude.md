@@ -78,3 +78,37 @@ returned to `LecturerAcademicRecords` are untouched.
 ## Requested contract/dependency changes
 
 None.
+
+---
+
+## Follow-up — reduce repetition and remove the forced horizontal scroll
+
+User feedback on the first pass: the study program and position/jabatan were
+repeated across the page, and the academic-record nav rendered a permanent
+horizontal scrollbar on desktop.
+
+- Hero band: dropped the ALL-CAPS `studyProgram.code · NIDN` eyebrow. The band
+  now reads name → position → "Program Studi: <full program name>", resolving
+  the code to its `institution.studyPrograms` name (e.g. `IAT` → "Ilmu
+  Al-Qur'an dan Tafsir"). NIP/NIDN stay only in the identity card `<dl>`.
+- Identity card: the chip row no longer repeats the study program or the
+  position. It now shows only the expertise tags, under a small "Bidang
+  keahlian" label. Study program and position each appear exactly once on the
+  page (in the hero); expertise appears once (card chips).
+- No-photo identity card: replaced the tall `aspect-[4/5]` grey placeholder
+  with a compact circular initial avatar so a lecturer without a photo no
+  longer gets a large empty block.
+- `LecturerAcademicRecords` nav: removed `overflow-x-auto` + `min-w-max`; the
+  four section links are now a `flex flex-wrap` row of pill links that wrap
+  instead of scrolling. Anchors (`#lecturer-research` etc.) unchanged.
+
+Files: `src/app/[locale]/(public)/dosen/[id]/page.tsx`,
+`src/components/public/lecturer-academic-records.tsx`. No new translation keys
+(`Academic.scheduleProgram` reused for the hero label). No contract/schema
+impact.
+
+Verification: `npm run lint`, `npx tsc --noEmit`, `npm run test`
+(135 files / 1,460 tests), `npm run build` — all pass, no warnings. Not
+screenshotted: this worktree has no `.env`/database, so `/dosen/[id]` cannot
+render locally here; the change was checked against the JSX and existing
+structural test.

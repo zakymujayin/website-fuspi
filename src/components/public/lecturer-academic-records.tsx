@@ -119,8 +119,8 @@ export function LecturerAcademicRecords({research, community, hki, teaching, lab
 
   return (
     <div className="mt-14 border-t border-slate-200 pt-8">
-      <nav aria-label={labels.navigationLabel} className="-mx-1 overflow-x-auto pb-1">
-        <ul className="flex min-w-max gap-1 px-1">
+      <nav aria-label={labels.navigationLabel}>
+        <ul className="flex flex-wrap gap-x-2 gap-y-1">
           {[
             {href: "#lecturer-research", label: labels.research, count: research.length},
             {href: "#lecturer-community", label: labels.community, count: community.length},
@@ -130,7 +130,7 @@ export function LecturerAcademicRecords({research, community, hki, teaching, lab
             <li key={item.href}>
               <a
                 href={item.href}
-                className="inline-flex items-center gap-2 border-b-2 border-transparent px-3 py-2 text-sm font-semibold text-slate-500 transition-colors hover:border-royal-300 hover:text-royal-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-600"
+                className="inline-flex items-center gap-2 rounded-full border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-600 transition-colors hover:border-royal-300 hover:bg-royal-50 hover:text-royal-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-600"
               >
                 {item.label}
                 <span className="font-mono text-xs font-normal text-slate-400">{item.count}</span>
