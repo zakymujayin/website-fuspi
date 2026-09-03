@@ -37,7 +37,7 @@ acceptance_commands:
   - npm run typecheck
   - npm run test
   - git diff --check
-status: active
+status: complete
 ---
 
 ## Intent
