@@ -154,3 +154,12 @@ active_leases:
       - coordination/tasks/M4-GPT-FILE-INPUT-ALIGNMENT.md
       - coordination/handoffs/M4-GPT-FILE-INPUT-ALIGNMENT-gpt.md
       - coordination/ownership.yml
+  - task: M4-GPT-HEADER-LCP-IMAGE-FIX
+    owner: gpt
+    paths:
+      - src/components/public/image-with-fallback.tsx
+      - src/components/public/identity-badges.tsx
+      - tests/m4/ui/header-lcp-image.test.ts
+      - coordination/tasks/M4-GPT-HEADER-LCP-IMAGE-FIX.md
+      - coordination/handoffs/M4-GPT-HEADER-LCP-IMAGE-FIX-gpt.md
+      - coordination/ownership.yml

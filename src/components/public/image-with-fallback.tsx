@@ -13,6 +13,7 @@ type ImageWithFallbackProps = {
   className?: string;
   sizes?: string;
   priority?: boolean;
+  loading?: "eager" | "lazy";
   focalPoint?: FocalPoint | null;
 };
 
@@ -27,7 +28,7 @@ type ImageWithFallbackProps = {
  * Omitted/null falls back to the browser default (`50% 50%`, i.e. today's
  * unchanged behavior).
  */
-export function ImageWithFallback({ src, alt, className, sizes, priority, focalPoint }: ImageWithFallbackProps) {
+export function ImageWithFallback({ src, alt, className, sizes, priority, loading, focalPoint }: ImageWithFallbackProps) {
   const [errored, setErrored] = useState(false);
 
   if (!src || errored) {
@@ -44,6 +45,7 @@ export function ImageWithFallback({ src, alt, className, sizes, priority, focalP
       alt={alt}
       fill
       priority={priority}
+      loading={loading}
       sizes={sizes}
       className={className}
       style={focalPoint ? { objectPosition: `${focalPoint.x}% ${focalPoint.y}%` } : undefined}

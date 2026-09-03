@@ -13,12 +13,10 @@ function BadgeImage({
   media,
   className,
   sizes,
-  priority = false,
 }: {
   media: NonNullable<PublicSiteSetting["logo"]>;
   className: string;
   sizes: string;
-  priority?: boolean;
 }) {
   return (
     <span className={className}>
@@ -27,7 +25,7 @@ function BadgeImage({
         alt={media.isDecorative ? "" : media.alt}
         className="object-contain"
         sizes={sizes}
-        priority={priority}
+        loading="eager"
       />
     </span>
   );
@@ -58,7 +56,7 @@ export function IdentityBadges({
   return (
     <Link href="/" className="flex shrink-0 items-center gap-3" dir="ltr">
       {logo ? (
-        <BadgeImage media={logo} className="relative block size-[76px] shrink-0" sizes="76px" priority />
+        <BadgeImage media={logo} className="relative block size-[76px] shrink-0" sizes="76px" />
       ) : (
         <svg viewBox="0 0 160 160" width="76" height="76" aria-hidden className="shrink-0">
         <defs>
