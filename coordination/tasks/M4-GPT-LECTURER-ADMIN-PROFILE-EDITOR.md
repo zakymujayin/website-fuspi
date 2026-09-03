@@ -42,7 +42,7 @@ acceptance_commands:
   - npm run prisma:validate
   - git diff --check
   - TASK_MANIFEST=coordination/tasks/M4-GPT-LECTURER-ADMIN-PROFILE-EDITOR.md TASK_BASE=32f321b7a71772ab7c04c9482f40848924df3412 npm run check:scope
-status: active
+status: complete
 ---
 
 ## Intent
