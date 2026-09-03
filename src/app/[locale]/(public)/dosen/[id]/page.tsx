@@ -1,4 +1,5 @@
 import {
+  Award,
   BookOpen,
   Clock,
   Download,
@@ -18,6 +19,7 @@ import type {Metadata} from "next";
 
 import {Breadcrumb} from "@/components/public/breadcrumb";
 import {LecturerAcademicRecords} from "@/components/public/lecturer-academic-records";
+import {splitExpertiseTags} from "@/components/public/lecturer-profile-utils";
 import {sanitizeStoredContentOrNull} from "@/components/public/post/sanitize";
 import {Container} from "@/components/ui/container";
 import {CmsHttpsExternalUrlSchema} from "@/contracts/cms";
@@ -178,6 +180,13 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
     {href: lecturer.instagramUrl, label: "Instagram", icon: Instagram},
   ].filter((link): link is {href: string; label: string; icon: typeof Linkedin} => Boolean(link.href));
 
+  const expertiseTags = splitExpertiseTags(tl?.expertise ?? null);
+  const identityChips = [
+    lecturer.studyProgram ? {key: "program", label: lecturer.studyProgram.code, icon: GraduationCap} : null,
+    ...expertiseTags.map((tag, index) => ({key: `expertise-${index}`, label: tag, icon: BookOpen})),
+    tl?.position ? {key: "position", label: tl.position, icon: Award} : null,
+  ].filter((chip): chip is {key: string; label: string; icon: typeof GraduationCap} => chip !== null);
+
   /* Sorted here rather than in the query: the select is `as const`, which makes a
      multi-key Prisma `orderBy` readonly and therefore rejected. Ties are broken
      explicitly so equal years and equal `order` values cannot reshuffle between
@@ -246,62 +255,91 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
         ]}
       />
 
-      <div className="grid gap-x-12 gap-y-10 lg:grid-cols-12">
-        <header className="order-1 lg:col-span-8 lg:col-start-5 lg:row-start-1">
-          {identifier || lecturer.studyProgram ? (
-            <p className="text-xs font-medium tracking-wide text-slate-400 uppercase">
-              {[identifier, lecturer.studyProgram?.code].filter(Boolean).join(" · ")}
-            </p>
-          ) : null}
-          <h1 className="mt-2 text-start font-display text-3xl font-bold tracking-tight text-slate-900 md:text-4xl">
-            <span dir="auto">{lecturer.name}</span>
-          </h1>
-          {tl?.position ? <p className="mt-2 text-start text-lg text-slate-600"><span dir="auto">{tl.position}</span></p> : null}
-          {socialLinks.length > 0 ? (
-            <ul className="mt-4 flex items-center gap-3">
-              {socialLinks.map(({href, label, icon: Icon}) => (
-                <li key={label}>
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={label}
-                    className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:border-royal-200 hover:bg-royal-50 hover:text-royal-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-600"
-                  >
-                    <Icon aria-hidden className="size-4" strokeWidth={1.5} />
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          {tl?.quote ? (
-            <blockquote
-              dir="rtl"
-              lang="ar"
-              className="mt-6 border-s-2 border-royal-200 ps-5 font-arabic text-xl leading-loose text-royal-900"
-            >
-              {tl.quote}
-            </blockquote>
-          ) : null}
-        </header>
+      <div className="lecturer-hero mb-10 rounded-2xl bg-royal-50 px-6 py-8 md:px-10 md:py-10">
+        {identifier || lecturer.studyProgram ? (
+          <p className="text-xs font-semibold tracking-wide text-royal-700 uppercase">
+            {[lecturer.studyProgram?.code, identifier].filter(Boolean).join(" · ")}
+          </p>
+        ) : null}
+        <h1 className="mt-2 text-start font-display text-3xl font-bold tracking-tight text-navy-900 md:text-4xl">
+          <span dir="auto">{lecturer.name}</span>
+        </h1>
+        {tl?.position ? <p className="mt-2 text-start text-lg text-royal-700"><span dir="auto">{tl.position}</span></p> : null}
+      </div>
 
-        <aside className="order-2 lg:col-span-4 lg:col-start-1 lg:row-span-2 lg:row-start-1">
+      <div className="grid gap-x-12 gap-y-10 lg:grid-cols-12">
+        <aside className="order-1 lg:col-span-4 lg:col-start-1 lg:row-span-2 lg:row-start-1">
           <div className="lg:sticky lg:top-24 space-y-6">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-xl border border-slate-200 bg-slate-100">
-              {lecturer.photoMedia ? (
-                <Image
-                  src={`/uploads/${lecturer.photoMedia.storageKey}`}
-                  alt={lecturer.photoMedia.alt ?? lecturer.name}
-                  fill
-                  priority
-                  sizes="(min-width: 1024px) 30vw, 100vw"
-                  className="object-cover"
-                />
-              ) : (
-                <span className="flex size-full items-center justify-center font-display text-6xl font-bold text-slate-300">
-                  {lecturer.name.charAt(0)}
-                </span>
-              )}
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+              <div className="relative aspect-[4/5] bg-slate-100">
+                {lecturer.photoMedia ? (
+                  <Image
+                    src={`/uploads/${lecturer.photoMedia.storageKey}`}
+                    alt={lecturer.photoMedia.alt ?? lecturer.name}
+                    fill
+                    priority
+                    sizes="(min-width: 1024px) 30vw, 100vw"
+                    className="object-cover"
+                  />
+                ) : (
+                  <span className="flex size-full items-center justify-center font-display text-6xl font-bold text-slate-300">
+                    {lecturer.name.charAt(0)}
+                  </span>
+                )}
+              </div>
+
+              <div className="space-y-4 p-6">
+                <p className="font-display text-base font-bold text-slate-900"><span dir="auto">{lecturer.name}</span></p>
+
+                {(lecturer.nip || lecturer.nidn) ? (
+                  <dl className="grid grid-cols-2 gap-x-3 gap-y-3 border-t border-slate-100 pt-4 text-sm">
+                    {lecturer.nip ? (
+                      <div>
+                        <dt className="text-xs text-slate-400">NIP</dt>
+                        <dd dir="ltr" className="font-mono text-slate-700">{lecturer.nip}</dd>
+                      </div>
+                    ) : null}
+                    {lecturer.nidn ? (
+                      <div>
+                        <dt className="text-xs text-slate-400">NIDN</dt>
+                        <dd dir="ltr" className="font-mono text-slate-700">{lecturer.nidn}</dd>
+                      </div>
+                    ) : null}
+                  </dl>
+                ) : null}
+
+                {identityChips.length > 0 ? (
+                  <ul className="flex flex-wrap gap-2 border-t border-slate-100 pt-4">
+                    {identityChips.map(({key, label, icon: Icon}) => (
+                      <li
+                        key={key}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-royal-50 px-3 py-1 text-xs font-medium text-royal-700"
+                      >
+                        <Icon aria-hidden className="size-3.5 shrink-0" strokeWidth={1.6} />
+                        <span dir="auto">{label}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+
+                {socialLinks.length > 0 ? (
+                  <ul className="flex items-center gap-2 border-t border-slate-100 pt-4">
+                    {socialLinks.map(({href, label, icon: Icon}) => (
+                      <li key={label}>
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={label}
+                          className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:border-royal-200 hover:bg-royal-50 hover:text-royal-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-600"
+                        >
+                          <Icon aria-hidden className="size-4" strokeWidth={1.5} />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </div>
             </div>
 
             {lecturer.cvMedia ? (
@@ -390,7 +428,17 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
           </div>
         </aside>
 
-        <div className="order-3 lg:col-span-8 lg:col-start-5 lg:row-start-2">
+        <div className="order-2 lg:col-span-8 lg:col-start-5 lg:row-start-1">
+          {tl?.quote ? (
+            <blockquote
+              dir="rtl"
+              lang="ar"
+              className="mb-10 border-s-2 border-royal-200 ps-5 font-arabic text-xl leading-loose text-royal-900"
+            >
+              {tl.quote}
+            </blockquote>
+          ) : null}
+
           {sanitizedBio ? (
             <section aria-labelledby="lecturer-bio">
               <h2 id="lecturer-bio" className="font-display text-lg font-semibold text-slate-900">
@@ -404,16 +452,7 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
             </section>
           ) : null}
 
-          {tl?.expertise ? (
-            <section aria-labelledby="lecturer-expertise" className={sanitizedBio ? "mt-10" : undefined}>
-              <h2 id="lecturer-expertise" className="font-display text-lg font-semibold text-slate-900">
-                {t("expertise")}
-              </h2>
-              <p className="mt-3 text-start text-slate-600"><span dir="auto">{tl.expertise}</span></p>
-            </section>
-          ) : null}
-
-          <section aria-labelledby="lecturer-education" className="mt-12">
+          <section aria-labelledby="lecturer-education" className={sanitizedBio ? "mt-12" : undefined}>
             <h2 id="lecturer-education" className="font-display text-lg font-semibold text-slate-900">
               {t("education")}
             </h2>
@@ -444,48 +483,55 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
           </section>
 
           <section aria-labelledby="lecturer-publications" className="mt-12">
-            <h2 id="lecturer-publications" className="font-display text-lg font-semibold text-slate-900">
-              {t("publications")}
-            </h2>
+            <div className="flex items-baseline justify-between gap-4">
+              <h2 id="lecturer-publications" className="font-display text-lg font-semibold text-slate-900">
+                {t("publications")}
+              </h2>
+              {publications.length > 0 ? (
+                <span className="font-mono text-xs text-slate-400">{publications.length}</span>
+              ) : null}
+            </div>
             {groupedPublications.length > 0 ? (
-              <div className="mt-5 space-y-8">
-                {groupedPublications.map(({type, items}) => (
-                  <div key={type}>
-                    <h3 className="font-display text-sm font-semibold text-slate-500">
-                      {t(`type${type}` as "typeJURNAL")}
-                    </h3>
-                    <ul className="mt-3 space-y-4">
-                      {items.map((pub) => (
-                        <li key={pub.id} className="grid grid-cols-[3.5rem_1fr] gap-x-4">
-                          <span className="font-mono text-sm text-slate-400">{pub.year ?? ""}</span>
-                          <div className="text-start">
-                            {pub.url ? (
-                              <a
-                                href={pub.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                dir="auto" className="font-medium text-slate-900 underline-offset-2 hover:text-royal-600 hover:underline"
-                              >
-                                {pub.title}
-                              </a>
-                            ) : (
-                              <span dir="auto" className="font-medium text-slate-900">{pub.title}</span>
-                            )}
-                            {(pub.publisher || pub.doi) ? (
-                              <p className="mt-1 text-sm text-slate-500">
-                                <span dir="auto">
-                                  {pub.publisher}
-                                  {pub.publisher && pub.doi ? " · " : ""}
-                                  {pub.doi ? `DOI ${pub.doi}` : ""}
-                                </span>
-                              </p>
-                            ) : null}
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
+              <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/70 p-6 md:p-8">
+                <div className="space-y-8">
+                  {groupedPublications.map(({type, items}, groupIndex) => (
+                    <div key={type} className={groupIndex > 0 ? "border-t border-slate-200 pt-8" : undefined}>
+                      <h3 className="font-display text-xs font-semibold tracking-wide text-slate-500 uppercase">
+                        {t(`type${type}` as "typeJURNAL")}
+                      </h3>
+                      <ul className="mt-4 divide-y divide-slate-200">
+                        {items.map((pub) => (
+                          <li key={pub.id} className="grid grid-cols-[3.5rem_1fr] gap-x-4 py-3 first:pt-0 last:pb-0">
+                            <span className="font-mono text-sm text-slate-400">{pub.year ?? ""}</span>
+                            <div className="text-start">
+                              {pub.url ? (
+                                <a
+                                  href={pub.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  dir="auto" className="font-medium text-slate-900 underline-offset-2 hover:text-royal-600 hover:underline"
+                                >
+                                  {pub.title}
+                                </a>
+                              ) : (
+                                <span dir="auto" className="font-medium text-slate-900">{pub.title}</span>
+                              )}
+                              {(pub.publisher || pub.doi) ? (
+                                <p className="mt-1 text-sm text-slate-500">
+                                  <span dir="auto">
+                                    {pub.publisher}
+                                    {pub.publisher && pub.doi ? " · " : ""}
+                                    {pub.doi ? `DOI ${pub.doi}` : ""}
+                                  </span>
+                                </p>
+                              ) : null}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
               <p className="mt-3 text-sm text-slate-500">{t("noPublications")}</p>

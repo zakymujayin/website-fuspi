@@ -152,9 +152,9 @@ export function LecturerAcademicRecords({research, community, hki, teaching, lab
             </div>
           </div>
           {research.length > 0 ? (
-            <ol className="mt-6 grid gap-3">
+            <ol className="mt-6 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-slate-50/70 px-6 md:px-8">
               {research.map((item) => (
-                <li key={item.id} className="border-b border-slate-100 pb-4 last:border-b-0">
+                <li key={item.id} className="py-4 first:pt-6 last:pb-6 md:first:pt-8 md:last:pb-8">
                   <div className="grid gap-2 sm:grid-cols-[4rem_1fr] sm:gap-5">
                     <span className="font-mono text-xs tabular-nums text-slate-400">{item.year}</span>
                     <div>
@@ -182,9 +182,9 @@ export function LecturerAcademicRecords({research, community, hki, teaching, lab
             </div>
           </div>
           {community.length > 0 ? (
-            <ol className="mt-6 grid gap-3">
+            <ol className="mt-6 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-slate-50/70 px-6 md:px-8">
               {community.map((item) => (
-                <li key={item.id} className="border-b border-slate-100 pb-4 last:border-b-0">
+                <li key={item.id} className="py-4 first:pt-6 last:pb-6 md:first:pt-8 md:last:pb-8">
                   <div className="grid gap-2 sm:grid-cols-[4rem_1fr] sm:gap-5">
                     <span className="font-mono text-xs tabular-nums text-slate-400">{item.year}</span>
                     <div>
@@ -213,9 +213,9 @@ export function LecturerAcademicRecords({research, community, hki, teaching, lab
             </div>
           </div>
           {hki.length > 0 ? (
-            <ol className="mt-6 grid gap-3">
+            <ol className="mt-6 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-slate-50/70 px-6 md:px-8">
               {hki.map((item) => (
-                <li key={item.id} className="border-b border-slate-100 pb-4 last:border-b-0">
+                <li key={item.id} className="py-4 first:pt-6 last:pb-6 md:first:pt-8 md:last:pb-8">
                   <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                     <h3 className="text-sm font-semibold leading-relaxed text-slate-800"><span dir="auto">{item.title}</span></h3>
                     <span className="text-xs text-slate-400">{item.type}</span>
