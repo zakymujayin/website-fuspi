@@ -86,15 +86,15 @@ export function MediaPickerUploadPanel({ onUploaded }: MediaPickerUploadPanelPro
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3">
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-sm font-medium text-slate-700">{t("title")}</p>
+    <div className="flex flex-col gap-4 rounded-xl border-2 border-dashed border-royal-200 bg-royal-50/40 p-4">
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-semibold text-slate-800">{t("title")}</p>
         <Input
           id={`${formId}-file`}
           type="file"
           accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
           ref={inputRef}
-          className="max-w-64"
+          className="h-auto min-h-12 w-full cursor-pointer rounded-xl border-2 border-dashed border-royal-200 bg-white px-3 py-2.5 text-sm text-slate-600 file:me-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-royal-500 file:px-4 file:py-2 file:font-semibold file:text-white hover:border-royal-400 hover:file:bg-royal-600 focus-visible:border-royal-500 focus-visible:ring-3 focus-visible:ring-royal-500/25"
           onChange={(event) => {
             const file = event.target.files?.[0] ?? null;
             setError(null);

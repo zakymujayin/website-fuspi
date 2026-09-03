@@ -75,7 +75,10 @@ export function ComplaintSubmitForm({labels}: {labels: ComplaintSubmitLabels}) {
   }
 
   return (
-    <form action={action} className="max-w-2xl">
+    <form
+      action={action}
+      className="max-w-2xl overflow-hidden rounded-2xl border border-slate-200 border-t-4 border-t-royal-500 bg-white p-5 shadow-[0_18px_45px_-30px_rgba(15,23,42,0.7)] sm:p-8"
+    >
       <FieldGroup>
         <Field>
           <FieldLabel htmlFor="category">{labels.category}</FieldLabel>

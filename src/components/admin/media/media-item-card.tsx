@@ -52,7 +52,7 @@ export function AdminMediaItemCard({ item, locale, uploadPublicUrl, labels }: Ad
       : formatAdminMediaBytes(item.size, locale);
 
   return (
-    <li className="flex flex-col overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+    <li className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_35px_-28px_rgba(15,23,42,0.8)]">
       <AdminMediaThumbnail thumbnail={thumbnail} className="aspect-square w-full" />
       <div className="flex flex-1 flex-col gap-1.5 p-4">
         <span className="w-fit rounded-full bg-royal-50 px-2 py-0.5 text-xs font-medium tracking-wide text-royal-700 uppercase">

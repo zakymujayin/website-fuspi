@@ -1,3 +1,4 @@
+import { ImagesIcon } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { redirect } from "next/navigation";
@@ -51,11 +52,18 @@ export default async function AdminMediaPage({ params, searchParams }: AdminMedi
 
   return (
     <section aria-labelledby="admin-media-title" className="flex flex-col gap-6">
-      <div>
-        <h1 id="admin-media-title" className="section-rule font-display text-2xl text-slate-900">
-          {t("title")}
-        </h1>
-        <p className="mt-2 max-w-prose text-sm text-slate-500">{t("description")}</p>
+      <div className="rounded-2xl border border-slate-200 border-s-4 border-s-royal-500 bg-white p-5 shadow-sm sm:p-6">
+        <div className="flex items-start gap-3">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-royal-50 text-royal-600">
+            <ImagesIcon aria-hidden className="size-5" strokeWidth={1.5} />
+          </span>
+          <div>
+            <h1 id="admin-media-title" className="section-rule font-display text-2xl text-slate-900">
+              {t("title")}
+            </h1>
+            <p className="mt-2 max-w-prose text-sm text-slate-500">{t("description")}</p>
+          </div>
+        </div>
       </div>
 
       <MediaUpload />

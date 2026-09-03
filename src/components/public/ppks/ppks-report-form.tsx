@@ -85,7 +85,10 @@ export function PpksReportForm({labels}: {labels: PpksFormLabels}) {
   }
 
   return (
-    <form action={action} className="max-w-2xl">
+    <form
+      action={action}
+      className="max-w-2xl overflow-hidden rounded-2xl border border-slate-200 border-t-4 border-t-royal-500 bg-white p-5 shadow-[0_18px_45px_-30px_rgba(15,23,42,0.7)] sm:p-8"
+    >
       <FieldGroup>
         {/* Nothing here is required except the account of what happened.
             docs/14 D2 forbids compelling a name, a student number, or an email. */}
@@ -139,6 +142,7 @@ export function PpksReportForm({labels}: {labels: PpksFormLabels}) {
             type="file"
             multiple
             accept="image/jpeg,image/png,image/webp,application/pdf"
+            className="h-auto min-h-14 cursor-pointer rounded-xl border-2 border-dashed border-royal-200 bg-royal-50/40 px-3 py-2.5 text-sm text-slate-600 transition-colors file:me-4 file:cursor-pointer file:rounded-lg file:border-0 file:bg-royal-500 file:px-4 file:py-2 file:font-semibold file:text-white hover:border-royal-400 hover:bg-royal-50/70 hover:file:bg-royal-600 focus-visible:border-royal-500 focus-visible:ring-3 focus-visible:ring-royal-500/25"
           />
           <FieldDescription>{labels.attachmentsHint}</FieldDescription>
         </Field>

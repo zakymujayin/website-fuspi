@@ -1,6 +1,6 @@
 "use client";
 
-import { XIcon } from "lucide-react";
+import { ImagesIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useEffect, useId, useRef, useState, type FormEvent } from "react";
@@ -303,16 +303,21 @@ export function MediaUpload() {
     <form
       onSubmit={handleSubmit}
       aria-labelledby={`${formId}-title`}
-      className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white px-4 py-4 sm:px-5"
+      className="flex flex-col gap-5 overflow-hidden rounded-2xl border border-slate-200 border-s-4 border-s-royal-500 bg-white p-5 shadow-sm sm:p-6"
     >
-      <div>
-        <h2 id={`${formId}-title`} className="font-display text-base font-medium text-slate-900">
-          {t("title")}
-        </h2>
-        <p className="mt-1 max-w-prose text-sm text-slate-500">{t("description")}</p>
+      <div className="flex items-start gap-3">
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-royal-50 text-royal-600">
+          <ImagesIcon aria-hidden className="size-5" strokeWidth={1.5} />
+        </span>
+        <div>
+          <h2 id={`${formId}-title`} className="font-display text-base font-medium text-slate-900">
+            {t("title")}
+          </h2>
+          <p className="mt-1 max-w-prose text-sm text-slate-500">{t("description")}</p>
+        </div>
       </div>
 
-      <div role="group" aria-label={t("policyLabel")} className="flex flex-wrap gap-2">
+      <div role="group" aria-label={t("policyLabel")} className="flex flex-wrap gap-2 rounded-xl bg-slate-50 p-1">
         {(["CMS_IMAGE", "PUBLIC_PDF"] as const).map((option) => (
           <Button
             key={option}
@@ -353,6 +358,7 @@ export function MediaUpload() {
                 setFieldError(null);
                 setSuccess(null);
               }}
+              className="h-auto min-h-14 cursor-pointer rounded-xl border-2 border-dashed border-royal-200 bg-royal-50/40 px-3 py-2.5 text-sm text-slate-600 transition-colors file:me-4 file:cursor-pointer file:rounded-lg file:border-0 file:bg-royal-500 file:px-4 file:py-2 file:font-semibold file:text-white hover:border-royal-400 hover:bg-royal-50/70 hover:file:bg-royal-600 focus-visible:border-royal-500 focus-visible:ring-3 focus-visible:ring-royal-500/25"
             />
             <FieldDescription>{t("imagesHint", { max: MAX_IMAGE_COUNT })}</FieldDescription>
           </Field>
@@ -362,7 +368,7 @@ export function MediaUpload() {
               {images.map((row, index) => (
                 <li
                   key={`${row.originalFile.name}-${index}`}
-                  className="flex flex-col gap-2 rounded-lg border border-slate-200 p-3"
+                  className="flex flex-col gap-2 rounded-xl border border-slate-200 bg-slate-50/60 p-4"
                 >
                   <div className="flex items-center justify-between gap-2">
                     <span className="truncate text-sm font-medium text-slate-700">{row.originalFile.name}</span>
@@ -431,6 +437,7 @@ export function MediaUpload() {
                 setFieldError(null);
                 setSuccess(null);
               }}
+              className="h-auto min-h-14 cursor-pointer rounded-xl border-2 border-dashed border-royal-200 bg-royal-50/40 px-3 py-2.5 text-sm text-slate-600 transition-colors file:me-4 file:cursor-pointer file:rounded-lg file:border-0 file:bg-royal-500 file:px-4 file:py-2 file:font-semibold file:text-white hover:border-royal-400 hover:bg-royal-50/70 hover:file:bg-royal-600 focus-visible:border-royal-500 focus-visible:ring-3 focus-visible:ring-royal-500/25"
             />
             <FieldDescription>{t("pdfHint")}</FieldDescription>
           </Field>

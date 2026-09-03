@@ -116,3 +116,24 @@ active_leases:
       - coordination/tasks/M4-GPT-CURRICULUM-COLOR-REFINEMENT.md
       - coordination/handoffs/M4-GPT-CURRICULUM-COLOR-REFINEMENT-gpt.md
       - coordination/ownership.yml
+  - task: M4-GPT-PUBLIC-FORMS-MEDIA-REDESIGN
+    owner: gpt
+    paths:
+      - src/components/public/complaint/complaint-submit-form.tsx
+      - src/components/public/ppks/ppks-report-form.tsx
+      - src/components/public/booking/booking-request-form.tsx
+      - src/app/[locale]/admin/media/page.tsx
+      - src/app/[locale]/admin/media/loading.tsx
+      - src/components/admin/media/media-upload.tsx
+      - src/components/admin/media/media-grid.tsx
+      - src/components/admin/media/media-item-card.tsx
+      - src/components/admin/media/media-filter-tabs.tsx
+      - src/components/admin/media/media-grid-skeleton.tsx
+      - src/components/admin/media/media-state-notice.tsx
+      - src/components/admin/media/media-thumbnail.tsx
+      - src/components/admin/media/media-picker-upload-panel.tsx
+      - src/components/admin/home-nav/home-media-picker.tsx
+      - tests/m4/ui/public-forms-media-redesign.test.tsx
+      - coordination/tasks/M4-GPT-PUBLIC-FORMS-MEDIA-REDESIGN.md
+      - coordination/handoffs/M4-GPT-PUBLIC-FORMS-MEDIA-REDESIGN-gpt.md
+      - coordination/ownership.yml

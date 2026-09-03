@@ -29,7 +29,7 @@ export function AdminMediaThumbnail({ thumbnail, className }: AdminMediaThumbnai
   const Icon = thumbnail.kind === "pdf" ? FileTextIcon : ImageOffIcon;
 
   return (
-    <div aria-hidden className={cn("flex items-center justify-center bg-slate-100 text-slate-300", className)}>
+    <div aria-hidden className={cn("flex items-center justify-center bg-navy-50 text-royal-300", className)}>
       <Icon className="size-10" strokeWidth={1.5} />
     </div>
   );

@@ -96,7 +96,7 @@ export function HomeMediaPicker({
   }
 
   return (
-    <section className="flex flex-col gap-3">
+    <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
       <div>
         <h3 className="text-sm font-medium text-slate-700">{label}</h3>
         <p className="mt-1 text-sm text-slate-500">{description}</p>
@@ -106,12 +106,12 @@ export function HomeMediaPicker({
         {selected && selectedThumb ? (
           <AdminMediaThumbnail
             thumbnail={selectedThumb}
-            className="aspect-video w-40 rounded-lg"
+            className="aspect-video w-40 rounded-xl border border-slate-200 shadow-sm"
           />
         ) : (
           <div
             aria-hidden
-            className="flex aspect-video w-40 items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-slate-300"
+            className="flex aspect-video w-40 items-center justify-center rounded-xl border-2 border-dashed border-royal-200 bg-royal-50/40 text-royal-300"
           >
             <ImageOffIcon className="size-8" strokeWidth={1.5} />
           </div>
@@ -143,7 +143,7 @@ export function HomeMediaPicker({
       ) : null}
 
       {open ? (
-        <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-white p-4">
+        <div className="flex flex-col gap-4 rounded-2xl border-2 border-royal-100 bg-slate-50/70 p-4 shadow-sm sm:p-5">
           <MediaPickerUploadPanel onUploaded={(item) => choose(item)} />
           {loading && items === null ? (
             <p role="status" className="flex items-center gap-2 text-sm text-slate-500">
@@ -164,10 +164,10 @@ export function HomeMediaPicker({
                         aria-pressed={isCurrent}
                         onClick={() => choose(item)}
                         className={cn(
-                          "group flex w-full flex-col overflow-hidden rounded-lg border text-start transition-colors",
+                          "group flex w-full flex-col overflow-hidden rounded-xl border bg-white text-start transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-500",
                           isCurrent
                             ? "border-royal-500 ring-2 ring-royal-500/30"
-                            : "border-slate-200 hover:border-slate-300",
+                            : "border-slate-200 hover:-translate-y-0.5 hover:border-royal-300 hover:shadow-sm",
                         )}
                       >
                         <AdminMediaThumbnail

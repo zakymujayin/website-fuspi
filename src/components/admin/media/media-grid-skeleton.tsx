@@ -11,7 +11,7 @@ export function AdminMediaGridSkeleton({ loadingLabel }: AdminMediaGridSkeletonP
       </p>
       <div aria-hidden className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 8 }, (_, index) => (
-          <div key={index} className="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+          <div key={index} className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
             <div className="aspect-square w-full animate-pulse bg-slate-200 motion-reduce:animate-none" />
             <div className="flex flex-col gap-2 p-4">
               <div className="h-4 w-16 animate-pulse rounded-full bg-slate-200 motion-reduce:animate-none" />

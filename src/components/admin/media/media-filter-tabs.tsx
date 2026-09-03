@@ -23,10 +23,10 @@ export function AdminMediaFilterTabs({ active, ariaLabel, labels }: AdminMediaFi
             href={buildAdminMediaHref(filter, 1)}
             aria-current={isActive ? "page" : undefined}
             className={cn(
-              "inline-flex h-10 items-center justify-center rounded-lg px-3 text-sm font-medium transition-colors",
+              "inline-flex h-10 items-center justify-center rounded-lg px-3 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-500",
               isActive
-                ? "bg-royal-500 text-white"
-                : "border border-slate-300 text-slate-600 hover:bg-slate-100",
+                ? "bg-navy-800 text-white shadow-sm"
+                : "border border-slate-300 bg-white text-slate-600 hover:border-royal-300 hover:bg-royal-50 hover:text-royal-700",
             )}
           >
             {labels[filter]}
