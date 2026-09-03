@@ -1,5 +1,4 @@
 import type {Metadata} from "next";
-import Image from "next/image";
 import {getTranslations, setRequestLocale} from "next-intl/server";
 
 import {SectionHeading} from "@/components/public/section-heading";
@@ -96,11 +95,44 @@ const DEAN_LABEL = {
   ar: "العميد الأول",
 } as const;
 
-const FACULTY_FOCUS = {
-  id: "FUSPI hadir sebagai fakultas yang memusatkan perhatian pada penguatan kajian ushuluddin, pemikiran Islam, dan layanan akademik yang berorientasi pada kemaslahatan publik.",
-  en: "FUSPI serves as a faculty focused on strengthening ushuluddin studies, Islamic thought, and academic services oriented toward public benefit.",
-  ar: "تنهض الكلية بدورها في تعزيز دراسات أصول الدين والفكر الإسلامي والخدمات الأكاديمية الموجهة إلى المصلحة العامة.",
-} as const;
+const NARRATIVE_SECTIONS = [
+  {
+    title: {
+      id: "Dari rumah keilmuan bersama",
+      en: "From one shared academic home",
+      ar: "من بيت علمي مشترك",
+    },
+    body: {
+      id: "Sebelum berdiri sebagai fakultas tersendiri, kajian ushuluddin, pemikiran Islam, adab, dan humaniora berada dalam satu lingkungan akademik. Dari ruang bersama itu tumbuh tradisi pengajaran, penelitian, dan pelayanan pendidikan yang menjadi dasar penataan kelembagaan berikutnya.",
+      en: "Before standing as its own faculty, ushuluddin, Islamic thought, adab, and humanities studies shared one academic environment. From that shared space grew teaching, research, and educational-service traditions that became the basis for the next institutional arrangement.",
+      ar: "قبل أن تصبح الكلية قائمة بذاتها، اجتمعت دراسات أصول الدين والفكر الإسلامي والأدب والإنسانيات في بيئة أكاديمية واحدة. ومن ذلك الفضاء المشترك نمت تقاليد التعليم والبحث والخدمة التعليمية التي أصبحت أساساً للتنظيم المؤسسي التالي.",
+    },
+  },
+  {
+    title: {
+      id: "Penataan mandat pada 1 Juli 2026",
+      en: "Clarifying the mandate on 1 July 2026",
+      ar: "تنظيم الرسالة في 1 يوليو 2026",
+    },
+    body: {
+      id: "Pada 1 Juli 2026, Fakultas Ushuluddin dan Pemikiran Islam berdiri sebagai ruang akademik yang memusatkan perhatian pada ilmu-ilmu ushuluddin dan kajian pemikiran Islam. Pembentukan ini menegaskan fokus kelembagaan, bukan memutus kesinambungan tradisi keilmuan yang telah berkembang sebelumnya.",
+      en: "On 1 July 2026, the Faculty of Ushuluddin and Islamic Thought was established as an academic space focused on ushuluddin sciences and Islamic thought. This formation clarified the institutional focus without breaking the continuity of scholarly traditions that had already developed.",
+      ar: "في 1 يوليو 2026 تأسست كلية أصول الدين والفكر الإسلامي فضاءً أكاديمياً يركز على علوم أصول الدين ودراسات الفكر الإسلامي. وقد أكد هذا التأسيس التركيز المؤسسي دون قطع استمرارية التقاليد العلمية التي نمت من قبل.",
+    },
+  },
+  {
+    title: {
+      id: "FUSPI dan Adab-Humaniora setelah pemisahan",
+      en: "FUSPI and Adab-Humanities after separation",
+      ar: "الكلية والأدب والإنسانيات بعد الاستقلال",
+    },
+    body: {
+      id: "Pemisahan Fakultas Adab dan Humaniora sebagai fakultas baru memberi kejelasan rumah akademik bagi dua rumpun keilmuan. FUSPI melanjutkan mandat ushuluddin dan pemikiran Islam, sementara bidang adab dan humaniora memperoleh ruang pengembangan tersendiri.",
+      en: "The separation of the Faculty of Adab and Humanities as a new faculty gave clearer academic homes to the two knowledge clusters. FUSPI continued the ushuluddin and Islamic thought mandate, while adab and humanities gained their own space for development.",
+      ar: "منح استقلال كلية الأدب والإنسانيات كليةً جديدة وضوحاً أكبر للبيتين العلميين. وواصلت كلية أصول الدين والفكر الإسلامي رسالتها في أصول الدين والفكر الإسلامي، بينما حصلت مجالات الأدب والإنسانيات على فضائها الخاص للتطور.",
+    },
+  },
+] as const;
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
@@ -118,66 +150,56 @@ export default async function HistoryPage({params}: {params: Promise<{locale: Ap
     <Container className="py-12 md:py-20">
       <SectionHeading as="h1" title={t("history")} description={t("historyDesc")} />
 
-      <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
-        <div className="border-s-4 border-brass-400 bg-royal-50/60 py-8 ps-8 pe-6">
-          <p className="max-w-[68ch] font-display text-2xl font-semibold leading-snug text-slate-950 md:text-3xl">
+      <article className="mt-12 max-w-5xl">
+        <div className="border-y border-slate-200 py-8 md:py-10">
+          <p className="max-w-[64ch] text-xl font-semibold leading-relaxed text-slate-950 md:text-2xl md:leading-relaxed">
             {HISTORY_INTRO[locale] ?? HISTORY_INTRO.id}
           </p>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            <div className="border border-royal-100 bg-white p-5">
-              <span className="text-xs font-medium tracking-wide text-royal-600 uppercase">
-                {ESTABLISHMENT_NOTE[locale] ?? ESTABLISHMENT_NOTE.id}
-              </span>
-              <p className="mt-3 text-sm leading-relaxed text-slate-600">
-                {FACULTY_FOCUS[locale] ?? FACULTY_FOCUS.id}
-              </p>
-            </div>
-            <div className="border border-royal-100 bg-white p-5">
-              <span className="text-xs font-medium tracking-wide text-royal-600 uppercase">
-                {DEAN_LABEL[locale] ?? DEAN_LABEL.id}
-              </span>
-              <p className="mt-3 font-display text-lg font-bold text-slate-900">{deanProfile.name}</p>
-              <p className="mt-1 text-sm text-slate-500">{deanPosition}</p>
-            </div>
-          </div>
         </div>
 
-        <aside className="lg:sticky lg:top-28">
-          <div className="relative aspect-[4/5] overflow-hidden border border-slate-200 bg-slate-100">
-            <Image
-              src={deanProfile.photoUrl ?? "/images/leadership/dekan-masykur.webp"}
-              alt={deanProfile.name}
-              fill
-              sizes="(min-width: 1024px) 360px, 100vw"
-              className="object-cover"
-              priority
-            />
-          </div>
-          <div className="border-x border-b border-slate-200 bg-white p-5">
-            <p className="text-xs font-medium tracking-wide text-royal-600 uppercase">
-              {DEAN_LABEL[locale] ?? DEAN_LABEL.id}
-            </p>
-            <p className="mt-2 font-display text-lg font-bold text-slate-900">{deanProfile.name}</p>
-            <p className="mt-1 text-sm leading-relaxed text-slate-500">{deanPosition}</p>
-          </div>
-        </aside>
-      </div>
+        <div className="divide-y divide-slate-200">
+          {NARRATIVE_SECTIONS.map((section) => (
+            <section
+              key={section.title.id}
+              className="grid gap-5 py-8 md:grid-cols-[16rem_minmax(0,1fr)] md:py-10"
+            >
+              <h2 className="font-display text-xl font-semibold leading-snug text-slate-950">
+                {section.title[locale] ?? section.title.id}
+              </h2>
+              <p className="prose-measure text-base leading-8 text-slate-700">
+                {section.body[locale] ?? section.body.id}
+              </p>
+            </section>
+          ))}
+        </div>
 
-      <ol className="relative mt-16 ms-3 border-s-2 border-slate-200 ps-8">
+        <section className="mt-4 border-s-2 border-brass-400 bg-white ps-5" aria-labelledby="first-dean-title">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-royal-600">
+            {ESTABLISHMENT_NOTE[locale] ?? ESTABLISHMENT_NOTE.id}
+          </p>
+          <h2 id="first-dean-title" className="mt-2 font-display text-xl font-semibold text-slate-950">
+            {DEAN_LABEL[locale] ?? DEAN_LABEL.id}: {deanProfile.name}
+          </h2>
+          <p className="prose-measure mt-2 text-sm leading-7 text-slate-600">
+            {deanPosition}
+          </p>
+        </section>
+      </article>
+
+      <ol className="relative mt-14 max-w-4xl border-t border-slate-200">
         {MILESTONES.map((milestone) => (
-          <li key={milestone.title.id} className="relative pb-12 last:pb-0">
-            <span className="absolute -start-[41px] top-0 flex size-7 items-center justify-center rounded-full border-2 border-royal-500 bg-white">
-              <span className="size-2 rounded-full bg-royal-500" />
-            </span>
-            <span className="font-display text-lg font-bold text-royal-700">
+          <li key={milestone.title.id} className="grid gap-4 border-b border-slate-200 py-6 md:grid-cols-[12rem_minmax(0,1fr)]">
+            <span className="font-display text-lg font-semibold text-royal-700">
               {milestone.year[locale] ?? milestone.year.id}
             </span>
-            <h2 className="mt-1 font-display text-base font-semibold text-slate-900">
-              {milestone.title[locale] ?? milestone.title.id}
-            </h2>
-            <p className="prose-measure mt-2 text-sm leading-relaxed text-slate-600">
-              {milestone.description[locale] ?? milestone.description.id}
-            </p>
+            <div>
+              <h2 className="font-display text-base font-semibold text-slate-950">
+                {milestone.title[locale] ?? milestone.title.id}
+              </h2>
+              <p className="prose-measure mt-2 text-sm leading-7 text-slate-600">
+                {milestone.description[locale] ?? milestone.description.id}
+              </p>
+            </div>
           </li>
         ))}
       </ol>
