@@ -94,7 +94,7 @@ export function MediaPickerUploadPanel({ onUploaded }: MediaPickerUploadPanelPro
           type="file"
           accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
           ref={inputRef}
-          className="h-auto min-h-12 w-full cursor-pointer rounded-xl border-2 border-dashed border-royal-200 bg-white px-3 py-2.5 text-sm text-slate-600 file:me-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-royal-500 file:px-4 file:py-2 file:font-semibold file:text-white hover:border-royal-400 hover:file:bg-royal-600 focus-visible:border-royal-500 focus-visible:ring-3 focus-visible:ring-royal-500/25"
+          className="h-auto min-h-12 w-full cursor-pointer rounded-xl border-2 border-dashed border-royal-200 bg-white px-3 py-2.5 text-sm text-slate-600 file:me-3 file:inline-flex file:h-8 file:min-h-8 file:items-center file:align-middle file:box-border file:cursor-pointer file:rounded-lg file:border-0 file:bg-royal-500 file:px-4 file:py-1.5 file:font-semibold file:leading-5 file:text-white file:transition-colors hover:border-royal-400 hover:file:bg-royal-600 focus-visible:border-royal-500 focus-visible:ring-3 focus-visible:ring-royal-500/25"
           onChange={(event) => {
             const file = event.target.files?.[0] ?? null;
             setError(null);
