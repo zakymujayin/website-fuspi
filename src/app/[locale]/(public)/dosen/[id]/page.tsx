@@ -64,6 +64,12 @@ const LECTURER_DETAIL_SELECT = {
       },
     },
   },
+  intellectualProperties: {
+    select: {id: true, title: true, type: true, registrationNumber: true, year: true, url: true, order: true},
+  },
+  teachingAssignments: {
+    select: {id: true, courseCode: true, courseName: true, programCode: true, credits: true, academicYearStart: true, academicYearEnd: true, term: true, semester: true, order: true},
+  },
 } as const;
 
 type MediaRef = {id: string; storageKey: string; mimeType: string; alt: string | null; width: number | null; height: number | null};
@@ -106,6 +112,8 @@ type Row = {
   publications: ReadonlyArray<PublicationRow>;
   research: ReadonlyArray<ResearchRelationRow>;
   communityServices: ReadonlyArray<CommunityRelationRow>;
+  intellectualProperties: ReadonlyArray<{id: string; title: string; type: string; registrationNumber: string | null; year: number | null; url: string | null; order: number}>;
+  teachingAssignments: ReadonlyArray<{id: string; courseCode: string; courseName: string; programCode: string; credits: number; academicYearStart: number; academicYearEnd: number; term: string; semester: number; order: number}>;
 };
 
 const PUBLICATION_ORDER = ["JURNAL", "BUKU", "BAB_BUKU", "PROSIDING", "ARTIKEL", "LAINNYA"] as const;
@@ -210,6 +218,21 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
     })
     .filter((item): item is NonNullable<typeof item> => item !== null)
     .sort((a, b) => b.year - a.year || a.title.localeCompare(b.title));
+  const hki = [...lecturer.intellectualProperties]
+    .sort((a, b) => (b.year ?? 0) - (a.year ?? 0) || a.order - b.order || a.title.localeCompare(b.title))
+    .map((item) => ({...item, url: safeExternalUrl(item.url)}));
+  const teaching = [...lecturer.teachingAssignments]
+    .sort((a, b) => b.academicYearStart - a.academicYearStart || a.semester - b.semester || a.order - b.order)
+    .map((item) => ({
+      id: item.id,
+      code: item.courseCode,
+      course: item.courseName,
+      program: item.programCode,
+      credits: item.credits,
+      academicYear: `${item.academicYearStart}/${item.academicYearEnd}`,
+      term: item.term === "GANJIL" ? "odd" as const : "even" as const,
+      semester: item.semester,
+    }));
 
   return (
     <Container className="py-12 md:py-20">
@@ -472,8 +495,8 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
           <LecturerAcademicRecords
             research={research}
             community={community}
-            hki={[]}
-            teaching={[]}
+            hki={hki}
+            teaching={teaching}
             labels={{
               research: t("research"),
               researchDescription: t("researchDescription"),

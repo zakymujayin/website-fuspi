@@ -49,6 +49,19 @@ enum PublicationType {
   LAINNYA
 }
 
+enum IntellectualPropertyType {
+  PATEN
+  HAK_CIPTA
+  MEREK
+  DESAIN_INDUSTRI
+  LAINNYA
+}
+
+enum TeachingTerm {
+  GANJIL
+  GENAP
+}
+
 enum PostType {
   BERITA
   PENGUMUMAN
@@ -686,6 +699,8 @@ model Lecturer {
   translations      LecturerTranslation[]
   educations        LecturerEducation[]
   publications      LecturerPublication[]
+  intellectualProperties LecturerIntellectualProperty[]
+  teachingAssignments LecturerTeachingAssignment[]
   research          LecturerResearch[]
   communityServices LecturerCommunityService[]
   posts             LecturerPost[]
@@ -722,6 +737,43 @@ model LecturerPublication {
   lecturer   Lecturer        @relation(fields: [lecturerId], references: [id], onDelete: Cascade)
 
   @@index([lecturerId, year])
+}
+
+model LecturerIntellectualProperty {
+  id                 String                   @id @default(cuid())
+  lecturerId         String
+  title              String                   @db.VarChar(500)
+  type               IntellectualPropertyType @default(HAK_CIPTA)
+  registrationNumber String?
+  year               Int?
+  url                String?
+  order              Int                      @default(0)
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+  lecturer           Lecturer                 @relation(fields: [lecturerId], references: [id], onDelete: Cascade)
+
+  @@index([lecturerId, year])
+}
+
+model LecturerTeachingAssignment {
+  id               String      @id @default(cuid())
+  lecturerId       String
+  courseCode       String      @db.VarChar(50)
+  courseName       String      @db.VarChar(255)
+  programCode      String      @db.VarChar(10)
+  credits          Int
+  academicYearStart Int
+  academicYearEnd  Int
+  term             TeachingTerm
+  semester         Int
+  order            Int         @default(0)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  lecturer         Lecturer    @relation(fields: [lecturerId], references: [id], onDelete: Cascade)
+
+  @@unique([lecturerId, courseCode, academicYearStart, academicYearEnd, term, semester])
+  @@index([academicYearStart, academicYearEnd, term, semester])
+  @@index([lecturerId, academicYearStart, academicYearEnd])
 }
 
 model LecturerTranslation {
