@@ -17,8 +17,10 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import type {Metadata} from "next";
 
 import {Breadcrumb} from "@/components/public/breadcrumb";
+import {LecturerAcademicRecords} from "@/components/public/lecturer-academic-records";
 import {sanitizeStoredContentOrNull} from "@/components/public/post/sanitize";
 import {Container} from "@/components/ui/container";
+import {CmsHttpsExternalUrlSchema} from "@/contracts/cms";
 import {Link} from "@/i18n/navigation";
 import {getPrismaClient} from "@/lib/db/client";
 import type {AppLocale} from "@/i18n/routing";
@@ -42,6 +44,26 @@ const LECTURER_DETAIL_SELECT = {
   publications: {
     select: {id: true, title: true, type: true, year: true, publisher: true, url: true, doi: true, order: true},
   },
+  research: {
+    select: {
+      research: {
+        select: {
+          id: true, year: true, documentUrl: true,
+          translations: {where: {status: "PUBLISHED" as const}, select: {locale: true, title: true}},
+        },
+      },
+    },
+  },
+  communityServices: {
+    select: {
+      communityService: {
+        select: {
+          id: true, year: true, location: true, documentUrl: true,
+          translations: {where: {status: "PUBLISHED" as const}, select: {locale: true, title: true}},
+        },
+      },
+    },
+  },
 } as const;
 
 type MediaRef = {id: string; storageKey: string; mimeType: string; alt: string | null; width: number | null; height: number | null};
@@ -49,6 +71,23 @@ type EducationRow = {id: string; degree: string; field: string | null; instituti
 type PublicationRow = {
   id: string; title: string; type: string; year: number | null;
   publisher: string | null; url: string | null; doi: string | null; order: number;
+};
+type ResearchRelationRow = {
+  research: {
+    id: string;
+    year: number;
+    documentUrl: string | null;
+    translations: ReadonlyArray<{locale: string; title: string}>;
+  };
+};
+type CommunityRelationRow = {
+  communityService: {
+    id: string;
+    year: number;
+    location: string | null;
+    documentUrl: string | null;
+    translations: ReadonlyArray<{locale: string; title: string}>;
+  };
 };
 
 type Row = {
@@ -65,6 +104,8 @@ type Row = {
   }>;
   educations: ReadonlyArray<EducationRow>;
   publications: ReadonlyArray<PublicationRow>;
+  research: ReadonlyArray<ResearchRelationRow>;
+  communityServices: ReadonlyArray<CommunityRelationRow>;
 };
 
 const PUBLICATION_ORDER = ["JURNAL", "BUKU", "BAB_BUKU", "PROSIDING", "ARTIKEL", "LAINNYA"] as const;
@@ -86,6 +127,12 @@ function stripTags(value: string) {
   return value.replace(/<[^>]*>/gu, " ").replace(/\s+/gu, " ").trim();
 }
 
+function safeExternalUrl(value: string | null) {
+  if (value === null) return null;
+  const parsed = CmsHttpsExternalUrlSchema.safeParse(value);
+  return parsed.success ? parsed.data : null;
+}
+
 function resolveLocale<T extends {locale: string}>(items: ReadonlyArray<T>, locale: AppLocale): T | undefined {
   return items.find((t) => t.locale === locale) ?? items.find((t) => t.locale === "id");
 }
@@ -102,6 +149,7 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
   const {locale, id} = await params;
   setRequestLocale(locale);
   const t = await getTranslations("LecturerProfile");
+  const tAcademic = await getTranslations("Academic");
   const tNav = await getTranslations("Nav");
 
   const lecturer = await getLecturer(id);
@@ -136,6 +184,32 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
   const groupedPublications = PUBLICATION_ORDER
     .map((type) => ({type, items: publications.filter((p) => p.type === type)}))
     .filter((group) => group.items.length > 0);
+
+  const research = lecturer.research
+    .map(({research: item}) => {
+      const translation = resolveLocale(item.translations, locale);
+      return translation ? {
+        id: item.id,
+        title: translation.title,
+        year: item.year,
+        url: safeExternalUrl(item.documentUrl),
+      } : null;
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null)
+    .sort((a, b) => b.year - a.year || a.title.localeCompare(b.title));
+  const community = lecturer.communityServices
+    .map(({communityService: item}) => {
+      const translation = resolveLocale(item.translations, locale);
+      return translation ? {
+        id: item.id,
+        title: translation.title,
+        year: item.year,
+        location: item.location,
+        url: safeExternalUrl(item.documentUrl),
+      } : null;
+    })
+    .filter((item): item is NonNullable<typeof item> => item !== null)
+    .sort((a, b) => b.year - a.year || a.title.localeCompare(b.title));
 
   return (
     <Container className="py-12 md:py-20">
@@ -394,6 +468,39 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
               <p className="mt-3 text-sm text-slate-500">{t("noPublications")}</p>
             )}
           </section>
+
+          <LecturerAcademicRecords
+            research={research}
+            community={community}
+            hki={[]}
+            teaching={[]}
+            labels={{
+              research: t("research"),
+              researchDescription: t("researchDescription"),
+              community: t("community"),
+              communityDescription: t("communityDescription"),
+              hki: t("hki"),
+              hkiDescription: t("hkiDescription"),
+              teaching: t("teaching"),
+              teachingDescription: t("teachingDescription"),
+              noRecords: t("noRecords"),
+              viewArchive: t("viewArchive"),
+              viewDocument: t("viewDocument"),
+              location: t("location"),
+              academicYear: t("academicYear"),
+              termOdd: t("termOdd"),
+              termEven: t("termEven"),
+              allSemesters: t("allSemesters"),
+              semester: t("semester"),
+              noTeaching: t("noTeaching"),
+              teachingPending: t("teachingPending"),
+              code: tAcademic("courseCode"),
+              course: tAcademic("courseName"),
+              program: tAcademic("scheduleProgram"),
+              credits: tAcademic("courseCredits"),
+              navigationLabel: t("navigationLabel"),
+            }}
+          />
 
           <div className="mt-12">
             <Link
