@@ -106,3 +106,11 @@ active_leases:
       - coordination/tasks/M4-GPT-PRODI-CMS-ADMIN-NAV.md
       - coordination/handoffs/M4-GPT-PRODI-CMS-ADMIN-NAV-gpt.md
       - coordination/ownership.yml
+  - task: M4-GPT-PRODI-ACCREDITATION-CORRECTION
+    owner: gpt
+    paths:
+      - prisma/seed.ts
+      - tests/m4/contracts/study-program-accreditation.test.ts
+      - coordination/tasks/M4-GPT-PRODI-ACCREDITATION-CORRECTION.md
+      - coordination/handoffs/M4-GPT-PRODI-ACCREDITATION-CORRECTION-gpt.md
+      - coordination/ownership.yml

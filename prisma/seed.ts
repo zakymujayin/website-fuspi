@@ -393,13 +393,15 @@ async function main() {
   });
 
   for (const [index, { code, slug, name }] of institution.studyPrograms.entries()) {
+    const accreditation = code === "IAT" ? "Unggul" : "B";
     await prisma.studyProgram.upsert({
       where: { code },
-      update: { slug, externalUrl: null, order: index, contentOwnerId: admin.id },
+      update: { slug, accreditation, externalUrl: null, order: index, contentOwnerId: admin.id },
       create: {
         code,
         slug,
         degree: "S1",
+        accreditation,
         order: index,
         contentOwnerId: admin.id,
         translations: { create: { locale: "id", name, status: "PUBLISHED" } },
