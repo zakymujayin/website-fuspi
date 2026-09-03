@@ -129,6 +129,35 @@ function publicMedia(media: MediaRow, rawUploadBase: string) {
   return parsed.success ? parsed.data : null;
 }
 
+function publicPdfMedia(media: MediaRow, rawUploadBase: string) {
+  if (
+    !media
+    || media.storageClass !== "PUBLIC"
+    || media.mimeType !== "application/pdf"
+    || (media.alt !== null && media.alt !== "")
+    || media.isDecorative
+    || media.width !== null
+    || media.height !== null
+    || media.focalX !== null
+    || media.focalY !== null
+    || !StorageKeySchema.safeParse(media.storageKey).success
+  ) return null;
+
+  const parsed = PublicMediaViewSchema.safeParse({
+    id: media.id,
+    url: `${uploadBase(rawUploadBase)}/${media.storageKey}`,
+    mimeType: media.mimeType,
+    size: media.size,
+    alt: "",
+    isDecorative: false,
+    width: null,
+    height: null,
+    focalX: null,
+    focalY: null,
+  });
+  return parsed.success ? parsed.data : null;
+}
+
 type DocumentRow = {
   id: string;
   slug: string;
@@ -279,6 +308,7 @@ export async function listAcademicPeople(
             logoMedia: {select: MEDIA_SELECT},
             curriculumDocument: {include: DOCUMENT_INCLUDE},
             brochureDocument: {include: DOCUMENT_INCLUDE},
+            accreditationCertificateMedia: {select: MEDIA_SELECT},
           },
         }),
         prisma.studyProgram.count({where}),
@@ -289,8 +319,10 @@ export async function listAcademicPeople(
         if (logo) assets.push({kind: "MEDIA", media: logo});
         const curriculum = publicDocument(row.curriculumDocument, rawUploadBase);
         const brochure = publicDocument(row.brochureDocument, rawUploadBase);
+        const certificate = publicPdfMedia(row.accreditationCertificateMedia, rawUploadBase);
         if (curriculum) assets.push(curriculum);
         if (brochure) assets.push(brochure);
+        if (certificate) assets.push({kind: "MEDIA", media: certificate});
         return AcademicAdminViewSchema.parse({
           id: row.id,
           resource: "STUDY_PROGRAM",
@@ -397,6 +429,12 @@ async function validatePhoto(tx: Prisma.TransactionClient, mediaId: string | nul
   return publicMedia(media, "/uploads") !== null;
 }
 
+async function validateCertificate(tx: Prisma.TransactionClient, mediaId: string | null | undefined) {
+  if (mediaId == null) return true;
+  const media = await tx.media.findUnique({where: {id: mediaId}, select: MEDIA_SELECT});
+  return publicPdfMedia(media, "/uploads") !== null;
+}
+
 async function validateDocument(tx: Prisma.TransactionClient, documentId: string | null) {
   if (documentId === null) return true;
   const document = await tx.document.findUnique({where: {id: documentId}, include: DOCUMENT_INCLUDE});
@@ -484,7 +522,10 @@ async function studyProgramRevisions(
     resourceType: "StudyProgram", resourceId: id, version, actorId, changeSummary: action,
     snapshot: {
       code: input.code, slug: input.slug, degree: input.degree, accreditation: input.accreditation,
-      accreditationExpiry: input.accreditationExpiry, externalUrl: input.externalUrl, email: input.email,
+      accreditationAgency: input.accreditationAgency, accreditationDecreeNumber: input.accreditationDecreeNumber,
+      accreditationExpiry: input.accreditationExpiry,
+      accreditationCertificateMediaId: input.accreditationCertificateMediaId,
+      externalUrl: input.externalUrl, email: input.email,
       phone: input.phone, logoMediaId: input.logoMediaId, curriculumDocumentId: input.curriculumDocumentId,
       brochureDocumentId: input.brochureDocumentId, isActive: input.isActive, order: input.order,
       contentOwnerId: input.contentOwnerId, version,
@@ -505,13 +546,16 @@ async function createStudyProgram(
   now: Date,
 ) {
   if (!await validatePhoto(tx, input.logoMediaId)) return {ok: false, code: "MEDIA_INVALID"} as const;
+  if (!await validateCertificate(tx, input.accreditationCertificateMediaId)) return {ok: false, code: "MEDIA_INVALID"} as const;
   if (!await validateDocument(tx, input.curriculumDocumentId) || !await validateDocument(tx, input.brochureDocumentId)) {
     return {ok: false, code: "DOCUMENT_INVALID"} as const;
   }
   const row = await tx.studyProgram.create({
     data: {
       code: input.code, slug: input.slug, degree: input.degree, accreditation: input.accreditation,
+      accreditationAgency: input.accreditationAgency, accreditationDecreeNumber: input.accreditationDecreeNumber,
       accreditationExpiry: input.accreditationExpiry ? new Date(input.accreditationExpiry) : null,
+      accreditationCertificateMediaId: input.accreditationCertificateMediaId,
       externalUrl: null, email: input.email, phone: input.phone, logoMediaId: input.logoMediaId,
       curriculumDocumentId: input.curriculumDocumentId, brochureDocumentId: input.brochureDocumentId,
       isActive: input.isActive, order: input.order, contentOwnerId: input.contentOwnerId,
@@ -537,6 +581,7 @@ async function updateStudyProgram(
   if (!current) return {ok: false, code: "NOT_FOUND"} as const;
   if (current.code !== input.code) return {ok: false, code: "IDENTITY_CONFLICT"} as const;
   if (!await validatePhoto(tx, input.logoMediaId)) return {ok: false, code: "MEDIA_INVALID"} as const;
+  if (!await validateCertificate(tx, input.accreditationCertificateMediaId)) return {ok: false, code: "MEDIA_INVALID"} as const;
   if (!await validateDocument(tx, input.curriculumDocumentId) || !await validateDocument(tx, input.brochureDocumentId)) {
     return {ok: false, code: "DOCUMENT_INVALID"} as const;
   }
@@ -545,7 +590,9 @@ async function updateStudyProgram(
   const version = expectedVersion + 1;
   await tx.studyProgram.update({where: {id}, data: {
     slug: input.slug, degree: input.degree, accreditation: input.accreditation,
+    accreditationAgency: input.accreditationAgency, accreditationDecreeNumber: input.accreditationDecreeNumber,
     accreditationExpiry: input.accreditationExpiry ? new Date(input.accreditationExpiry) : null,
+    accreditationCertificateMediaId: input.accreditationCertificateMediaId,
     externalUrl: null, email: input.email, phone: input.phone, logoMediaId: input.logoMediaId,
     curriculumDocumentId: input.curriculumDocumentId, brochureDocumentId: input.brochureDocumentId,
     isActive: input.isActive, order: input.order, contentOwnerId: input.contentOwnerId,

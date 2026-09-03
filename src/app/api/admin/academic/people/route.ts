@@ -86,6 +86,7 @@ export async function POST(request: Request) {
       revalidatePath(`/${locale}/akademik`, "page");
       revalidatePath(`/${locale}/dosen`, "page");
       revalidatePath(`/${locale}/tenaga-kependidikan`, "page");
+      revalidatePath(`/${locale}/akademik/akreditasi`, "page");
       revalidatePath(`/${locale}/prodi/[slug]`, "page");
     }
   }

@@ -1,10 +1,61 @@
 import type {Metadata} from "next";
+import {ArrowUpRight, BadgeCheck, FileCheck2} from "lucide-react";
 import {getTranslations, setRequestLocale} from "next-intl/server";
-import {FileCheck2} from "lucide-react";
 
 import {AcademicTopicShell} from "@/components/public/academic-topic-shell";
-import {dummyAccreditations} from "@/lib/data/dummy-academic";
+import {institution} from "@/config/institution";
+import {Link} from "@/i18n/navigation";
+import {getPrismaClient} from "@/lib/db/client";
+import type {Prisma} from "@/generated/prisma/client";
+import {StorageKeySchema} from "@/contracts/storage";
 import type {AppLocale} from "@/i18n/routing";
+
+const PROGRAM_SELECT = {
+  id: true,
+  code: true,
+  slug: true,
+  accreditation: true,
+  accreditationAgency: true,
+  accreditationDecreeNumber: true,
+  accreditationExpiry: true,
+  accreditationCertificateMedia: {
+    select: {storageKey: true, storageClass: true, mimeType: true, originalName: true},
+  },
+  translations: {
+    where: {status: "PUBLISHED" as const},
+    select: {locale: true, name: true},
+  },
+} as const;
+
+function resolveTranslation<T extends {locale: string}>(rows: readonly T[], locale: AppLocale) {
+  return rows.find((row) => row.locale === locale) ?? rows.find((row) => row.locale === "id");
+}
+
+function formatDate(value: Date | null, locale: AppLocale) {
+  if (!value) return null;
+  return new Intl.DateTimeFormat(locale === "ar" ? "ar" : locale === "en" ? "en-US" : "id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Asia/Jakarta",
+  }).format(value);
+}
+
+function certificateUrl(
+  media: {storageKey: string; storageClass: string; mimeType: string; originalName: string} | null,
+  uploadBase: string,
+) {
+  if (
+    !media
+    || media.storageClass !== "PUBLIC"
+    || media.mimeType !== "application/pdf"
+    || !StorageKeySchema.safeParse(media.storageKey).success
+  ) return null;
+  return {
+    href: `${uploadBase.replace(/\/+$/u, "") || "/uploads"}/${media.storageKey}`,
+    name: media.originalName,
+  };
+}
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
@@ -17,111 +68,141 @@ export default async function AccreditationPage({params}: {params: Promise<{loca
   const {locale} = await params;
   setRequestLocale(locale);
   const t = await getTranslations("Academic");
+  const tPages = await getTranslations("Pages");
   const tNav = await getTranslations("Nav");
 
-  const faculty = dummyAccreditations.find((item) => item.scope === "faculty");
-  const programs = dummyAccreditations.filter((item) => item.scope !== "faculty");
+  let programs: Array<Prisma.StudyProgramGetPayload<{select: typeof PROGRAM_SELECT}>> = [];
+  try {
+    const rows = await getPrismaClient().studyProgram.findMany({
+      where: {
+        isActive: true,
+        code: {in: institution.studyPrograms.map((program) => program.code)},
+        translations: {some: {status: "PUBLISHED", locale: {in: locale === "id" ? ["id"] : [locale, "id"]}}},
+      },
+      orderBy: [{order: "asc"}, {code: "asc"}],
+      select: PROGRAM_SELECT,
+    });
+    programs = rows;
+  } catch {
+    // The public page keeps its composed empty state when the database is unavailable.
+  }
 
-  const scopeLabel = (scope: string) =>
-    scope === "faculty" ? t("accreditationFaculty") : tNav(`program.${scope}` as never);
+  const meta = [`${programs.length} ${tNav("studyPrograms")}`];
+  const uploadBase = process.env.UPLOAD_PUBLIC_URL ?? "/uploads";
 
   return (
-    <AcademicTopicShell
-      resourceKey="accreditation"
-      meta={faculty ? [faculty.agency, `${t("accreditationGrade")}: ${faculty.grade}`] : undefined}
-    >
-      {faculty ? (
-        <section
-          className="border-y border-slate-200 bg-white py-7 md:py-8"
-          aria-labelledby="accreditation-faculty"
-        >
-          <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-royal-600">
-                {t("accreditationFaculty")}
-              </p>
-              <h2 id="accreditation-faculty" className="mt-2 font-display text-2xl font-semibold text-slate-950">
-                {faculty.grade}
-              </h2>
-            </div>
-            <p className="max-w-xl text-sm leading-relaxed text-slate-600">
-              {faculty.agency} · {faculty.decreeNumber}
-            </p>
+    <AcademicTopicShell resourceKey="accreditation" meta={meta}>
+      <section className="relative overflow-hidden rounded-[1.75rem] bg-slate-950 px-6 py-8 text-white shadow-[0_22px_55px_-28px_rgba(15,23,42,0.65)] md:px-10 md:py-12">
+        <div aria-hidden className="pointer-events-none absolute -end-20 -top-28 size-80 rounded-full bg-royal-700/30 blur-3xl" />
+        <div className="relative max-w-3xl">
+          <div className="flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.2em] text-brass-300">
+            <BadgeCheck aria-hidden className="size-4" strokeWidth={1.5} />
+            <span>{tNav("accreditation")}</span>
           </div>
-
-          <dl className="mt-7 grid gap-5 border-t border-slate-200 pt-5 sm:grid-cols-3">
-            {[
-              {label: t("accreditationAgency"), value: faculty.agency},
-              {label: t("accreditationDecree"), value: faculty.decreeNumber},
-              {label: t("accreditationValidUntil"), value: faculty.validUntil},
-            ].map((row) => (
-              <div key={row.label}>
-                <dt className="text-xs font-medium uppercase tracking-[0.12em] text-slate-500">
-                  {row.label}
-                </dt>
-                <dd className="mt-1.5 text-sm leading-relaxed text-slate-800">{row.value}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-      ) : null}
+          <h2 className="mt-5 max-w-2xl font-display text-3xl font-semibold tracking-tight text-balance md:text-4xl">
+            {tNav("studyPrograms")}
+          </h2>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300 md:text-base">
+            {tPages("accreditationDesc")}
+          </p>
+        </div>
+      </section>
 
       <section className="mt-12" aria-labelledby="accreditation-programs">
-        <div className="flex items-end justify-between border-b border-slate-200 pb-4">
+        <div className="flex flex-wrap items-end justify-between gap-4 border-b border-slate-200 pb-5">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-royal-600">{tNav("studyPrograms")}</p>
-            <h2 id="accreditation-programs" className="mt-2 font-display text-2xl font-semibold text-slate-950">
-              {tNav("studyPrograms")}
+            <h2 id="accreditation-programs" className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">
+              {tNav("accreditation")}
             </h2>
           </div>
-          <span className="hidden font-display text-sm font-semibold text-slate-400 sm:block">{programs.length}</span>
+          <span className="font-display text-sm font-semibold tabular-nums text-slate-400">{String(programs.length).padStart(2, "0")}</span>
         </div>
 
-        <ol className="mt-10 grid gap-12">
-          {programs.map((program, index) => (
-            <li key={program.id} className="border-b border-slate-200 pb-12 last:border-b-0">
-              <header className="flex items-start gap-4">
-                <span className="pt-1 font-display text-sm font-semibold tracking-[0.12em] text-brass-600">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{tNav("studyPrograms")}</p>
-                  <h3 className="mt-2 font-display text-2xl font-semibold text-slate-950 md:text-3xl">
-                    {scopeLabel(program.scope)}
-                  </h3>
-                  <span aria-hidden className="mt-4 block h-0.5 w-20 bg-brass-500" />
-                </div>
-              </header>
+        {programs.length > 0 ? (
+          <ol className="mt-8 grid gap-6">
+            {programs.map((program, index) => {
+              const translation = resolveTranslation(program.translations, locale);
+              const contract = institution.studyPrograms.find((item) => item.code === program.code);
+              const certificate = certificateUrl(program.accreditationCertificateMedia, uploadBase);
+              const facts = [
+                {label: t("accreditationGrade"), value: program.accreditation},
+                {label: t("accreditationAgency"), value: program.accreditationAgency},
+                {label: t("accreditationDecree"), value: program.accreditationDecreeNumber},
+                {label: t("accreditationValidUntil"), value: formatDate(program.accreditationExpiry, locale)},
+              ].filter((fact): fact is {label: string; value: string} => Boolean(fact.value?.trim()));
 
-              <div className="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,0.78fr)] lg:items-start">
-                <div className="border-t border-slate-200 pt-5">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-royal-600">{t("accreditationHistory")}</p>
-                  <dl className="mt-5 grid gap-5 sm:grid-cols-3">
-                    {[
-                      {label: t("accreditationGrade"), value: program.grade},
-                      {label: t("accreditationAgency"), value: program.agency},
-                      {label: t("accreditationValidUntil"), value: program.validUntil},
-                      {label: t("accreditationDecree"), value: program.decreeNumber},
-                    ].map((row) => (
-                      <div key={row.label} className="sm:col-span-1">
-                        <dt className="text-xs font-medium uppercase tracking-[0.1em] text-slate-500">{row.label}</dt>
-                        <dd className="mt-1.5 text-sm leading-relaxed text-slate-800">{row.value}</dd>
+              return (
+                <li key={program.id}>
+                  <article className="group overflow-hidden rounded-2xl border border-slate-200 bg-white transition-shadow hover:shadow-[0_20px_45px_-30px_rgba(15,23,42,0.7)]">
+                    <header className="flex flex-wrap items-start justify-between gap-5 border-b border-slate-100 bg-slate-50/80 px-6 py-6 md:px-8">
+                      <div className="flex min-w-0 items-start gap-4">
+                        <span className="pt-1 font-display text-sm font-semibold tabular-nums tracking-[0.14em] text-brass-600">{String(index + 1).padStart(2, "0")}</span>
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-royal-600">{program.code}</p>
+                          <h3 className="mt-2 font-display text-2xl font-semibold tracking-tight text-slate-950 md:text-3xl">
+                            {translation?.name ?? contract?.name ?? program.code}
+                          </h3>
+                        </div>
                       </div>
-                    ))}
-                  </dl>
-                </div>
+                      <Link
+                        href={`/prodi/${program.slug}`}
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-royal-700 transition-colors hover:text-royal-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-royal-500"
+                      >
+                        {tNav("studyPrograms")}
+                        <ArrowUpRight aria-hidden className="size-4" strokeWidth={1.5} />
+                      </Link>
+                    </header>
 
-                <div className="border border-slate-200 bg-slate-50 p-3">
-                  <div className="flex aspect-[4/3] flex-col items-center justify-center border border-dashed border-slate-300 bg-white px-6 text-center">
-                    <FileCheck2 aria-hidden className="size-10 text-royal-500" strokeWidth={1.5} />
-                    <p className="mt-3 text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">{t("accreditationCertificate")}</p>
-                    <p className="mt-2 max-w-xs text-sm leading-relaxed text-slate-600">{t("accreditationUnavailable")}</p>
-                  </div>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ol>
+                    <div className="grid gap-8 px-6 py-7 md:px-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:gap-12">
+                      <div>
+                        {facts.length > 0 ? (
+                          <dl className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
+                            {facts.map((fact) => (
+                              <div key={fact.label}>
+                                <dt className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-500">{fact.label}</dt>
+                                <dd className="mt-2 break-words text-sm font-medium leading-6 text-slate-800">{fact.value}</dd>
+                              </div>
+                            ))}
+                          </dl>
+                        ) : (
+                          <p className="text-sm leading-7 text-slate-500">{t("accreditationUnavailable")}</p>
+                        )}
+                      </div>
+
+                      <div className="border-s border-slate-200 ps-0 lg:ps-8">
+                        {certificate ? (
+                          <a
+                            href={certificate.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex h-full min-h-32 flex-col justify-between rounded-xl border border-royal-100 bg-royal-50/60 p-5 transition-colors hover:border-royal-300 hover:bg-royal-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-royal-500"
+                          >
+                            <FileCheck2 aria-hidden className="size-7 text-royal-600" strokeWidth={1.5} />
+                            <span className="mt-8">
+                              <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-royal-700">{t("accreditationCertificate")}</span>
+                              <span className="mt-2 block truncate text-sm font-medium text-slate-800">{certificate.name}</span>
+                            </span>
+                          </a>
+                        ) : (
+                          <div className="flex min-h-32 flex-col justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 p-5">
+                            <FileCheck2 aria-hidden className="size-7 text-slate-400" strokeWidth={1.5} />
+                            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">{t("accreditationCertificate")}</p>
+                            <p className="mt-2 text-sm leading-6 text-slate-500">{t("accreditationUnavailable")}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                </li>
+              );
+            })}
+          </ol>
+        ) : (
+          <div className="mt-8 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center">
+            <p className="text-sm leading-7 text-slate-500">{t("accreditationUnavailable")}</p>
+          </div>
+        )}
       </section>
     </AcademicTopicShell>
   );

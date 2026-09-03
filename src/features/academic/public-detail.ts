@@ -39,6 +39,26 @@ function mediaView(media: MediaRow, uploadBase: string) {
   return parsed.success ? parsed.data : null;
 }
 
+function pdfMediaView(media: MediaRow, uploadBase: string) {
+  if (
+    !media
+    || media.storageClass !== "PUBLIC"
+    || media.mimeType !== "application/pdf"
+    || (media.alt !== null && media.alt !== "")
+    || media.isDecorative
+    || media.width !== null
+    || media.height !== null
+    || media.focalX !== null
+    || media.focalY !== null
+    || !StorageKeySchema.safeParse(media.storageKey).success
+  ) return null;
+  const parsed = PublicMediaViewSchema.safeParse({
+    id: media.id, url: `${baseUrl(uploadBase)}/${media.storageKey}`, mimeType: media.mimeType,
+    size: media.size, alt: "", isDecorative: false, width: null, height: null, focalX: null, focalY: null,
+  });
+  return parsed.success ? parsed.data : null;
+}
+
 function resolve<T extends {locale: Locale}>(rows: T[], locale: Locale) {
   return rows.find((row) => row.locale === locale) ?? rows.find((row) => row.locale === "id") ?? null;
 }
@@ -110,6 +130,7 @@ export async function getPublicAcademicDetail(
         translations: {where: localeFilter}, logoMedia: {select: MEDIA_SELECT},
         curriculumDocument: {include: {translations: {where: localeFilter}}},
         brochureDocument: {include: {translations: {where: localeFilter}}},
+        accreditationCertificateMedia: {select: MEDIA_SELECT},
       }});
       if (!row) return {ok: false, code: "NOT_FOUND"};
       const translation = resolve(row.translations, locale);
@@ -117,7 +138,10 @@ export async function getPublicAcademicDetail(
       detail = {
         id: row.id, resource, slug: row.slug, code: row.code, degree: row.degree,
         accreditation: row.accreditation,
+        accreditationAgency: row.accreditationAgency,
+        accreditationDecreeNumber: row.accreditationDecreeNumber,
         accreditationExpiry: row.accreditationExpiry?.toISOString() ?? null,
+        accreditationCertificate: pdfMediaView(row.accreditationCertificateMedia, uploadBase),
         institutionalEmail: row.email, logo: mediaView(row.logoMedia, uploadBase),
         curriculumDocument: documentView(row.curriculumDocument, locale, uploadBase),
         brochureDocument: documentView(row.brochureDocument, locale, uploadBase),

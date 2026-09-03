@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { Textarea } from "@/components/ui/textarea";
+import { ProgramCertificatePicker, type CertificatePreview } from "./program-certificate-picker";
 
 import {
   EMPTY_PROGRAM_STUDIO_TRANSLATION,
@@ -58,7 +59,10 @@ function errorMessage(t: ReturnType<typeof useTranslations>, code: unknown) {
   return t("errors.UNAVAILABLE");
 }
 
-export function ProgramStudioEditorForm({initialDraft}: {initialDraft: ProgramStudioDraft}) {
+export function ProgramStudioEditorForm({
+  initialDraft,
+  initialCertificate,
+}: {initialDraft: ProgramStudioDraft; initialCertificate: CertificatePreview | null}) {
   const t = useTranslations("StudyPrograms");
   const tAdmin = useTranslations("AdminHomeNav");
   const router = useRouter();
@@ -116,7 +120,10 @@ export function ProgramStudioEditorForm({initialDraft}: {initialDraft: ProgramSt
             slug: draft.slug,
             degree: "S1",
             accreditation: draft.accreditation.trim() || null,
+            accreditationAgency: draft.accreditationAgency.trim() || null,
+            accreditationDecreeNumber: draft.accreditationDecreeNumber.trim() || null,
             accreditationExpiry,
+            accreditationCertificateMediaId: draft.accreditationCertificateMediaId,
             externalUrl: null,
             email: draft.email.trim() || null,
             phone: draft.phone.trim() || null,
@@ -194,6 +201,24 @@ export function ProgramStudioEditorForm({initialDraft}: {initialDraft: ProgramSt
             />
           </Field>
           <Field>
+            <FieldLabel htmlFor={`${formId}-agency`}>Lembaga akreditasi</FieldLabel>
+            <Input
+              id={`${formId}-agency`}
+              value={draft.accreditationAgency}
+              onChange={(event) => setDraft((current) => ({...current, accreditationAgency: event.target.value}))}
+              placeholder="Contoh: BAN-PT"
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor={`${formId}-decree`}>Nomor SK akreditasi</FieldLabel>
+            <Input
+              id={`${formId}-decree`}
+              value={draft.accreditationDecreeNumber}
+              onChange={(event) => setDraft((current) => ({...current, accreditationDecreeNumber: event.target.value}))}
+              placeholder="Masukkan nomor SK resmi"
+            />
+          </Field>
+          <Field>
             <FieldLabel htmlFor={`${formId}-email`}>Email</FieldLabel>
             <Input id={`${formId}-email`} type="email" value={draft.email} onChange={(event) => setDraft((current) => ({...current, email: event.target.value}))} />
           </Field>
@@ -202,6 +227,13 @@ export function ProgramStudioEditorForm({initialDraft}: {initialDraft: ProgramSt
             <Input id={`${formId}-phone`} value={draft.phone} onChange={(event) => setDraft((current) => ({...current, phone: event.target.value}))} />
           </Field>
         </FieldGroup>
+        <div className="mt-5">
+          <ProgramCertificatePicker
+            value={draft.accreditationCertificateMediaId}
+            onChange={(id) => setDraft((current) => ({...current, accreditationCertificateMediaId: id}))}
+            initialCertificate={initialCertificate}
+          />
+        </div>
       </FieldSet>
 
       <FieldSet>

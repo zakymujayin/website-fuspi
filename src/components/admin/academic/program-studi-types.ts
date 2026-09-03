@@ -19,7 +19,10 @@ export type ProgramStudioDraft = {
   slug: string;
   degree: "S1";
   accreditation: string;
+  accreditationAgency: string;
+  accreditationDecreeNumber: string;
   accreditationExpiry: string;
+  accreditationCertificateMediaId: string | null;
   email: string;
   phone: string;
   logoMediaId: string | null;

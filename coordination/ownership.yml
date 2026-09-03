@@ -91,21 +91,6 @@ active_leases:
       - coordination/tasks/M4-GPT-PUBLIC-IA-MENU-REMAP.md
       - coordination/handoffs/M4-GPT-PUBLIC-IA-MENU-REMAP-gpt.md
       - coordination/ownership.yml
-  - task: M4-GPT-PRODI-CMS-ADMIN-NAV
-    owner: gpt
-    paths:
-      - src/app/[locale]/admin/program-studi/**
-      - src/app/api/admin/academic/people/route.ts
-      - src/components/admin/academic/**
-      - src/components/admin/admin-sidebar.tsx
-      - src/components/admin/admin-sidebar-data.ts
-      - src/components/admin/admin-layout-shell.tsx
-      - src/app/[locale]/(public)/prodi/[slug]/page.tsx
-      - tests/m4/ui/program-studi-admin.test.tsx
-      - tests/m4/ui/admin-sidebar-groups.test.tsx
-      - coordination/tasks/M4-GPT-PRODI-CMS-ADMIN-NAV.md
-      - coordination/handoffs/M4-GPT-PRODI-CMS-ADMIN-NAV-gpt.md
-      - coordination/ownership.yml
   - task: M4-GPT-PRODI-ACCREDITATION-CORRECTION
     owner: gpt
     paths:
@@ -113,4 +98,24 @@ active_leases:
       - tests/m4/contracts/study-program-accreditation.test.ts
       - coordination/tasks/M4-GPT-PRODI-ACCREDITATION-CORRECTION.md
       - coordination/handoffs/M4-GPT-PRODI-ACCREDITATION-CORRECTION-gpt.md
+      - coordination/ownership.yml
+  - task: M4-GPT-ACCREDITATION-CMS-REDESIGN
+    owner: gpt
+    paths:
+      - prisma/schema.prisma
+      - prisma/migrations/20260904120000_add_study_program_accreditation_details/migration.sql
+      - src/generated/prisma/**
+      - src/contracts/academic.ts
+      - src/contracts/academic-public.ts
+      - src/features/academic/people.ts
+      - src/features/academic/public-detail.ts
+      - src/app/api/admin/academic/people/route.ts
+      - src/app/[locale]/(public)/akademik/akreditasi/page.tsx
+      - src/app/[locale]/admin/program-studi/[id]/edit/page.tsx
+      - src/components/admin/academic/**
+      - tests/m4/contracts/academic-accreditation-contracts.test.ts
+      - tests/m4/runtime/academic-accreditation.test.ts
+      - tests/m4/ui/accreditation-page.test.tsx
+      - coordination/tasks/M4-GPT-ACCREDITATION-CMS-REDESIGN.md
+      - coordination/handoffs/M4-GPT-ACCREDITATION-CMS-REDESIGN-gpt.md
       - coordination/ownership.yml

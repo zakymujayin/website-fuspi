@@ -3,12 +3,14 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {notFound, redirect} from "next/navigation";
 
 import {ProgramStudioEditorForm} from "@/components/admin/academic/program-studi-editor-form";
+import type {CertificatePreview} from "@/components/admin/academic/program-certificate-picker";
 import {EMPTY_PROGRAM_STUDIO_TRANSLATION, PROGRAM_STUDIO_LOCALES, type ProgramStudioDraft} from "@/components/admin/academic/program-studi-types";
 import {institution} from "@/config/institution";
 import {Link} from "@/i18n/navigation";
 import {getPrismaClient} from "@/lib/db/client";
 import {decideProtectedRoute, getRequestSession} from "@/lib/auth/runtime/request-session";
 import {parseAppLocale} from "@/lib/auth/runtime/redirect";
+import {StorageKeySchema} from "@/contracts/storage";
 
 export async function generateMetadata({params}: {params: Promise<{locale: string; id: string}>}): Promise<Metadata> {
   const {locale} = await params;
@@ -26,7 +28,7 @@ export default async function EditProgramStudioPage({params}: {params: Promise<{
 
   const row = await getPrismaClient().studyProgram.findUnique({
     where: {id},
-    select: {id: true, code: true, slug: true, degree: true, accreditation: true, accreditationExpiry: true, email: true, phone: true, logoMediaId: true, curriculumDocumentId: true, brochureDocumentId: true, isActive: true, order: true, contentOwnerId: true, version: true, translations: {select: {locale: true, name: true, description: true, vision: true, mission: true, objectives: true, learningOutcomes: true, graduateProfile: true, careerProspects: true}}},
+    select: {id: true, code: true, slug: true, degree: true, accreditation: true, accreditationAgency: true, accreditationDecreeNumber: true, accreditationExpiry: true, accreditationCertificateMediaId: true, email: true, phone: true, logoMediaId: true, curriculumDocumentId: true, brochureDocumentId: true, isActive: true, order: true, contentOwnerId: true, version: true, accreditationCertificateMedia: {select: {id: true, storageKey: true, storageClass: true, mimeType: true, originalName: true, size: true}}, translations: {select: {locale: true, name: true, description: true, vision: true, mission: true, objectives: true, learningOutcomes: true, graduateProfile: true, careerProspects: true}}},
   });
   if (!row || !institution.studyPrograms.some((program) => program.code === row.code)) notFound();
 
@@ -51,7 +53,10 @@ export default async function EditProgramStudioPage({params}: {params: Promise<{
     slug: row.slug,
     degree: "S1",
     accreditation: row.accreditation ?? "",
+    accreditationAgency: row.accreditationAgency ?? "",
+    accreditationDecreeNumber: row.accreditationDecreeNumber ?? "",
     accreditationExpiry: row.accreditationExpiry?.toISOString().slice(0, 10) ?? "",
+    accreditationCertificateMediaId: row.accreditationCertificateMediaId,
     email: row.email ?? "",
     phone: row.phone ?? "",
     logoMediaId: row.logoMediaId,
@@ -62,6 +67,18 @@ export default async function EditProgramStudioPage({params}: {params: Promise<{
     contentOwnerId: row.contentOwnerId,
     translations,
   };
+  const uploadBase = (process.env.UPLOAD_PUBLIC_URL ?? "/uploads").replace(/\/+$/u, "") || "/uploads";
+  const initialCertificate: CertificatePreview | null = row.accreditationCertificateMedia
+    && row.accreditationCertificateMedia.storageClass === "PUBLIC"
+    && row.accreditationCertificateMedia.mimeType === "application/pdf"
+    && StorageKeySchema.safeParse(row.accreditationCertificateMedia.storageKey).success
+    ? {
+      id: row.accreditationCertificateMedia.id,
+      url: `${uploadBase}/${row.accreditationCertificateMedia.storageKey}`,
+      originalName: row.accreditationCertificateMedia.originalName,
+      size: row.accreditationCertificateMedia.size,
+    }
+    : null;
   const t = await getTranslations("Nav");
 
   return (
@@ -74,7 +91,7 @@ export default async function EditProgramStudioPage({params}: {params: Promise<{
         </div>
         <Link href="/admin/program-studi" className="text-sm font-medium text-primary hover:underline">{t("studyPrograms")}</Link>
       </div>
-      <ProgramStudioEditorForm initialDraft={draft} />
+      <ProgramStudioEditorForm initialDraft={draft} initialCertificate={initialCertificate} />
     </section>
   );
 }

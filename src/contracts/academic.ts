@@ -53,7 +53,10 @@ export const StudyProgramInputSchema = z.object({
   slug: SlugSchema,
   degree: z.literal("S1"),
   accreditation: OptionalText(120),
+  accreditationAgency: OptionalText(120).optional(),
+  accreditationDecreeNumber: OptionalText(255).optional(),
   accreditationExpiry: z.iso.datetime({offset: true}).nullable(),
+  accreditationCertificateMediaId: CmsIdentifierSchema.nullable().optional(),
   externalUrl: z.null(),
   email: InstitutionalEmailSchema,
   phone: PhoneSchema,
@@ -185,7 +188,7 @@ export const AcademicAdminViewSchema = z.object({
   isActive: z.boolean().nullable(),
   translations: z.array(TranslationWorkflowViewSchema).min(1).max(3),
   governance: CmsGovernanceSummarySchema.nullable(),
-  assets: z.array(CmsPublicAssetReferenceSchema).max(3),
+  assets: z.array(CmsPublicAssetReferenceSchema).max(4),
 }).strict();
 
 export const AcademicListResultSchema = z.object({items: z.array(AcademicAdminViewSchema).max(50), page: CmsPageMetadataSchema}).strict();

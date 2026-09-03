@@ -576,6 +576,7 @@ model Media {
   lecturerCvs            Lecturer[]      @relation("LecturerCv")
   staffPhotos            Staff[]         @relation("StaffPhoto")
   programLogos           StudyProgram[]  @relation("StudyProgramLogo")
+  studyProgramAccreditationCertificates StudyProgram[] @relation("StudyProgramAccreditationCertificate")
   partnershipLogos       Partnership[]   @relation("PartnershipLogo")
   achievementImages      Achievement[]   @relation("AchievementImage")
   albumCovers            Album[]         @relation("AlbumCover")
@@ -600,7 +601,10 @@ model StudyProgram {
   slug                 String                    @unique
   degree               String
   accreditation        String?
+  accreditationAgency  String?
+  accreditationDecreeNumber String?
   accreditationExpiry  DateTime?
+  accreditationCertificateMediaId String?
   externalUrl          String?
   email                String?
   phone                String?
@@ -619,6 +623,7 @@ model StudyProgram {
   createdAt            DateTime                  @default(now())
   updatedAt            DateTime                  @updatedAt
   logoMedia            Media?                    @relation("StudyProgramLogo", fields: [logoMediaId], references: [id], onDelete: Restrict)
+  accreditationCertificateMedia Media?            @relation("StudyProgramAccreditationCertificate", fields: [accreditationCertificateMediaId], references: [id], onDelete: SetNull)
   curriculumDocument   Document?                 @relation("ProgramCurriculum", fields: [curriculumDocumentId], references: [id], onDelete: SetNull)
   brochureDocument     Document?                 @relation("ProgramBrochure", fields: [brochureDocumentId], references: [id], onDelete: SetNull)
   translations         StudyProgramTranslation[]
@@ -627,6 +632,7 @@ model StudyProgram {
   albums               StudyProgramAlbum[]
 
   @@index([contentOwnerId, reviewDueAt])
+  @@index([accreditationCertificateMediaId])
 }
 
 model StudyProgramTranslation {
