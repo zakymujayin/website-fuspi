@@ -95,6 +95,19 @@ const DEAN_LABEL = {
   ar: "العميد الأول",
 } as const;
 
+const SECTION_LABELS = {
+  history: {
+    id: "Sejarah",
+    en: "History",
+    ar: "التاريخ",
+  },
+  milestones: {
+    id: "Tonggak penting",
+    en: "Key milestones",
+    ar: "المحطات الرئيسية",
+  },
+} as const;
+
 const NARRATIVE_SECTIONS = [
   {
     title: {
@@ -150,59 +163,86 @@ export default async function HistoryPage({params}: {params: Promise<{locale: Ap
     <Container className="py-12 md:py-20">
       <SectionHeading as="h1" title={t("history")} description={t("historyDesc")} />
 
-      <article className="mt-12 max-w-5xl">
-        <div className="border-y border-slate-200 py-8 md:py-10">
-          <p className="max-w-[64ch] text-xl font-semibold leading-relaxed text-slate-950 md:text-2xl md:leading-relaxed">
-            {HISTORY_INTRO[locale] ?? HISTORY_INTRO.id}
-          </p>
-        </div>
-
-        <div className="divide-y divide-slate-200">
-          {NARRATIVE_SECTIONS.map((section) => (
-            <section
-              key={section.title.id}
-              className="grid gap-5 py-8 md:grid-cols-[16rem_minmax(0,1fr)] md:py-10"
-            >
-              <h2 className="font-display text-xl font-semibold leading-snug text-slate-950">
-                {section.title[locale] ?? section.title.id}
+      <article className="mt-10">
+        <section
+          className="border-y border-slate-200 py-10"
+          aria-labelledby="history-narrative-title"
+        >
+          <div className="grid gap-8 lg:grid-cols-[14rem_minmax(0,1fr)]">
+            <div>
+              <h2 id="history-narrative-title" className="font-display text-2xl font-semibold text-slate-950">
+                {SECTION_LABELS.history[locale] ?? SECTION_LABELS.history.id}
               </h2>
-              <p className="prose-measure text-base leading-8 text-slate-700">
-                {section.body[locale] ?? section.body.id}
-              </p>
-            </section>
-          ))}
-        </div>
+              <span aria-hidden className="mt-3 block h-0.5 w-16 bg-brass-500" />
+            </div>
 
-        <section className="mt-4 border-s-2 border-brass-400 bg-white ps-5" aria-labelledby="first-dean-title">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-royal-600">
-            {ESTABLISHMENT_NOTE[locale] ?? ESTABLISHMENT_NOTE.id}
-          </p>
-          <h2 id="first-dean-title" className="mt-2 font-display text-xl font-semibold text-slate-950">
-            {DEAN_LABEL[locale] ?? DEAN_LABEL.id}: {deanProfile.name}
-          </h2>
-          <p className="prose-measure mt-2 text-sm leading-7 text-slate-600">
-            {deanPosition}
-          </p>
+            <div className="grid gap-x-10 gap-y-7 md:grid-cols-2">
+              <p className="text-base leading-8 text-slate-700">
+                {HISTORY_INTRO[locale] ?? HISTORY_INTRO.id}
+              </p>
+              {NARRATIVE_SECTIONS.map((section) => (
+                <div key={section.title.id}>
+                  <h3 className="font-display text-base font-semibold text-slate-950">
+                    {section.title[locale] ?? section.title.id}
+                  </h3>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">
+                    {section.body[locale] ?? section.body.id}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section
+          className="border-b border-slate-200 py-10"
+          aria-labelledby="first-dean-title"
+        >
+          <div className="grid gap-6 lg:grid-cols-[14rem_minmax(0,1fr)]">
+            <div>
+              <p className="text-xs font-medium uppercase tracking-[0.16em] text-royal-600">
+                {ESTABLISHMENT_NOTE[locale] ?? ESTABLISHMENT_NOTE.id}
+              </p>
+              <h2 id="first-dean-title" className="mt-2 font-display text-xl font-semibold text-slate-950">
+                {DEAN_LABEL[locale] ?? DEAN_LABEL.id}
+              </h2>
+            </div>
+            <div>
+              <p className="font-display text-lg font-semibold text-slate-950">{deanProfile.name}</p>
+              <p className="mt-1 text-sm leading-7 text-slate-600">{deanPosition}</p>
+            </div>
+          </div>
         </section>
       </article>
 
-      <ol className="relative mt-14 max-w-4xl border-t border-slate-200">
-        {MILESTONES.map((milestone) => (
-          <li key={milestone.title.id} className="grid gap-4 border-b border-slate-200 py-6 md:grid-cols-[12rem_minmax(0,1fr)]">
-            <span className="font-display text-lg font-semibold text-royal-700">
-              {milestone.year[locale] ?? milestone.year.id}
-            </span>
-            <div>
-              <h2 className="font-display text-base font-semibold text-slate-950">
-                {milestone.title[locale] ?? milestone.title.id}
-              </h2>
-              <p className="prose-measure mt-2 text-sm leading-7 text-slate-600">
-                {milestone.description[locale] ?? milestone.description.id}
-              </p>
-            </div>
-          </li>
-        ))}
-      </ol>
+      <section className="mt-12" aria-labelledby="history-milestones-title">
+        <div className="grid gap-8 lg:grid-cols-[14rem_minmax(0,1fr)]">
+          <div>
+            <h2 id="history-milestones-title" className="font-display text-2xl font-semibold text-slate-950">
+              {SECTION_LABELS.milestones[locale] ?? SECTION_LABELS.milestones.id}
+            </h2>
+            <span aria-hidden className="mt-3 block h-0.5 w-16 bg-brass-500" />
+          </div>
+
+          <ol className="divide-y divide-slate-200 border-y border-slate-200">
+            {MILESTONES.map((milestone) => (
+              <li key={milestone.title.id} className="grid gap-4 py-6 md:grid-cols-[11rem_minmax(0,1fr)]">
+                <span className="font-display text-base font-semibold text-royal-700">
+                  {milestone.year[locale] ?? milestone.year.id}
+                </span>
+                <div>
+                  <h3 className="font-display text-base font-semibold text-slate-950">
+                    {milestone.title[locale] ?? milestone.title.id}
+                  </h3>
+                  <p className="mt-2 text-sm leading-7 text-slate-600">
+                    {milestone.description[locale] ?? milestone.description.id}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
     </Container>
   );
 }
