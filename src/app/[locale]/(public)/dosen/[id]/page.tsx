@@ -1,8 +1,8 @@
 import {
+  Award,
   BookOpen,
   Clock,
   Download,
-  ExternalLink,
   Globe,
   GraduationCap,
   Instagram,
@@ -11,6 +11,7 @@ import {
   MapPin,
   Phone,
 } from "lucide-react";
+import type {ReactNode} from "react";
 import Image from "next/image";
 import {notFound} from "next/navigation";
 import {getTranslations, setRequestLocale} from "next-intl/server";
@@ -155,6 +156,24 @@ async function getLecturer(slug: string): Promise<Row | null> {
   } catch { return null; }
 }
 
+function CardField({label, children}: {label: string; children: ReactNode}) {
+  return (
+    <div className="border-t border-slate-100 pt-4">
+      <p className="text-xs font-medium text-slate-400">{label}</p>
+      <div className="mt-1.5 text-sm text-slate-700">{children}</div>
+    </div>
+  );
+}
+
+function Chip({icon: Icon, children}: {icon: typeof Award; children: ReactNode}) {
+  return (
+    <li className="inline-flex items-center gap-1.5 rounded-md bg-royal-50 px-2.5 py-1 text-xs font-medium text-royal-700">
+      <Icon aria-hidden className="size-3.5 shrink-0" strokeWidth={1.6} />
+      <span dir="auto">{children}</span>
+    </li>
+  );
+}
+
 export default async function DosenDetailPage({params}: {params: Promise<{locale: AppLocale; id: string}>}) {
   const {locale, id} = await params;
   setRequestLocale(locale);
@@ -172,16 +191,13 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
       ?? lecturer.studyProgram.code
     : null;
 
-  const scholarLinks = [
+  const researchMediaLinks = [
     {href: lecturer.googleScholarUrl, label: "Google Scholar", icon: Globe},
     {href: lecturer.sintaUrl, label: "SINTA", icon: GraduationCap},
     {href: lecturer.scopusUrl, label: "Scopus", icon: BookOpen},
-  ].filter((link): link is {href: string; label: string; icon: typeof Globe} => Boolean(link.href));
-
-  const socialLinks = [
     {href: lecturer.linkedinUrl, label: "LinkedIn", icon: Linkedin},
     {href: lecturer.instagramUrl, label: "Instagram", icon: Instagram},
-  ].filter((link): link is {href: string; label: string; icon: typeof Linkedin} => Boolean(link.href));
+  ].filter((link): link is {href: string; label: string; icon: typeof Globe} => Boolean(link.href));
 
   const expertiseTags = splitExpertiseTags(tl?.expertise ?? null);
 
@@ -257,16 +273,6 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
         <h1 className="text-start font-display text-3xl font-bold tracking-tight text-navy-900 md:text-4xl">
           <span dir="auto">{lecturer.name}</span>
         </h1>
-        {tl?.position ? (
-          <p className="mt-3 text-start text-lg text-royal-800"><span dir="auto">{tl.position}</span></p>
-        ) : null}
-        {lecturer.studyProgram ? (
-          <p className="mt-2 text-start text-sm text-royal-700">
-            {tAcademic("scheduleProgram")}
-            {": "}
-            <span className="font-semibold">{programName}</span>
-          </p>
-        ) : null}
       </div>
 
       <div className="grid gap-x-12 gap-y-10 lg:grid-cols-12">
@@ -295,142 +301,114 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
               <div className="space-y-4 p-6">
                 <p className="font-display text-base font-bold text-slate-900"><span dir="auto">{lecturer.name}</span></p>
 
-                {(lecturer.nip || lecturer.nidn) ? (
-                  <dl className="grid grid-cols-2 gap-x-3 gap-y-3 border-t border-slate-100 pt-4 text-sm">
-                    {lecturer.nip ? (
-                      <div>
-                        <dt className="text-xs text-slate-400">NIP</dt>
-                        <dd dir="ltr" className="font-mono text-slate-700">{lecturer.nip}</dd>
-                      </div>
-                    ) : null}
-                    {lecturer.nidn ? (
-                      <div>
-                        <dt className="text-xs text-slate-400">NIDN</dt>
-                        <dd dir="ltr" className="font-mono text-slate-700">{lecturer.nidn}</dd>
-                      </div>
-                    ) : null}
-                  </dl>
+                {lecturer.nip ? (
+                  <CardField label="NIP">
+                    <span dir="ltr" className="font-mono">{lecturer.nip}</span>
+                  </CardField>
+                ) : null}
+
+                {lecturer.nidn ? (
+                  <CardField label="NIDN">
+                    <span dir="ltr" className="font-mono">{lecturer.nidn}</span>
+                  </CardField>
+                ) : null}
+
+                {programName ? (
+                  <CardField label={tAcademic("scheduleProgram")}>
+                    <ul className="flex flex-wrap gap-2">
+                      <Chip icon={GraduationCap}>{programName}</Chip>
+                    </ul>
+                  </CardField>
                 ) : null}
 
                 {expertiseTags.length > 0 ? (
-                  <div className="border-t border-slate-100 pt-4">
-                    <p className="text-xs text-slate-400">{t("expertise")}</p>
-                    <ul className="mt-2 flex flex-wrap gap-2">
+                  <CardField label={t("expertise")}>
+                    <ul className="flex flex-wrap gap-2">
                       {expertiseTags.map((tag) => (
-                        <li
-                          key={tag}
-                          className="inline-flex items-center rounded-full bg-royal-50 px-3 py-1 text-xs font-medium text-royal-700"
-                        >
-                          <span dir="auto">{tag}</span>
+                        <Chip key={tag} icon={BookOpen}>{tag}</Chip>
+                      ))}
+                    </ul>
+                  </CardField>
+                ) : null}
+
+                {tl?.position ? (
+                  <CardField label={t("position")}>
+                    <ul className="flex flex-wrap gap-2">
+                      <Chip icon={Award}>{tl.position}</Chip>
+                    </ul>
+                  </CardField>
+                ) : null}
+
+                {researchMediaLinks.length > 0 ? (
+                  <CardField label={t("researchMedia")}>
+                    <ul className="flex flex-wrap items-center gap-2">
+                      {researchMediaLinks.map(({href, label, icon: Icon}) => (
+                        <li key={label}>
+                          <a
+                            href={href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label={label}
+                            className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:border-royal-200 hover:bg-royal-50 hover:text-royal-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-600"
+                          >
+                            <Icon aria-hidden className="size-4" strokeWidth={1.5} />
+                          </a>
                         </li>
                       ))}
                     </ul>
-                  </div>
+                  </CardField>
                 ) : null}
 
-                {socialLinks.length > 0 ? (
-                  <ul className="flex items-center gap-2 border-t border-slate-100 pt-4">
-                    {socialLinks.map(({href, label, icon: Icon}) => (
-                      <li key={label}>
-                        <a
-                          href={href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={label}
-                          className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:border-royal-200 hover:bg-royal-50 hover:text-royal-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-600"
-                        >
-                          <Icon aria-hidden className="size-4" strokeWidth={1.5} />
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
+                {(lecturer.email || lecturer.phone) ? (
+                  <CardField label={t("contact")}>
+                    <div className="space-y-2">
+                      {lecturer.email ? (
+                        <p className="flex items-start gap-2">
+                          <Mail aria-hidden className="mt-0.5 size-4 shrink-0 text-slate-400" strokeWidth={1.5} />
+                          <a href={`mailto:${lecturer.email}`} dir="ltr" className="text-start break-all text-royal-600 underline-offset-2 hover:underline">{lecturer.email}</a>
+                        </p>
+                      ) : null}
+                      {lecturer.phone ? (
+                        <p className="flex items-start gap-2">
+                          <Phone aria-hidden className="mt-0.5 size-4 shrink-0 text-slate-400" strokeWidth={1.5} />
+                          <span dir="ltr" className="text-start">{lecturer.phone}</span>
+                        </p>
+                      ) : null}
+                    </div>
+                  </CardField>
+                ) : null}
+
+                {tl?.officeLocation ? (
+                  <CardField label={t("officeAddress")}>
+                    <p className="flex items-start gap-2">
+                      <MapPin aria-hidden className="mt-0.5 size-4 shrink-0 text-slate-400" strokeWidth={1.5} />
+                      <span dir="auto">{tl.officeLocation}</span>
+                    </p>
+                  </CardField>
+                ) : null}
+
+                {tl?.officeHours ? (
+                  <CardField label={t("officeHours")}>
+                    <p className="flex items-start gap-2">
+                      <Clock aria-hidden className="mt-0.5 size-4 shrink-0 text-slate-400" strokeWidth={1.5} />
+                      <span dir="auto">{tl.officeHours}</span>
+                    </p>
+                  </CardField>
+                ) : null}
+
+                {lecturer.cvMedia ? (
+                  <CardField label={t("curriculumVitae")}>
+                    <a
+                      href={`/uploads/${lecturer.cvMedia.storageKey}`}
+                      className="inline-flex items-center gap-2 rounded-lg border border-royal-200 bg-royal-50 px-3 py-2 text-sm font-semibold text-royal-700 transition-colors hover:bg-royal-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-600"
+                    >
+                      <Download data-icon aria-hidden className="size-4" strokeWidth={1.5} />
+                      {t("downloadCv")}
+                    </a>
+                  </CardField>
                 ) : null}
               </div>
             </div>
-
-            {lecturer.cvMedia ? (
-              <a
-                href={`/uploads/${lecturer.cvMedia.storageKey}`}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-royal-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-royal-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-600 active:translate-y-px"
-              >
-                <Download data-icon aria-hidden className="size-4" strokeWidth={1.5} />
-                {t("downloadCv")}
-              </a>
-            ) : null}
-
-            {(lecturer.email || lecturer.phone || tl?.officeLocation || tl?.officeHours) ? (
-              <section aria-labelledby="lecturer-contact" className="rounded-xl border border-slate-200 bg-white p-6">
-                <h2 id="lecturer-contact" className="section-rule font-display text-sm font-semibold text-slate-900">
-                  {t("contact")}
-                </h2>
-                <dl className="mt-4 space-y-3 text-sm">
-                  {lecturer.email ? (
-                    <div className="flex items-start gap-3">
-                      <Mail aria-hidden className="mt-0.5 size-4 shrink-0 text-slate-400" strokeWidth={1.5} />
-                      <div>
-                        <dt className="sr-only">{t("contact")}</dt>
-                        <dd>
-                          <a href={`mailto:${lecturer.email}`} className="text-royal-600 underline-offset-2 hover:underline">
-                            {lecturer.email}
-                          </a>
-                        </dd>
-                      </div>
-                    </div>
-                  ) : null}
-                  {lecturer.phone ? (
-                    <div className="flex items-start gap-3">
-                      <Phone aria-hidden className="mt-0.5 size-4 shrink-0 text-slate-400" strokeWidth={1.5} />
-                      <div>
-                        <dt className="sr-only">{t("contact")}</dt>
-                        <dd dir="ltr" className="text-start text-slate-700">{lecturer.phone}</dd>
-                      </div>
-                    </div>
-                  ) : null}
-                  {tl?.officeLocation ? (
-                    <div className="flex items-start gap-3">
-                      <MapPin aria-hidden className="mt-0.5 size-4 shrink-0 text-slate-400" strokeWidth={1.5} />
-                      <div>
-                        <dt className="text-xs text-slate-400">{t("office")}</dt>
-                        <dd dir="auto" className="text-slate-700">{tl.officeLocation}</dd>
-                      </div>
-                    </div>
-                  ) : null}
-                  {tl?.officeHours ? (
-                    <div className="flex items-start gap-3">
-                      <Clock aria-hidden className="mt-0.5 size-4 shrink-0 text-slate-400" strokeWidth={1.5} />
-                      <div>
-                        <dt className="text-xs text-slate-400">{t("officeHours")}</dt>
-                        <dd dir="auto" className="text-slate-700">{tl.officeHours}</dd>
-                      </div>
-                    </div>
-                  ) : null}
-                </dl>
-              </section>
-            ) : null}
-
-            {scholarLinks.length > 0 ? (
-              <section aria-labelledby="lecturer-scholar" className="rounded-xl border border-slate-200 bg-white p-6">
-                <h2 id="lecturer-scholar" className="section-rule font-display text-sm font-semibold text-slate-900">
-                  {t("scholarProfiles")}
-                </h2>
-                <ul className="mt-4 space-y-2.5 text-sm">
-                  {scholarLinks.map(({href, label, icon: Icon}) => (
-                    <li key={label}>
-                      <a
-                        href={href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-royal-600 underline-offset-2 hover:underline"
-                      >
-                        <Icon aria-hidden className="size-4 shrink-0" strokeWidth={1.5} />
-                        {label}
-                        <ExternalLink aria-hidden className="size-3 text-slate-400" strokeWidth={1.5} />
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            ) : null}
           </div>
         </aside>
 

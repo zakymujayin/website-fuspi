@@ -113,6 +113,48 @@ screenshotted: this worktree has no `.env`/database, so `/dosen/[id]` cannot
 render locally here; the change was checked against the JSX and existing
 structural test.
 
+### Third follow-up — rebuild the identity card to match the reference
+
+User supplied the actual reference (FK USU lecturer page) and pointed out the
+identity card was missing fields the reference shows. Rebuilt the sticky card
+to carry the full labelled stack, one field per row (`CardField` helper: small
+grey label + content):
+
+photo → name → NIP → NIDN → Program Studi (chip) → Bidang keahlian (chips) →
+Jabatan (chip) → Media Penelitian (Scholar/SINTA/Scopus/LinkedIn/Instagram
+icon links, merged from the old `scholarLinks` + `socialLinks`) → Kontak
+(e-mail + phone) → Alamat Kantor → Jam konsultasi → Curriculum Vitae
+(download link).
+
+- The separate floating "Kontak" and "Profil ilmiah" sub-cards and the
+  full-width blue CV button below the card are gone — all consolidated into
+  the one card, as the reference does.
+- Hero band is now the lecturer name only. Position and study program are no
+  longer shown there (they live once, in the card), so nothing on the page is
+  duplicated. (The reference hero shows only name fragments; we can't split
+  `name`, so the whole string is the h1 — see the name-parts follow-up above.)
+- New `LecturerProfile` message keys: `position`, `researchMedia`,
+  `officeAddress`, `curriculumVitae` (id/en/ar). `Academic.scheduleProgram`
+  reused for the "Program Studi" label, `expertise` for "Bidang keahlian".
+- Removed the now-unused `#lecturer-contact` / `#lecturer-scholar` section ids
+  (nothing linked to them). `#lecturer-education` / `#lecturer-publications`
+  and the records-component anchors are unchanged.
+- Updated `public-lecturer-detail-redesign.test.tsx`: the NIP/NIDN assertion
+  now matches `label="NIP"` / `label="NIDN"` (the CardField prop) instead of
+  the old `>NIP<` text node.
+
+Risk: `messages/*.json` was touched (4 additive keys in `LecturerProfile`).
+This branch *is* `M4-GPT-PUBLIC-IA-MENU-REMAP`, which holds a messages lease,
+so the edit is in-lane, but `M4-CLAUDE-PAGE-ADMIN-UI` also holds a messages
+lease — the keys are additive and in a public-profile namespace it does not
+touch, so a merge conflict is unlikely but possible.
+
+Verified: `npm run lint`, `npx tsc --noEmit`, `npm run test` (135 files /
+1,460 tests), `npm run build` — all pass, no warnings. Rendered locally
+against `/id/dosen/dr-agus-ali-dzawafi-m-fil-i` (most seeded lecturers are
+draft/inactive and 404); the card fields render in the correct order and the
+page has no horizontal scroll.
+
 ### Second follow-up — drop the in-page section nav
 
 User still found the wrapped pill nav weak ("blends into the background", the

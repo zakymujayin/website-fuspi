@@ -18,8 +18,8 @@ describe("public lecturer detail page redesign", () => {
   it("shows NIP and NIDN as separate identity rows instead of collapsing them into one line", () => {
     expect(page).toContain("lecturer.nip");
     expect(page).toContain("lecturer.nidn");
-    expect(page).toMatch(/>\s*NIP\s*</);
-    expect(page).toMatch(/>\s*NIDN\s*</);
+    expect(page).toMatch(/label="NIP"/);
+    expect(page).toMatch(/label="NIDN"/);
   });
 
   it("renders expertise as individual chips via the shared splitter", () => {
