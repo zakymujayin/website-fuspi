@@ -82,10 +82,11 @@ export async function POST(request: Request) {
   if (result.ok) {
     for (const locale of ["id", "en", "ar"] as const) {
       revalidatePath(`/${locale}/admin/academic`);
+      revalidatePath(`/${locale}/admin/program-studi`);
       revalidatePath(`/${locale}/akademik`, "page");
       revalidatePath(`/${locale}/dosen`, "page");
       revalidatePath(`/${locale}/tenaga-kependidikan`, "page");
-      revalidatePath(`/${locale}/program-studi/[slug]`, "page");
+      revalidatePath(`/${locale}/prodi/[slug]`, "page");
     }
   }
   return json(result, academicPeopleHttpStatus(result));

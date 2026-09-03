@@ -91,3 +91,18 @@ active_leases:
       - coordination/tasks/M4-GPT-PUBLIC-IA-MENU-REMAP.md
       - coordination/handoffs/M4-GPT-PUBLIC-IA-MENU-REMAP-gpt.md
       - coordination/ownership.yml
+  - task: M4-GPT-PRODI-CMS-ADMIN-NAV
+    owner: gpt
+    paths:
+      - src/app/[locale]/admin/program-studi/**
+      - src/app/api/admin/academic/people/route.ts
+      - src/components/admin/academic/**
+      - src/components/admin/admin-sidebar.tsx
+      - src/components/admin/admin-sidebar-data.ts
+      - src/components/admin/admin-layout-shell.tsx
+      - src/app/[locale]/(public)/prodi/[slug]/page.tsx
+      - tests/m4/ui/program-studi-admin.test.tsx
+      - tests/m4/ui/admin-sidebar-groups.test.tsx
+      - coordination/tasks/M4-GPT-PRODI-CMS-ADMIN-NAV.md
+      - coordination/handoffs/M4-GPT-PRODI-CMS-ADMIN-NAV-gpt.md
+      - coordination/ownership.yml

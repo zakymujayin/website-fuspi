@@ -83,6 +83,15 @@ export const SIDEBAR_MENU_GROUPS = [
     ],
   },
   {
+    labelKey: "academics",
+    labelNamespace: "Nav",
+    items: [
+      { href: "/admin/program-studi", icon: GraduationCapIcon, labelKey: "studyPrograms", labelNamespace: "Nav" },
+      { href: "/admin/impor-dosen", icon: UserPlusIcon, labelKey: "lecturers", labelNamespace: "Nav" },
+      { href: "/admin/dokumen", icon: FileDownIcon, labelKey: "academicDocs", labelNamespace: "Nav" },
+    ],
+  },
+  {
     labelKey: "publications",
     items: [
       { href: "/admin/layanan", icon: Building2Icon, labelKey: "services" },
@@ -98,11 +107,6 @@ export const SIDEBAR_MENU_GROUPS = [
       },
       { href: "/admin/prestasi", icon: TrophyIcon, labelKey: "achievements" },
       { href: "/admin/kegiatan", icon: UsersIcon, labelKey: "activities" },
-      {
-        href: "/admin/impor-dosen",
-        icon: UserPlusIcon,
-        labelKey: "lecturerImport",
-      },
       {
         href: "/admin/pengaduan/ppks",
         icon: ShieldAlertIcon,

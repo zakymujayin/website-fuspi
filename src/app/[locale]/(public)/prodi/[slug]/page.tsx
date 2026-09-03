@@ -88,7 +88,7 @@ export default async function ProdiDetailPage({params}: {params: Promise<{locale
   try {
     const prisma = getPrismaClient();
     const rows = await prisma.studyProgram.findMany({
-      where: {slug},
+      where: {slug, isActive: true},
       select: STUDY_PROGRAM_SELECT,
     }) as ProdiRow[];
     dbProdi = rows[0] ?? null;
@@ -177,7 +177,7 @@ export default async function ProdiDetailPage({params}: {params: Promise<{locale
           ) : null}
 
           {facts.length > 0 ? (
-            <dl className="mt-10 grid grid-cols-3 gap-4 border-t border-white/15 pt-6 sm:gap-8">
+            <dl className="mt-10 grid grid-cols-3 gap-4 border-t border-white/15 pt-6 text-center sm:gap-8">
               {facts.map((fact) => (
                 <div key={fact.label}>
                   <dt className="text-xs font-medium text-slate-400">{fact.label}</dt>
@@ -208,7 +208,7 @@ export default async function ProdiDetailPage({params}: {params: Promise<{locale
                          plate the faculty vision already uses on the home page. */
                       <div
                         dir="auto"
-                        className="rich-text mt-6 rounded-2xl border border-royal-100 bg-royal-50 p-6 font-display text-lg font-semibold leading-relaxed text-royal-900 md:p-8 md:text-xl"
+                        className="rich-text mt-6 rounded-2xl border border-royal-100 bg-royal-50 p-6 font-display text-base font-semibold leading-relaxed text-royal-900 md:p-8 md:text-lg"
                         dangerouslySetInnerHTML={{__html: section.html}}
                       />
                     ) : (
