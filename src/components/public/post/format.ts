@@ -1,20 +1,14 @@
 import type {AppLocale} from "@/i18n/routing";
+import {formatDateDdMmYyyy} from "@/lib/format/date";
 
-import {INTL_LOCALE_TAG} from "./locale";
-
-const JAKARTA_TIME_ZONE = "Asia/Jakarta";
 const WORDS_PER_MINUTE = 200;
 const TAG_PATTERN = /<[^>]*>/g;
 const WHITESPACE_PATTERN = /\s+/g;
 
-/** Publication date formatted in Asia/Jakarta business time (docs/12-multibahasa-rtl.md, docs/19). */
-export function formatJakartaPublishedDate(date: Date, locale: AppLocale): string {
-  return new Intl.DateTimeFormat(INTL_LOCALE_TAG[locale], {
-    timeZone: JAKARTA_TIME_ZONE,
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(date);
+/** Publication date formatted as dd/mm/yyyy in Asia/Jakarta business time. */
+export function formatJakartaPublishedDate(date: Date, _locale: AppLocale): string {
+  void _locale;
+  return formatDateDdMmYyyy(date);
 }
 
 /** ~200 words/minute estimate from sanitized article HTML (docs/19-C). */

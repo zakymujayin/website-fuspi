@@ -10,6 +10,7 @@ import {
 import {Field, FieldDescription, FieldGroup, FieldLabel} from "@/components/ui/field";
 import {Input} from "@/components/ui/input";
 import {Textarea} from "@/components/ui/textarea";
+import {formatDateTimeDdMmYyyy} from "@/lib/format/date";
 
 export type ComplaintTrackLabels = {
   ticketNumber: string;
@@ -87,19 +88,15 @@ function ReplyForm({
 
 export function ComplaintTrackForm({
   labels,
-  locale,
+  locale: _locale,
 }: {
   labels: ComplaintTrackLabels;
   locale: string;
 }) {
   const [state, action, pending] = useActionState(trackComplaintAction, INITIAL);
+  void _locale;
 
-  const formatDate = (iso: string) =>
-    new Intl.DateTimeFormat(locale, {
-      dateStyle: "medium",
-      timeStyle: "short",
-      timeZone: "Asia/Jakarta",
-    }).format(new Date(iso));
+  const formatDate = (iso: string) => formatDateTimeDdMmYyyy(iso);
 
   return (
     <div className="max-w-2xl">

@@ -4,6 +4,7 @@ import {ArrowRightIcon} from "lucide-react";
 import Image from "next/image";
 
 import {Link} from "@/i18n/navigation";
+import {formatDateDdMmYyyy} from "@/lib/format/date";
 import {cn} from "@/lib/utils";
 
 export type PublicContentCardData = {
@@ -103,8 +104,8 @@ export function PublicContentCard({
 
         {item.startsAt ? (
           <p className="text-xs text-slate-400">
-            {new Date(item.startsAt).toLocaleDateString("id-ID", {year: "numeric", month: "long", day: "numeric"})}
-            {item.endsAt ? ` — ${new Date(item.endsAt).toLocaleDateString("id-ID", {year: "numeric", month: "long", day: "numeric"})}` : ""}
+            {formatDateDdMmYyyy(item.startsAt)}
+            {item.endsAt ? ` — ${formatDateDdMmYyyy(item.endsAt)}` : ""}
           </p>
         ) : null}
 

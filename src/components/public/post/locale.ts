@@ -4,7 +4,7 @@ import type {AppLocale} from "@/i18n/routing";
 /** Intl locale tags for date/number formatting per active site locale. */
 export const INTL_LOCALE_TAG: Record<AppLocale, string> = {
   id: "id-ID",
-  en: "en-US",
+  en: "en-GB",
   ar: "ar",
 };
 

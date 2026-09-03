@@ -10,6 +10,7 @@ import { PublicContentStateNotice } from "@/components/admin/public-content/publ
 import { getPublicContentDetail } from "@/features/public-content/public-query";
 import { getPrismaClient } from "@/lib/db/client";
 import type { PublicContentDetail } from "@/contracts/public-content";
+import {formatDateDdMmYyyy} from "@/lib/format/date";
 
 export async function generateMetadata({
   params,
@@ -99,10 +100,7 @@ export default async function AlbumDetailPage({
             dateTime={album.eventDate}
             className="mt-4 inline-block text-sm text-slate-500"
           >
-            {new Date(album.eventDate).toLocaleDateString(
-              album.translation.resolvedLocale === "ar" ? "ar-SA" : locale,
-              { year: "numeric", month: "long", day: "numeric" },
-            )}
+            {formatDateDdMmYyyy(album.eventDate)}
           </time>
         ) : null}
 

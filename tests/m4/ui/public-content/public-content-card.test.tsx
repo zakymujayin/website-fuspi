@@ -182,7 +182,7 @@ describe("PublicContentCard", () => {
       />,
     );
     const el = $(markup);
-    expect(el.textContent).toContain("Januari");
+    expect(el.textContent).toContain("01/01/2026");
   });
 
   it("does not render date when startsAt is null", () => {

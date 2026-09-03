@@ -8,6 +8,7 @@ import {BOOKING_ADMIN_ROLES, listBookings} from "@/features/booking/domain";
 import {parseAppLocale} from "@/lib/auth/runtime/redirect";
 import {decideProtectedRoute, getRequestSession} from "@/lib/auth/runtime/request-session";
 import {getPrismaClient} from "@/lib/db/client";
+import {formatDateTimeDdMmYyyy} from "@/lib/format/date";
 
 type Props = {
   params: Promise<{locale: string}>;
@@ -32,12 +33,8 @@ export async function generateMetadata({params}: Props): Promise<Metadata> {
   return {title: t("title"), robots: {index: false, follow: false}};
 }
 
-function formatDate(locale: string, iso: string) {
-  return new Intl.DateTimeFormat(locale, {
-    dateStyle: "medium",
-    timeStyle: "short",
-    timeZone: "Asia/Jakarta",
-  }).format(new Date(iso));
+function formatDate(_locale: string, iso: string) {
+  return formatDateTimeDdMmYyyy(iso);
 }
 
 function formatRange(locale: string, startIso: string, endIso: string) {

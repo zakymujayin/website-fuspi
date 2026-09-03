@@ -10,6 +10,7 @@ import { PublicContentStateNotice } from "@/components/admin/public-content/publ
 import type { PublicContentDetail } from "@/contracts/public-content";
 import { getPublicContentDetail } from "@/features/public-content/public-query";
 import { getPrismaClient } from "@/lib/db/client";
+import {formatDateDdMmYyyy} from "@/lib/format/date";
 
 const RESOURCE = "ACHIEVEMENT" as const;
 const LIST_PATH = "/prestasi";
@@ -81,7 +82,7 @@ const tNav = await getTranslations("Nav");
             {achievement.achievedAt ? (
               <>
                 {" · "}
-                {new Date(achievement.achievedAt).toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" })}
+                {formatDateDdMmYyyy(achievement.achievedAt)}
               </>
             ) : null}
           </p>

@@ -9,6 +9,7 @@ import {getPrismaClient} from "@/lib/db/client";
 import type {Prisma} from "@/generated/prisma/client";
 import {StorageKeySchema} from "@/contracts/storage";
 import type {AppLocale} from "@/i18n/routing";
+import {formatDateDdMmYyyy} from "@/lib/format/date";
 
 const PROGRAM_SELECT = {
   id: true,
@@ -31,14 +32,10 @@ function resolveTranslation<T extends {locale: string}>(rows: readonly T[], loca
   return rows.find((row) => row.locale === locale) ?? rows.find((row) => row.locale === "id");
 }
 
-function formatDate(value: Date | null, locale: AppLocale) {
+function formatDate(value: Date | null, _locale: AppLocale) {
   if (!value) return null;
-  return new Intl.DateTimeFormat(locale === "ar" ? "ar" : locale === "en" ? "en-US" : "id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "Asia/Jakarta",
-  }).format(value);
+  void _locale;
+  return formatDateDdMmYyyy(value);
 }
 
 function certificateUrl(

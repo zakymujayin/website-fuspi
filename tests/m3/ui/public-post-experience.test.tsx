@@ -68,10 +68,9 @@ describe("Jakarta-localized date and reading-time presentation", () => {
   const CROSS_MIDNIGHT_UTC = new Date("2026-01-15T17:30:00.000Z");
 
   it("formats the Jakarta calendar date per locale", () => {
-    expect(formatJakartaPublishedDate(CROSS_MIDNIGHT_UTC, "id")).toBe("16 Januari 2026");
-    expect(formatJakartaPublishedDate(CROSS_MIDNIGHT_UTC, "en")).toBe("January 16, 2026");
-    expect(formatJakartaPublishedDate(CROSS_MIDNIGHT_UTC, "ar")).toContain("يناير");
-    expect(formatJakartaPublishedDate(CROSS_MIDNIGHT_UTC, "ar")).toContain("2026");
+    expect(formatJakartaPublishedDate(CROSS_MIDNIGHT_UTC, "id")).toBe("16/01/2026");
+    expect(formatJakartaPublishedDate(CROSS_MIDNIGHT_UTC, "en")).toBe("16/01/2026");
+    expect(formatJakartaPublishedDate(CROSS_MIDNIGHT_UTC, "ar")).toBe("16/01/2026");
   });
 
   it("estimates ~200 words/minute with a floor of one minute", () => {

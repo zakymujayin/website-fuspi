@@ -10,6 +10,7 @@ import { getPublicContentDetail } from "@/features/public-content/public-query";
 import { getPrismaClient } from "@/lib/db/client";
 import type { PublicContentDetail } from "@/contracts/public-content";
 import { cn } from "@/lib/utils";
+import {formatDateTimeDdMmYyyy} from "@/lib/format/date";
 
 export async function generateMetadata({
   params,
@@ -74,17 +75,6 @@ export default async function EventDetailPage({
 
   const start = new Date(event.startAt);
   const end = event.endAt ? new Date(event.endAt) : null;
-  const dateFormatter = new Intl.DateTimeFormat(
-    event.translation.resolvedLocale === "ar" ? "ar-SA" : locale,
-    {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    },
-  );
 
   return (
     <Container className="py-12 md:py-20">
@@ -153,13 +143,13 @@ export default async function EventDetailPage({
             </svg>
             <div className="text-sm text-slate-700">
               <time dateTime={event.startAt}>
-                {dateFormatter.format(start)}
+                {formatDateTimeDdMmYyyy(start)}
               </time>
               {end ? (
                 <>
                   {" \u2014 "}
                   <time dateTime={event.endAt ?? undefined}>
-                    {dateFormatter.format(end)}
+                    {formatDateTimeDdMmYyyy(end)}
                   </time>
                 </>
               ) : null}

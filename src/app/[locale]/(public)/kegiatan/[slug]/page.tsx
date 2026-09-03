@@ -10,6 +10,7 @@ import { PublicContentStateNotice } from "@/components/admin/public-content/publ
 import type { PublicContentDetail } from "@/contracts/public-content";
 import { getPublicContentDetail } from "@/features/public-content/public-query";
 import { getPrismaClient } from "@/lib/db/client";
+import {formatDateDdMmYyyy} from "@/lib/format/date";
 
 const RESOURCE = "STUDENT_ACTIVITY" as const;
 const LIST_PATH = "/kegiatan";
@@ -76,7 +77,7 @@ const tNav = await getTranslations("Nav");
               dateTime={studentActivity.date}
               className="mt-4 inline-block text-sm text-slate-500"
             >
-              {new Date(studentActivity.date).toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" })}
+              {formatDateDdMmYyyy(studentActivity.date)}
             </time>
           ) : null}
         </header>

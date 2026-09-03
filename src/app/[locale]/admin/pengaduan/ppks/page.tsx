@@ -5,6 +5,7 @@ import {getTranslations, setRequestLocale} from "next-intl/server";
 import {Link} from "@/i18n/navigation";
 import {currentSessionToken, getTicketQueryBoundary} from "@/features/tickets/boundary";
 import {isPpksEncryptionConfigured} from "@/lib/tickets/ppks-encryption";
+import {formatDateTimeDdMmYyyy} from "@/lib/format/date";
 
 const PRIORITY_TONE: Record<string, string> = {
   URGENT: "bg-danger-surface text-danger",
@@ -49,10 +50,6 @@ export default async function AdminPpksInboxPage({params}: {params: Promise<{loc
   const items = listed.ok
     ? listed.data.items.filter((item) => item.category === "PELECEHAN_SEKSUAL")
     : [];
-
-  const dateFormat = new Intl.DateTimeFormat(locale, {
-    dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Jakarta",
-  });
 
   return (
     <div>
@@ -117,7 +114,7 @@ export default async function AdminPpksInboxPage({params}: {params: Promise<{loc
                   <td className="px-5 py-3 text-slate-700">
                     {t(`status${item.status}` as "statusBARU")}
                   </td>
-                  <td className="px-5 py-3 text-slate-500">{dateFormat.format(item.createdAt)}</td>
+                <td className="px-5 py-3 text-slate-500">{formatDateTimeDdMmYyyy(item.createdAt)}</td>
                 </tr>
               ))}
             </tbody>

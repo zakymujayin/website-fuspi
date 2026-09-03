@@ -269,9 +269,9 @@ describe("Jakarta date and byte formatting", () => {
   const CROSS_MIDNIGHT_ISO = "2026-01-15T17:30:00.000Z";
 
   it("formats the Jakarta creation date and time per locale", () => {
-    expect(formatAdminMediaCreatedAt(CROSS_MIDNIGHT_ISO, "id")).toContain("16 Januari 2026");
-    expect(formatAdminMediaCreatedAt(CROSS_MIDNIGHT_ISO, "en")).toContain("January 16, 2026");
-    expect(formatAdminMediaCreatedAt(CROSS_MIDNIGHT_ISO, "ar")).toContain("يناير");
+    expect(formatAdminMediaCreatedAt(CROSS_MIDNIGHT_ISO, "id")).toContain("16/01/2026");
+    expect(formatAdminMediaCreatedAt(CROSS_MIDNIGHT_ISO, "en")).toContain("16/01/2026");
+    expect(formatAdminMediaCreatedAt(CROSS_MIDNIGHT_ISO, "ar")).toContain("16/01/2026");
   });
 
   it("formats byte sizes in binary steps", () => {
@@ -540,7 +540,7 @@ describe("accessible Media Library item semantics", () => {
     );
     const time = markupToContainer(markup).querySelector("time");
     expect(time?.getAttribute("dateTime")).toBe(SAMPLE_ITEM.createdAt);
-    expect(time?.textContent).toContain("16 Januari 2026");
+    expect(time?.textContent).toContain("16/01/2026");
   });
 });
 

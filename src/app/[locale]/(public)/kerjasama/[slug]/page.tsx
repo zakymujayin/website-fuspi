@@ -17,6 +17,7 @@ import { PublicContentStateNotice } from "@/components/admin/public-content/publ
 import type { PublicContentDetail } from "@/contracts/public-content";
 import { getPublicContentDetail } from "@/features/public-content/public-query";
 import { getPrismaClient } from "@/lib/db/client";
+import {formatDateDdMmYyyy} from "@/lib/format/date";
 
 const RESOURCE = "PARTNERSHIP" as const;
 const LIST_PATH = "/kerjasama";
@@ -76,9 +77,8 @@ export default async function PartnershipDetailPage({ params }: PageProps) {
   }
 
   const partnership = result.data as Extract<PublicContentDetail, { resource: typeof RESOURCE }>;
-  const dateOptions: Intl.DateTimeFormatOptions = { year: "numeric", month: "long", day: "numeric" };
-  const startDate = partnership.startDate ? new Date(partnership.startDate).toLocaleDateString(locale, dateOptions) : null;
-  const endDate = partnership.endDate ? new Date(partnership.endDate).toLocaleDateString(locale, dateOptions) : null;
+  const startDate = partnership.startDate ? formatDateDdMmYyyy(partnership.startDate) : null;
+  const endDate = partnership.endDate ? formatDateDdMmYyyy(partnership.endDate) : null;
 
   return (
     <Container className="py-12 md:py-20">

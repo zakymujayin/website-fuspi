@@ -10,6 +10,7 @@ import {Link} from "@/i18n/navigation";
 import {currentSessionToken, getTicketQueryBoundary} from "@/features/tickets/boundary";
 import {getPrismaClient} from "@/lib/db/client";
 import {isPpksEncryptionConfigured} from "@/lib/tickets/ppks-encryption";
+import {formatDateTimeDdMmYyyy} from "@/lib/format/date";
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
@@ -43,10 +44,6 @@ export default async function AdminPpksDetailPage({
   const parsed = PpksTicketDetailSchema.safeParse(detail.data);
   if (!parsed.success) notFound();
   const ticket = parsed.data;
-
-  const stamp = new Intl.DateTimeFormat(locale, {
-    dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Jakarta",
-  });
 
   /* Only Satgas members can be assigned. Offering the wider staff list would
      invite handing a PPKS case to an account that cannot even open it. */
@@ -126,7 +123,7 @@ export default async function AdminPpksDetailPage({
         </div>
         <div>
           <dt className="text-xs text-slate-400 uppercase">{t("columnReceived")}</dt>
-          <dd className="text-sm text-slate-700">{stamp.format(ticket.createdAt)}</dd>
+          <dd className="text-sm text-slate-700">{formatDateTimeDdMmYyyy(ticket.createdAt)}</dd>
         </div>
       </dl>
 
@@ -200,7 +197,7 @@ export default async function AdminPpksDetailPage({
                 }`}
               >
                 <p className="flex flex-wrap items-center gap-2">
-                  <span className="font-mono text-xs text-slate-400">{stamp.format(reply.createdAt)}</span>
+                  <span className="font-mono text-xs text-slate-400">{formatDateTimeDdMmYyyy(reply.createdAt)}</span>
                   <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                     reply.isInternal ? "bg-warning-surface text-slate-900" : "bg-royal-50 text-royal-700"
                   }`}>

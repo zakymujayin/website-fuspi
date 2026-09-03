@@ -1,13 +1,13 @@
 import type { AppLocale } from "@/i18n/routing";
+import {formatDateTimeDdMmYyyy} from "@/lib/format/date";
 
 /** Intl locale tags for date/number formatting per active site locale (mirrors docs/12-multibahasa-rtl.md). */
 const INTL_LOCALE_TAG: Record<AppLocale, string> = {
   id: "id-ID",
-  en: "en-US",
+  en: "en-GB",
   ar: "ar",
 };
 
-const JAKARTA_TIME_ZONE = "Asia/Jakarta";
 const BYTE_UNITS = ["B", "KB", "MB", "GB"] as const;
 const BYTE_STEP = 1024;
 
@@ -38,13 +38,7 @@ export function formatAdminMediaDimensions(width: number, height: number, locale
 }
 
 /** Asia/Jakarta creation date and time (docs/12-multibahasa-rtl.md business-time rule; manifest data requirement 3). */
-export function formatAdminMediaCreatedAt(iso: string, locale: AppLocale): string {
-  return new Intl.DateTimeFormat(INTL_LOCALE_TAG[locale], {
-    timeZone: JAKARTA_TIME_ZONE,
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(iso));
+export function formatAdminMediaCreatedAt(iso: string, _locale: AppLocale): string {
+  void _locale;
+  return formatDateTimeDdMmYyyy(iso);
 }

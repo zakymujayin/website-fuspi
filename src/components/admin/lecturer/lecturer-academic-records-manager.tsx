@@ -15,8 +15,8 @@ import {PortalSubmitButton} from "@/components/portal/portal-form-status";
 import type {AppLocale} from "@/i18n/routing";
 
 type Labels = {
-  hki: {title: string; description: string; name: string; type: string; registration: string; year: string; url: string; add: string; save: string; remove: string; addTitle: string; empty: string; saved: string; error: string};
-  teaching: {title: string; description: string; code: string; name: string; program: string; credits: string; yearStart: string; yearEnd: string; term: string; semester: string; add: string; save: string; remove: string; addTitle: string; empty: string; saved: string; error: string};
+  hki: {title: string; description: string; name: string; type: string; registration: string; year: string; url: string; add: string; save: string; remove: string; addTitle: string; empty: string; saved: string; error: string; types: ReadonlyArray<{value: string; label: string}>};
+  teaching: {title: string; description: string; code: string; name: string; program: string; credits: string; yearStart: string; yearEnd: string; term: string; semester: string; add: string; save: string; remove: string; addTitle: string; empty: string; saved: string; error: string; programs: ReadonlyArray<{value: string; label: string}>; terms: ReadonlyArray<{value: string; label: string}>};
   types: ReadonlyArray<{value: string; label: string}>;
   programs: ReadonlyArray<{value: string; label: string}>;
   terms: ReadonlyArray<{value: string; label: string}>;

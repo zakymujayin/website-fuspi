@@ -10,6 +10,7 @@ import {
 import {Field, FieldDescription, FieldGroup, FieldLabel} from "@/components/ui/field";
 import {Input} from "@/components/ui/input";
 import {Textarea} from "@/components/ui/textarea";
+import {formatDateDdMmYyyy, formatDateTimeDdMmYyyy, formatTimeWib} from "@/lib/format/date";
 
 export type BookingTrackLabels = {
   bookingNumber: string;
@@ -38,12 +39,10 @@ const INITIAL: BookingTrackState = {status: "idle"};
 
 /* Stored instants already carry the Jakarta offset, so the reader sees the same
    wall-clock time the room is actually booked for. */
-function formatRange(locale: string, startIso: string, endIso: string) {
-  const date = new Intl.DateTimeFormat(locale, {dateStyle: "full", timeZone: "Asia/Jakarta"});
-  const time = new Intl.DateTimeFormat(locale, {timeStyle: "short", timeZone: "Asia/Jakarta"});
+function formatRange(_locale: string, startIso: string, endIso: string) {
   const start = new Date(startIso);
   const end = new Date(endIso);
-  return `${date.format(start)}, ${time.format(start)} - ${time.format(end)} WIB`;
+  return `${formatDateDdMmYyyy(start)} ${formatTimeWib(start).replace(/\sWIB$/u, "")} - ${formatTimeWib(end)}`;
 }
 
 export function BookingTrackForm({
@@ -55,12 +54,7 @@ export function BookingTrackForm({
 }) {
   const [state, action, pending] = useActionState(trackBookingAction, INITIAL);
 
-  const formatStamp = (iso: string) =>
-    new Intl.DateTimeFormat(locale, {
-      dateStyle: "medium",
-      timeStyle: "short",
-      timeZone: "Asia/Jakarta",
-    }).format(new Date(iso));
+  const formatStamp = (iso: string) => formatDateTimeDdMmYyyy(iso);
 
   return (
     <div className="max-w-2xl">

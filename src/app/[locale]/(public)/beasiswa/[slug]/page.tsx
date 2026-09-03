@@ -9,6 +9,7 @@ import { PublicContentStateNotice } from "@/components/admin/public-content/publ
 import type { PublicContentDetail } from "@/contracts/public-content";
 import { getPublicContentDetail } from "@/features/public-content/public-query";
 import { getPrismaClient } from "@/lib/db/client";
+import {formatDateDdMmYyyy} from "@/lib/format/date";
 
 const RESOURCE = "SCHOLARSHIP" as const;
 const LIST_PATH = "/beasiswa";
@@ -81,13 +82,13 @@ export default async function ScholarshipDetailPage({ params }: PageProps) {
               {scholarship.startDate ? (
                 <div>
                   <dt className="text-[13px] font-medium uppercase tracking-wide text-slate-500">{t("detail.startDate")}</dt>
-                  <dd className="mt-1 text-sm text-slate-700">{new Date(scholarship.startDate).toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" })}</dd>
+                  <dd className="mt-1 text-sm text-slate-700">{formatDateDdMmYyyy(scholarship.startDate)}</dd>
                 </div>
               ) : null}
               {scholarship.endDate ? (
                 <div>
                   <dt className="text-[13px] font-medium uppercase tracking-wide text-slate-500">{t("detail.endDate")}</dt>
-                  <dd className="mt-1 text-sm text-slate-700">{new Date(scholarship.endDate).toLocaleDateString(locale, { year: "numeric", month: "long", day: "numeric" })}</dd>
+                  <dd className="mt-1 text-sm text-slate-700">{formatDateDdMmYyyy(scholarship.endDate)}</dd>
                 </div>
               ) : null}
             </dl>

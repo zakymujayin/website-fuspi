@@ -230,11 +230,11 @@ describe("formatting", () => {
   it("renders the instant in Asia/Jakarta, not UTC", () => {
     // 2026-07-15T03:00Z is 10:00 in Jakarta (UTC+7).
     expect(formatAdminPostInstant("2026-07-15T03:00:00.000Z", "id")).toContain("10");
-    expect(formatAdminPostInstant("2026-07-15T03:00:00.000Z", "id")).toContain("Juli");
+    expect(formatAdminPostInstant("2026-07-15T03:00:00.000Z", "id")).toContain("15/07/2026");
   });
 
   it("formats per locale", () => {
-    expect(formatAdminPostInstant("2026-07-15T03:00:00.000Z", "en")).toContain("July");
+    expect(formatAdminPostInstant("2026-07-15T03:00:00.000Z", "en")).toContain("15/07/2026");
   });
 
   it("joins available locales as uppercase codes", () => {

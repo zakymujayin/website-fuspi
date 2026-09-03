@@ -9,6 +9,7 @@ import {getPrismaClient} from "@/lib/db/client";
 import {Link} from "@/i18n/navigation";
 import type {AppLocale} from "@/i18n/routing";
 import {ArrowRight} from "lucide-react";
+import {formatDateDdMmYyyy} from "@/lib/format/date";
 
 const POST_SELECT = {
   id: true, slug: true, publishedAt: true,
@@ -32,10 +33,6 @@ function coverView(m: Row["coverMedia"]): ResolvedCoverImage {
 
 function resolveLocale<T extends {locale: string}>(items: ReadonlyArray<T>, requested: AppLocale): T | undefined {
   return items.find((t) => t.locale === requested) ?? items.find((t) => t.locale === "id");
-}
-
-function formatDate(d: Date): string {
-  return `${String(d.getDate()).padStart(2, "0")} ${["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"][d.getMonth()]} ${d.getFullYear()}`;
 }
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
@@ -74,7 +71,7 @@ export default async function ColumnsPage({params}: {params: Promise<{locale: Ap
                 href={`/kolom/${p.slug}`} title={tl?.title ?? ""} excerpt={tl?.excerpt ?? null}
                 resolvedLocale={locale} cover={coverView(p.coverMedia)}
                 authorName={p.author?.name ?? null}
-                dateLabel={p.publishedAt ? formatDate(p.publishedAt) : ""}
+              dateLabel={p.publishedAt ? formatDateDdMmYyyy(p.publishedAt) : ""}
                 dateTimeIso={p.publishedAt?.toISOString().slice(0, 10) ?? ""}
                 categoryLabel={catTl?.title ?? null} />
             );
