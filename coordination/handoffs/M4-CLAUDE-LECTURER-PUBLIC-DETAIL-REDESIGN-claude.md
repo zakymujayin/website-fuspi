@@ -220,3 +220,29 @@ Verification: targeted redesign tests (10/10), lint, typecheck, full suite
 (139 files / 1,488 tests), and `git diff --check` all passed. The production
 build had already passed after the preceding visual pass; this follow-up only
 changes utility classes and focus states.
+
+### Sixth follow-up — preserve lecturer photo proportions and dynamic media links
+
+- The public lecturer directory now uses a consistent `4/5` portrait frame with
+  `object-contain`, so source images with different dimensions remain intact
+  instead of being enlarged and cropped by `object-cover`.
+- The lecturer detail identity photo uses the same contain treatment and frame
+  padding for consistent presentation across profiles.
+- Research-media links remain data-driven: only valid, populated lecturer
+  fields render an icon, and each icon links to that lecturer's stored profile
+  URL. Brand paths/colors were refreshed for Google Scholar, Scopus, ORCID,
+  LinkedIn, and Instagram; the asset layer can be replaced when the owner
+  supplies final icon files without changing this URL/filter logic.
+
+Files changed:
+
+- `src/app/[locale]/(public)/dosen/page.tsx`
+- `src/app/[locale]/(public)/dosen/[id]/page.tsx`
+- `src/components/public/research-media-icons.tsx`
+
+Latest implementation commit: `08a9965`.
+
+Verification: `npm run lint`, `npx tsc --noEmit`, `npm run test` (140 files /
+1,493 tests), targeted research-media and lecturer-detail tests (14/14), and
+`git diff --check` all passed. No database, schema, or route contract change
+was made.
