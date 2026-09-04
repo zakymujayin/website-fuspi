@@ -257,7 +257,7 @@ type LecturerSeed = {
 
 const LECTURERS: LecturerSeed[] = [
   {
-    slug: "masykur",
+    slug: "dr-masykur-m-hum",
     name: "Dr. Masykur, M.Hum.",
     nidn: null,
     nip: "197606172005011003",
@@ -860,7 +860,7 @@ async function main() {
     };
     const educations = item.educations.map((e, order) => ({ ...e, order }));
     const publications = item.publications.map((p, order) => ({ ...p, order }));
-    const photoMediaId = item.slug === "masykur" ? masykurPhoto.id : undefined;
+    const photoMediaId = item.slug === "dr-masykur-m-hum" ? masykurPhoto.id : undefined;
 
     await prisma.lecturer.upsert({
       where: { slug: item.slug },
