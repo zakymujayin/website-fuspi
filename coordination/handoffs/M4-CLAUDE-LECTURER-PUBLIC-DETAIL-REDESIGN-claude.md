@@ -203,3 +203,20 @@ Verification for this follow-up:
 Untested: a live browser screenshot was not captured because the local dev
 server did not remain available in the sandbox after startup; no data,
 fetching, authorization, or academic-record sorting behavior was changed.
+
+### Fifth follow-up — accessibility and spacing polish
+
+- Replaced the remaining `space-y-*` utilities in the profile card and
+  publication groups with grid gaps, keeping the page aligned with the
+  project's spacing convention.
+- Added explicit visible focus treatment to publication, contact, and return
+  links, and gave the academic-period select the same rounded control language
+  used elsewhere in the public UI.
+- No data, fetching, sorting, anchor, or locale behavior changed.
+
+Latest implementation commit: `205d033`.
+
+Verification: targeted redesign tests (10/10), lint, typecheck, full suite
+(139 files / 1,488 tests), and `git diff --check` all passed. The production
+build had already passed after the preceding visual pass; this follow-up only
+changes utility classes and focus states.
