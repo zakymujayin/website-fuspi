@@ -287,7 +287,7 @@ Seeds a real, complete lecturer so the redesign is exercised against realistic v
 
 **Interfaces:**
 - Consumes: nothing from Task 1 (the seeder writes Prisma directly).
-- Produces: a lecturer at slug `masykur` with `nip`, `scopusUrl`, `sintaUrl`, `googleScholarUrl`, 3 educations, 27 publications, and a photo — the fixture Tasks 4–5 are eyeballed against.
+- Produces: a lecturer at slug `dr-masykur-m-hum` with `nip`, `scopusUrl`, `sintaUrl`, `googleScholarUrl`, 3 educations, 27 publications, and a photo — the fixture Tasks 4–5 are eyeballed against.
 
 **Identity rule (from the spec, non-negotiable):** academic content is real and sourced; institutional identity is FUSPI's. Email becomes `masykur@fuspi.uinbanten.ac.id`, office becomes `Gedung FUSPI Lt. 2, Ruang Dekan`, position becomes `Dekan Fakultas Ushuluddin dan Pemikiran Islam`. No external faculty domain, branding, or copy enters the repo.
 
@@ -441,7 +441,7 @@ npx tsx -e "
 import {getPrismaClient} from './src/lib/db/client';
 const p = getPrismaClient();
 const l = await p.lecturer.findUnique({
-  where: {slug: 'masykur'},
+  where: {slug: 'dr-masykur-m-hum'},
   include: {publications: true, educations: true, translations: true},
 });
 console.log(l?.name, l?.email, l?.nip);
@@ -782,14 +782,14 @@ overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_r
 
 - [ ] **Step 5: Verify in the browser**
 
-Run: `npm run dev` then open `http://localhost:3004/id/dosen/masykur`.
+Run: `npm run dev` then open `http://localhost:3004/id/dosen/dr-masykur-m-hum`.
 
 Check, against the Task 2 seed data:
 - Every section sits on a visibly distinct white card over a grey ground — no block reads as floating text.
 - The identity card shows NIP, program chip, expertise chips, jabatan chip, and a six-icon research media row.
 - 15 publications render grouped by type without the page feeling like one undifferentiated column.
 
-Then `http://localhost:3004/ar/dosen/masykur` — confirm RTL mirrors correctly and no physical-direction utility leaked in.
+Then `http://localhost:3004/ar/dosen/dr-masykur-m-hum` — confirm RTL mirrors correctly and no physical-direction utility leaked in.
 
 - [ ] **Step 6: Run the gate**
 
@@ -2110,7 +2110,7 @@ Replace `media={null}` from Task 7 Step 6 with the real `<MediaManager ... />`.
 
 Run `npm run dev`, open the Media & CV tab for Dr. Masykur:
 - Upload a PDF → save → reload the page → the CV filename persists.
-- Open `/id/dosen/masykur` → the "Unduh CV" button appears in the identity card and downloads the file.
+- Open `/id/dosen/dr-masykur-m-hum` → the "Unduh CV" button appears in the identity card and downloads the file.
 - Remove the CV → save → reload → the button is gone from the public page.
 - Attempt to upload a non-PDF as the CV → rejected. Confirm the server rejects it too, not just the client: the `validateCertificate` guard from Task 1 is the real boundary.
 
@@ -2136,7 +2136,7 @@ Spec §8 requires an axe pass on the rebuilt public page and the six-tab editor.
 - Create: `e2e/m5/lecturer-profile.spec.ts`
 
 **Interfaces:**
-- Consumes: the seeded `masykur` lecturer from Task 2; the rebuilt page from Task 4; the period filter from Task 5.
+- Consumes: the seeded `dr-masykur-m-hum` lecturer from Task 2; the rebuilt page from Task 4; the period filter from Task 5.
 - Produces: nothing.
 
 - [ ] **Step 1: Write the spec**
@@ -2151,14 +2151,14 @@ const AXE_TAGS = ["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"];
 
 test.describe("M5 lecturer profile — public detail", () => {
   test("has no accessibility violations", async ({page}) => {
-    await page.goto("/id/dosen/masykur");
+    await page.goto("/id/dosen/dr-masykur-m-hum");
     await expect(page.locator("h1")).toContainText("Masykur");
     const results = await new AxeBuilder({page}).withTags(AXE_TAGS).analyze();
     expect(results.violations).toEqual([]);
   });
 
   test("labels the teaching filter by academic period, not semester number", async ({page}) => {
-    await page.goto("/id/dosen/masykur");
+    await page.goto("/id/dosen/dr-masykur-m-hum");
     const filter = page.locator("#lecturer-period");
     await expect(filter).toBeVisible();
     await expect(filter).toBeEnabled();
@@ -2172,7 +2172,7 @@ test.describe("M5 lecturer profile — public detail", () => {
   });
 
   test("filtering by period narrows the course table", async ({page}) => {
-    await page.goto("/id/dosen/masykur");
+    await page.goto("/id/dosen/dr-masykur-m-hum");
     const rows = page.locator("#lecturer-teaching tbody tr");
     await expect(rows).toHaveCount(4);
     await page.locator("#lecturer-period").selectOption({label: "Ganjil 2026/2027"});
@@ -2180,7 +2180,7 @@ test.describe("M5 lecturer profile — public detail", () => {
   });
 
   test("renders Arabic RTL without leaking physical direction", async ({page}) => {
-    await page.goto("/ar/dosen/masykur");
+    await page.goto("/ar/dosen/dr-masykur-m-hum");
     const html = page.locator("html").first();
     await expect(html).toHaveAttribute("dir", "rtl");
     await expect(html).toHaveAttribute("lang", "ar");
@@ -2189,7 +2189,7 @@ test.describe("M5 lecturer profile — public detail", () => {
   });
 
   test("exposes each research media link with an accessible name", async ({page}) => {
-    await page.goto("/id/dosen/masykur");
+    await page.goto("/id/dosen/dr-masykur-m-hum");
     for (const label of ["Google Scholar", "Scopus", "SINTA"]) {
       await expect(page.getByRole("link", {name: label})).toBeVisible();
     }
@@ -2250,7 +2250,7 @@ git commit -m "docs: close the lecturer profile redesign handoff"
 
 ## Notes for the executor
 
-**Task order matters.** Task 1 must land before Tasks 7–8 (they build payloads against the extended contract). Task 2 should land early — Tasks 4, 7, and 9 all depend on the seeded `masykur` record, and stub data hides the exact density problems this work exists to fix. Task 3 must precede Task 4. Task 6 must precede Task 7. Task 9 needs Tasks 2, 4, and 5 in place.
+**Task order matters.** Task 1 must land before Tasks 7–8 (they build payloads against the extended contract). Task 2 should land early — Tasks 4, 7, and 9 all depend on the seeded `dr-masykur-m-hum` record, and stub data hides the exact density problems this work exists to fix. Task 3 must precede Task 4. Task 6 must precede Task 7. Task 9 needs Tasks 2, 4, and 5 in place.
 
 **Three things that look like bugs but are not:**
 - `academicYear` stays on `LecturerTeachingRecord` as an optional display string even after Task 5 adds the numeric fields — the table column still renders it.
