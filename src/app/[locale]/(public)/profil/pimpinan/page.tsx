@@ -30,8 +30,9 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
   return (
     <div className="bg-slate-50">
       <Container className="py-8 md:py-12">
-        <header className="border-b border-slate-200 pb-6 md:pb-8">
-          <div className="max-w-3xl">
+        <header className="relative overflow-hidden rounded-2xl border border-royal-100 bg-royal-50 px-6 py-7 shadow-sm md:px-9 md:py-8">
+          <div aria-hidden="true" className="absolute end-8 top-1/2 size-28 -translate-y-1/2 rounded-full border border-royal-200/70 md:size-40" />
+          <div className="relative max-w-3xl border-s-4 border-brass-500 ps-5 md:ps-6">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-royal-700">FUSPI · Profil Fakultas</p>
             <h1 className="section-rule mt-3 font-display text-4xl font-bold tracking-tight text-slate-950 md:text-5xl">
               {t("leadership")}
@@ -44,16 +45,16 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
 
         <main>
           <section aria-labelledby="dean-profile" className="mt-8 md:mt-12">
-            <div className="grid overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-md lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.25fr)]">
+            <div className="grid overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_14px_34px_rgb(30_42_90/0.1)] lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.25fr)]">
               <div className="bg-royal-50 p-4 md:p-6">
                 {deanProfile.photoUrl ? (
-                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-navy-900 ring-1 ring-inset ring-royal-200">
+                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-slate-100 p-2 ring-1 ring-inset ring-royal-200">
                     <Image
                       src={deanProfile.photoUrl}
                       alt={deanProfile.name}
                       fill
                       sizes="(min-width: 1024px) 38vw, 100vw"
-                      className="object-contain"
+                      className="rounded-xl object-contain transition-transform duration-300 hover:scale-[1.01]"
                       priority
                     />
                   </div>
@@ -62,7 +63,7 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
                 )}
               </div>
 
-              <div className="flex flex-col justify-center p-6 md:p-10 lg:p-12">
+              <div className="flex flex-col justify-center border-t border-slate-200 p-6 md:p-10 lg:border-t-0 lg:border-s lg:p-12">
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-royal-600">{t("dean")}</p>
                 <h2 id="dean-profile" className="mt-4 font-display text-2xl font-bold tracking-tight text-slate-950 md:text-4xl">
                   {deanProfile.name}
@@ -72,7 +73,7 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
                   href={LHKPN_URL}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-8 inline-flex min-h-10 w-fit items-center gap-2 rounded-lg bg-royal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-royal-700 active:scale-[0.98]"
+                  className="mt-8 inline-flex min-h-10 w-fit items-center gap-2 rounded-lg border border-royal-200 px-4 py-2.5 text-sm font-semibold text-royal-700 shadow-sm transition-colors hover:border-royal-300 hover:bg-royal-50 active:scale-[0.98]"
                 >
                   {lhkpnLabels[locale]}
                   <span aria-hidden="true" className="text-base leading-none">↗</span>
@@ -81,19 +82,22 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
             </div>
           </section>
 
-          <section aria-labelledby="vice-deans" className="mt-20 md:mt-24">
-            <div className="border-b border-slate-200 pb-5">
+          <section aria-labelledby="vice-deans" className="mt-20 rounded-3xl border border-royal-100 bg-royal-50/60 p-4 md:mt-24 md:p-7">
+            <div className="mb-8 px-1">
               <h2 id="vice-deans" className="section-rule font-display text-2xl font-bold tracking-tight text-slate-950 md:text-3xl">
                 {t("viceDeans")}
               </h2>
             </div>
 
-            <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {viceDeans.map((vd) => (
-                <article key={vd.initials} className="flex min-h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
+            <div className="grid gap-5 lg:grid-cols-6">
+              {viceDeans.map((vd, index) => {
+                const isWide = index === viceDeans.length - 1;
+
+                return (
+                  <article key={vd.initials} className={isWide ? "group flex min-h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md lg:col-span-6 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]" : "group flex min-h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md lg:col-span-3"}>
                   {vd.photoUrl ? (
-                  <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
-                      <Image src={vd.photoUrl} alt={vd.name} fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-contain" />
+                    <div className={isWide ? "relative aspect-[4/3] w-full overflow-hidden bg-slate-100 lg:aspect-auto lg:min-h-[230px]" : "relative aspect-[4/3] w-full overflow-hidden bg-slate-100"}>
+                      <Image src={vd.photoUrl} alt={vd.name} fill sizes={isWide ? "(min-width: 1024px) 48vw, 100vw" : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"} className="object-contain transition-transform duration-300 group-hover:scale-[1.01]" />
                     </div>
                   ) : (
                     <DeanAvatarPlate initials={vd.initials} name={vd.name} />
@@ -112,19 +116,20 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
                       <span aria-hidden="true" className="text-base leading-none">↗</span>
                     </a>
                   </div>
-                </article>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           </section>
 
           <section aria-labelledby="admin-leadership" className="mt-20 md:mt-24">
-            <div className="border-b border-slate-200 pb-5">
+            <div className="mb-8 px-1">
               <h2 id="admin-leadership" className="section-rule font-display text-2xl font-bold tracking-tight text-slate-950 md:text-3xl">
                 {headOfAdmin.position[locale] ?? headOfAdmin.position.id}
               </h2>
             </div>
 
-            <article className="mt-8 grid overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm sm:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
+            <article className="grid overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_30px_rgb(30_42_90/0.08)] sm:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
               {headOfAdmin.photoUrl ? (
                 <div className="relative aspect-[4/3] w-full bg-slate-100 sm:aspect-auto sm:min-h-[240px]">
                   <Image src={headOfAdmin.photoUrl} alt={headOfAdmin.name} fill sizes="(min-width: 640px) 320px, 100vw" className="object-contain" />

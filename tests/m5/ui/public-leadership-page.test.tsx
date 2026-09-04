@@ -10,8 +10,8 @@ const page = readFileSync(
 
 describe("public leadership page visual contract", () => {
   it("separates the page introduction and dean identity into high-contrast surfaces", () => {
-    expect(page).toContain("border-b border-slate-200 pb-6");
-    expect(page).toContain("bg-white shadow-md");
+    expect(page).toContain("rounded-2xl border border-royal-100 bg-royal-50");
+    expect(page).toContain("border-slate-200 bg-white shadow-[0_14px_34px");
     expect(page).toContain("bg-royal-50");
     expect(page).toContain("text-slate-950");
     expect(page).not.toContain("bg-navy-950");
@@ -39,7 +39,8 @@ describe("public leadership page visual contract", () => {
     expect(page).toContain('aria-labelledby="dean-profile"');
     expect(page).toContain('aria-labelledby="vice-deans"');
     expect(page).toContain('aria-labelledby="admin-leadership"');
-    expect(page).toContain("sm:grid-cols-2 lg:grid-cols-3");
+    expect(page).toContain("grid gap-5 lg:grid-cols-6");
+    expect(page).toContain("lg:col-span-6 lg:grid");
   });
 
   it("uses logical direction utilities for the RTL-ready layout", () => {

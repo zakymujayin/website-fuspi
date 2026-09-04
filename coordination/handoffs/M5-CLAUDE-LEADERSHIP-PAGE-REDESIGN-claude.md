@@ -43,6 +43,10 @@ editorial hierarchy and stronger contrast:
   frame and enlarged the administration media column for a more balanced card.
 - Added the locale-aware LHKPN CTA to the dean, vice-dean, and administration
   profile groups; vice-dean links are bottom-aligned for consistent card rows.
+- Applied the requested redesign pass: compact royal-tinted introduction,
+  framed dean feature panel, subtle tinted section surface, two-up vice-dean
+  cards with a wide third profile row, neutral image framing, and restrained
+  depth/hover treatment.
 
 ## API/schema/migration impact
 
