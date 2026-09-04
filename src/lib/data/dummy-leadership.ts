@@ -40,6 +40,7 @@ export const viceDeans: readonly LeadershipMember[] = [
   {
     initials: "AF",
     name: "Dr. Ade Fakih Kurniawan, S.Th.I., M.Ud",
+    photoUrl: "/images/leadership/wd3-ade-fakih.webp",
     position: {
       id: "Wakil Dekan III — Bidang Kemahasiswaan, Alumni, dan Kerja Sama",
       en: "Vice Dean III — Student Affairs, Alumni and Partnerships",
@@ -56,6 +57,7 @@ export const viceDeans: readonly LeadershipMember[] = [
 export const headOfAdmin: LeadershipMember = {
   initials: "SS",
   name: "Slamet Sucipto, S.E",
+  photoUrl: "/images/leadership/kabag-umum-slamet-sucipto.webp",
   position: {
     id: "Kepala Bagian Umum",
     en: "Head of General Affairs",
