@@ -13,6 +13,7 @@ const lhkpnLabels: Record<AppLocale, string> = {
   en: "View LHKPN",
   ar: "عرض LHKPN",
 };
+const LHKPN_URL = "https://elhkpn.kpk.go.id/portal/user/check_search_announ";
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
@@ -68,7 +69,7 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
                 </h2>
                 <p className="mt-3 max-w-xl text-sm font-medium leading-6 text-slate-600 md:text-base">{deanPosition}</p>
                 <a
-                  href="https://elhkpn.kpk.go.id/portal/user/check_search_announ"
+                  href={LHKPN_URL}
                   target="_blank"
                   rel="noreferrer"
                   className="mt-8 inline-flex min-h-10 w-fit items-center gap-2 rounded-lg bg-royal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-royal-700 active:scale-[0.98]"
@@ -101,6 +102,15 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
                     <h3 className="font-display text-base font-bold leading-6 text-slate-950">{vd.name}</h3>
                     <p className="mt-2 text-sm font-medium leading-6 text-royal-700">{vd.position[locale] ?? vd.position.id}</p>
                     {vd.bio ? <p className="mt-4 border-t border-slate-200 pt-4 text-sm leading-6 text-slate-600">{vd.bio[locale] ?? vd.bio.id}</p> : null}
+                    <a
+                      href={LHKPN_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-auto inline-flex min-h-10 w-fit items-center gap-2 pt-5 text-sm font-semibold text-royal-700 transition-colors hover:text-royal-900 active:scale-[0.98]"
+                    >
+                      {lhkpnLabels[locale]}
+                      <span aria-hidden="true" className="text-base leading-none">↗</span>
+                    </a>
                   </div>
                 </article>
               ))}
@@ -126,6 +136,15 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
                 <p className="text-xs font-semibold uppercase tracking-[0.16em] text-royal-600">FUSPI · Administrasi</p>
                 <h3 className="mt-3 font-display text-xl font-bold tracking-tight text-slate-950 md:text-2xl">{headOfAdmin.name}</h3>
                 <p className="mt-2 text-sm font-medium leading-6 text-slate-600">{headOfAdmin.position[locale] ?? headOfAdmin.position.id}</p>
+                <a
+                  href={LHKPN_URL}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-5 inline-flex min-h-10 w-fit items-center gap-2 rounded-lg border border-royal-200 px-4 py-2.5 text-sm font-semibold text-royal-700 transition-colors hover:border-royal-300 hover:bg-royal-50 active:scale-[0.98]"
+                >
+                  {lhkpnLabels[locale]}
+                  <span aria-hidden="true" className="text-base leading-none">↗</span>
+                </a>
               </div>
             </article>
           </section>

@@ -30,6 +30,11 @@ describe("public leadership page visual contract", () => {
     expect(page).toContain('target="_blank"');
   });
 
+  it("offers the LHKPN action for every leadership profile group", () => {
+    expect(page.match(/href=\{LHKPN_URL\}/g)).toHaveLength(3);
+    expect(page).toContain("mt-auto inline-flex");
+  });
+
   it("keeps leadership groups semantically labelled and responsive", () => {
     expect(page).toContain('aria-labelledby="dean-profile"');
     expect(page).toContain('aria-labelledby="vice-deans"');

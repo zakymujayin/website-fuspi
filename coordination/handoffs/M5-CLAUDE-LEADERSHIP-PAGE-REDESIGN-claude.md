@@ -41,6 +41,8 @@ editorial hierarchy and stronger contrast:
   page hierarchy starts with the leadership profiles rather than the banner.
 - Changed the vice-dean and administration image surfaces to a neutral slate
   frame and enlarged the administration media column for a more balanced card.
+- Added the locale-aware LHKPN CTA to the dean, vice-dean, and administration
+  profile groups; vice-dean links are bottom-aligned for consistent card rows.
 
 ## API/schema/migration impact
 
@@ -52,7 +54,7 @@ semantics remain unchanged.
 - `npx vitest run tests/m5/ui/public-leadership-page.test.tsx` — passed (5)
 - `npm run lint` — passed
 - `npm run typecheck` — passed
-- `npm run test` — passed (140 files, 1,493 tests)
+- `npm run test` — passed (140 files, 1,494 tests)
 - `git diff --check` — passed
 
 ## Untested areas and risks
