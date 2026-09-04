@@ -249,7 +249,7 @@ export function LecturerAcademicRecords({research, community, hki, teaching, lab
               value={selectedPeriod}
               onChange={(event) => setSelectedPeriod(event.target.value)}
               disabled={periods.length === 0}
-              className="min-h-10 border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition-colors focus:border-royal-500 focus:ring-2 focus:ring-royal-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+              className="min-h-10 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition-colors focus:border-royal-500 focus:ring-2 focus:ring-royal-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
             >
               <option value="all">{labels.allPeriods}</option>
               {periods.map((period) => <option key={period.key} value={period.key}>{period.label}</option>)}

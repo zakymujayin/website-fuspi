@@ -321,7 +321,7 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
                 </div>
               )}
 
-              <div className="space-y-4 p-6">
+              <div className="grid gap-4 p-6">
                 <p className="font-display text-base font-bold text-slate-900"><span dir="auto">{lecturer.name}</span></p>
 
                 {lecturer.nip ? (
@@ -384,11 +384,11 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
 
                 {(lecturer.email || lecturer.phone) ? (
                   <CardField label={t("contact")}>
-                    <div className="space-y-2">
+                    <div className="grid gap-2">
                       {lecturer.email ? (
                         <p className="flex items-start gap-2">
                           <Mail aria-hidden className="mt-0.5 size-4 shrink-0 text-slate-400" strokeWidth={1.5} />
-                          <a href={`mailto:${lecturer.email}`} dir="ltr" className="text-start break-all text-royal-600 underline-offset-2 hover:underline">{lecturer.email}</a>
+                          <a href={`mailto:${lecturer.email}`} dir="ltr" className="text-start break-all text-royal-600 underline-offset-2 transition-colors hover:text-royal-800 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-600">{lecturer.email}</a>
                         </p>
                       ) : null}
                       {lecturer.phone ? (
@@ -490,7 +490,7 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
               action={publications.length > 0 ? <span className="font-mono text-xs text-slate-400">{publications.length}</span> : undefined}
             >
               {groupedPublications.length > 0 ? (
-                <div className="space-y-8">
+                <div className="grid gap-8">
                   {groupedPublications.map(({type, items}, groupIndex) => (
                     <div key={type} className={groupIndex > 0 ? "border-t border-slate-200 pt-8" : undefined}>
                       <h3 className="font-display text-xs font-semibold tracking-wide text-slate-500 uppercase">
@@ -506,7 +506,7 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
                                   href={pub.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  dir="auto" className="font-medium text-slate-900 underline-offset-2 hover:text-royal-600 hover:underline"
+                                  dir="auto" className="font-medium text-slate-900 underline-offset-2 hover:text-royal-600 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-600"
                                 >
                                   {pub.title}
                                 </a>
@@ -570,7 +570,7 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
           <div className="mt-12">
             <Link
               href="/dosen"
-              className="text-sm font-medium text-royal-600 underline-offset-2 hover:underline"
+              className="text-sm font-medium text-royal-600 underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-600"
             >
               {t("backToList")}
             </Link>
