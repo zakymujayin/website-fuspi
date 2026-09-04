@@ -17,6 +17,7 @@ type RecordTableProps<T> = {
   title: string;
   description?: string;
   addLabel: string;
+  actionsLabel: string;
   onAdd: () => void;
   columns: ReadonlyArray<RecordColumn<T>>;
   rows: readonly T[];
@@ -27,7 +28,7 @@ type RecordTableProps<T> = {
 };
 
 export function RecordTable<T>({
-  title, description, addLabel, onAdd, columns, rows, rowKey, emptyLabel, renderActions, renderCard,
+  title, description, addLabel, actionsLabel, onAdd, columns, rows, rowKey, emptyLabel, renderActions, renderCard,
 }: RecordTableProps<T>) {
   return (
     <div className="flex flex-col gap-4">
@@ -48,7 +49,7 @@ export function RecordTable<T>({
       </div>
 
       {rows.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-slate-500">
+        <p className="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center text-sm text-slate-500">
           {emptyLabel}
         </p>
       ) : (
@@ -79,7 +80,7 @@ export function RecordTable<T>({
                       </th>
                     ))}
                     <th scope="col" className="px-5 py-3 text-end">
-                      <span className="sr-only">{addLabel}</span>
+                      <span className="sr-only">{actionsLabel}</span>
                     </th>
                   </tr>
                 </thead>

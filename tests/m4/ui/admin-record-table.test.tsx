@@ -15,6 +15,7 @@ function renderTable(rows: readonly Row[], onAdd = vi.fn()) {
     <RecordTable
       title="Publikasi"
       addLabel="Tambah publikasi"
+      actionsLabel="Aksi"
       onAdd={onAdd}
       columns={columns}
       rows={rows}
@@ -47,6 +48,11 @@ describe("RecordTable", () => {
     // scope this assertion to the table to check the desktop row content specifically.
     expect(within(table).getByText("Teori Interpretasi Paul Ricoeur")).toBeTruthy();
     expect(within(table).getByText("2021")).toBeTruthy();
+
+    const tableHead = table.querySelector("thead");
+    expect(tableHead).toBeTruthy();
+    expect(within(tableHead as HTMLElement).getByText("Aksi")).toBeTruthy();
+    expect(within(tableHead as HTMLElement).queryByText("Tambah publikasi")).toBeNull();
   });
 
   it("shows the record count in the header", () => {
