@@ -63,9 +63,10 @@ describe("academic editor/import runtime boundaries", () => {
       intent: "COMMIT", atomic: true,
       rows: [{rowNumber: 1, resource: "LECTURER", payload: {
         name: "Dosen", slug: "dosen", nidn: null, nip: null, orcid: null,
-        googleScholarUrl: null, sintaUrl: null, email: null, phone: null, photoMediaId: null,
+        googleScholarUrl: null, sintaUrl: null, scopusUrl: null, linkedinUrl: null, instagramUrl: null, twitterUrl: null,
+        email: null, phone: null, photoMediaId: null, cvMediaId: null,
         studyProgramId: null, order: 0, isActive: true,
-        translations: {id: {position: null, expertise: null, bio: `<p>${"&".repeat(50_000)}</p>`, officeHours: null}},
+        translations: {id: {position: null, expertise: null, bio: `<p>${"&".repeat(50_000)}</p>`, officeHours: null, officeLocation: null, quote: null}},
       }}],
     }, now);
     expect(result).toEqual({ok: false, code: "VALIDATION_FAILED"});

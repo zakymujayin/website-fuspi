@@ -1,6 +1,7 @@
 import {describe, expect, it, vi} from "vitest";
 
 import type {ActiveDatabaseSession} from "@/contracts/auth";
+import {LecturerInputSchema} from "@/contracts/academic";
 import {
   academicPeopleHttpStatus,
   executeAcademicPeopleCommand,
@@ -131,5 +132,69 @@ describe("academic people runtime boundaries", () => {
     expect(academicPeopleHttpStatus({ok: false, code: "CSRF_INVALID"})).toBe(403);
     expect(academicPeopleHttpStatus({ok: false, code: "IDENTITY_CONFLICT"})).toBe(409);
     expect(academicPeopleHttpStatus({ok: false, code: "UNAVAILABLE"})).toBe(503);
+  });
+});
+
+describe("lecturer contract parity", () => {
+  it("accepts the extended research-media and CV fields", () => {
+    const parsed = LecturerInputSchema.safeParse({
+      name: "Dr. Uji Coba, M.Hum.",
+      slug: "uji-coba",
+      nidn: null, nip: null, orcid: null,
+      googleScholarUrl: null, sintaUrl: null,
+      scopusUrl: {kind: "EXTERNAL", href: "https://www.scopus.com/authid/detail.uri?authorId=1"},
+      linkedinUrl: null, instagramUrl: null, twitterUrl: null,
+      email: null, phone: null,
+      photoMediaId: null, cvMediaId: "cmtlyc9sc0000ap7nvy6bm0iv",
+      studyProgramId: null, order: 0, isActive: true,
+      translations: {id: {
+        position: "Dekan", expertise: null, bio: null, officeHours: null,
+        officeLocation: "Gedung FUSPI Lt. 2", quote: "خَيْرُ النَّاسِ أَنْفَعُهُمْ لِلنَّاسِ",
+      }},
+    });
+
+    expect(parsed.success).toBe(true);
+    expect(parsed.data?.scopusUrl?.href).toBe("https://www.scopus.com/authid/detail.uri?authorId=1");
+    expect(parsed.data?.cvMediaId).toBe("cmtlyc9sc0000ap7nvy6bm0iv");
+    expect(parsed.data?.translations.id.officeLocation).toBe("Gedung FUSPI Lt. 2");
+  });
+
+  it("accepts explicit nulls for every new field", () => {
+    const parsed = LecturerInputSchema.safeParse({
+      name: "Dr. Uji Coba, M.Hum.",
+      slug: "uji-coba",
+      nidn: null, nip: null, orcid: null,
+      googleScholarUrl: null, sintaUrl: null,
+      scopusUrl: null, linkedinUrl: null, instagramUrl: null, twitterUrl: null,
+      email: null, phone: null,
+      photoMediaId: null, cvMediaId: null,
+      studyProgramId: null, order: 0, isActive: true,
+      translations: {id: {
+        position: null, expertise: null, bio: null, officeHours: null,
+        officeLocation: null, quote: null,
+      }},
+    });
+
+    expect(parsed.success).toBe(true);
+  });
+
+  it("rejects a non-https research-media link", () => {
+    const parsed = LecturerInputSchema.safeParse({
+      name: "Dr. Uji Coba, M.Hum.",
+      slug: "uji-coba",
+      nidn: null, nip: null, orcid: null,
+      googleScholarUrl: null, sintaUrl: null,
+      scopusUrl: {kind: "EXTERNAL", href: "http://insecure.example/profile"},
+      linkedinUrl: null, instagramUrl: null, twitterUrl: null,
+      email: null, phone: null,
+      photoMediaId: null, cvMediaId: null,
+      studyProgramId: null, order: 0, isActive: true,
+      translations: {id: {
+        position: null, expertise: null, bio: null, officeHours: null,
+        officeLocation: null, quote: null,
+      }},
+    });
+
+    expect(parsed.success).toBe(false);
   });
 });

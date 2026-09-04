@@ -79,6 +79,8 @@ const PersonTranslationInputSchema = z.object({
   expertise: OptionalText(500),
   bio: OptionalText(100_000),
   officeHours: OptionalText(255),
+  officeLocation: OptionalText(200),
+  quote: OptionalText(500),
 }).strict();
 
 const StaffTranslationInputSchema = z.object({position: OptionalText(255), unit: OptionalText(255)}).strict();
@@ -91,9 +93,14 @@ export const LecturerInputSchema = z.object({
   orcid: z.string().trim().regex(/^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$/u).nullable(),
   googleScholarUrl: ExternalLinkSchema.nullable(),
   sintaUrl: ExternalLinkSchema.nullable(),
+  scopusUrl: ExternalLinkSchema.nullable(),
+  linkedinUrl: ExternalLinkSchema.nullable(),
+  instagramUrl: ExternalLinkSchema.nullable(),
+  twitterUrl: ExternalLinkSchema.nullable(),
   email: InstitutionalEmailSchema,
   phone: PhoneSchema,
   photoMediaId: CmsIdentifierSchema.nullable(),
+  cvMediaId: CmsIdentifierSchema.nullable(),
   studyProgramId: CmsIdentifierSchema.nullable(),
   order: z.number().int().min(0).max(10_000),
   isActive: z.boolean(),

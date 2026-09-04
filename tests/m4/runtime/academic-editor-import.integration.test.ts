@@ -23,9 +23,13 @@ suite("academic editor/import PostgreSQL runtime", () => {
     return {rowNumber, resource: "LECTURER" as const, payload: {
       name: `${marker} Lecturer ${rowNumber}`, slug: `${marker}-lecturer-${rowNumber}`,
       nidn: `${marker}-nidn-${rowNumber}`, nip: `${marker}-nip-${rowNumber}`, orcid: null,
-      googleScholarUrl: null, sintaUrl: null, email: `${marker}-${rowNumber}@example.test`, phone: "+62 21 555 5001",
-      photoMediaId: mediaId, studyProgramId: programId, order: rowNumber, isActive: true,
-      translations: {id: {position: "Lektor", expertise: "Tafsir", bio: "<p>Bio.</p>", officeHours: null}, en: {position: "Lecturer", expertise: null, bio: null, officeHours: null}},
+      googleScholarUrl: null, sintaUrl: null, scopusUrl: null, linkedinUrl: null, instagramUrl: null, twitterUrl: null,
+      email: `${marker}-${rowNumber}@example.test`, phone: "+62 21 555 5001",
+      photoMediaId: mediaId, cvMediaId: null, studyProgramId: programId, order: rowNumber, isActive: true,
+      translations: {
+        id: {position: "Lektor", expertise: "Tafsir", bio: "<p>Bio.</p>", officeHours: null, officeLocation: null, quote: null},
+        en: {position: "Lecturer", expertise: null, bio: null, officeHours: null, officeLocation: null, quote: null},
+      },
     }};
   }
 

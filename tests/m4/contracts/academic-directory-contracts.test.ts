@@ -43,7 +43,7 @@ describe("academic directory contracts", () => {
   });
 
   it("bounds Lecturer identifiers, media, links, and translations", () => {
-    const lecturer = {name: "Dosen Sintetis", slug: "dosen-sintetis", nidn: null, nip: null, orcid: "0000-0002-1825-0097", googleScholarUrl: {kind: "EXTERNAL", href: "https://scholar.google.com/example"}, sintaUrl: null, email: "dosen@example.com", phone: null, photoMediaId: "media-1", studyProgramId: "program-1", order: 1, isActive: true, translations: {id: {position: "Dosen", expertise: null, bio: null, officeHours: null}}};
+    const lecturer = {name: "Dosen Sintetis", slug: "dosen-sintetis", nidn: null, nip: null, orcid: "0000-0002-1825-0097", googleScholarUrl: {kind: "EXTERNAL", href: "https://scholar.google.com/example"}, sintaUrl: null, scopusUrl: null, linkedinUrl: null, instagramUrl: null, twitterUrl: null, email: "dosen@example.com", phone: null, photoMediaId: "media-1", cvMediaId: null, studyProgramId: "program-1", order: 1, isActive: true, translations: {id: {position: "Dosen", expertise: null, bio: null, officeHours: null, officeLocation: null, quote: null}}};
     expect(LecturerInputSchema.safeParse(lecturer).success).toBe(true);
     expect(LecturerInputSchema.safeParse({...lecturer, orcid: "invalid"}).success).toBe(false);
     expect(LecturerInputSchema.safeParse({...lecturer, googleScholarUrl: {kind: "EXTERNAL", href: "http://localhost/private"}}).success).toBe(false);

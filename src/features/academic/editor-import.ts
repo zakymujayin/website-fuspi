@@ -167,11 +167,17 @@ export async function getAcademicEditorDetail(
           name: row.name, slug: row.slug, nidn: row.nidn, nip: row.nip, orcid: row.orcid,
           googleScholarUrl: row.googleScholarUrl ? {kind: "EXTERNAL", href: row.googleScholarUrl} : null,
           sintaUrl: row.sintaUrl ? {kind: "EXTERNAL", href: row.sintaUrl} : null,
-          email: row.email, phone: row.phone, photoMediaId: row.photoMediaId,
+          scopusUrl: row.scopusUrl ? {kind: "EXTERNAL", href: row.scopusUrl} : null,
+          linkedinUrl: row.linkedinUrl ? {kind: "EXTERNAL", href: row.linkedinUrl} : null,
+          instagramUrl: row.instagramUrl ? {kind: "EXTERNAL", href: row.instagramUrl} : null,
+          twitterUrl: row.twitterUrl ? {kind: "EXTERNAL", href: row.twitterUrl} : null,
+          email: row.email, phone: row.phone,
+          photoMediaId: row.photoMediaId, cvMediaId: row.cvMediaId,
           studyProgramId: row.studyProgramId, order: row.order, isActive: row.isActive,
           translations: localized(row.translations, (translation) => ({
             position: translation.position, expertise: translation.expertise,
             bio: translation.bio, officeHours: translation.officeHours,
+            officeLocation: translation.officeLocation, quote: translation.quote,
           })),
         },
       };
@@ -308,7 +314,10 @@ async function createImportRow(tx: Prisma.TransactionClient, row: ImportRow, act
     const created = await tx.lecturer.create({data: {
       name: input.name, slug: input.slug, nidn: input.nidn, nip: input.nip, orcid: input.orcid,
       googleScholarUrl: input.googleScholarUrl?.href ?? null, sintaUrl: input.sintaUrl?.href ?? null,
-      email: input.email, phone: input.phone, photoMediaId: input.photoMediaId,
+      scopusUrl: input.scopusUrl?.href ?? null, linkedinUrl: input.linkedinUrl?.href ?? null,
+      instagramUrl: input.instagramUrl?.href ?? null, twitterUrl: input.twitterUrl?.href ?? null,
+      email: input.email, phone: input.phone,
+      photoMediaId: input.photoMediaId, cvMediaId: input.cvMediaId,
       studyProgramId: input.studyProgramId, order: input.order, isActive: input.isActive,
       translations: {create: Object.entries(input.translations).map(([locale, value]) => ({locale: locale as Locale, ...value, ...translationState(locale as Locale, actorId, now)}))},
     }, select: {id: true}});

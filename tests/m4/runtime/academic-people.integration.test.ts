@@ -103,15 +103,20 @@ suite("academic people PostgreSQL runtime", () => {
       orcid: null,
       googleScholarUrl: {kind: "EXTERNAL" as const, href: "https://scholar.google.com/example"},
       sintaUrl: null,
+      scopusUrl: null,
+      linkedinUrl: null,
+      instagramUrl: null,
+      twitterUrl: null,
       email: `${marker}-lecturer@example.test`,
       phone: "+62 21 555 0202",
       photoMediaId: publicMediaId,
+      cvMediaId: null,
       studyProgramId: programId,
       order: 1,
       isActive: true,
       translations: {
-        id: {position: "Lektor", expertise: "Tafsir", bio: `<p>${marker} bio.</p>`, officeHours: "Senin"},
-        ar: {position: "محاضر", expertise: null, bio: null, officeHours: null},
+        id: {position: "Lektor", expertise: "Tafsir", bio: `<p>${marker} bio.</p>`, officeHours: "Senin", officeLocation: null, quote: null},
+        ar: {position: "محاضر", expertise: null, bio: null, officeHours: null, officeLocation: null, quote: null},
       },
     };
   }

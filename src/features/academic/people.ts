@@ -605,13 +605,17 @@ async function updateStudyProgram(
 
 async function createLecturer(tx: Prisma.TransactionClient, input: LecturerInput, actorId: string, now: Date) {
   if (!await validatePhoto(tx, input.photoMediaId)) return {ok: false, code: "MEDIA_INVALID"} as const;
+  if (!await validateCertificate(tx, input.cvMediaId)) return {ok: false, code: "MEDIA_INVALID"} as const;
   if (input.studyProgramId && !await tx.studyProgram.findUnique({where: {id: input.studyProgramId}, select: {id: true}})) {
     return {ok: false, code: "RELATION_INVALID"} as const;
   }
   const row = await tx.lecturer.create({data: {
     name: input.name, slug: input.slug, nidn: input.nidn, nip: input.nip, orcid: input.orcid,
     googleScholarUrl: input.googleScholarUrl?.href ?? null, sintaUrl: input.sintaUrl?.href ?? null,
-    email: input.email, phone: input.phone, photoMediaId: input.photoMediaId,
+    scopusUrl: input.scopusUrl?.href ?? null, linkedinUrl: input.linkedinUrl?.href ?? null,
+    instagramUrl: input.instagramUrl?.href ?? null, twitterUrl: input.twitterUrl?.href ?? null,
+    email: input.email, phone: input.phone,
+    photoMediaId: input.photoMediaId, cvMediaId: input.cvMediaId,
     studyProgramId: input.studyProgramId, order: input.order, isActive: input.isActive,
   }, select: {id: true}});
   await replaceLecturerTranslations(tx, row.id, input, actorId, now);
@@ -623,13 +627,17 @@ async function updateLecturer(tx: Prisma.TransactionClient, id: string, expected
   if (expectedVersion !== null) return {ok: false, code: "VALIDATION_FAILED"} as const;
   if (!await tx.lecturer.findUnique({where: {id}, select: {id: true}})) return {ok: false, code: "NOT_FOUND"} as const;
   if (!await validatePhoto(tx, input.photoMediaId)) return {ok: false, code: "MEDIA_INVALID"} as const;
+  if (!await validateCertificate(tx, input.cvMediaId)) return {ok: false, code: "MEDIA_INVALID"} as const;
   if (input.studyProgramId && !await tx.studyProgram.findUnique({where: {id: input.studyProgramId}, select: {id: true}})) {
     return {ok: false, code: "RELATION_INVALID"} as const;
   }
   await tx.lecturer.update({where: {id}, data: {
     name: input.name, slug: input.slug, nidn: input.nidn, nip: input.nip, orcid: input.orcid,
     googleScholarUrl: input.googleScholarUrl?.href ?? null, sintaUrl: input.sintaUrl?.href ?? null,
-    email: input.email, phone: input.phone, photoMediaId: input.photoMediaId,
+    scopusUrl: input.scopusUrl?.href ?? null, linkedinUrl: input.linkedinUrl?.href ?? null,
+    instagramUrl: input.instagramUrl?.href ?? null, twitterUrl: input.twitterUrl?.href ?? null,
+    email: input.email, phone: input.phone,
+    photoMediaId: input.photoMediaId, cvMediaId: input.cvMediaId,
     studyProgramId: input.studyProgramId, order: input.order, isActive: input.isActive,
   }});
   await replaceLecturerTranslations(tx, id, input, actorId, now);

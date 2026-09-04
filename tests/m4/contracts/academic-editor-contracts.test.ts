@@ -12,9 +12,10 @@ const workflow = [{locale: "id", status: "DRAFT", sourceVersion: 1, translatorId
 function lecturerPayload(slug = "dosen-sintetis", nip: string | null = "nip-1") {
   return {
     name: "Dosen Sintetis", slug, nidn: "nidn-1", nip, orcid: null,
-    googleScholarUrl: null, sintaUrl: null, email: "dosen@example.test", phone: null,
-    photoMediaId: null, studyProgramId: null, order: 0, isActive: true,
-    translations: {id: {position: "Lektor", expertise: null, bio: null, officeHours: null}},
+    googleScholarUrl: null, sintaUrl: null, scopusUrl: null, linkedinUrl: null, instagramUrl: null, twitterUrl: null,
+    email: "dosen@example.test", phone: null,
+    photoMediaId: null, cvMediaId: null, studyProgramId: null, order: 0, isActive: true,
+    translations: {id: {position: "Lektor", expertise: null, bio: null, officeHours: null, officeLocation: null, quote: null}},
   };
 }
 
