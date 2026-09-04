@@ -30,9 +30,27 @@ describe("public leadership page visual contract", () => {
 
   it("keeps leadership groups semantically labelled and responsive", () => {
     expect(page).toContain('aria-labelledby="dean-profile"');
-    expect(page).toContain('aria-labelledby="vice-deans"');
+    expect(page).toContain('aria-labelledby="leadership-team"');
+    expect(page).toContain("Jajaran Pimpinan");
+    expect(page).not.toContain('aria-labelledby="vice-deans"');
     expect(page).toContain("grid items-stretch gap-x-5 gap-y-12 sm:grid-cols-2 lg:grid-cols-4");
     expect(page).toContain("relative size-full overflow-hidden rounded-xl");
+  });
+
+  it("separates leadership roles from their areas of responsibility", () => {
+    expect(page).toContain("function LeadershipPosition");
+    expect(page).toContain('position.indexOf("—")');
+    expect(page).toContain("whitespace-nowrap text-[13px] font-semibold leading-5");
+    expect(page).toContain("max-w-[15rem] text-pretty text-sm leading-6");
+  });
+
+  it("keeps the roster readable and names on one line", () => {
+    expect(page).toContain("vd.bio");
+    expect(page).toContain("headOfAdminBio");
+    expect(page).toContain("whitespace-nowrap font-display text-[13px] font-bold leading-5 tracking-tight");
+    expect(page).not.toContain("text-[clamp");
+    expect(page).toContain("max-w-[15rem] text-pretty text-sm leading-6 text-slate-500");
+    expect(page).toContain("min-h-24 max-w-[18rem] self-center text-pretty text-sm leading-6");
   });
 
   it("uses logical direction utilities for the RTL-ready layout", () => {

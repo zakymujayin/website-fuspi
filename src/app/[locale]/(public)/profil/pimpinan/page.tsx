@@ -8,6 +8,20 @@ import type {AppLocale} from "@/i18n/routing";
 import {deanProfile} from "@/lib/data/dummy-dean";
 import {headOfAdmin, viceDeans} from "@/lib/data/dummy-leadership";
 
+const leadershipTeamLabels: Record<AppLocale, string> = {
+  id: "Jajaran Pimpinan",
+  en: "Faculty Leadership",
+  ar: "قيادة الكلية",
+};
+
+const LEADERSHIP_NAME_CLASS = "whitespace-nowrap font-display text-[13px] font-bold leading-5 tracking-tight text-slate-950";
+const LEADERSHIP_ROLE_CLASS = "whitespace-nowrap text-[13px] font-semibold leading-5 text-royal-700";
+const headOfAdminBio: Record<AppLocale, string> = {
+  id: "Mengelola administrasi umum, ketatausahaan, dan dukungan operasional fakultas.",
+  en: "Oversees general administration, office services, and operational support for the faculty.",
+  ar: "يشرف على الإدارة العامة والخدمات المكتبية والدعم التشغيلي للكلية.",
+};
+
 function LeadershipPortrait({
   photoUrl,
   initials,
@@ -39,6 +53,24 @@ function LeadershipPortrait({
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function LeadershipPosition({position}: {position: string}) {
+  const separatorIndex = position.indexOf("—");
+  const role = separatorIndex === -1 ? position : position.slice(0, separatorIndex).trim();
+  const scope = separatorIndex === -1 ? null : position.slice(separatorIndex + 1).trim();
+
+  return (
+    <div className="mt-2 flex flex-col items-center">
+      <p className={LEADERSHIP_ROLE_CLASS}>{role}</p>
+      {scope ? (
+        <>
+          <span aria-hidden="true" className="my-2 h-px w-8 bg-brass-500" />
+          <p className="max-w-[15rem] text-pretty text-sm leading-6 text-slate-500">{scope}</p>
+        </>
+      ) : null}
     </div>
   );
 }
@@ -91,10 +123,10 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
             </div>
           </section>
 
-          <section aria-labelledby="vice-deans" className="mt-16 md:mt-20">
+          <section aria-labelledby="leadership-team" className="mt-16 md:mt-20">
             <div className="mb-8 flex items-end gap-4 px-1">
-              <h2 id="vice-deans" className="section-rule shrink-0 font-display text-2xl font-bold tracking-tight text-slate-950 md:text-3xl">
-                {t("viceDeans")}
+              <h2 id="leadership-team" className="section-rule shrink-0 font-display text-2xl font-bold tracking-tight text-slate-950 md:text-3xl">
+                {leadershipTeamLabels[locale]}
               </h2>
               <span aria-hidden="true" className="mb-1 h-px flex-1 bg-slate-200" />
             </div>
@@ -109,9 +141,13 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
                     sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
                   />
                   <div className="flex flex-1 flex-col border-t border-slate-200 pt-4">
-                    <h3 className="font-display text-base font-bold leading-6 text-slate-950">{vd.name}</h3>
-                    <p className="mt-2 text-sm font-medium leading-6 text-royal-700">{vd.position[locale] ?? vd.position.id}</p>
-                    {vd.bio ? <p className="mt-3 text-sm leading-6 text-slate-600">{vd.bio[locale] ?? vd.bio.id}</p> : null}
+                    <h3 className={LEADERSHIP_NAME_CLASS}>{vd.name}</h3>
+                    <LeadershipPosition position={vd.position[locale] ?? vd.position.id} />
+                    {vd.bio ? (
+                      <p className="mt-4 min-h-24 max-w-[18rem] self-center text-pretty text-sm leading-6 text-slate-600">
+                        {vd.bio[locale] ?? vd.bio.id}
+                      </p>
+                    ) : null}
                   </div>
                 </article>
               ))}
@@ -123,8 +159,11 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
                   sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
                 />
                 <div className="flex flex-1 flex-col border-t border-slate-200 pt-4">
-                  <h3 className="font-display text-base font-bold leading-6 text-slate-950">{headOfAdmin.name}</h3>
-                  <p className="mt-2 text-sm font-medium leading-6 text-royal-700">{headOfAdmin.position[locale] ?? headOfAdmin.position.id}</p>
+                  <h3 className={LEADERSHIP_NAME_CLASS}>{headOfAdmin.name}</h3>
+                  <LeadershipPosition position={headOfAdmin.position[locale] ?? headOfAdmin.position.id} />
+                  <p className="mt-4 min-h-24 max-w-[18rem] self-center text-pretty text-sm leading-6 text-slate-600">
+                    {headOfAdminBio[locale]}
+                  </p>
                 </div>
               </article>
             </div>

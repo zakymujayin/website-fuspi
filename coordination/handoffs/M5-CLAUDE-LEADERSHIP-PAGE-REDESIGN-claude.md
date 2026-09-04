@@ -3,7 +3,7 @@
 - Task ID: `M5-CLAUDE-LEADERSHIP-PAGE-REDESIGN`
 - Branch: `ai/claude/m5-lecturer-profile-redesign`
 - Base SHA: `b936c4f`
-- Implementation SHA: `8bcafcfd35dbf6202ae1876f36e3d76695802171`
+- Implementation SHA: `49098d8`
 
 ## Summary
 
@@ -20,6 +20,8 @@ characterful directory composition:
 - Removed the LHKPN CTA from every profile at the owner's request.
 - Added a source-level visual contract test covering surfaces, responsive
   layout, semantic section labels, and RTL-safe direction utilities.
+- Refined leadership role/scope separation, name and bio proportions, and
+  localized the leadership section heading.
 
 ## Files changed
 
@@ -35,10 +37,10 @@ semantics remain unchanged.
 
 ## Verification
 
-- `npx vitest run tests/m5/ui/public-leadership-page.test.tsx` — passed (5)
+- `npx vitest run tests/m5/ui/public-leadership-page.test.tsx` — passed (7)
 - `npm run lint` — passed
 - `npm run typecheck` — passed
-- `npm run test` — passed (140 files, 1,494 tests)
+- `npm run test` — passed (140 files, 1,495 tests)
 - `git diff --check` — passed
 
 ## Untested areas and risks
@@ -49,8 +51,8 @@ semantics remain unchanged.
   Next dev lock. The page was therefore verified through static source tests,
   lint, typecheck, and the full test suite.
 - Existing concurrent worktree changes in
-  `src/app/[locale]/(public)/dosen/[id]/page.tsx`,
-  `src/components/public/research-media-icons.tsx`, and `next-env.d.ts` were
+  `src/components/public/home-cta-section.tsx` and
+  `src/components/public/site-footer.tsx` are outside this task lease and were
   left untouched.
 
 ## Requested contract/dependency changes
