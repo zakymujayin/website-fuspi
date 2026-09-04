@@ -16,10 +16,15 @@ const SKIP_TO_CONTENT = {
   en: "Skip to main content",
   ar: "تخطَّ إلى المحتوى الرئيسي",
 } as const;
-const STUDY_PROGRAMS = {
-  id: "Program Studi",
-  en: "Study Programs",
-  ar: "البرامج الدراسية",
+const ACADEMICS_GROUP = {
+  id: "Akademik",
+  en: "Academics",
+  ar: "الشؤون الأكاديمية",
+} as const;
+const RESEARCH_GROUP = {
+  id: "Riset & PkM",
+  en: "Research & Community Service",
+  ar: "البحث وخدمة المجتمع",
 } as const;
 const EXTERNAL_HINT = {
   id: "(situs eksternal, terbuka di tab baru)",
@@ -313,7 +318,7 @@ test.describe("public shell hardening — keyboard and focus", () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(`/id${SHELL_PATH}`);
 
-    const trigger = page.getByRole("button", { name: STUDY_PROGRAMS.id });
+    const trigger = page.getByRole("button", { name: RESEARCH_GROUP.id });
     await trigger.focus();
     await expect(trigger).toBeFocused();
     await expect(trigger).toHaveAttribute("aria-expanded", "false");
@@ -322,7 +327,7 @@ test.describe("public shell hardening — keyboard and focus", () => {
     const menu = page.getByRole("menu");
     await expect(menu).toBeVisible();
     await expect(trigger).toHaveAttribute("aria-expanded", "true");
-    await expect(menu.getByRole("menuitem")).toHaveCount(3);
+    await expect(menu.getByRole("menuitem")).toHaveCount(2);
 
     await page.keyboard.press("ArrowDown");
     expect(
@@ -392,7 +397,7 @@ test.describe("public shell hardening — keyboard and focus", () => {
 
     const drawer = await openDrawer(page, "id");
 
-    const summary = drawer.locator("summary", { hasText: STUDY_PROGRAMS.id });
+    const summary = drawer.locator("summary", { hasText: ACADEMICS_GROUP.id });
     await expect(drawer.getByRole("link", { name: "Ilmu Hadis" })).toBeHidden();
 
     await summary.focus();
@@ -433,7 +438,7 @@ test.describe("public shell hardening — drawer structure", () => {
     await page.setViewportSize({ width: 360, height: 780 });
     await page.goto(`/id${SHELL_PATH}`);
     const drawer = await openDrawer(page, "id");
-    await drawer.locator("summary", { hasText: STUDY_PROGRAMS.id }).click();
+    await drawer.locator("summary", { hasText: ACADEMICS_GROUP.id }).click();
     await expect(drawer.getByRole("link", { name: "Ilmu Hadis" })).toBeVisible();
 
     const targets = await drawer
@@ -663,7 +668,7 @@ test.describe("public shell hardening — responsive", () => {
           }),
         );
 
-      expect(items).toHaveLength(6);
+      expect(items).toHaveLength(7);
       for (const item of items) {
         expect(item.start, `start of "${item.label}"`).toBeGreaterThanOrEqual(0);
         expect(item.end, `end of "${item.label}"`).toBeLessThanOrEqual(1024);

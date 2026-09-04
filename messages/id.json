@@ -177,7 +177,8 @@
     "accessibility": "Aksesibilitas",
     "sitemap": "Peta Situs",
     "openMap": "Buka di Google Maps",
-    "mapTitle": "Peta lokasi kampus FUSPI"
+    "mapTitle": "Peta lokasi kampus FUSPI",
+    "slogan": "Kajian keislaman yang kredibel, kontekstual, dan berwibawa."
   },
   "StudyPrograms": {
     "title": "Program Studi",
@@ -1429,9 +1430,16 @@
   "Home": {
     "heroTitle": "Fakultas Ushuluddin dan Pemikiran Islam",
     "heroSubtitle": "Mengembangkan kajian Al-Qur'an, hadis, aqidah, dan filsafat Islam dalam lingkungan akademik yang kredibel dan berwibawa.",
+    "heroEyebrow": "UIN Sultan Maulana Hasanuddin Banten",
+    "heroRegion": "Sorotan Fakultas",
+    "heroSlidePrevious": "Slide sebelumnya",
+    "heroSlideNext": "Slide berikutnya",
+    "heroPauseSlideshow": "Jeda slideshow",
+    "heroPlaySlideshow": "Putar slideshow",
     "heroCtaPrimary": "Profil Fakultas",
     "heroCtaSecondary": "Program Studi",
     "quickLinksLabel": "Akses cepat",
+    "newsroomEyebrow": "Berita & Informasi",
     "newsTitle": "Berita Terbaru",
     "newsEmptyTitle": "Belum ada berita",
     "newsEmptyDescription": "Berita dan kegiatan fakultas akan tampil di sini setelah diterbitkan.",
@@ -1482,8 +1490,15 @@
     },
     "columnsEyebrow": "Sorotan Akademik",
     "achievementsEyebrow": "Mahasiswa Kami",
+    "achievementsTitle": "Prestasi Mahasiswa",
     "columnsTitle": "Sorotan Akademik",
     "columnsDescription": "Tulisan opini dan pemikiran dari dekan, dosen, dan mahasiswa FUSPI.",
+    "lecturersTitle": "Dosen & Peneliti",
+    "testimonialsEyebrow": "Suara Alumni",
+    "testimonialsTitle": "Jejak setelah FUSPI",
+    "testimonialsDescription": "Pengalaman alumni yang membawa tradisi keilmuan FUSPI ke ruang profesi dan pengabdian.",
+    "previousTestimonial": "Testimoni sebelumnya",
+    "nextTestimonial": "Testimoni berikutnya",
     "columnRole": {
       "dean": "Dekan",
       "lecturer": "Dosen",

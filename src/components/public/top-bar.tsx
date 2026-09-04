@@ -14,9 +14,10 @@ export async function TopBar() {
   return (
     <div className="bg-navy-900 text-slate-300">
       {/* Matches the wider main-header row (see site-header.tsx) so both bars align. */}
-      <div className="mx-auto flex h-10 max-w-[1440px] items-center justify-between gap-4 px-4 text-xs sm:px-6">
+      <div className="mx-auto flex h-9 max-w-[1440px] items-center justify-between gap-4 px-4 text-xs sm:px-6">
         <a
           href={`mailto:${CONTACT_EMAIL}`}
+          aria-label={CONTACT_EMAIL}
           className="inline-flex items-center gap-1.5 text-slate-300 transition-colors hover:text-white"
         >
           <Mail aria-hidden className="size-3.5" strokeWidth={1.5} />
@@ -33,7 +34,7 @@ export async function TopBar() {
               url={item.url}
               label={t(item.key)}
               externalHint={externalHint}
-              className="inline-flex h-8 items-center gap-1 rounded-lg px-2 text-xs font-medium text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
+              className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-xs font-medium text-slate-300 transition-colors hover:bg-white/10 hover:text-white"
             />
           ))}
           <LanguageSwitcher tone="dark" size="sm" />

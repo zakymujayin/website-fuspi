@@ -17,14 +17,14 @@ const MEGA_THRESHOLD = 6;
  * room to breathe inside its column.
  */
 const PANEL_ITEM_CLASS =
-  "flex min-h-11 cursor-pointer items-center rounded-lg px-3 py-2.5 text-sm text-slate-700 outline-none transition-colors data-[highlighted]:bg-white data-[highlighted]:text-royal-700 data-[highlighted]:shadow-sm motion-reduce:transition-none";
+  "flex min-h-11 cursor-pointer items-center rounded-md px-3 py-2.5 text-sm text-slate-700 outline-none transition-colors data-[highlighted]:bg-white data-[highlighted]:text-royal-700 data-[highlighted]:shadow-sm motion-reduce:transition-none";
 
 /**
  * `whitespace-nowrap` keeps a long EN or AR label on one line: the unified
  * header row is fixed at 72px, so a wrapped label would spill out of it.
  */
 const ITEM_CLASS =
-  "flex min-h-11 shrink-0 items-center rounded-lg px-1 text-[12.5px] font-medium whitespace-nowrap text-slate-700 transition-colors hover:text-royal-600 2xl:px-2.5 2xl:text-[14.5px]";
+  "flex min-h-11 shrink-0 items-center px-1 text-[13px] font-medium whitespace-nowrap text-slate-700 transition-colors hover:text-royal-600 xl:px-1.5 xl:text-sm 2xl:px-2.5";
 
 /**
  * Dropdowns open on hover (pointer) and on click/keyboard; Esc closes them.
@@ -40,7 +40,7 @@ export function DesktopNav({ primary }: { primary: readonly NavGroup[] }) {
     // for the same row, so the drawer stays in charge through tablet widths.
     <nav
       aria-label={t("primaryLabel")}
-      className="hidden shrink-0 items-center gap-0.5 xl:flex 2xl:gap-1"
+      className="hidden shrink-0 items-center gap-0.5 lg:flex 2xl:gap-1"
     >
       {primary.map((item) => {
         if (!item.children) {
@@ -73,7 +73,7 @@ export function DesktopNav({ primary }: { primary: readonly NavGroup[] }) {
               <Menu.Positioner sideOffset={8} align="start" className="z-50">
                 <Menu.Popup
                   className={cn(
-                    "rounded-xl border border-slate-200/70 bg-slate-50/95 shadow-lg backdrop-blur-md outline-none",
+                    "rounded-md border border-slate-200/70 bg-slate-50/95 shadow-lg backdrop-blur-md outline-none",
                     sections
                       ? "grid w-[620px] grid-cols-2 p-5"
                       : isMega

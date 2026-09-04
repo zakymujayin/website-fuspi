@@ -27,7 +27,7 @@ const SECTION_TITLE_CLASS =
   "px-3 pb-1 font-display text-[11px] font-medium tracking-wide text-slate-500 uppercase";
 
 /** Every drawer target is at least 44px per docs/26-C. */
-const TARGET_CLASS = "flex min-h-11 items-center rounded-lg px-3 py-2 text-sm";
+const TARGET_CLASS = "flex min-h-11 items-center rounded-md px-3 py-2 text-sm";
 
 function SectionTitle({ id, children }: { id: string; children: React.ReactNode }) {
   return (
@@ -52,7 +52,7 @@ export function MobileNav({ primary, content, utility, actions, externalHint }: 
     <Dialog.Root open={open} onOpenChange={setOpen}>
       <Dialog.Trigger
         aria-label={t("openMenu")}
-        className="grid size-11 shrink-0 place-items-center rounded-lg text-slate-700 hover:bg-slate-100 xl:hidden"
+        className="grid size-11 shrink-0 place-items-center rounded-md text-slate-700 hover:bg-slate-100 lg:hidden"
       >
         <Menu aria-hidden className="size-6" strokeWidth={1.5} />
       </Dialog.Trigger>
@@ -74,7 +74,7 @@ export function MobileNav({ primary, content, utility, actions, externalHint }: 
             </Dialog.Title>
             <Dialog.Close
               aria-label={t("closeMenu")}
-              className="grid size-11 shrink-0 place-items-center rounded-lg text-slate-700 hover:bg-slate-100"
+              className="grid size-11 shrink-0 place-items-center rounded-md text-slate-700 hover:bg-slate-100"
             >
               <X aria-hidden className="size-5" strokeWidth={1.5} />
             </Dialog.Close>
@@ -100,14 +100,14 @@ export function MobileNav({ primary, content, utility, actions, externalHint }: 
                     label={t(item.key)}
                     externalHint={externalHint}
                     onClick={close}
-                    className="h-11 flex-1 justify-center rounded-lg bg-royal-500 text-sm font-medium text-white hover:bg-royal-600"
+                    className="h-11 flex-1 justify-center rounded-md bg-royal-500 text-sm font-medium text-white hover:bg-royal-600"
                   />
                 ) : (
                   <Link
                     key={item.key}
                     href={item.href}
                     onClick={close}
-                    className="flex h-11 flex-1 items-center justify-center rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:border-royal-300 hover:bg-royal-50 hover:text-royal-700"
+                    className="flex h-11 flex-1 items-center justify-center rounded-md border border-slate-300 text-sm font-medium text-slate-700 hover:border-royal-300 hover:bg-royal-50 hover:text-royal-700"
                   >
                     {t(item.key)}
                   </Link>

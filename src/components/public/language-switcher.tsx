@@ -80,8 +80,9 @@ export function LanguageSwitcher({
     >
       <Menu.Root modal={false}>
         <Menu.Trigger
+          aria-label={`${t("languageLabel")}: ${LOCALE_NAMES[activeLocale]}`}
           className={cn(
-            "inline-flex items-center gap-2 rounded-lg font-medium transition-colors",
+            "inline-flex items-center gap-2 rounded-md font-medium transition-colors",
             size === "lg" ? "min-h-11 px-3 text-sm" : "min-h-9 px-2 text-xs",
             tone === "dark"
               ? "text-slate-300 hover:bg-white/10 hover:text-white"
@@ -105,7 +106,7 @@ export function LanguageSwitcher({
                     key={locale}
                     render={<Link href={pathname} locale={nextLocale} hrefLang={nextLocale} lang={nextLocale} />}
                     className={cn(
-                      "flex min-h-10 cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-sm outline-none transition-colors",
+                      "flex min-h-10 cursor-pointer items-center gap-3 rounded-md px-3 py-2 text-sm outline-none transition-colors",
                       "text-slate-700 data-[highlighted]:bg-royal-50 data-[highlighted]:text-royal-700",
                     )}
                     aria-current={isActive ? "true" : undefined}

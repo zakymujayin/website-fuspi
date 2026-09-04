@@ -89,13 +89,13 @@ describe("VideoSection", () => {
     expect(markup).toContain("Shown in dev only");
   });
 
-  it("uses a dark ground and no physical-direction utility", () => {
+  it("sits on the light canvas and uses no physical-direction utility", () => {
     const source = readFileSync(
       path.join(process.cwd(), "src/components/public/video-section.tsx"),
       "utf8",
     );
-    expect(source).toMatch(/from-royal-9\d\d/); // dark section
-    expect(source).toContain("grain"); // textured
+    expect(source).toContain("bg-slate-50"); // light section, light-first homepage
+    expect(source).not.toContain("grain"); // no texture overlay on an institutional section
     expect(source).not.toMatch(/\b(ml|mr|pl|pr|left|right)-\d/);
     expect(source).not.toMatch(/\btext-(left|right)\b/);
   });

@@ -52,7 +52,7 @@ export function Reveal({ children, index = 0, className }: RevealProps) {
         // Only ever hidden/offset under motion-safe: with no preference set,
         // reduced motion never applies these, so content is always visible
         // by default and this can never get stuck invisible.
-        "flex h-full opacity-100 motion-safe:transition-all motion-safe:duration-700 motion-safe:ease-out",
+        "flex h-full opacity-100 motion-safe:transition-all motion-safe:duration-500 motion-safe:ease-out",
         inView ? "translate-y-0" : "motion-safe:translate-y-5 motion-safe:opacity-0",
         className,
       )}

@@ -24,7 +24,7 @@ function PartnerMark({ partner }: { partner: PartnerCard }) {
     return (
       <span
         title={partner.title}
-        className="flex h-24 w-44 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-xl font-bold text-royal-700"
+        className="flex h-20 w-44 shrink-0 items-center justify-center border-y border-slate-200 bg-white text-xl font-bold text-royal-700"
       >
         {monogram(partner.title)}
       </span>
@@ -32,7 +32,7 @@ function PartnerMark({ partner }: { partner: PartnerCard }) {
   }
 
   return (
-    <span className="relative flex h-24 w-44 shrink-0 items-center justify-center">
+    <span className="relative flex h-20 w-44 shrink-0 items-center justify-center">
       <Image
         src={partner.media.url}
         alt=""
@@ -75,7 +75,7 @@ export function PartnersMarquee({ partners }: PartnersMarqueeProps) {
   const durationSeconds = Math.round((halfLength * MARK_PITCH_PX) / PX_PER_SECOND);
 
   return (
-    <div className="relative overflow-hidden">
+    <div className="fuspi-marquee relative overflow-hidden">
       <div className="pointer-events-none absolute inset-y-0 start-0 z-10 w-16 bg-gradient-to-r from-white to-transparent" />
       <div className="pointer-events-none absolute inset-y-0 end-0 z-10 w-16 bg-gradient-to-l from-white to-transparent" />
 

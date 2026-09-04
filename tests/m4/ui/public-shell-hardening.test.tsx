@@ -58,15 +58,15 @@ describe("single header geometry", () => {
   const source = readShellFile("src/components/public/shell/sticky-header.tsx");
   const header = readShellFile("src/components/public/site-header.tsx");
 
-  it("renders a sticky single bar with no client-only state", () => {
-    expect(source).not.toContain("useState");
-    expect(source).not.toContain("useEffect");
+  it("renders a sticky header that compacts past the scroll threshold", () => {
+    expect(source).toContain("data-compact");
     expect(source).toContain("sticky");
     expect(source).toContain("z-30");
+    expect(source).toContain("isHeaderCompact");
   });
 
-  it("keeps the unified bar at 96px", () => {
-    expect(header).toContain("h-24");
+  it("keeps the expanded flow height at 112px (36px utility + 76px main)", () => {
+    expect(header).toContain("h-[76px]");
   });
 
   it("places the language switcher and utility links inside the top bar", () => {
@@ -75,8 +75,8 @@ describe("single header geometry", () => {
     expect(topbar).toContain("<UtilityLink");
   });
 
-  it("animates only shadow on scroll, never moving page content", () => {
-    expect(source).not.toContain("translate-y");
+  it("compacts to the 60px pinned bar as a transform, never a height change", () => {
+    expect(source).toContain("-translate-y-[3.25rem]");
     expect(source).toContain("shadow-sm");
   });
 
@@ -281,7 +281,7 @@ describe("drawer structure", () => {
   });
 
   it("holds every target at 44px", () => {
-    expect(source).toContain('"flex min-h-11 items-center rounded-lg px-3 py-2 text-sm"');
+    expect(source).toContain('"flex min-h-11 items-center rounded-md px-3 py-2 text-sm"');
     // Trigger and close button are square 44px controls.
     expect(source.match(/size-11/g)?.length).toBe(2);
     expect(source).toContain('size="lg"');

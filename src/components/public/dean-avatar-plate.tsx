@@ -9,7 +9,7 @@ export function DeanAvatarPlate({initials, name}: {initials: string; name: strin
     <div
       role="img"
       aria-label={name}
-      className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-brass-400/40 bg-gradient-to-br from-navy-950 via-navy-900 to-royal-800 shadow-sm"
+      className="relative aspect-[4/5] w-full overflow-hidden rounded-md border border-brass-400/40 bg-gradient-to-br from-navy-950 via-navy-900 to-royal-800 shadow-sm"
     >
       <svg
         aria-hidden
@@ -28,10 +28,10 @@ export function DeanAvatarPlate({initials, name}: {initials: string; name: strin
         <rect width="200" height="200" fill={`url(#${patternId})`} />
       </svg>
 
-      <div className="pointer-events-none absolute inset-3 rounded-xl border border-brass-400/30" />
+      <div className="pointer-events-none absolute inset-3 rounded-md border border-brass-400/30" />
 
       <div className="relative flex h-full items-center justify-center">
-        <span className="font-display text-6xl font-bold tracking-tight text-white/90 md:text-7xl">
+        <span className="text-4xl font-bold tracking-tight text-white/90 md:text-5xl">
           {initials}
         </span>
       </div>

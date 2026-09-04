@@ -177,7 +177,8 @@
     "accessibility": "إمكانية الوصول",
     "sitemap": "خريطة الموقع",
     "openMap": "افتح في خرائط جوجل",
-    "mapTitle": "خريطة موقع حرم الكلية"
+    "mapTitle": "خريطة موقع حرم الكلية",
+    "slogan": "دراسات إسلامية موثوقة وسياقية وذات جدارة."
   },
   "StudyPrograms": {
     "title": "البرامج الدراسية",
@@ -1429,9 +1430,16 @@
   "Home": {
     "heroTitle": "كلية أصول الدين والفكر الإسلامي",
     "heroSubtitle": "تطوير الدراسات القرآنية والحديث والعقيدة والفلسفة الإسلامية في بيئة أكاديمية موثوقة.",
+    "heroEyebrow": "جامعة السلطان مولانا حسن الدين الإسلامية الحكومية بانتين",
+    "heroRegion": "أبرز أخبار الكلية",
+    "heroSlidePrevious": "الشريحة السابقة",
+    "heroSlideNext": "الشريحة التالية",
+    "heroPauseSlideshow": "إيقاف عرض الشرائح مؤقتًا",
+    "heroPlaySlideshow": "تشغيل عرض الشرائح",
     "heroCtaPrimary": "ملف الكلية",
     "heroCtaSecondary": "البرامج الدراسية",
     "quickLinksLabel": "وصول سريع",
+    "newsroomEyebrow": "الأخبار والمعلومات",
     "newsTitle": "آخر الأخبار",
     "newsEmptyTitle": "لا توجد أخبار بعد",
     "newsEmptyDescription": "ستظهر أخبار وأنشطة الكلية هنا بعد نشرها.",
@@ -1482,8 +1490,15 @@
     },
     "columnsEyebrow": "إضاءات أكاديمية",
     "achievementsEyebrow": "طلابنا",
+    "achievementsTitle": "إنجازات الطلاب",
     "columnsTitle": "أضواء أكاديمية",
     "columnsDescription": "مقالات رأي وتأملات من عميد الكلية وأساتذتها وطلابها.",
+    "lecturersTitle": "المحاضرون والباحثون",
+    "testimonialsEyebrow": "أصوات الخريجين",
+    "testimonialsTitle": "المسيرة بعد الكلية",
+    "testimonialsDescription": "تجارب الخريجين في نقل التقاليد العلمية للكلية إلى الحياة المهنية وخدمة المجتمع.",
+    "previousTestimonial": "الشهادة السابقة",
+    "nextTestimonial": "الشهادة التالية",
     "columnRole": {
       "dean": "العميد",
       "lecturer": "أستاذ",

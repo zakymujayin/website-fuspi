@@ -31,13 +31,13 @@ export async function SiteHeader() {
   return (
     <StickyHeader>
       <TopBar />
-      <div className="h-24 border-b border-slate-200 bg-white">
-        {/* Wider than the shared 1200px content container: the nav row needs
-            more room for 8 top-level items plus search/PPID/PMB than a page's
+      <div className="h-[76px] border-b border-slate-200 bg-white">
+        {/* Wider than the shared 1280px content container: the nav row needs
+            more room for the top-level items plus search/PPID/PMB than a page's
             reading column does. */}
         <div className="mx-auto h-full w-full max-w-[1440px] px-4 sm:px-6">
           <div className="flex h-full items-center justify-between gap-3">
-            <div className="shrink-0 [&>a>*:first-child]:!h-[60px] [&>a>*:first-child]:!w-[60px]">
+            <div className="shrink-0">
               <IdentityBadges
                 logo={siteSetting?.logo ?? null}
                 accreditationLogo={siteSetting?.accreditationLogo ?? null}
@@ -52,14 +52,14 @@ export async function SiteHeader() {
                 label={t(ppidLink.key)}
                 externalHint={externalHint}
                 showIcon={false}
-                className="h-10 shrink-0 whitespace-nowrap rounded-lg border border-brass-500 px-3 text-[13px] font-semibold text-[#7d5621] transition-colors hover:bg-brass-500/10 xl:px-4 xl:text-sm"
+                className="h-10 shrink-0 whitespace-nowrap rounded-md border border-brass-500 px-3 text-[13px] font-semibold text-[#7d5621] transition-colors hover:bg-brass-500/10 xl:px-4 xl:text-sm"
               />
               <UtilityLink
                 url={pmbLink.url}
                 label={t(pmbLink.key)}
                 externalHint={externalHint}
                 showIcon={false}
-                className="h-10 shrink-0 whitespace-nowrap rounded-lg bg-royal-500 px-3 text-[13px] font-medium text-white transition-colors hover:bg-royal-600 xl:px-4 xl:text-sm"
+                className="h-10 shrink-0 whitespace-nowrap rounded-md bg-royal-500 px-3 text-[13px] font-semibold text-white transition-colors hover:bg-royal-600 xl:px-4 xl:text-sm"
               />
             </div>
             <MobileNav

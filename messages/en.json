@@ -177,7 +177,8 @@
     "accessibility": "Accessibility",
     "sitemap": "Site Map",
     "openMap": "Open in Google Maps",
-    "mapTitle": "FUSPI campus location map"
+    "mapTitle": "FUSPI campus location map",
+    "slogan": "Credible, contextual, and dignified Islamic scholarship."
   },
   "StudyPrograms": {
     "title": "Study Programs",
@@ -1429,9 +1430,16 @@
   "Home": {
     "heroTitle": "Faculty of Ushuluddin and Islamic Thought",
     "heroSubtitle": "Developing Quranic studies, hadith, aqidah, and Islamic philosophy in a credible and authoritative academic environment.",
+    "heroEyebrow": "UIN Sultan Maulana Hasanuddin Banten",
+    "heroRegion": "Faculty Highlights",
+    "heroSlidePrevious": "Previous slide",
+    "heroSlideNext": "Next slide",
+    "heroPauseSlideshow": "Pause slideshow",
+    "heroPlaySlideshow": "Play slideshow",
     "heroCtaPrimary": "Faculty Profile",
     "heroCtaSecondary": "Study Programs",
     "quickLinksLabel": "Quick access",
+    "newsroomEyebrow": "News & Information",
     "newsTitle": "Latest News",
     "newsEmptyTitle": "No news yet",
     "newsEmptyDescription": "Faculty news and activities will appear here once published.",
@@ -1482,8 +1490,15 @@
     },
     "columnsEyebrow": "Academic Spotlight",
     "achievementsEyebrow": "Our Students",
+    "achievementsTitle": "Student Achievements",
     "columnsTitle": "Academic Spotlight",
     "columnsDescription": "Opinion pieces and reflections from FUSPI's dean, lecturers, and students.",
+    "lecturersTitle": "Lecturers & Researchers",
+    "testimonialsEyebrow": "Alumni Voices",
+    "testimonialsTitle": "Life after FUSPI",
+    "testimonialsDescription": "Alumni experiences carrying FUSPI's scholarly tradition into professional life and public service.",
+    "previousTestimonial": "Previous testimonial",
+    "nextTestimonial": "Next testimonial",
     "columnRole": {
       "dean": "Dean",
       "lecturer": "Lecturer",

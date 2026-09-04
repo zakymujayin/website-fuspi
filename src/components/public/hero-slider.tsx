@@ -1,224 +1,134 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import {ArrowRight, ChevronLeft, ChevronRight, Pause, Play} from "lucide-react";
+import {useTranslations} from "next-intl";
+import {useCallback, useEffect, useState} from "react";
 
-import { ImageWithFallback } from "@/components/public/image-with-fallback";
-import { toFocalPoint } from "@/components/public/focal-point";
-import { Link } from "@/i18n/navigation";
-import { cn } from "@/lib/utils";
-import type { PublicHomeSlide } from "@/features/home-nav/public-query";
+import {toFocalPoint} from "@/components/public/focal-point";
+import {ImageWithFallback} from "@/components/public/image-with-fallback";
+import type {PublicHomeSlide} from "@/features/home-nav/public-query";
+import {Link} from "@/i18n/navigation";
+import {cn} from "@/lib/utils";
 
-const AUTOPLAY_MS = 6000;
+const AUTOPLAY_MS = 8000;
 
-type HeroSliderProps = {
-  slides: readonly PublicHomeSlide[];
-};
+function HeroLink({href, children, secondary = false}: {href: string; children: React.ReactNode; secondary?: boolean}) {
+  const className = cn(
+    "inline-flex h-12 items-center justify-center gap-2 rounded-md px-7 text-sm font-semibold transition-colors duration-200 motion-safe:active:scale-[0.98]",
+    secondary
+      ? "border border-white/55 bg-transparent text-white hover:border-white hover:bg-white/10"
+      : "bg-white text-royal-700 hover:bg-royal-50",
+  );
+  const content = <>{children}<ArrowRight data-icon aria-hidden className="rtl:rotate-180" strokeWidth={1.5} /></>;
+  return href.startsWith("http") ? (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={className}>{content}</a>
+  ) : (
+    <Link href={href} className={className}>{content}</Link>
+  );
+}
 
-export function HeroSlider({ slides }: HeroSliderProps) {
+export function HeroSlider({slides}: {slides: readonly PublicHomeSlide[]}) {
+  const t = useTranslations("Home");
   const [active, setActive] = useState(0);
-  const [paused, setPaused] = useState(false);
+  const [manualPause, setManualPause] = useState(false);
+  const [interactionPause, setInteractionPause] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
 
-  const goNext = useCallback(() => {
-    setActive((i) => (i + 1) % slides.length);
-  }, [slides.length]);
-
-  const goPrev = useCallback(() => {
-    setActive((i) => (i - 1 + slides.length) % slides.length);
-  }, [slides.length]);
+  const goNext = useCallback(() => setActive((index) => (index + 1) % slides.length), [slides.length]);
+  const goPrev = useCallback(() => setActive((index) => (index - 1 + slides.length) % slides.length), [slides.length]);
 
   useEffect(() => {
-    if (slides.length <= 1 || paused) return;
-    const id = setInterval(goNext, AUTOPLAY_MS);
-    return () => clearInterval(id);
-  }, [slides.length, paused, goNext]);
+    const query = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(query.matches);
+    update();
+    query.addEventListener("change", update);
+    return () => query.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (slides.length <= 1 || manualPause || interactionPause || reducedMotion) return;
+    const timer = window.setInterval(goNext, AUTOPLAY_MS);
+    return () => window.clearInterval(timer);
+  }, [goNext, interactionPause, manualPause, reducedMotion, slides.length]);
+
+  useEffect(() => {
+    const update = () => setInteractionPause(document.hidden);
+    document.addEventListener("visibilitychange", update);
+    return () => document.removeEventListener("visibilitychange", update);
+  }, []);
 
   if (slides.length === 0) return null;
+  const slide = slides[active];
+  const primaryHref = slide.cta?.href ?? "/profil";
+  const primaryLabel = slide.ctaLabel ?? t("heroCtaPrimary");
 
   return (
     <section
       aria-roledescription="carousel"
-      aria-label="Hero"
-      className="relative min-h-[560px] overflow-hidden md:min-h-[660px]"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      aria-label={t("heroRegion")}
+      className="relative isolate min-h-[calc(100svh-7rem)] overflow-hidden bg-navy-950"
+      onMouseEnter={() => setInteractionPause(true)}
+      onMouseLeave={() => setInteractionPause(false)}
+      onFocusCapture={() => setInteractionPause(true)}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setInteractionPause(false);
+      }}
     >
-      {/* Full-bleed photo, kept sharp: only graded (saturation, contrast,
-          brightness) so the set reads as one tone. These formal group
-          photos put faces low-mid in the frame with empty ceiling above
-          (see slide 1) — text is anchored at the optical center, biased
-          above the geometric center, so the title stays clear of faces. */}
-      {slides.map((slide, index) => (
-        <div
-          key={slide.id}
-          aria-hidden={index !== active}
-          className={cn(
-            "absolute inset-0 transition-opacity duration-700 ease-out",
-            index === active ? "opacity-100" : "opacity-0",
-          )}
-        >
+      {slides.map((item, index) => (
+        <div key={item.id} aria-hidden={index !== active} className={cn("absolute inset-0 transition-opacity duration-1000", index === active ? "opacity-100" : "opacity-0")}>
           <ImageWithFallback
-            src={slide.image?.url}
-            alt={slide.image?.isDecorative ? "" : (slide.image?.alt ?? slide.title)}
+            src={item.image?.url}
+            alt={item.image?.isDecorative ? "" : (item.image?.alt ?? item.title)}
             priority={index === 0}
-            className="scale-105 object-cover object-top saturate-[.8] contrast-[1.1] brightness-[.92]"
+            loading={index === 0 ? undefined : "lazy"}
             sizes="100vw"
-            focalPoint={toFocalPoint(slide.image)}
-          />
-          {/* Color grade: multiplies the brand royal blue over the photo so
-              the raw clashing colors (fluorescent ceiling, mismatched
-              decor) read as one deliberate tone instead of a flat
-              snapshot. */}
-          <div
-            aria-hidden
-            className="absolute inset-0 mix-blend-multiply"
-            style={{ backgroundColor: "rgba(24,32,66,0.38)" }}
-          />
-          {/* Gradient follows the text: dark across the upper half where
-              the title/subtitle sit at the optical center, fully clear by
-              ~70% so the faces low-mid in the frame keep their presence.
-              A light bottom tint keeps the wave/dots readable without
-              darkening the people again. */}
-          <div
-            aria-hidden
-            className="absolute inset-0"
-            style={{
-              backgroundImage:
-                "linear-gradient(to bottom, rgba(24,32,66,0.82) 0%, rgba(24,32,66,0.6) 22%, rgba(24,32,66,0.38) 42%, rgba(24,32,66,0.15) 56%, rgba(24,32,66,0) 70%, rgba(24,32,66,0) 82%, rgba(24,32,66,0.35) 100%)",
-            }}
+            className="object-cover saturate-[.85] contrast-[1.06]"
+            focalPoint={toFocalPoint(item.image)}
           />
         </div>
       ))}
+      <div aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,15,42,.72)_0%,rgba(8,15,42,.52)_48%,rgba(8,15,42,.90)_100%)]" />
+      <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(14,21,51,.18)_78%)]" />
 
-      {/* Signature seam: a full-width wave, not a single corner cut — reads
-          as deliberate at any hero width. The welcome section's background
-          matches this same fill color, so the curve lands cleanly with room
-          to breathe below it. No accent line on the crest: a soft shadow
-          under the curve reads as a floating layer instead, cleaner than a
-          hard stroke. */}
-      <svg
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-16 w-full text-background drop-shadow-[0_-6px_16px_rgba(15,23,42,0.12)] md:h-24"
-        viewBox="0 0 1440 120"
-        preserveAspectRatio="none"
-      >
-        <path d="M0,60 C480,120 960,0 1440,60 L1440,120 L0,120 Z" fill="currentColor" />
-      </svg>
-
-      {/* Anchored at the optical center: the stack is vertically centered,
-          then biased up by bottom padding that clears the wave and dots.
-          The block lands centered around ~40% of the frame — lower than a
-          top anchor, but the title still stays off the faces low-mid in
-          the photos. Centering also self-adapts to 1- vs 3-line titles
-          and per-locale copy length. */}
-      <div className="relative z-10 flex min-h-[560px] flex-col justify-center ps-6 pe-6 pb-24 sm:ps-10 md:min-h-[660px] md:pb-36 md:ps-16 lg:ps-20">
-        {slides.map((slide, index) => (
-          <div
-            key={slide.id}
-            className={cn(
-              "max-w-xl transition-all duration-700 ease-out md:max-w-2xl",
-              index === active ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
-            )}
-            aria-hidden={index !== active}
-          >
-            {index === active ? (
-              <>
-                <h1 className="font-display text-4xl font-extrabold tracking-tight text-white text-balance motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-6 motion-safe:blur-in-8 motion-safe:duration-700 motion-safe:ease-out motion-safe:fill-mode-both md:text-5xl md:leading-[1.1] lg:text-6xl">
-                  {slide.title}
-                </h1>
-                {slide.subtitle ? (
-                  <p className="mt-4 max-w-2xl text-base leading-relaxed text-slate-200 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-4 motion-safe:duration-700 motion-safe:delay-150 motion-safe:ease-out motion-safe:fill-mode-both md:text-lg">
-                    {slide.subtitle}
-                  </p>
-                ) : null}
-                {slide.cta && slide.ctaLabel ? (
-                  <div className="mt-8 flex flex-wrap gap-3 motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-4 motion-safe:duration-700 motion-safe:delay-300 motion-safe:ease-out motion-safe:fill-mode-both">
-                    <CTA href={slide.cta.href}>{slide.ctaLabel}</CTA>
-                  </div>
-                ) : null}
-              </>
-            ) : null}
+      <div className="relative z-10 mx-auto flex min-h-[calc(100svh-7rem)] max-w-[1280px] items-center justify-center px-5 py-24 sm:px-8 lg:px-10">
+        <div className="w-full max-w-4xl text-center text-white">
+          <p className="mx-auto mb-6 w-fit border-y border-white/25 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85">
+            {t("heroEyebrow")}
+          </p>
+          <h1 key={`title-${slide.id}`} className="mx-auto max-w-4xl text-[clamp(2rem,4vw,3.25rem)] font-bold leading-[1.12] tracking-[-0.015em] text-balance text-white motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-5 motion-safe:duration-700">
+            {slide.title}
+          </h1>
+          {slide.subtitle ? (
+            <p key={`subtitle-${slide.id}`} className="mx-auto mt-6 max-w-2xl text-base leading-7 text-white/85 md:text-lg md:leading-8">
+              {slide.subtitle}
+            </p>
+          ) : null}
+          <div className="mt-9 flex flex-wrap justify-center gap-3">
+            <HeroLink href={primaryHref}>{primaryLabel}</HeroLink>
+            <HeroLink href="/prodi" secondary>{t("heroCtaSecondary")}</HeroLink>
           </div>
-        ))}
+          <p aria-live="polite" className="sr-only">{slide.title}</p>
+        </div>
       </div>
 
       {slides.length > 1 ? (
-        <>
-          {/* Chevron zone: mid-height on desktop where the text block keeps
-              its left inset; bottom-anchored on mobile, where a vertically
-              centered chevron would land on the subtitle or CTA. */}
-          <button
-            type="button"
-            onClick={goPrev}
-            aria-label="Slide sebelumnya"
-            className="absolute start-0 bottom-24 z-20 ms-4 grid size-10 place-items-center rounded-full border border-white/25 bg-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_4px_16px_rgba(0,0,0,0.15)] backdrop-blur-md transition-all duration-200 hover:scale-105 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 md:inset-y-0 md:my-auto"
-          >
-            <ChevronLeft aria-hidden className="size-5" strokeWidth={1.5} />
-          </button>
-          <button
-            type="button"
-            onClick={goNext}
-            aria-label="Slide berikutnya"
-            className="absolute end-0 bottom-24 z-20 me-4 grid size-10 place-items-center rounded-full border border-white/25 bg-white/10 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.25),0_4px_16px_rgba(0,0,0,0.15)] backdrop-blur-md transition-all duration-200 hover:scale-105 hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 md:inset-y-0 md:my-auto"
-          >
-            <ChevronRight aria-hidden className="size-5" strokeWidth={1.5} />
-          </button>
-
-          {/* Cleared above the wave divider (h-14/h-20) with margin, so the
-              dots never sit on top of the curve. */}
-          <div className="absolute bottom-20 start-1/2 z-20 flex -translate-x-1/2 gap-2 md:bottom-28" role="tablist">
-            {slides.map((slide, index) => (
-              <button
-                key={slide.id}
-                type="button"
-                role="tab"
-                aria-selected={index === active}
-                aria-label={`Pindah ke slide ${index + 1}`}
-                onClick={() => setActive(index)}
-                className={cn(
-                  "h-1.5 rounded-full transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50",
-                  index === active ? "w-8 bg-brass-400" : "w-1.5 bg-white/40 hover:bg-white/60",
-                )}
-              />
-            ))}
+        <div className="absolute inset-x-0 bottom-5 z-20 mx-auto flex max-w-[1280px] items-center justify-between gap-4 px-5 sm:px-8 lg:px-10">
+          <p className="text-xs tabular-nums tracking-[0.18em] text-white/75">
+            {String(active + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
+          </p>
+          <div className="flex items-center gap-2">
+            <button type="button" onClick={goPrev} aria-label={t("heroSlidePrevious")} className="grid size-11 place-items-center rounded-md border border-white/35 text-white transition-colors hover:bg-white hover:text-navy-950 motion-safe:active:scale-[0.97]">
+              <ChevronLeft aria-hidden className="size-5 rtl:rotate-180" strokeWidth={1.5} />
+            </button>
+            <button type="button" onClick={() => setManualPause((value) => !value)} aria-label={manualPause ? t("heroPlaySlideshow") : t("heroPauseSlideshow")} className="grid size-11 place-items-center rounded-md border border-white/35 text-white transition-colors hover:bg-white hover:text-navy-950 motion-safe:active:scale-[0.97]">
+              {manualPause ? <Play aria-hidden className="size-4" strokeWidth={1.5} /> : <Pause aria-hidden className="size-4" strokeWidth={1.5} />}
+            </button>
+            <button type="button" onClick={goNext} aria-label={t("heroSlideNext")} className="grid size-11 place-items-center rounded-md border border-white/35 text-white transition-colors hover:bg-white hover:text-navy-950 motion-safe:active:scale-[0.97]">
+              <ChevronRight aria-hidden className="size-5 rtl:rotate-180" strokeWidth={1.5} />
+            </button>
           </div>
-        </>
+        </div>
       ) : null}
     </section>
-  );
-}
-
-function CTA({ href, children }: { href: string; children: React.ReactNode }) {
-  const isExternal = href.startsWith("http");
-  const className =
-    "group/cta relative isolate inline-flex h-11 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-r from-brass-500 to-brass-400 px-5 text-sm font-semibold text-navy-900 transition-all duration-200 hover:from-brass-400 hover:to-brass-400 hover:shadow-[0_10px_28px_-10px_var(--brass-500)] active:scale-[0.98]";
-
-  // Sheen sweeps once on hover for feedback, not on a loop; hidden entirely
-  // under reduced motion instead of jumping straight to the end state.
-  const content = (
-    <>
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 -translate-x-full motion-safe:transition-transform motion-safe:duration-700 motion-safe:ease-out motion-safe:group-hover/cta:translate-x-full"
-        style={{
-          backgroundImage:
-            "linear-gradient(115deg, transparent 30%, rgb(255 255 255 / 55%) 50%, transparent 70%)",
-        }}
-      />
-      <span className="relative">{children}</span>
-    </>
-  );
-
-  if (isExternal) {
-    return (
-      <a href={href} target="_blank" rel="noopener noreferrer" className={className}>
-        {content}
-      </a>
-    );
-  }
-  return (
-    <Link href={href} className={className}>
-      {content}
-    </Link>
   );
 }

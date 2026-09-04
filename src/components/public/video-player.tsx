@@ -30,7 +30,7 @@ export function extractYouTubeId(url: string): string | null {
 
 function PlayButton() {
   return (
-    <span className="grid size-16 place-items-center rounded-full bg-white/95 text-royal-700 shadow-lg transition-transform duration-200 group-hover:scale-110">
+    <span className="grid size-16 place-items-center rounded-full bg-white/95 text-royal-700 shadow-md transition-transform duration-200 group-hover:scale-105">
       <Play aria-hidden className="size-6 translate-x-0.5" fill="currentColor" strokeWidth={0} />
     </span>
   );
@@ -49,7 +49,7 @@ export function VideoPlayer({ video, className }: VideoPlayerProps) {
 
   if (playing && youtubeId) {
     return (
-      <div className={cn("relative mx-auto aspect-video max-w-3xl overflow-hidden rounded-2xl shadow-lg", className)}>
+      <div className={cn("relative mx-auto aspect-video max-w-3xl overflow-hidden rounded-md shadow-md", className)}>
         <iframe
           className="absolute inset-0 size-full"
           src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0`}
@@ -66,7 +66,7 @@ export function VideoPlayer({ video, className }: VideoPlayerProps) {
       <ImageWithFallback
         src={video.poster?.url}
         alt={video.poster?.isDecorative ? "" : (video.poster?.alt ?? video.title)}
-        className="object-cover transition-transform duration-500 group-hover:scale-105"
+        className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
         sizes="(min-width: 1024px) 60vw, 100vw"
         focalPoint={toFocalPoint(video.poster)}
       />
@@ -83,7 +83,7 @@ export function VideoPlayer({ video, className }: VideoPlayerProps) {
         type="button"
         onClick={() => setPlaying(true)}
         aria-label={video.title}
-        className={cn("group relative mx-auto flex w-full max-w-3xl flex-col overflow-hidden rounded-2xl shadow-lg transition-all duration-200 hover:shadow-xl", className)}
+        className={cn("group relative mx-auto flex w-full max-w-3xl flex-col overflow-hidden rounded-md shadow-md transition-shadow duration-200 hover:shadow-lg", className)}
       >
         {poster}
       </button>
@@ -95,7 +95,7 @@ export function VideoPlayer({ video, className }: VideoPlayerProps) {
       href={video.url}
       target="_blank"
       rel="noopener noreferrer"
-      className={cn("group relative mx-auto flex max-w-3xl flex-col overflow-hidden rounded-2xl shadow-lg transition-all duration-200 hover:shadow-xl", className)}
+      className={cn("group relative mx-auto flex max-w-3xl flex-col overflow-hidden rounded-md shadow-md transition-shadow duration-200 hover:shadow-lg", className)}
     >
       {poster}
     </a>

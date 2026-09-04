@@ -1,4 +1,4 @@
-import { Amiri, IBM_Plex_Sans_Arabic, Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { Amiri, IBM_Plex_Sans_Arabic, Newsreader } from "next/font/google";
 import { setRequestLocale } from "next-intl/server";
 
 import { SiteFooter } from "@/components/public/site-footer";
@@ -6,16 +6,11 @@ import { SiteHeader } from "@/components/public/site-header";
 import { SkipLink } from "@/components/public/skip-link";
 import { OrganizationJsonLd } from "@/components/public/json-ld";
 
-const display = Plus_Jakarta_Sans({
+const editorial = Newsreader({
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
-  variable: "--font-plus-jakarta-sans",
-});
-
-const body = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
+  variable: "--font-newsreader",
 });
 
 const arabicUi = IBM_Plex_Sans_Arabic({
@@ -32,7 +27,7 @@ const arabicQuote = Amiri({
   variable: "--font-amiri",
 });
 
-const FONT_VARIABLES = `${display.variable} ${body.variable} ${arabicUi.variable} ${arabicQuote.variable}`;
+const FONT_VARIABLES = `${editorial.variable} ${arabicUi.variable} ${arabicQuote.variable}`;
 
 export default async function PublicLayout({
   children,
@@ -49,9 +44,7 @@ export default async function PublicLayout({
       <SkipLink />
       <OrganizationJsonLd />
       <SiteHeader />
-      {/* The header is sticky, so the skip link and any in-page anchor must clear
-          its full ~136px height (top bar + main header) instead of landing underneath it. */}
-      <main id="main" tabIndex={-1} className="flex-1 scroll-mt-[136px] outline-none">
+      <main id="main" tabIndex={-1} className="w-full max-w-full flex-1 overflow-x-hidden scroll-mt-[136px] outline-none">
         {children}
       </main>
       <SiteFooter />
