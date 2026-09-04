@@ -140,7 +140,7 @@ export function LecturerAcademicRecords({research, community, hki, teaching, lab
   return (
     <div className="mt-14 border-t border-slate-200 pt-10">
       <div className="grid gap-12">
-        <section id="lecturer-research" aria-labelledby="lecturer-research-title" className="scroll-mt-28">
+        <section id="lecturer-research" aria-labelledby="lecturer-research-title" className="scroll-mt-28 rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-24px_rgba(15,23,42,0.25)] md:p-8">
           <div className="flex items-start gap-3">
             <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-royal-50 text-royal-600">
               <BookOpenCheck aria-hidden className="size-4.5" strokeWidth={1.6} />
@@ -151,7 +151,7 @@ export function LecturerAcademicRecords({research, community, hki, teaching, lab
             </div>
           </div>
           {research.length > 0 ? (
-            <ol className="mt-6 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-slate-50/70 px-6 md:px-8">
+            <ol className="mt-6 divide-y divide-slate-200 border-y border-slate-200">
               {research.map((item) => (
                 <li key={item.id} className="py-4 first:pt-6 last:pb-6 md:first:pt-8 md:last:pb-8">
                   <div className="grid gap-2 sm:grid-cols-[4rem_1fr] sm:gap-5">
@@ -170,7 +170,7 @@ export function LecturerAcademicRecords({research, community, hki, teaching, lab
           </Link>
         </section>
 
-        <section id="lecturer-community" aria-labelledby="lecturer-community-title" className="scroll-mt-28">
+        <section id="lecturer-community" aria-labelledby="lecturer-community-title" className="scroll-mt-28 rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-24px_rgba(15,23,42,0.25)] md:p-8">
           <div className="flex items-start gap-3">
             <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-royal-50 text-royal-600">
               <HeartHandshake aria-hidden className="size-4.5" strokeWidth={1.6} />
@@ -181,7 +181,7 @@ export function LecturerAcademicRecords({research, community, hki, teaching, lab
             </div>
           </div>
           {community.length > 0 ? (
-            <ol className="mt-6 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-slate-50/70 px-6 md:px-8">
+            <ol className="mt-6 divide-y divide-slate-200 border-y border-slate-200">
               {community.map((item) => (
                 <li key={item.id} className="py-4 first:pt-6 last:pb-6 md:first:pt-8 md:last:pb-8">
                   <div className="grid gap-2 sm:grid-cols-[4rem_1fr] sm:gap-5">
@@ -201,7 +201,7 @@ export function LecturerAcademicRecords({research, community, hki, teaching, lab
           </Link>
         </section>
 
-        <section id="lecturer-hki" aria-labelledby="lecturer-hki-title" className="scroll-mt-28">
+        <section id="lecturer-hki" aria-labelledby="lecturer-hki-title" className="scroll-mt-28 rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-24px_rgba(15,23,42,0.25)] md:p-8">
           <div className="flex items-start gap-3">
             <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-royal-50 text-royal-600">
               <Copyright aria-hidden className="size-4.5" strokeWidth={1.6} />
@@ -212,7 +212,7 @@ export function LecturerAcademicRecords({research, community, hki, teaching, lab
             </div>
           </div>
           {hki.length > 0 ? (
-            <ol className="mt-6 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-slate-50/70 px-6 md:px-8">
+            <ol className="mt-6 divide-y divide-slate-200 border-y border-slate-200">
               {hki.map((item) => (
                 <li key={item.id} className="py-4 first:pt-6 last:pb-6 md:first:pt-8 md:last:pb-8">
                   <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -228,7 +228,7 @@ export function LecturerAcademicRecords({research, community, hki, teaching, lab
           ) : <div className="mt-6"><EmptyState>{labels.noRecords}</EmptyState></div>}
         </section>
 
-        <section id="lecturer-teaching" aria-labelledby="lecturer-teaching-title" className="scroll-mt-28">
+        <section id="lecturer-teaching" aria-labelledby="lecturer-teaching-title" className="scroll-mt-28 rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-24px_rgba(15,23,42,0.25)] md:p-8">
           <div className="flex items-start gap-3">
             <span className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-lg bg-royal-50 text-royal-600">
               <GraduationCap aria-hidden className="size-4.5" strokeWidth={1.6} />

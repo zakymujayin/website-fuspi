@@ -286,23 +286,21 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
         ]}
       />
 
-      {(() => {
-        const [base, ...rest] = lecturer.name.split(",");
-        const suffix = rest.join(",").trim();
-        return (
-          <div className="lecturer-hero mb-10 rounded-2xl bg-royal-50 px-6 py-8 md:px-10 md:py-10">
-            <h1 className="text-start font-display font-bold tracking-tight text-navy-900">
-              <span className="block text-3xl md:text-4xl" dir="auto">{base.trim()}</span>
-              {suffix ? <span className="mt-2 block text-base font-medium text-royal-700" dir="auto">{suffix}</span> : null}
-            </h1>
-            {tl?.position ? <p className="mt-3 text-sm text-royal-800" dir="auto">{tl.position}</p> : null}
-          </div>
-        );
-      })()}
+      <header className="lecturer-hero mb-10 rounded-2xl border border-royal-100 bg-royal-50 px-6 py-8 md:px-10 md:py-10">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-semibold tracking-[0.14em] text-royal-700 uppercase">
+          {lecturer.studyProgram?.code ? <span>{lecturer.studyProgram.code}</span> : null}
+          {lecturer.studyProgram?.code && programName ? <span aria-hidden className="h-px w-6 bg-brass-500" /> : null}
+          {programName ? <span className="tracking-normal normal-case text-royal-800">{programName}</span> : null}
+        </div>
+        <h1 className="mt-6 max-w-3xl text-start font-display text-3xl font-bold tracking-tight text-navy-900 text-balance md:text-5xl">
+          <span dir="auto">{lecturer.name}</span>
+        </h1>
+        {tl?.position ? <p className="mt-3 text-sm font-medium text-royal-800" dir="auto">{tl.position}</p> : null}
+      </header>
 
       <div className="grid gap-x-12 gap-y-10 lg:grid-cols-12">
         <aside className="order-1 lg:col-span-4 lg:col-start-1 lg:row-span-2 lg:row-start-1">
-          <div className="lg:sticky lg:top-24 space-y-6">
+          <div className="lg:sticky lg:top-24 grid gap-6">
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-24px_rgba(15,23,42,0.25)]">
               {lecturer.photoMedia ? (
                 <div className="relative aspect-[4/5] bg-slate-100">

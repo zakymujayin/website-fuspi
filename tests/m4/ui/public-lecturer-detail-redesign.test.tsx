@@ -13,6 +13,8 @@ describe("public lecturer detail page redesign", () => {
   it("renders a hero band naming the study program and lecturer identity above the fold", () => {
     expect(page).toContain("lecturer-hero");
     expect(page).toContain("lecturer.studyProgram");
+    expect(page).toContain("lecturer.studyProgram?.code");
+    expect(page).toContain("programName");
   });
 
   it("shows NIP and NIDN as separate identity rows instead of collapsing them into one line", () => {
