@@ -46,11 +46,19 @@ describe("public leadership page visual contract", () => {
 
   it("keeps the roster readable and names on one line", () => {
     expect(page).toContain("vd.bio");
-    expect(page).toContain("headOfAdminBio");
+    expect(page).not.toContain("headOfAdminBio");
     expect(page).toContain("whitespace-nowrap font-display text-[13px] font-bold leading-5 tracking-tight");
     expect(page).not.toContain("text-[clamp");
     expect(page).toContain("max-w-[15rem] text-pretty text-sm leading-6 text-slate-500");
     expect(page).toContain("min-h-24 max-w-[18rem] self-center text-pretty text-sm leading-6");
+  });
+
+  it("localizes the leadership page eyebrow across supported locales", () => {
+    expect(page).toContain("const leadershipEyebrowLabels: Record<AppLocale, string>");
+    expect(page).toContain('id: "FUSPI · Profil Fakultas"');
+    expect(page).toContain('en: "FUSPI · Faculty Profile"');
+    expect(page).toContain('ar: "FUSPI · الملف التعريفي للكلية"');
+    expect(page).toContain("{leadershipEyebrowLabels[locale]}");
   });
 
   it("uses logical direction utilities for the RTL-ready layout", () => {

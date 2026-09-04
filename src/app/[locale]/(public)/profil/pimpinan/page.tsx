@@ -14,13 +14,14 @@ const leadershipTeamLabels: Record<AppLocale, string> = {
   ar: "قيادة الكلية",
 };
 
+const leadershipEyebrowLabels: Record<AppLocale, string> = {
+  id: "FUSPI · Profil Fakultas",
+  en: "FUSPI · Faculty Profile",
+  ar: "FUSPI · الملف التعريفي للكلية",
+};
+
 const LEADERSHIP_NAME_CLASS = "whitespace-nowrap font-display text-[13px] font-bold leading-5 tracking-tight text-slate-950";
 const LEADERSHIP_ROLE_CLASS = "whitespace-nowrap text-[13px] font-semibold leading-5 text-royal-700";
-const headOfAdminBio: Record<AppLocale, string> = {
-  id: "Mengelola administrasi umum, ketatausahaan, dan dukungan operasional fakultas.",
-  en: "Oversees general administration, office services, and operational support for the faculty.",
-  ar: "يشرف على الإدارة العامة والخدمات المكتبية والدعم التشغيلي للكلية.",
-};
 
 function LeadershipPortrait({
   photoUrl,
@@ -93,7 +94,7 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
         <header className="relative overflow-hidden rounded-2xl border border-royal-100 bg-royal-50 px-6 py-7 shadow-sm md:px-9 md:py-8">
           <div aria-hidden="true" className="absolute end-8 top-1/2 size-28 -translate-y-1/2 rounded-full border border-royal-200/70 md:size-40" />
           <div className="relative max-w-3xl border-s-4 border-brass-500 ps-5 md:ps-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-royal-700">FUSPI · Profil Fakultas</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-royal-700">{leadershipEyebrowLabels[locale]}</p>
             <h1 className="section-rule mt-3 font-display text-4xl font-bold tracking-tight text-slate-950 md:text-5xl">
               {t("leadership")}
             </h1>
@@ -161,9 +162,6 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
                 <div className="flex flex-1 flex-col border-t border-slate-200 pt-4">
                   <h3 className={LEADERSHIP_NAME_CLASS}>{headOfAdmin.name}</h3>
                   <LeadershipPosition position={headOfAdmin.position[locale] ?? headOfAdmin.position.id} />
-                  <p className="mt-4 min-h-24 max-w-[18rem] self-center text-pretty text-sm leading-6 text-slate-600">
-                    {headOfAdminBio[locale]}
-                  </p>
                 </div>
               </article>
             </div>

@@ -3,7 +3,7 @@
 - Task ID: `M5-CLAUDE-LEADERSHIP-PAGE-REDESIGN`
 - Branch: `ai/claude/m5-lecturer-profile-redesign`
 - Base SHA: `b936c4f`
-- Implementation SHA: `49098d8`
+- Implementation SHA: `6c32a6f`
 
 ## Summary
 
@@ -22,6 +22,8 @@ characterful directory composition:
   layout, semantic section labels, and RTL-safe direction utilities.
 - Refined leadership role/scope separation, name and bio proportions, and
   localized the leadership section heading.
+- Localized the page eyebrow for all supported locales and removed an
+  unsourced head-of-administration bio.
 
 ## Files changed
 
@@ -37,10 +39,10 @@ semantics remain unchanged.
 
 ## Verification
 
-- `npx vitest run tests/m5/ui/public-leadership-page.test.tsx` — passed (7)
+- `npx vitest run tests/m5/ui/public-leadership-page.test.tsx` — passed (8)
 - `npm run lint` — passed
 - `npm run typecheck` — passed
-- `npm run test` — passed (140 files, 1,495 tests)
+- `npm run test` — passed (140 files, 1,496 tests)
 - `git diff --check` — passed
 
 ## Untested areas and risks
