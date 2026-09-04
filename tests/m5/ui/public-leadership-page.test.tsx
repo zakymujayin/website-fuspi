@@ -10,10 +10,11 @@ const page = readFileSync(
 
 describe("public leadership page visual contract", () => {
   it("separates the page introduction and dean identity into high-contrast surfaces", () => {
-    expect(page).toContain("bg-navy-950");
+    expect(page).toContain("border-b border-slate-200 pb-6");
     expect(page).toContain("bg-white shadow-md");
     expect(page).toContain("bg-royal-50");
     expect(page).toContain("text-slate-950");
+    expect(page).not.toContain("bg-navy-950");
   });
 
   it("uses a consistent editorial image ratio for leadership portraits", () => {

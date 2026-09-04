@@ -37,6 +37,10 @@ editorial hierarchy and stronger contrast:
 - Added locale-aware `Lihat LHKPN` / `View LHKPN` / `عرض LHKPN` CTA linking to
   KPK's official e-Announcement search page:
   `https://elhkpn.kpk.go.id/portal/user/check_search_announ`.
+- Reduced the oversized dark hero into a compact light editorial header so the
+  page hierarchy starts with the leadership profiles rather than the banner.
+- Changed the vice-dean and administration image surfaces to a neutral slate
+  frame and enlarged the administration media column for a more balanced card.
 
 ## API/schema/migration impact
 
