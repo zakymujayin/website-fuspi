@@ -133,6 +133,18 @@ function escapeXml(value: string) {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
+async function writeToStorage(buffer: Buffer, ext: string) {
+  const checksumSha256 = createHash("sha256").update(buffer).digest("hex");
+  const now = new Date();
+  const yyyy = String(now.getUTCFullYear());
+  const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const storageKey = `${yyyy}/${mm}/${checksumSha256}${ext}`;
+  const dir = path.join(UPLOAD_DIR, yyyy, mm);
+  await fs.mkdir(dir, { recursive: true });
+  await fs.writeFile(path.join(UPLOAD_DIR, storageKey), buffer);
+  return { storageKey, checksumSha256, size: buffer.length };
+}
+
 async function makePlaceholderFile(opts: { label: string; width: number; height: number; from: string; to: string }) {
   const fontSize = Math.round(Math.min(opts.width, opts.height) / 11);
   const svg = `<svg width="${opts.width}" height="${opts.height}" xmlns="http://www.w3.org/2000/svg">
@@ -148,58 +160,19 @@ async function makePlaceholderFile(opts: { label: string; width: number; height:
   </svg>`;
 
   const buffer = await sharp(Buffer.from(svg)).webp({ quality: 82 }).toBuffer();
-  const checksumSha256 = createHash("sha256").update(buffer).digest("hex");
-  const now = new Date();
-  const yyyy = String(now.getUTCFullYear());
-  const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
-  const storageKey = `${yyyy}/${mm}/${checksumSha256}.webp`;
-  const dir = path.join(UPLOAD_DIR, yyyy, mm);
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(path.join(UPLOAD_DIR, storageKey), buffer);
-  return { storageKey, checksumSha256, size: buffer.length };
-}
-
-async function upsertPlaceholderMedia(
-  uploaderId: string,
-  opts: { label: string; width: number; height: number; from: string; to: string; alt: string; originalName: string },
-) {
-  const file = await makePlaceholderFile(opts);
-  return prisma.media.upsert({
-    where: { storageKey: file.storageKey },
-    update: {},
-    create: {
-      storageKey: file.storageKey,
-      checksumSha256: file.checksumSha256,
-      originalName: opts.originalName,
-      mimeType: "image/webp",
-      size: file.size,
-      alt: opts.alt,
-      width: opts.width,
-      height: opts.height,
-      uploaderId,
-    },
-  });
+  return writeToStorage(buffer, ".webp");
 }
 
 async function makeAssetFile(sourcePath: string) {
   const buffer = await fs.readFile(sourcePath);
-  const checksumSha256 = createHash("sha256").update(buffer).digest("hex");
-  const now = new Date();
-  const yyyy = String(now.getUTCFullYear());
-  const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
-  const ext = path.extname(sourcePath);
-  const storageKey = `${yyyy}/${mm}/${checksumSha256}${ext}`;
-  const dir = path.join(UPLOAD_DIR, yyyy, mm);
-  await fs.mkdir(dir, { recursive: true });
-  await fs.writeFile(path.join(UPLOAD_DIR, storageKey), buffer);
-  return { storageKey, checksumSha256, size: buffer.length };
+  return writeToStorage(buffer, path.extname(sourcePath));
 }
 
-async function upsertMediaFromAsset(
+async function upsertMediaRow(
   uploaderId: string,
-  opts: { assetPath: string; alt: string; originalName: string; mimeType: string; width: number; height: number },
+  file: { storageKey: string; checksumSha256: string; size: number },
+  opts: { alt: string; originalName: string; mimeType: string; width: number; height: number },
 ) {
-  const file = await makeAssetFile(opts.assetPath);
   return prisma.media.upsert({
     where: { storageKey: file.storageKey },
     update: {},
@@ -217,6 +190,28 @@ async function upsertMediaFromAsset(
   });
 }
 
+async function upsertPlaceholderMedia(
+  uploaderId: string,
+  opts: { label: string; width: number; height: number; from: string; to: string; alt: string; originalName: string },
+) {
+  const file = await makePlaceholderFile(opts);
+  return upsertMediaRow(uploaderId, file, {
+    alt: opts.alt,
+    originalName: opts.originalName,
+    mimeType: "image/webp",
+    width: opts.width,
+    height: opts.height,
+  });
+}
+
+async function upsertMediaFromAsset(
+  uploaderId: string,
+  opts: { assetPath: string; alt: string; originalName: string; mimeType: string; width: number; height: number },
+) {
+  const file = await makeAssetFile(opts.assetPath);
+  return upsertMediaRow(uploaderId, file, opts);
+}
+
 /* Demo lecturers. The invented identities below are fictional on purpose: the
    directory carries education history and publications, and attaching invented
    credentials to a real person would fabricate an academic record.
@@ -231,6 +226,7 @@ type LecturerSeed = {
   name: string;
   nidn: string | null;
   nip?: string | null;
+  email?: string;
   program: string;
   position: string;
   expertise: string;
@@ -261,6 +257,7 @@ const LECTURERS: LecturerSeed[] = [
     name: "Dr. Masykur, M.Hum.",
     nidn: null,
     nip: "197606172005011003",
+    email: "masykur@fuspi.uinbanten.ac.id",
     program: "AFI",
     position: "Dekan Fakultas Ushuluddin dan Pemikiran Islam",
     expertise: "Filsafat Islam, moderasi beragama, pemikiran keislaman kontemporer",
@@ -871,7 +868,7 @@ async function main() {
         googleScholarUrl: item.googleScholarUrl ?? null,
         sintaUrl: item.sintaUrl ?? null,
         scopusUrl: item.scopusUrl ?? null,
-        email: `${item.slug}@fuspi.uinbanten.ac.id`,
+        email: item.email ?? `${item.slug}@fuspi.uinbanten.ac.id`,
         studyProgramId: programsByCode.get(item.program) ?? null,
         order: index,
         isActive: true,
@@ -892,7 +889,7 @@ async function main() {
         googleScholarUrl: item.googleScholarUrl ?? null,
         sintaUrl: item.sintaUrl ?? null,
         scopusUrl: item.scopusUrl ?? null,
-        email: `${item.slug}@fuspi.uinbanten.ac.id`,
+        email: item.email ?? `${item.slug}@fuspi.uinbanten.ac.id`,
         studyProgramId: programsByCode.get(item.program) ?? null,
         order: index,
         userId: item.slug === PORTAL_ACCOUNT_SLUG ? lecturerAccount.id : undefined,
