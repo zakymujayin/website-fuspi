@@ -8,6 +8,12 @@ import type {AppLocale} from "@/i18n/routing";
 import {deanProfile} from "@/lib/data/dummy-dean";
 import {headOfAdmin, viceDeans} from "@/lib/data/dummy-leadership";
 
+const lhkpnLabels: Record<AppLocale, string> = {
+  id: "Lihat LHKPN",
+  en: "View LHKPN",
+  ar: "عرض LHKPN",
+};
+
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
   const t = await getTranslations({locale, namespace: "Pages"});
@@ -19,7 +25,6 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
   setRequestLocale(locale);
   const t = await getTranslations("Pages");
   const deanPosition = deanProfile.position[locale] ?? deanProfile.position.id;
-  const deanMessage = deanProfile.message[locale] ?? deanProfile.message.id;
 
   return (
     <div className="bg-slate-50">
@@ -48,7 +53,7 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
                       alt={deanProfile.name}
                       fill
                       sizes="(min-width: 1024px) 38vw, 100vw"
-                      className="object-cover"
+                      className="object-contain"
                       priority
                     />
                   </div>
@@ -63,10 +68,15 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
                   {deanProfile.name}
                 </h2>
                 <p className="mt-3 max-w-xl text-sm font-medium leading-6 text-slate-600 md:text-base">{deanPosition}</p>
-
-                <blockquote className="mt-8 rounded-2xl border-s-4 border-brass-500 bg-royal-50 px-5 py-5 md:px-6 md:py-6">
-                  <p className="max-w-[62ch] text-sm leading-7 text-slate-700 md:text-base md:leading-8">{deanMessage}</p>
-                </blockquote>
+                <a
+                  href="https://elhkpn.kpk.go.id/portal/user/check_search_announ"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-8 inline-flex min-h-10 w-fit items-center gap-2 rounded-lg bg-royal-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-royal-700 active:scale-[0.98]"
+                >
+                  {lhkpnLabels[locale]}
+                  <span aria-hidden="true" className="text-base leading-none">↗</span>
+                </a>
               </div>
             </div>
           </section>
@@ -83,7 +93,7 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
                 <article key={vd.initials} className="flex min-h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
                   {vd.photoUrl ? (
                     <div className="relative aspect-[4/3] w-full overflow-hidden bg-navy-900">
-                      <Image src={vd.photoUrl} alt={vd.name} fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-cover object-top" />
+                      <Image src={vd.photoUrl} alt={vd.name} fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-contain" />
                     </div>
                   ) : (
                     <DeanAvatarPlate initials={vd.initials} name={vd.name} />
@@ -108,7 +118,7 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
             <article className="mt-8 grid overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm sm:grid-cols-[minmax(0,280px)_minmax(0,1fr)]">
               {headOfAdmin.photoUrl ? (
                 <div className="relative aspect-[4/3] w-full bg-slate-100 sm:aspect-auto sm:min-h-[220px]">
-                  <Image src={headOfAdmin.photoUrl} alt={headOfAdmin.name} fill sizes="(min-width: 640px) 280px, 100vw" className="object-cover object-top" />
+                  <Image src={headOfAdmin.photoUrl} alt={headOfAdmin.name} fill sizes="(min-width: 640px) 280px, 100vw" className="object-contain" />
                 </div>
               ) : (
                 <DeanAvatarPlate initials={headOfAdmin.initials} name={headOfAdmin.name} />

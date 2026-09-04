@@ -28,6 +28,16 @@ editorial hierarchy and stronger contrast:
 - `coordination/tasks/M5-CLAUDE-LEADERSHIP-PAGE-REDESIGN.md`
 - `coordination/handoffs/M5-CLAUDE-LEADERSHIP-PAGE-REDESIGN-claude.md`
 
+## Follow-up requested by owner
+
+- Removed the dean welcome-message block so the card focuses on identity and
+  position.
+- Changed all leadership photos to `object-contain` inside the shared editorial
+  frame so source portraits are not cropped or stretched.
+- Added locale-aware `Lihat LHKPN` / `View LHKPN` / `عرض LHKPN` CTA linking to
+  KPK's official e-Announcement search page:
+  `https://elhkpn.kpk.go.id/portal/user/check_search_announ`.
+
 ## API/schema/migration impact
 
 None. Existing leadership data, locale fallback, image paths, and page
@@ -35,10 +45,10 @@ semantics remain unchanged.
 
 ## Verification
 
-- `npx vitest run tests/m5/ui/public-leadership-page.test.tsx` — passed (4)
+- `npx vitest run tests/m5/ui/public-leadership-page.test.tsx` — passed (5)
 - `npm run lint` — passed
 - `npm run typecheck` — passed
-- `npm run test` — passed (140 files, 1,492 tests)
+- `npm run test` — passed (140 files, 1,493 tests)
 - `git diff --check` — passed
 
 ## Untested areas and risks

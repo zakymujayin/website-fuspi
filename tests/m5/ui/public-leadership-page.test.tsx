@@ -18,7 +18,15 @@ describe("public leadership page visual contract", () => {
 
   it("uses a consistent editorial image ratio for leadership portraits", () => {
     expect(page).toContain("aspect-[4/3]");
-    expect(page).not.toContain("aspect-[3/4]");
+    expect(page).toContain("object-contain");
+    expect(page).not.toContain("object-cover");
+  });
+
+  it("keeps the dean card focused on identity and links to the official LHKPN search", () => {
+    expect(page).not.toContain("deanMessage");
+    expect(page).toContain("https://elhkpn.kpk.go.id/portal/user/check_search_announ");
+    expect(page).toContain("lhkpnLabels[locale]");
+    expect(page).toContain('target="_blank"');
   });
 
   it("keeps leadership groups semantically labelled and responsive", () => {
