@@ -12,9 +12,9 @@ export const viceDeans: readonly LeadershipMember[] = [
     name: "Dr. H. Masrukhin Muhsin, Lc, M.A.",
     photoUrl: "/images/leadership/wd1-masrukhin.webp",
     position: {
-      id: "Wakil Dekan I — Bidang Akademik",
-      en: "Vice Dean I — Academic Affairs",
-      ar: "نائب العميد الأول — الشؤون الأكاديمية",
+      id: "Wakil Dekan I — Bidang Akademik dan Kelembagaan",
+      en: "Vice Dean I — Academic and Institutional Affairs",
+      ar: "نائب العميد الأول — الشؤون الأكاديمية والمؤسسية",
     },
     bio: {
       id: "Mengoordinasikan kurikulum, mutu pembelajaran, dan pengembangan program studi di lingkungan FUSPI.",
@@ -27,9 +27,9 @@ export const viceDeans: readonly LeadershipMember[] = [
     name: "Dr. H. Endang Saeful Anwar, Lc, M.A.",
     photoUrl: "/images/leadership/wd2-endang.webp",
     position: {
-      id: "Wakil Dekan II — Administrasi Umum dan Keuangan",
-      en: "Vice Dean II — General Administration and Finance",
-      ar: "نائب العميد الثاني — الإدارة العامة والمالية",
+      id: "Wakil Dekan II — Bidang Administrasi Umum, Perencanaan dan Keuangan",
+      en: "Vice Dean II — General Administration, Planning and Finance",
+      ar: "نائب العميد الثاني — الإدارة العامة والتخطيط والمالية",
     },
     bio: {
       id: "Mengelola tata kelola administrasi, keuangan, serta sarana dan prasarana fakultas.",
@@ -41,9 +41,9 @@ export const viceDeans: readonly LeadershipMember[] = [
     initials: "AF",
     name: "Dr. Ade Fakih Kurniawan, S.Th.I., M.Ud",
     position: {
-      id: "Wakil Dekan III — Kemahasiswaan dan Kerja Sama",
-      en: "Vice Dean III — Student Affairs and Partnerships",
-      ar: "نائب العميد الثالث — شؤون الطلاب والشراكات",
+      id: "Wakil Dekan III — Bidang Kemahasiswaan, Alumni, dan Kerja Sama",
+      en: "Vice Dean III — Student Affairs, Alumni and Partnerships",
+      ar: "نائب العميد الثالث — شؤون الطلاب والخريجين والشراكات",
     },
     bio: {
       id: "Membina kegiatan kemahasiswaan, alumni, serta kerja sama dalam dan luar negeri.",
