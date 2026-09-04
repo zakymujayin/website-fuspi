@@ -1,23 +1,14 @@
 "use client";
 
-import {PencilLineIcon, Trash2Icon} from "lucide-react";
+import {PencilLineIcon} from "lucide-react";
 import {useActionState, useEffect, useState} from "react";
 
-import {
-  AlertDialog,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import {LecturerRecordSheet} from "./lecturer-record-sheet";
 import {LECTURER_MANAGER_COPY} from "./lecturer-manager-copy";
 import {saveAdminEducationAction, type AdminLecturerRelationFormState} from "./lecturer-relations-actions";
 import type {AdminLecturerRelations} from "@/features/academic/lecturer-relations";
 import {RecordTable} from "@/components/admin/shared/record-table";
+import {RecordDeleteAction} from "@/components/admin/shared/record-delete-action";
 import {Button} from "@/components/ui/button";
 import {Field, FieldGroup, FieldLabel} from "@/components/ui/field";
 import {Input} from "@/components/ui/input";
@@ -80,50 +71,6 @@ function EducationForm({
   );
 }
 
-function DeleteEducationAction({
-  lecturerId, item, labels,
-}: {
-  lecturerId: string;
-  item: Education;
-  labels: (typeof LECTURER_MANAGER_COPY)[AppLocale]["education"];
-}) {
-  const [state, action, pending] = useActionState(
-    saveAdminEducationAction,
-    {status: "idle"} satisfies AdminLecturerRelationFormState,
-  );
-  const [open, setOpen] = useState(false);
-  const [prevStatus, setPrevStatus] = useState(state.status);
-  if (state.status !== prevStatus) {
-    setPrevStatus(state.status);
-    if (state.status === "saved") setOpen(false);
-  }
-
-  return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger render={<Button type="button" variant="ghost" size="sm" />}>
-        <Trash2Icon data-icon="inline-start" />
-        {labels.remove}
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{labels.confirmTitle}</AlertDialogTitle>
-          <AlertDialogDescription dir="auto">
-            {labels.confirmDescription.replace("{title}", item.degree)}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{labels.cancel}</AlertDialogCancel>
-          <form action={action}>
-            <input type="hidden" name="lecturerId" value={lecturerId} />
-            <input type="hidden" name="id" value={item.id} />
-            <PortalSubmitButton pending={pending} name="intent" value="delete" label={labels.remove} pendingLabel={labels.remove} />
-          </form>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  );
-}
-
 export function EducationManager({
   locale, lecturerId, educations,
 }: {
@@ -163,7 +110,15 @@ export function EducationManager({
               <PencilLineIcon data-icon="inline-start" />
               {labels.edit}
             </Button>
-            <DeleteEducationAction lecturerId={lecturerId} item={row} labels={labels} />
+            <RecordDeleteAction
+              action={saveAdminEducationAction}
+              initialState={{status: "idle"} satisfies AdminLecturerRelationFormState}
+              lecturerId={lecturerId}
+              item={row}
+              subject={(r) => r.degree}
+              itemId={(r) => r.id}
+              labels={labels}
+            />
           </>
         )}
       />
