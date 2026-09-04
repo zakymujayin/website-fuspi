@@ -39,8 +39,9 @@ describe("public leadership page visual contract", () => {
     expect(page).toContain('aria-labelledby="dean-profile"');
     expect(page).toContain('aria-labelledby="vice-deans"');
     expect(page).toContain('aria-labelledby="admin-leadership"');
-    expect(page).toContain("grid gap-5 lg:grid-cols-6");
-    expect(page).toContain("lg:col-span-6 lg:grid");
+    expect(page).toContain("grid gap-5 sm:grid-cols-2 lg:grid-cols-3");
+    expect(page).toContain("relative size-full overflow-hidden rounded-xl");
+    expect(page).not.toContain("lg:col-span-6");
   });
 
   it("uses logical direction utilities for the RTL-ready layout", () => {

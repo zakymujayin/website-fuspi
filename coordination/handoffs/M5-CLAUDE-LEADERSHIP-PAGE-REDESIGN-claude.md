@@ -45,8 +45,12 @@ editorial hierarchy and stronger contrast:
   profile groups; vice-dean links are bottom-aligned for consistent card rows.
 - Applied the requested redesign pass: compact royal-tinted introduction,
   framed dean feature panel, subtle tinted section surface, two-up vice-dean
-  cards with a wide third profile row, neutral image framing, and restrained
+  cards aligned into one desktop grid, neutral image framing, and restrained
   depth/hover treatment.
+- Corrected the vice-dean composition after visual review: all three profiles
+  now share one aligned three-column grid on desktop. Every portrait uses a
+  fixed 4:3 canvas plus an inner frame with `object-contain`, preserving the
+  full source image regardless of its original aspect ratio.
 
 ## API/schema/migration impact
 

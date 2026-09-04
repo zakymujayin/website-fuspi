@@ -48,15 +48,17 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
             <div className="grid overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_14px_34px_rgb(30_42_90/0.1)] lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.25fr)]">
               <div className="bg-royal-50 p-4 md:p-6">
                 {deanProfile.photoUrl ? (
-                  <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-slate-100 p-2 ring-1 ring-inset ring-royal-200">
-                    <Image
-                      src={deanProfile.photoUrl}
-                      alt={deanProfile.name}
-                      fill
-                      sizes="(min-width: 1024px) 38vw, 100vw"
-                      className="rounded-xl object-contain transition-transform duration-300 hover:scale-[1.01]"
-                      priority
-                    />
+                  <div className="relative aspect-[4/3] w-full rounded-2xl bg-slate-100 p-2 ring-1 ring-inset ring-royal-200">
+                    <div className="relative size-full overflow-hidden rounded-xl bg-slate-100">
+                      <Image
+                        src={deanProfile.photoUrl}
+                        alt={deanProfile.name}
+                        fill
+                        sizes="(min-width: 1024px) 38vw, 100vw"
+                        className="object-contain transition-transform duration-300 hover:scale-[1.01]"
+                        priority
+                      />
+                    </div>
                   </div>
                 ) : (
                   <DeanAvatarPlate initials={deanProfile.initials} name={deanProfile.name} />
@@ -89,15 +91,14 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
               </h2>
             </div>
 
-            <div className="grid gap-5 lg:grid-cols-6">
-              {viceDeans.map((vd, index) => {
-                const isWide = index === viceDeans.length - 1;
-
-                return (
-                  <article key={vd.initials} className={isWide ? "group flex min-h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md lg:col-span-6 lg:grid lg:grid-cols-[minmax(0,1.15fr)_minmax(0,1fr)]" : "group flex min-h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md lg:col-span-3"}>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {viceDeans.map((vd) => (
+                <article key={vd.initials} className="group flex min-h-full flex-col overflow-hidden rounded-2xl border-t-2 border-royal-500 border-e border-b border-s border-slate-200 bg-white shadow-[0_8px_24px_rgb(30_42_90/0.08)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
                   {vd.photoUrl ? (
-                    <div className={isWide ? "relative aspect-[4/3] w-full overflow-hidden bg-slate-100 lg:aspect-auto lg:min-h-[230px]" : "relative aspect-[4/3] w-full overflow-hidden bg-slate-100"}>
-                      <Image src={vd.photoUrl} alt={vd.name} fill sizes={isWide ? "(min-width: 1024px) 48vw, 100vw" : "(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"} className="object-contain transition-transform duration-300 group-hover:scale-[1.01]" />
+                    <div className="relative aspect-[4/3] w-full bg-slate-100 p-2">
+                      <div className="relative size-full overflow-hidden rounded-xl bg-slate-100">
+                        <Image src={vd.photoUrl} alt={vd.name} fill sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" className="object-contain transition-transform duration-300 group-hover:scale-[1.01]" />
+                      </div>
                     </div>
                   ) : (
                     <DeanAvatarPlate initials={vd.initials} name={vd.name} />
@@ -116,9 +117,8 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
                       <span aria-hidden="true" className="text-base leading-none">↗</span>
                     </a>
                   </div>
-                  </article>
-                );
-              })}
+                </article>
+              ))}
             </div>
           </section>
 
@@ -131,8 +131,10 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
 
             <article className="grid overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_12px_30px_rgb(30_42_90/0.08)] sm:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
               {headOfAdmin.photoUrl ? (
-                <div className="relative aspect-[4/3] w-full bg-slate-100 sm:aspect-auto sm:min-h-[240px]">
-                  <Image src={headOfAdmin.photoUrl} alt={headOfAdmin.name} fill sizes="(min-width: 640px) 320px, 100vw" className="object-contain" />
+                <div className="relative aspect-[4/3] w-full bg-slate-100 p-4 sm:aspect-auto sm:min-h-[240px]">
+                  <div className="relative size-full overflow-hidden rounded-xl bg-slate-100">
+                    <Image src={headOfAdmin.photoUrl} alt={headOfAdmin.name} fill sizes="(min-width: 640px) 320px, 100vw" className="object-contain" />
+                  </div>
                 </div>
               ) : (
                 <DeanAvatarPlate initials={headOfAdmin.initials} name={headOfAdmin.name} />
