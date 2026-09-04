@@ -1,8 +1,8 @@
 # Handoff — M4-CLAUDE-LECTURER-PUBLIC-DETAIL-REDESIGN — claude
 
-- Branch: `ai/gpt/m4-public-ia-menu-remap`
+- Branch: `ai/claude/m5-lecturer-profile-redesign`
 - Base SHA: `ec608aa8cfa7933711d397cf08ebec3f4a348e77`
-- Head SHA: (see commit accompanying this handoff)
+- Head SHA: `f1ca879`
 
 ## Result
 
@@ -166,3 +166,39 @@ page's `labels` object; the `LecturerProfile.navigationLabel` message key is
 left in place, unused). Added `rounded-lg` to the four section-header icon
 badges (were sharp squares). `#lecturer-*` anchors unchanged. Same
 verification commands, all green.
+
+### Fourth follow-up — finish the detail-page visual pass
+
+- Hero is now a semantic header with an explicit study-program eyebrow: code,
+  resolved program name, lecturer name, and position are grouped into one
+  readable identity band. The stored lecturer name is rendered intact rather
+  than split on commas, so academic suffixes and names with punctuation remain
+  correct.
+- The sticky identity card now uses a grid gap instead of the legacy
+  `space-y-*` utility.
+- Research, community service, HKI, and teaching records now share the same
+  elevated white panel shell as biography, education, and publications. Their
+  inner lists retain the hairline separators without a nested tinted card,
+  improving hierarchy and reducing card-within-card repetition.
+- Added structural test coverage for the hero's study-program code and name.
+
+Files changed in this follow-up:
+
+- `src/app/[locale]/(public)/dosen/[id]/page.tsx`
+- `src/components/public/lecturer-academic-records.tsx`
+- `tests/m4/ui/public-lecturer-detail-redesign.test.tsx`
+
+Verification for this follow-up:
+
+| Command | Result |
+|---|---|
+| `npx vitest run tests/m4/ui/public-lecturer-detail-redesign.test.tsx src/components/public/lecturer-profile-utils.test.ts` | passed, 2 files / 10 tests |
+| `npm run lint` | passed |
+| `npx tsc --noEmit` | passed |
+| `npm run test` | passed, 139 files / 1,488 tests |
+| `npm run build` | passed; lecturer detail route compiled |
+| `git diff --check` | passed |
+
+Untested: a live browser screenshot was not captured because the local dev
+server did not remain available in the sandbox after startup; no data,
+fetching, authorization, or academic-record sorting behavior was changed.
