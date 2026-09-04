@@ -3,7 +3,7 @@
 - task ID: M5-CLAUDE-LEADERSHIP-STAFF-DISPLAY
 - branch: ai/claude/m5-lecturer-profile-redesign
 - base SHA: 10f1b8a6164e86108478b3f4ee6b40fadf1baa87
-- head SHA: 4410501
+- head SHA: 6b69b620dc4e1efb8b5e509d24b0764fc6d84b44
 
 ## Summary
 
