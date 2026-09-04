@@ -18,13 +18,13 @@ export type ResearchMediaLink = {
   href: string;
   label: string;
   Icon: (props: IconProps) => JSX.Element;
+  iconClassName?: string;
 };
 
 function ScholarIcon({className}: IconProps) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden className={className} fill="currentColor">
-      <path d="M12 2 1 8.5l11 6.5 9-5.32V17h2V8.5L12 2Z" />
-      <path d="M5 13.18v4.09L12 21l7-3.73v-4.09L12 17l-7-3.82Z" />
+      <path d="M5.242 13.769 0 9.5 12 0l12 9.5-5.242 4.269C17.548 11.249 14.978 9.5 12 9.5c-2.977 0-5.548 1.748-6.758 4.269zM12 10a7 7 0 1 0 0 14 7 7 0 0 0 0-14z" />
     </svg>
   );
 }
@@ -32,7 +32,7 @@ function ScholarIcon({className}: IconProps) {
 function ScopusIcon({className}: IconProps) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden className={className} fill="currentColor">
-      <path d="M17.2 6.4a6.6 6.6 0 0 0-3.9-1.3c-2.2 0-3.7 1.2-3.7 2.9 0 1.5 1.1 2.3 3.3 3.1l1 .4c2.9 1 4.4 2.4 4.4 4.8 0 2.9-2.4 4.8-5.9 4.8a8.7 8.7 0 0 1-4.7-1.3l.7-1.9a7 7 0 0 0 4 1.2c2.1 0 3.5-1 3.5-2.6 0-1.4-1-2.2-3.2-3l-1-.4C8.7 12 7.2 10.7 7.2 8.2c0-2.8 2.3-4.7 5.9-4.7a8.4 8.4 0 0 1 4.6 1.3l-.5 1.6Z" />
+      <path d="M24 19.059 23.86 17.282c-1.426.772-2.945 1.076-4.465 1.076-3.319 0-5.96-2.782-5.96-6.475 0-3.903 2.595-6.31 5.633-6.31 1.917 0 3.39.303 4.792 1.075L24 4.895c-1.286-.608-2.337-.889-4.698-.889-4.534 0-7.97 3.53-7.97 8.017 0 5.12 4.09 7.924 7.9 7.924 1.916 0 3.506-.257 4.768-.888Zm-14.954-3.46c0-2.22-1.964-3.225-3.857-4.347C3.716 10.364 2.15 9.756 2.15 8.12c0-1.215.889-2.548 2.642-2.548 1.519 0 2.57.234 3.903 1.029l.117-1.847c-1.239-.514-2.127-.748-4.137-.748C1.8 4.006.047 5.876.047 8.26c0 2.384 2.103 3.413 4.02 4.581 1.426.865 2.922 1.45 2.922 2.992 0 1.496-1.333 2.571-2.922 2.571-1.566 0-2.594-.35-3.786-1.075L0 19.176c1.215.56 2.454.818 4.16.818 2.385 0 4.885-1.473 4.885-4.395Z" />
     </svg>
   );
 }
@@ -48,7 +48,7 @@ function SintaIcon({className}: IconProps) {
 function OrcidIcon({className}: IconProps) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden className={className} fill="currentColor">
-      <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20ZM8.5 6.6a1.1 1.1 0 1 1 0 2.2 1.1 1.1 0 0 1 0-2.2Zm-.9 3.3h1.8v7.5H7.6V9.9Zm3.6 0h3.2c2.4 0 3.9 1.6 3.9 3.7s-1.5 3.8-3.9 3.8h-3.2V9.9Zm1.8 1.6v4.3h1.3c1.5 0 2.2-1 2.2-2.2s-.7-2.1-2.2-2.1h-1.3Z" />
+      <path d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12 12-5.372 12-12S18.628 0 12 0ZM7.369 4.378c.525 0 .947.431.947.947s-.422.947-.947.947a.95.95 0 0 1-.947-.947c0-.525.422-.947.947-.947Zm-.722 3.038h1.444v10.041H6.647V7.416Zm3.562 0h3.9c3.712 0 5.344 2.653 5.344 5.025 0 2.578-2.016 5.025-5.325 5.025h-3.919V7.416Zm1.444 1.303v7.444h2.297c3.272 0 4.022-2.484 4.022-3.722 0-2.016-1.284-3.722-4.097-3.722h-2.222Z" />
     </svg>
   );
 }
@@ -83,11 +83,11 @@ export function researchMediaLinks(source: ResearchMediaSource): ReadonlyArray<R
     : null;
 
   return [
-    {key: "scholar", href: safeHttpsUrl(source.googleScholarUrl), label: "Google Scholar", Icon: ScholarIcon},
-    {key: "scopus", href: safeHttpsUrl(source.scopusUrl), label: "Scopus", Icon: ScopusIcon},
+    {key: "scholar", href: safeHttpsUrl(source.googleScholarUrl), label: "Google Scholar", Icon: ScholarIcon, iconClassName: "text-[#4285f4]"},
+    {key: "scopus", href: safeHttpsUrl(source.scopusUrl), label: "Scopus", Icon: ScopusIcon, iconClassName: "text-[#e97132]"},
     {key: "sinta", href: safeHttpsUrl(source.sintaUrl), label: "SINTA", Icon: SintaIcon},
-    {key: "orcid", href: orcidHref, label: "ORCID", Icon: OrcidIcon},
-    {key: "linkedin", href: safeHttpsUrl(source.linkedinUrl), label: "LinkedIn", Icon: LinkedinIcon},
-    {key: "instagram", href: safeHttpsUrl(source.instagramUrl), label: "Instagram", Icon: InstagramIcon},
+    {key: "orcid", href: orcidHref, label: "ORCID", Icon: OrcidIcon, iconClassName: "text-[#a6ce39]"},
+    {key: "linkedin", href: safeHttpsUrl(source.linkedinUrl), label: "LinkedIn", Icon: LinkedinIcon, iconClassName: "text-[#0a66c2]"},
+    {key: "instagram", href: safeHttpsUrl(source.instagramUrl), label: "Instagram", Icon: InstagramIcon, iconClassName: "text-[#e4405f]"},
   ].filter((link): link is ResearchMediaLink => link.href !== null);
 }

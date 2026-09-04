@@ -166,14 +166,14 @@ export default async function DosenPage({
                   href={`/dosen/${d.slug}`}
                   className="group flex h-full flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-600"
                 >
-                  <div className="relative aspect-[4/3] bg-slate-100">
+                  <div className="relative aspect-[4/5] bg-slate-100">
                     {d.photoMedia ? (
                       <Image
                         src={`/uploads/${d.photoMedia.storageKey}`}
                         alt={d.photoMedia.alt ?? d.name}
                         fill
                         sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                        className="object-cover object-top"
+                        className="object-contain object-center p-2 sm:p-3"
                       />
                     ) : (
                       <span className="flex size-full items-center justify-center font-display text-5xl font-bold text-slate-300">

@@ -310,7 +310,7 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
                     fill
                     priority
                     sizes="(min-width: 1024px) 30vw, 100vw"
-                    className="object-cover"
+                    className="object-contain object-center p-2 sm:p-3"
                   />
                 </div>
               ) : (
@@ -365,16 +365,17 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
                 {mediaLinks.length > 0 ? (
                   <CardField label={t("researchMedia")}>
                     <ul className="flex flex-wrap items-center gap-2">
-                      {mediaLinks.map(({key, href, label, Icon}) => (
+                      {mediaLinks.map(({key, href, label, Icon, iconClassName}) => (
                         <li key={key}>
                           <a
                             href={href}
                             target="_blank"
                             rel="noopener noreferrer"
                             aria-label={label}
+                            title={label}
                             className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:border-royal-200 hover:bg-royal-50 hover:text-royal-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-600"
                           >
-                            <Icon className="size-4" />
+                            <Icon className={`size-4 ${iconClassName ?? ""}`} />
                           </a>
                         </li>
                       ))}
