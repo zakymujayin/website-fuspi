@@ -125,7 +125,8 @@ export function teachingPeriods(
     });
   }
   return [...seen.values()]
-    .sort((a, b) => b.start - a.start || (a.term === "odd" ? -1 : 1))
+    // Genap (even) of a given academic year falls later on the calendar than its Ganjil (odd).
+    .sort((a, b) => b.start - a.start || (a.term === "even" ? -1 : 1))
     .map(({key, label}) => ({key, label}));
 }
 

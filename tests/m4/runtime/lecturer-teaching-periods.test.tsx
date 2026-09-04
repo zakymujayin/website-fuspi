@@ -46,4 +46,16 @@ describe("teachingPeriods", () => {
   it("returns no options when there is no teaching", () => {
     expect(teachingPeriods([], labels)).toEqual([]);
   });
+
+  it("orders the even term above the odd term within one academic year", () => {
+    const periods = teachingPeriods([
+      {id: "a", code: "IAT101", course: "A", program: "IAT", credits: 3, academicYearStart: 2025, academicYearEnd: 2026, term: "odd", semester: 1},
+      {id: "b", code: "IAT201", course: "B", program: "IAT", credits: 3, academicYearStart: 2025, academicYearEnd: 2026, term: "even", semester: 2},
+    ], labels);
+
+    expect(periods).toEqual([
+      {key: "2025-even", label: "Genap 2025/2026"},
+      {key: "2025-odd", label: "Ganjil 2025/2026"},
+    ]);
+  });
 });
