@@ -7,7 +7,7 @@ import sharp from "sharp";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 import { PrismaClient } from "../src/generated/prisma/client";
-import type { HomeSectionKey } from "../src/generated/prisma/enums";
+import type { HomeSectionKey, PublicationType, TeachingTerm } from "../src/generated/prisma/enums";
 import { institution } from "../src/config/institution";
 import { parseDatabaseUrl } from "../src/lib/db/config";
 
@@ -181,10 +181,124 @@ async function upsertPlaceholderMedia(
   });
 }
 
-/* Demo lecturers. Identities are fictional on purpose: the directory carries
-   education history and publications, and attaching invented credentials to a
-   real person would fabricate an academic record. */
-const LECTURERS = [
+async function makeAssetFile(sourcePath: string) {
+  const buffer = await fs.readFile(sourcePath);
+  const checksumSha256 = createHash("sha256").update(buffer).digest("hex");
+  const now = new Date();
+  const yyyy = String(now.getUTCFullYear());
+  const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const ext = path.extname(sourcePath);
+  const storageKey = `${yyyy}/${mm}/${checksumSha256}${ext}`;
+  const dir = path.join(UPLOAD_DIR, yyyy, mm);
+  await fs.mkdir(dir, { recursive: true });
+  await fs.writeFile(path.join(UPLOAD_DIR, storageKey), buffer);
+  return { storageKey, checksumSha256, size: buffer.length };
+}
+
+async function upsertMediaFromAsset(
+  uploaderId: string,
+  opts: { assetPath: string; alt: string; originalName: string; mimeType: string; width: number; height: number },
+) {
+  const file = await makeAssetFile(opts.assetPath);
+  return prisma.media.upsert({
+    where: { storageKey: file.storageKey },
+    update: {},
+    create: {
+      storageKey: file.storageKey,
+      checksumSha256: file.checksumSha256,
+      originalName: opts.originalName,
+      mimeType: opts.mimeType,
+      size: file.size,
+      alt: opts.alt,
+      width: opts.width,
+      height: opts.height,
+      uploaderId,
+    },
+  });
+}
+
+/* Demo lecturers. The invented identities below are fictional on purpose: the
+   directory carries education history and publications, and attaching invented
+   credentials to a real person would fabricate an academic record.
+   Dr. Masykur is the exception and the inverse case — a real person whose record
+   is reproduced from his published faculty profile, never invented. His academic
+   content is sourced; his institutional identity (email, office, position) is
+   FUSPI's, never another faculty's. */
+const PORTAL_ACCOUNT_SLUG = "halimah-nur-azizah";
+
+type LecturerSeed = {
+  slug: string;
+  name: string;
+  nidn: string | null;
+  nip?: string | null;
+  program: string;
+  position: string;
+  expertise: string;
+  quote?: string;
+  officeLocation: string;
+  officeHours: string;
+  googleScholarUrl?: string | null;
+  sintaUrl?: string | null;
+  scopusUrl?: string | null;
+  bio: string;
+  educations: { degree: string; field: string; institution: string; city: string; year: number }[];
+  publications: { title: string; type: PublicationType; year: number; publisher: string }[];
+  teaching?: {
+    courseCode: string;
+    courseName: string;
+    programCode: string;
+    credits: number;
+    academicYearStart: number;
+    academicYearEnd: number;
+    term: TeachingTerm;
+    semester: number;
+  }[];
+};
+
+const LECTURERS: LecturerSeed[] = [
+  {
+    slug: "masykur",
+    name: "Dr. Masykur, M.Hum.",
+    nidn: null,
+    nip: "197606172005011003",
+    program: "AFI",
+    position: "Dekan Fakultas Ushuluddin dan Pemikiran Islam",
+    expertise: "Filsafat Islam, moderasi beragama, pemikiran keislaman kontemporer",
+    officeLocation: "Gedung FUSPI Lt. 2, Ruang Dekan",
+    officeHours: "Senin-Kamis, 09.00-14.00 WIB",
+    googleScholarUrl: "https://scholar.google.co.id/citations?user=wlrJ3SsAAAAJ&hl=en",
+    sintaUrl: "https://sinta.kemdikbud.go.id/authors/profile/6058892",
+    scopusUrl: "https://www.scopus.com/authid/detail.uri?authorId=59316785500",
+    bio: "<p>Dr. Masykur, M.Hum. lahir di Cirebon, 17 Juni 1976. Saat ini beliau menjabat sebagai Dekan Fakultas Ushuluddin dan Pemikiran Islam UIN Sultan Maulana Hasanuddin Banten. Sebelumnya beliau pernah menjabat sebagai Wakil Dekan II Fakultas Dakwah, Sekretaris LP2M, dan Sekretaris Halal Center di universitas yang sama. Beliau juga aktif dalam organisasi keagamaan dan sosial, antara lain sebagai Wakil Sekretaris RMI PWNU Banten (2020-2021).</p><p>Dr. Masykur menempuh pendidikan tinggi di bidang filsafat: S1 Aqidah Filsafat di UIN Sunan Kalijaga Yogyakarta, kemudian melanjutkan ke S2 dan S3 Ilmu Filsafat di Universitas Indonesia, Depok. Bidang kepakaran beliau meliputi filsafat Islam, moderasi beragama, dan studi pemikiran keislaman kontemporer.</p><p>Sebagai akademisi produktif, beliau telah menulis sejumlah buku dan artikel ilmiah, dan aktif dalam pengembangan moderasi beragama serta sertifikasi halal di Indonesia.</p>",
+    educations: [
+      {degree: "Dr.", field: "Ilmu Filsafat", institution: "Universitas Indonesia", city: "Depok", year: 2015},
+      {degree: "M.Hum.", field: "Ilmu Filsafat", institution: "Universitas Indonesia", city: "Depok", year: 2004},
+      {degree: "S.Ag.", field: "Aqidah Filsafat", institution: "UIN Sunan Kalijaga", city: "Yogyakarta", year: 2000},
+    ],
+    publications: [
+      {title: "Ulama Perempuan Banten Kontemporer untuk Politik Keramahan dan Ekonomi Kerakyatan", type: "BUKU" as const, year: 2021, publisher: "Media Madani, Banten"},
+      {title: "Filsafat Umum: Dari Filsafat Yunani Kuno ke Filsafat Modern", type: "BUKU" as const, year: 2021, publisher: "A-Empat, Banten"},
+      {title: "Menanam Kembali Moderasi Beragama untuk Merajut Kebhinekaan Bangsa", type: "BUKU" as const, year: 2020, publisher: "Teras Karsa Publisher"},
+      {title: "Ulama Perempuan Banten: Dari Mekah, Pesantren dan Majelis Taklim untuk Islam Nusantara", type: "BUKU" as const, year: 2017, publisher: "Bildung Nusa Media, Yogyakarta"},
+      {title: "Data Perlindungan Perempuan dan Anak Korban Kekerasan", type: "BUKU" as const, year: 2016, publisher: "FTK Press, Banten"},
+      {title: "Teori Interpretasi Paul Ricoeur", type: "BUKU" as const, year: 2015, publisher: "LKiS, Yogyakarta"},
+      {title: "Dialektika Teks Suci Agama: Struktur Makna Agama dalam Kehidupan Masyarakat", type: "BUKU" as const, year: 2008, publisher: "Pustaka Pelajar, Yogyakarta"},
+      {title: "Intelektual Pesantren: Potret dan Cakrawala Pemikiran di Era Keemasan Pesantren", type: "BUKU" as const, year: 2003, publisher: "Diva Pustaka, Jakarta"},
+      {title: "Reviving Religious Moderation for World Peace", type: "JURNAL" as const, year: 2024, publisher: "Journal of Ecohumanism, Vol. 3 No. 3"},
+      {title: "The Yahukimo Conflict", type: "JURNAL" as const, year: 2021, publisher: "Walisongo: Jurnal Penelitian Sosial Keagamaan, Vol. 29 No. 2"},
+      {title: "The Perspective of al-Sunnah al-Nabawiyyah", type: "JURNAL" as const, year: 2021, publisher: "Turkish Journal of Computer and Mathematics Education"},
+      {title: "Pre-Service Teachers' Perception", type: "JURNAL" as const, year: 2021, publisher: "Walisongo: Jurnal Penelitian Sosial Keagamaan"},
+      {title: "Resolusi Konflik dan Islam Nusantara", type: "JURNAL" as const, year: 2016, publisher: "Refleksi"},
+      {title: "Sunda Wiwitan Baduy", type: "JURNAL" as const, year: 2012, publisher: "El Harakah"},
+      {title: "Agama, Etnisitas dan Radikalisme", type: "JURNAL" as const, year: 2008, publisher: "Al Qalam"},
+    ],
+    teaching: [
+      {courseCode: "AFI-3101", courseName: "Filsafat Islam Klasik", programCode: "AFI", credits: 3, academicYearStart: 2026, academicYearEnd: 2027, term: "GANJIL" as const, semester: 3},
+      {courseCode: "AFI-3204", courseName: "Hermeneutika dan Tafsir Kontemporer", programCode: "AFI", credits: 3, academicYearStart: 2026, academicYearEnd: 2027, term: "GANJIL" as const, semester: 5},
+      {courseCode: "AFI-2202", courseName: "Moderasi Beragama", programCode: "AFI", credits: 2, academicYearStart: 2025, academicYearEnd: 2026, term: "GENAP" as const, semester: 4},
+      {courseCode: "FUS-1103", courseName: "Pengantar Filsafat", programCode: "FUS", credits: 2, academicYearStart: 2025, academicYearEnd: 2026, term: "GANJIL" as const, semester: 3},
+    ],
+  },
   {
     slug: "halimah-nur-azizah",
     name: "Dr. Halimah Nur Azizah, M.Ag.",
@@ -711,16 +825,26 @@ async function main() {
     (await prisma.studyProgram.findMany({ select: { id: true, code: true } })).map((p) => [p.code, p.id]),
   );
 
+  const portalLecturer = LECTURERS.find((l) => l.slug === PORTAL_ACCOUNT_SLUG)!;
   const lecturerAccount = await prisma.user.upsert({
     where: { email: "dosen.demo@fuspi.uinbanten.ac.id" },
     update: { role: "DOSEN" },
     create: {
       email: "dosen.demo@fuspi.uinbanten.ac.id",
-      name: LECTURERS[0].name,
+      name: portalLecturer.name,
       passwordHash: await bcrypt.hash("WelcomeDosenDemo321@_", 12),
       role: "DOSEN",
       mustChangePassword: true,
     },
+  });
+
+  const masykurPhoto = await upsertMediaFromAsset(admin.id, {
+    assetPath: path.join(__dirname, "assets/lecturers/masykur.webp"),
+    alt: "Dr. Masykur, M.Hum.",
+    originalName: "masykur.webp",
+    mimeType: "image/webp",
+    width: 800,
+    height: 1000,
   });
 
   for (const [index, item] of LECTURERS.entries()) {
@@ -736,32 +860,49 @@ async function main() {
     };
     const educations = item.educations.map((e, order) => ({ ...e, order }));
     const publications = item.publications.map((p, order) => ({ ...p, order }));
+    const photoMediaId = item.slug === "masykur" ? masykurPhoto.id : undefined;
 
     await prisma.lecturer.upsert({
       where: { slug: item.slug },
       update: {
         name: item.name,
         nidn: item.nidn,
+        nip: item.nip ?? null,
+        googleScholarUrl: item.googleScholarUrl ?? null,
+        sintaUrl: item.sintaUrl ?? null,
+        scopusUrl: item.scopusUrl ?? null,
         email: `${item.slug}@fuspi.uinbanten.ac.id`,
         studyProgramId: programsByCode.get(item.program) ?? null,
         order: index,
         isActive: true,
-        userId: index === 0 ? lecturerAccount.id : undefined,
+        userId: item.slug === PORTAL_ACCOUNT_SLUG ? lecturerAccount.id : undefined,
+        photoMediaId,
         translations: { deleteMany: {}, create: [translation] },
         educations: { deleteMany: {}, create: educations },
         publications: { deleteMany: {}, create: publications },
+        teachingAssignments: item.teaching
+          ? { deleteMany: {}, create: item.teaching.map((t, order) => ({ ...t, order })) }
+          : undefined,
       },
       create: {
         slug: item.slug,
         name: item.name,
         nidn: item.nidn,
+        nip: item.nip ?? null,
+        googleScholarUrl: item.googleScholarUrl ?? null,
+        sintaUrl: item.sintaUrl ?? null,
+        scopusUrl: item.scopusUrl ?? null,
         email: `${item.slug}@fuspi.uinbanten.ac.id`,
         studyProgramId: programsByCode.get(item.program) ?? null,
         order: index,
-        userId: index === 0 ? lecturerAccount.id : undefined,
+        userId: item.slug === PORTAL_ACCOUNT_SLUG ? lecturerAccount.id : undefined,
+        photoMediaId,
         translations: { create: [translation] },
         educations: { create: educations },
         publications: { create: publications },
+        teachingAssignments: item.teaching
+          ? { create: item.teaching.map((t, order) => ({ ...t, order })) }
+          : undefined,
       },
     });
   }
