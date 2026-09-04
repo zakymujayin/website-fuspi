@@ -3,10 +3,7 @@ import {
   BookOpen,
   Clock,
   Download,
-  Globe,
   GraduationCap,
-  Instagram,
-  Linkedin,
   Mail,
   MapPin,
   Phone,
@@ -21,6 +18,7 @@ import {Breadcrumb} from "@/components/public/breadcrumb";
 import {LecturerAcademicRecords} from "@/components/public/lecturer-academic-records";
 import {splitExpertiseTags} from "@/components/public/lecturer-profile-utils";
 import {sanitizeStoredContentOrNull} from "@/components/public/post/sanitize";
+import {researchMediaLinks} from "@/components/public/research-media-icons";
 import {Container} from "@/components/ui/container";
 import {institution} from "@/config/institution";
 import {CmsHttpsExternalUrlSchema} from "@/contracts/cms";
@@ -32,6 +30,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://fuspi.uinbanten.ac
 
 const LECTURER_DETAIL_SELECT = {
   id: true, slug: true, name: true, nidn: true, nip: true, email: true, phone: true,
+  orcid: true,
   googleScholarUrl: true, sintaUrl: true, scopusUrl: true,
   linkedinUrl: true, instagramUrl: true, twitterUrl: true,
   studyProgram: {select: {code: true, slug: true}},
@@ -102,6 +101,7 @@ type CommunityRelationRow = {
 type Row = {
   id: string; slug: string; name: string; nidn: string | null; nip: string | null;
   email: string | null; phone: string | null;
+  orcid: string | null;
   googleScholarUrl: string | null; sintaUrl: string | null; scopusUrl: string | null;
   linkedinUrl: string | null; instagramUrl: string | null; twitterUrl: string | null;
   studyProgram: {code: string; slug: string} | null;
@@ -165,6 +165,26 @@ function CardField({label, children}: {label: string; children: ReactNode}) {
   );
 }
 
+function SectionCard({id, title, action, children}: {
+  id: string;
+  title: string;
+  action?: ReactNode;
+  children: ReactNode;
+}) {
+  return (
+    <section
+      aria-labelledby={`${id}-title`}
+      className="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-24px_rgba(15,23,42,0.25)] md:p-8"
+    >
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <h2 id={`${id}-title`} className="font-display text-lg font-semibold text-slate-900">{title}</h2>
+        {action}
+      </div>
+      <div className="mt-5">{children}</div>
+    </section>
+  );
+}
+
 function Chip({icon: Icon, children}: {icon: typeof Award; children: ReactNode}) {
   return (
     <li className="inline-flex items-center gap-1.5 rounded-md bg-royal-50 px-2.5 py-1 text-xs font-medium text-royal-700">
@@ -191,13 +211,7 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
       ?? lecturer.studyProgram.code
     : null;
 
-  const researchMediaLinks = [
-    {href: lecturer.googleScholarUrl, label: "Google Scholar", icon: Globe},
-    {href: lecturer.sintaUrl, label: "SINTA", icon: GraduationCap},
-    {href: lecturer.scopusUrl, label: "Scopus", icon: BookOpen},
-    {href: lecturer.linkedinUrl, label: "LinkedIn", icon: Linkedin},
-    {href: lecturer.instagramUrl, label: "Instagram", icon: Instagram},
-  ].filter((link): link is {href: string; label: string; icon: typeof Globe} => Boolean(link.href));
+  const mediaLinks = researchMediaLinks(lecturer);
 
   const expertiseTags = splitExpertiseTags(tl?.expertise ?? null);
 
@@ -258,7 +272,8 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
     }));
 
   return (
-    <Container className="py-12 md:py-20">
+    <div className="bg-slate-50">
+      <Container className="py-12 md:py-20">
       <Breadcrumb
         ariaLabel={tNav("breadcrumbLabel")}
         className="mb-8"
@@ -269,16 +284,24 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
         ]}
       />
 
-      <div className="lecturer-hero mb-10 rounded-2xl bg-royal-50 px-6 py-8 md:px-10 md:py-10">
-        <h1 className="text-start font-display text-3xl font-bold tracking-tight text-navy-900 md:text-4xl">
-          <span dir="auto">{lecturer.name}</span>
-        </h1>
-      </div>
+      {(() => {
+        const [base, ...rest] = lecturer.name.split(",");
+        const suffix = rest.join(",").trim();
+        return (
+          <div className="lecturer-hero mb-10 rounded-2xl bg-royal-50 px-6 py-8 md:px-10 md:py-10">
+            <h1 className="text-start font-display font-bold tracking-tight text-navy-900">
+              <span className="block text-3xl md:text-4xl" dir="auto">{base.trim()}</span>
+              {suffix ? <span className="mt-2 block text-base font-medium text-royal-700" dir="auto">{suffix}</span> : null}
+            </h1>
+            {tl?.position ? <p className="mt-3 text-sm text-royal-800" dir="auto">{tl.position}</p> : null}
+          </div>
+        );
+      })()}
 
       <div className="grid gap-x-12 gap-y-10 lg:grid-cols-12">
         <aside className="order-1 lg:col-span-4 lg:col-start-1 lg:row-span-2 lg:row-start-1">
           <div className="lg:sticky lg:top-24 space-y-6">
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-24px_rgba(15,23,42,0.25)]">
               {lecturer.photoMedia ? (
                 <div className="relative aspect-[4/5] bg-slate-100">
                   <Image
@@ -339,11 +362,11 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
                   </CardField>
                 ) : null}
 
-                {researchMediaLinks.length > 0 ? (
+                {mediaLinks.length > 0 ? (
                   <CardField label={t("researchMedia")}>
                     <ul className="flex flex-wrap items-center gap-2">
-                      {researchMediaLinks.map(({href, label, icon: Icon}) => (
-                        <li key={label}>
+                      {mediaLinks.map(({key, href, label, Icon}) => (
+                        <li key={key}>
                           <a
                             href={href}
                             target="_blank"
@@ -351,7 +374,7 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
                             aria-label={label}
                             className="flex size-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition-colors hover:border-royal-200 hover:bg-royal-50 hover:text-royal-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-royal-600"
                           >
-                            <Icon aria-hidden className="size-4" strokeWidth={1.5} />
+                            <Icon className="size-4" />
                           </a>
                         </li>
                       ))}
@@ -423,60 +446,50 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
             </blockquote>
           ) : null}
 
-          {sanitizedBio ? (
-            <section aria-labelledby="lecturer-bio">
-              <h2 id="lecturer-bio" className="font-display text-lg font-semibold text-slate-900">
-                {t("biography")}
-              </h2>
-              <div
-                dir="auto"
-                className="rich-text mt-3"
-                dangerouslySetInnerHTML={{__html: sanitizedBio}}
-              />
-            </section>
-          ) : null}
+          <div className="grid gap-8">
+            {sanitizedBio ? (
+              <SectionCard id="lecturer-bio" title={t("biography")}>
+                <div
+                  dir="auto"
+                  className="rich-text"
+                  dangerouslySetInnerHTML={{__html: sanitizedBio}}
+                />
+              </SectionCard>
+            ) : null}
 
-          <section aria-labelledby="lecturer-education" className={sanitizedBio ? "mt-12" : undefined}>
-            <h2 id="lecturer-education" className="font-display text-lg font-semibold text-slate-900">
-              {t("education")}
-            </h2>
-            {educations.length > 0 ? (
-              <ol className="mt-5 border-s border-slate-200">
-                {educations.map((edu) => (
-                  <li key={edu.id} className="relative ps-6 pb-7 last:pb-0">
-                    <span
-                      aria-hidden
-                      className="absolute start-0 top-1.5 size-2 -translate-x-1/2 rounded-full bg-royal-500 rtl:translate-x-1/2"
-                    />
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                      <span dir="auto" className="font-display text-base font-bold text-royal-900">{edu.degree}</span>
-                      {edu.field ? <span dir="auto" className="text-slate-700">{edu.field}</span> : null}
-                      {edu.year ? (
-                        <span className="ms-auto font-mono text-sm text-slate-400">{edu.year}</span>
-                      ) : null}
-                    </div>
-                    <p className="mt-1 text-start text-sm text-slate-500">
-                      <span dir="auto">{[edu.institution, edu.city].filter(Boolean).join(", ")}</span>
-                    </p>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="mt-3 text-sm text-slate-500">{t("noEducation")}</p>
-            )}
-          </section>
+            <SectionCard id="lecturer-education" title={t("education")}>
+              {educations.length > 0 ? (
+                <ol className="border-s border-slate-200">
+                  {educations.map((edu) => (
+                    <li key={edu.id} className="relative ps-6 pb-7 last:pb-0">
+                      <span
+                        aria-hidden
+                        className="absolute start-0 top-1.5 size-2 -translate-x-1/2 rounded-full bg-royal-500 rtl:translate-x-1/2"
+                      />
+                      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                        <span dir="auto" className="font-display text-base font-bold text-royal-900">{edu.degree}</span>
+                        {edu.field ? <span dir="auto" className="text-slate-700">{edu.field}</span> : null}
+                        {edu.year ? (
+                          <span className="ms-auto font-mono text-sm text-slate-400">{edu.year}</span>
+                        ) : null}
+                      </div>
+                      <p className="mt-1 text-start text-sm text-slate-500">
+                        <span dir="auto">{[edu.institution, edu.city].filter(Boolean).join(", ")}</span>
+                      </p>
+                    </li>
+                  ))}
+                </ol>
+              ) : (
+                <p className="text-sm text-slate-500">{t("noEducation")}</p>
+              )}
+            </SectionCard>
 
-          <section aria-labelledby="lecturer-publications" className="mt-12">
-            <div className="flex items-baseline justify-between gap-4">
-              <h2 id="lecturer-publications" className="font-display text-lg font-semibold text-slate-900">
-                {t("publications")}
-              </h2>
-              {publications.length > 0 ? (
-                <span className="font-mono text-xs text-slate-400">{publications.length}</span>
-              ) : null}
-            </div>
-            {groupedPublications.length > 0 ? (
-              <div className="mt-5 rounded-2xl border border-slate-200 bg-slate-50/70 p-6 md:p-8">
+            <SectionCard
+              id="lecturer-publications"
+              title={t("publications")}
+              action={publications.length > 0 ? <span className="font-mono text-xs text-slate-400">{publications.length}</span> : undefined}
+            >
+              {groupedPublications.length > 0 ? (
                 <div className="space-y-8">
                   {groupedPublications.map(({type, items}, groupIndex) => (
                     <div key={type} className={groupIndex > 0 ? "border-t border-slate-200 pt-8" : undefined}>
@@ -516,11 +529,11 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
                     </div>
                   ))}
                 </div>
-              </div>
-            ) : (
-              <p className="mt-3 text-sm text-slate-500">{t("noPublications")}</p>
-            )}
-          </section>
+              ) : (
+                <p className="text-sm text-slate-500">{t("noPublications")}</p>
+              )}
+            </SectionCard>
+          </div>
 
           <LecturerAcademicRecords
             research={research}
@@ -564,6 +577,7 @@ export default async function DosenDetailPage({params}: {params: Promise<{locale
           </div>
         </div>
       </div>
-    </Container>
+      </Container>
+    </div>
   );
 }
