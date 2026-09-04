@@ -7,17 +7,17 @@
 
 ## Summary
 
-Redesigned the public leadership page at `/id/profil/pimpinan` with a clearer
-editorial hierarchy and stronger contrast:
+Redesigned the public leadership page at `/id/profil/pimpinan` with a clean,
+characterful directory composition:
 
-- Added a navy page-introduction band with readable white copy and the existing
-  brass signature rule.
-- Separated the dean's identity and welcome message into a bordered white
-  feature surface with a tinted message block.
-- Normalized leadership portrait presentation to a consistent 4:3 ratio so
-  landscape and portrait source assets no longer create uneven crops/layouts.
-- Rebuilt vice-dean entries as equal-height responsive cards and the head of
-  administration as a compact horizontal profile on larger screens.
+- Added a compact royal-tinted page introduction with a brass accent.
+- Removed the dean welcome message and presented the dean as a centered primary
+  profile.
+- Placed the three vice deans and the head of administration in one aligned,
+  responsive four-column directory grid.
+- Normalized every portrait into a shared 4:3 frame with an inner surface and
+  `object-contain`, preserving both landscape and portrait source assets.
+- Removed the LHKPN CTA from every profile at the owner's request.
 - Added a source-level visual contract test covering surfaces, responsive
   layout, semantic section labels, and RTL-safe direction utilities.
 
@@ -27,30 +27,6 @@ editorial hierarchy and stronger contrast:
 - `tests/m5/ui/public-leadership-page.test.tsx`
 - `coordination/tasks/M5-CLAUDE-LEADERSHIP-PAGE-REDESIGN.md`
 - `coordination/handoffs/M5-CLAUDE-LEADERSHIP-PAGE-REDESIGN-claude.md`
-
-## Follow-up requested by owner
-
-- Removed the dean welcome-message block so the card focuses on identity and
-  position.
-- Changed all leadership photos to `object-contain` inside the shared editorial
-  frame so source portraits are not cropped or stretched.
-- Added locale-aware `Lihat LHKPN` / `View LHKPN` / `عرض LHKPN` CTA linking to
-  KPK's official e-Announcement search page:
-  `https://elhkpn.kpk.go.id/portal/user/check_search_announ`.
-- Reduced the oversized dark hero into a compact light editorial header so the
-  page hierarchy starts with the leadership profiles rather than the banner.
-- Changed the vice-dean and administration image surfaces to a neutral slate
-  frame and enlarged the administration media column for a more balanced card.
-- Added the locale-aware LHKPN CTA to the dean, vice-dean, and administration
-  profile groups; vice-dean links are bottom-aligned for consistent card rows.
-- Applied the requested redesign pass: compact royal-tinted introduction,
-  framed dean feature panel, subtle tinted section surface, two-up vice-dean
-  cards aligned into one desktop grid, neutral image framing, and restrained
-  depth/hover treatment.
-- Corrected the vice-dean composition after visual review: all three profiles
-  now share one aligned three-column grid on desktop. Every portrait uses a
-  fixed 4:3 canvas plus an inner frame with `object-contain`, preserving the
-  full source image regardless of its original aspect ratio.
 
 ## API/schema/migration impact
 
