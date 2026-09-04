@@ -57,7 +57,7 @@ export const headOfAdmin: LeadershipMember = {
   initials: "SS",
   name: "Slamet Sucipto, S.E",
   position: {
-    id: "Kepala Bagian Tata Usaha",
+    id: "Kepala Bagian Umum",
     en: "Head of General Affairs",
     ar: "رئيس الشؤون الإدارية",
   },

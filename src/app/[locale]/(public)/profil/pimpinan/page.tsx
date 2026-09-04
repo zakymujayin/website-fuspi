@@ -7,7 +7,7 @@ import {SectionHeading} from "@/components/public/section-heading";
 import {Container} from "@/components/ui/container";
 import type {AppLocale} from "@/i18n/routing";
 import {deanProfile} from "@/lib/data/dummy-dean";
-import {viceDeans} from "@/lib/data/dummy-leadership";
+import {headOfAdmin, viceDeans} from "@/lib/data/dummy-leadership";
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
   const {locale} = await params;
@@ -69,6 +69,21 @@ export default async function LeadershipPage({params}: {params: Promise<{locale:
               ) : null}
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="mt-16 border-t border-slate-200 pt-12">
+        <h2 className="font-display text-lg font-bold text-slate-900">{headOfAdmin.position[locale] ?? headOfAdmin.position.id}</h2>
+        <div className="mt-6 max-w-[220px]">
+          {headOfAdmin.photoUrl ? (
+            <div className="relative aspect-[3/4] w-full overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
+              <Image src={headOfAdmin.photoUrl} alt={headOfAdmin.name} fill sizes="220px" className="object-cover" />
+            </div>
+          ) : (
+            <DeanAvatarPlate initials={headOfAdmin.initials} name={headOfAdmin.name} />
+          )}
+          <p className="mt-4 font-display text-sm font-semibold text-slate-900">{headOfAdmin.name}</p>
+          <p className="mt-0.5 text-xs text-slate-500">{headOfAdmin.position[locale] ?? headOfAdmin.position.id}</p>
         </div>
       </div>
     </Container>
