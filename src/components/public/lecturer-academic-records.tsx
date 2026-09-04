@@ -44,7 +44,9 @@ export type LecturerTeachingRecord = {
   course: string;
   program: string;
   credits: number;
-  academicYear: string;
+  academicYear?: string;
+  academicYearStart: number;
+  academicYearEnd: number;
   term: "odd" | "even";
   semester: number;
 };
@@ -65,8 +67,8 @@ export type LecturerAcademicRecordsLabels = {
   academicYear: string;
   termOdd: string;
   termEven: string;
-  allSemesters: string;
-  semester: string;
+  allPeriods: string;
+  period: string;
   noTeaching: string;
   teachingPending: string;
   code: string;
@@ -106,15 +108,33 @@ function RecordLink({href, children, label}: {href: string; children: string; la
   );
 }
 
+export function teachingPeriods(
+  teaching: readonly LecturerTeachingRecord[],
+  labels: {termOdd: string; termEven: string},
+): ReadonlyArray<{key: string; label: string}> {
+  const seen = new Map<string, {key: string; label: string; start: number; term: string}>();
+  for (const item of teaching) {
+    const key = `${item.academicYearStart}-${item.term}`;
+    if (seen.has(key)) continue;
+    const termLabel = item.term === "odd" ? labels.termOdd : labels.termEven;
+    seen.set(key, {
+      key,
+      label: `${termLabel} ${item.academicYearStart}/${item.academicYearEnd}`,
+      start: item.academicYearStart,
+      term: item.term,
+    });
+  }
+  return [...seen.values()]
+    .sort((a, b) => b.start - a.start || (a.term === "odd" ? -1 : 1))
+    .map(({key, label}) => ({key, label}));
+}
+
 export function LecturerAcademicRecords({research, community, hki, teaching, labels}: Props) {
-  const [selectedSemester, setSelectedSemester] = useState<number | "all">("all");
-  const semesters = useMemo(
-    () => [...new Set(teaching.map((item) => item.semester))].sort((a, b) => a - b),
-    [teaching],
-  );
-  const filteredTeaching = selectedSemester === "all"
+  const [selectedPeriod, setSelectedPeriod] = useState<string>("all");
+  const periods = useMemo(() => teachingPeriods(teaching, labels), [teaching, labels]);
+  const filteredTeaching = selectedPeriod === "all"
     ? teaching
-    : teaching.filter((item) => item.semester === selectedSemester);
+    : teaching.filter((item) => `${item.academicYearStart}-${item.term}` === selectedPeriod);
 
   return (
     <div className="mt-14 border-t border-slate-200 pt-10">
@@ -219,19 +239,19 @@ export function LecturerAcademicRecords({research, community, hki, teaching, lab
           </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-3 border-y border-slate-200 py-3">
-            <label htmlFor="lecturer-semester" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
+            <label htmlFor="lecturer-period" className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
               <CalendarDays aria-hidden className="size-4 text-royal-600" strokeWidth={1.6} />
-              {labels.semester}
+              {labels.period}
             </label>
             <select
-              id="lecturer-semester"
-              value={selectedSemester}
-              onChange={(event) => setSelectedSemester(event.target.value === "all" ? "all" : Number(event.target.value))}
-              disabled={semesters.length === 0}
+              id="lecturer-period"
+              value={selectedPeriod}
+              onChange={(event) => setSelectedPeriod(event.target.value)}
+              disabled={periods.length === 0}
               className="min-h-10 border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none transition-colors focus:border-royal-500 focus:ring-2 focus:ring-royal-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
             >
-              <option value="all">{labels.allSemesters}</option>
-              {semesters.map((semester) => <option key={semester} value={semester}>{labels.semester} {semester}</option>)}
+              <option value="all">{labels.allPeriods}</option>
+              {periods.map((period) => <option key={period.key} value={period.key}>{period.label}</option>)}
             </select>
           </div>
 
