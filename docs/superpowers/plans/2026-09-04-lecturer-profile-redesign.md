@@ -73,7 +73,7 @@ describe("lecturer contract parity", () => {
     expect(parsed.data?.translations.id.officeLocation).toBe("Gedung FUSPI Lt. 2");
   });
 
-  it("still accepts a payload that omits every new field", () => {
+  it("accepts explicit nulls for every new field", () => {
     const parsed = LecturerInputSchema.safeParse({
       name: "Dr. Uji Coba, M.Hum.",
       slug: "uji-coba",
@@ -249,7 +249,14 @@ Read-back — replace the LECTURER `input` block (`:166-176`):
 
 - [ ] **Step 7: Verify the CSV importer still accepts legacy files**
 
-`src/features/academic/lecturer-csv-import.ts:182` parses the same schema. Every new field is nullable, so a CSV without the new columns must still import. Run the existing suite to confirm no regression:
+**This step is load-bearing, not a formality.** The new fields are `.nullable()`, not `.optional()` — a required key that accepts `null`, matching every existing field in this schema including `photoMediaId`. Under `.strict()`, a caller that *omits* the key fails. Two callers build their payload object with explicit keys and must both be checked:
+
+- `src/features/academic/lecturer-csv-import.ts:182`
+- `src/features/academic/editor-import.ts:243` — a **second** `LecturerInputSchema.parse` call, distinct from the read-back edited in Step 6
+
+Add the new keys defaulted to `null` at each site. Do **not** loosen `.strict()` or switch the fields to `.optional()` to make this pass — `.strict()` is what stops an attacker-supplied extra key from riding along.
+
+Run the existing suite to confirm no regression:
 
 Run: `npx vitest run tests/platform/lecturer-portal/lecturer-csv-import.test.ts`
 Expected: PASS, unchanged.
@@ -376,6 +383,29 @@ The record:
 
 Only the 15 publications whose title and venue are both known are seeded. The source's remaining journal entries are bare URLs with no title — seeding a row whose `title` is a URL would be fabricating a citation. They are omitted deliberately; do not invent titles for them.
 
+Also add teaching assignments to the same entry. **Without these the period filter built in Task 5 has zero options, renders disabled, and its Task 9 test asserts nothing** — the feature this branch exists to fix would ship untested. Four rows spanning two academic years and both terms, including two rows that share `semester: 3` across different years so the composite-key filter is genuinely exercised:
+
+```typescript
+    teaching: [
+      {courseCode: "AFI-3101", courseName: "Filsafat Islam Klasik", programCode: "AFI", credits: 3, academicYearStart: 2026, academicYearEnd: 2027, term: "GANJIL" as const, semester: 3},
+      {courseCode: "AFI-3204", courseName: "Hermeneutika dan Tafsir Kontemporer", programCode: "AFI", credits: 3, academicYearStart: 2026, academicYearEnd: 2027, term: "GANJIL" as const, semester: 5},
+      {courseCode: "AFI-2202", courseName: "Moderasi Beragama", programCode: "AFI", credits: 2, academicYearStart: 2025, academicYearEnd: 2026, term: "GENAP" as const, semester: 4},
+      {courseCode: "FUS-1103", courseName: "Pengantar Filsafat", programCode: "FUS", credits: 2, academicYearStart: 2025, academicYearEnd: 2026, term: "GANJIL" as const, semester: 3},
+    ],
+```
+
+These are representative teaching assignments for his stated field, not sourced records — unlike the publications, the source page lists no courses. That is acceptable for a course schedule in a way it is not for a citation: a schedule is operational data the faculty sets, not a credential claim attributed to him.
+
+The other `LECTURERS` entries have no `teaching` key, so type it optional and guard the write:
+
+```typescript
+        teachingAssignments: item.teaching
+          ? {deleteMany: {}, create: item.teaching.map((t, order) => ({...t, order}))}
+          : undefined,
+```
+
+Use `create:` without `deleteMany:` in the upsert's `create` branch.
+
 - [ ] **Step 5: Thread the new fields through the seed loop**
 
 `prisma/seed.ts:726-767` currently writes only `name`, `nidn`, `email`, `studyProgramId`, `order`, `isActive`. Extend both the `update` and `create` blocks with:
@@ -418,10 +448,12 @@ console.log(l?.name, l?.email, l?.nip);
 console.log('scopus:', l?.scopusUrl);
 console.log('publications:', l?.publications.length, 'educations:', l?.educations.length);
 console.log('photo:', l?.photoMediaId);
+const t = await p.lecturerTeachingAssignment.findMany({where: {lecturerId: l!.id}});
+console.log('teaching:', t.length, [...new Set(t.map((r) => r.academicYearStart + '-' + r.term))]);
 "
 ```
 
-Expected: `Dr. Masykur, M.Hum. masykur@fuspi.uinbanten.ac.id 197606172005011003`, `publications: 15 educations: 3`, and a non-null photo id.
+Expected: `Dr. Masykur, M.Hum. masykur@fuspi.uinbanten.ac.id 197606172005011003`, `publications: 15 educations: 3`, a non-null photo id, and `teaching: 4` across three distinct periods (`2026-GANJIL`, `2025-GENAP`, `2025-GANJIL`).
 
 - [ ] **Step 8: Confirm no FUDA identity leaked**
 
@@ -2129,10 +2161,22 @@ test.describe("M5 lecturer profile — public detail", () => {
     await page.goto("/id/dosen/masykur");
     const filter = page.locator("#lecturer-period");
     await expect(filter).toBeVisible();
+    await expect(filter).toBeEnabled();
     const options = await filter.locator("option").allInnerTexts();
-    for (const option of options.slice(1)) {
+    const periods = options.slice(1);
+    expect(periods.length).toBeGreaterThanOrEqual(3);
+    for (const option of periods) {
       expect(option).toMatch(/^(Ganjil|Genap) \d{4}\/\d{4}$/u);
     }
+    expect(periods).not.toContain("Semester 3");
+  });
+
+  test("filtering by period narrows the course table", async ({page}) => {
+    await page.goto("/id/dosen/masykur");
+    const rows = page.locator("#lecturer-teaching tbody tr");
+    await expect(rows).toHaveCount(4);
+    await page.locator("#lecturer-period").selectOption({label: "Ganjil 2026/2027"});
+    await expect(rows).toHaveCount(2);
   });
 
   test("renders Arabic RTL without leaking physical direction", async ({page}) => {
@@ -2156,14 +2200,14 @@ test.describe("M5 lecturer profile — public detail", () => {
 - [ ] **Step 2: Run it**
 
 Run: `npx playwright test e2e/m5/lecturer-profile.spec.ts --project=chromium`
-Expected: 4 passing.
+Expected: 5 passing.
 
 Every violation axe reports is a real defect introduced by Tasks 4–5 — fix the markup, never relax `AXE_TAGS` or filter the violation list to make the test green.
 
 - [ ] **Step 3: Run the mobile project too**
 
 Run: `npx playwright test e2e/m5/lecturer-profile.spec.ts --project=mobile`
-Expected: 4 passing. This is what catches the sticky identity card and the card-list fallback breaking at 390px.
+Expected: 5 passing. This is what catches the sticky identity card and the card-list fallback breaking at 390px.
 
 - [ ] **Step 4: Commit**
 
