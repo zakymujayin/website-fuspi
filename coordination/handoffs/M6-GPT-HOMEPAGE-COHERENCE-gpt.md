@@ -196,7 +196,15 @@ UPDATE "HomeSection" SET "order" = 16 WHERE key = 'ACHIEVEMENT';
 UPDATE "HomeSection" SET "order" = 17 WHERE key = 'CTA';
 ```
 
-Note that `prisma/seed.ts` still seeds the old order, so a reseed reverts this.
+### Seeder alignment
+
+`prisma/seed.ts` derived `order` from each section's position in the `SECTIONS` array, and its `update` branch overwrote the column, so **any reseed silently reverted whatever order the faculty had set in the admin UI** — no error, no warning.
+
+Ordering is now an explicit `HOME_SECTION_ORDER: Record<HomeSectionKey, number>` map, separate from the array (which is grouped by editorial copy, a different concern). Typed as a full `Record`, so adding a key to the `HomeSectionKey` enum fails the build until its position is chosen deliberately — verified by removing a key and confirming `tsc` reports `TS2741: Property 'ACHIEVEMENT' is missing ... but required in type 'Record<HomeSectionKey, number>'`.
+
+The map's 18 values were diffed against the live rows: zero mismatches, so seed and database now agree. The seeder itself was **not executed** — it rewrites large amounts of content, and the point was only to stop it clobbering the order.
+
+`prisma/seed.ts` sits outside this task's `allowed_paths`; the reviewer asked for the fix explicitly after being shown the reseed risk.
 
 ## Requested contract / dependency changes
 

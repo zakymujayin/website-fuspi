@@ -129,6 +129,43 @@ const SECTIONS: SectionCopy[] = [
   },
 ];
 
+/**
+ * Homepage section order, kept apart from the SECTIONS array above.
+ *
+ * The array is grouped by editorial copy; the page's reading order is a
+ * separate decision, so deriving `order` from array position silently coupled
+ * the two. It also meant a reseed reverted whatever order the faculty had set
+ * in `/admin/beranda/bagian`, with no error to notice.
+ *
+ * Typed as a full Record, so adding a key to `HomeSectionKey` fails the build
+ * here until its position is chosen deliberately. Gaps of 10 leave room to
+ * insert a section without renumbering the rest.
+ *
+ * Note that `page.tsx` composes several keys into one rendered section and
+ * takes the *smallest* order among them (news + announcements + agenda, intro +
+ * prodi, video + gallery), so grouped keys are numbered adjacently.
+ */
+const HOME_SECTION_ORDER: Record<HomeSectionKey, number> = {
+  HERO: 0,
+  QUICKLINK: 10,
+  DEAN: 20,
+  INTRO: 30,
+  PRODI: 31,
+  STATS: 40,
+  COLUMN: 50,
+  NEWS: 60,
+  ANNOUNCEMENT: 61,
+  AGENDA: 62,
+  ACHIEVEMENT: 70,
+  TESTIMONIAL: 80,
+  FACILITY: 90,
+  VIDEO: 100,
+  VIDEO_GALLERY: 101,
+  SERVICE: 110,
+  PARTNERSHIP: 120,
+  CTA: 130,
+};
+
 function escapeXml(value: string) {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
@@ -532,7 +569,7 @@ async function main() {
     });
   }
 
-  for (const [index, section] of SECTIONS.entries()) {
+  for (const section of SECTIONS) {
     const translations = (["id", "en", "ar"] as const).map((locale) => ({
       locale,
       title: section[locale].title,
@@ -543,12 +580,12 @@ async function main() {
     await prisma.homeSection.upsert({
       where: { key: section.key },
       update: {
-        order: index, itemLimit: section.itemLimit ?? 4, ctaUrl: section.ctaUrl ?? null,
+        order: HOME_SECTION_ORDER[section.key], itemLimit: section.itemLimit ?? 4, ctaUrl: section.ctaUrl ?? null,
         translations: { deleteMany: {}, create: translations },
       },
       create: {
         key: section.key,
-        order: index,
+        order: HOME_SECTION_ORDER[section.key],
         itemLimit: section.itemLimit ?? 4,
         ctaUrl: section.ctaUrl ?? null,
         translations: { create: translations },
