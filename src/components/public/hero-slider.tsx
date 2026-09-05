@@ -10,7 +10,6 @@ import type {PublicHomeSlide} from "@/features/home-nav/public-query";
 import {Link} from "@/i18n/navigation";
 import {cn} from "@/lib/utils";
 import styles from "./home-design.module.css";
-import {institution} from "@/config/institution";
 
 const AUTOPLAY_MS = 8000;
 
@@ -91,11 +90,6 @@ export function HeroSlider({slides}: {slides: readonly PublicHomeSlide[]}) {
       ))}
       <div aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,15,42,.55)_0%,rgba(8,15,42,.72)_45%,rgba(8,15,42,.65)_100%)]" />
       <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(14,21,51,.18)_78%)]" />
-
-      <div data-faculty-tab className={styles.facultyTab}>
-        <p className="font-semibold leading-snug">{institution.name}</p>
-        <p className="mt-1 hidden text-sm leading-5 sm:block">{institution.university}</p>
-      </div>
 
       <div className="relative z-10 mx-auto flex min-h-[min(45rem,calc(100svh-7rem))] max-w-[1280px] items-center justify-center px-5 py-24 sm:px-8 lg:px-10">
         <div className="w-full max-w-5xl text-center text-white">

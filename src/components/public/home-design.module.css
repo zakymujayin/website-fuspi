@@ -115,20 +115,6 @@
   border-block-end: 1px solid #c8d4eb;
 }
 
-.facultyTab {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: max(1.5rem, calc((100% - 87rem) / 2));
-  z-index: 20;
-  inline-size: min(24rem, calc(100% - 3rem));
-  padding: 1rem 1.25rem;
-  border-block-end: 3px solid var(--royal-500);
-  background: var(--royal-800);
-  color: white;
-  font-size: 1.125rem;
-  box-shadow: 0 6px 16px rgb(14 21 51 / .12);
-}
-
 .searchPanel {
   --primary: var(--royal-950);
   --primary-foreground: white;
@@ -147,24 +133,9 @@
   }
 }
 
-@media (width < 1024px) {
-  :global(.public-shell):has([data-faculty-tab]) .brandName {
-    display: none;
-  }
-}
-
 @media (width >= 1400px) {
   .brandName {
     display: block;
-  }
-}
-
-@media (width < 640px) {
-  .facultyTab {
-    inset-inline-start: 1rem;
-    inline-size: min(19rem, calc(100% - 2rem));
-    padding: .625rem .875rem;
-    font-size: .875rem;
   }
 }
 

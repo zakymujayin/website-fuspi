@@ -2,17 +2,16 @@ import {expect, test} from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
 for (const locale of ["id", "en", "ar"] as const) {
-  test(`${locale}: compact identity and real search work on desktop and mobile`, async ({page}) => {
+  test(`${locale}: hero has no identity tab and header search works on desktop and mobile`, async ({page}) => {
     await page.emulateMedia({reducedMotion: "reduce"});
     for (const width of [1440, 390, 360]) {
       await page.setViewportSize({width, height: 900});
       await page.goto(`/${locale}`);
-      await expect(page.locator("[data-faculty-tab]")).toBeVisible();
+      await expect(page.locator("[data-faculty-tab]")).toHaveCount(0);
       const hero = page.locator('section[aria-roledescription="carousel"]');
-      const heroBox = await hero.boundingBox();
-      const tabBox = await page.locator("[data-faculty-tab]").boundingBox();
-      expect(tabBox!.y).toBe(heroBox!.y);
-      expect(tabBox!.height).toBeLessThan(120);
+      await expect(hero.locator("h1")).toBeVisible();
+      await expect(page.locator('header a[dir="ltr"] > span').nth(1)).toBeVisible();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
       const trigger = page.locator('header button[aria-haspopup="dialog"]').first();
       await trigger.click();
       const dialog = page.getByRole("dialog");
