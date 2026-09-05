@@ -12,8 +12,9 @@ import { cn } from "@/lib/utils";
  * the effect then reconciles a page restored mid-scroll.
  *
  * Compaction is expressed as a transform, never as a height. The header keeps
- * its full flow height (36px utility bar + 76px main bar), so the pinned bar
- * shrinks to the specified 60px without moving a single pixel of page content.
+ * its full flow height (36px utility bar + 76px main bar); on scroll only the
+ * utility bar retracts, so the pinned 76px main bar stays complete — nothing
+ * below moves and no identity or navigation content is ever clipped.
  */
 export function StickyHeader({
   children,
@@ -42,8 +43,10 @@ export function StickyHeader({
         // property, so `transition-transform` alone would not animate them.
         "group sticky top-0 z-30 w-full transition-[translate,box-shadow] duration-200 ease-out",
         "data-[compact=true]:shadow-sm motion-reduce:transition-none",
-        // 112px flow − 52px slide = the 60px pinned bar of docs/17-B.
-        "data-[compact=true]:-translate-y-[3.25rem]",
+        // Only the 36px utility bar slides out of view; the 76px main bar with
+        // the identity, navigation, and actions stays fully visible and never
+        // clips a single pixel of its content.
+        "data-[compact=true]:-translate-y-[2.25rem]",
         className,
       )}
     >

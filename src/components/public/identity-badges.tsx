@@ -23,9 +23,8 @@ export function IdentityBadges({
           <ImageWithFallback src="/images/brand/uin-logo-navy.png" alt={institution.university} className="object-contain" sizes="56px" loading="eager" />
         </span>
       )}
-      <span className="hidden max-w-48 xl:block">
-        <span className="block text-[10px] font-bold uppercase tracking-[.18em] text-royal-600">FUSPI</span>
-        <span className="mt-1 block text-sm font-semibold leading-tight text-navy-950">{institution.name}</span>
+      <span className="max-w-44 sm:max-w-48 lg:hidden min-[1400px]:block">
+        <span className="block text-sm font-semibold leading-tight text-navy-950">{institution.name}</span>
       </span>
       <span className="hidden items-center gap-2 border-s border-slate-200 ps-3 2xl:flex">
         {accreditationLogo ? (

@@ -52,14 +52,14 @@ export async function SiteHeader() {
                 label={t(ppidLink.key)}
                 externalHint={externalHint}
                 showIcon={false}
-                className="h-10 shrink-0 whitespace-nowrap rounded-md border border-brass-500 px-3 text-[13px] font-semibold text-[#7d5621] transition-colors hover:bg-brass-500/10 xl:px-4 xl:text-sm"
+                className="h-10 shrink-0 whitespace-nowrap rounded-md border border-brass-500 px-3 text-[13px] font-semibold text-[#704b1b] transition-colors hover:bg-brass-500/10 xl:px-4 xl:text-sm"
               />
               <UtilityLink
                 url={pmbLink.url}
                 label={t(pmbLink.key)}
                 externalHint={externalHint}
                 showIcon={false}
-                className="h-10 shrink-0 whitespace-nowrap rounded-md bg-royal-500 px-3 text-[13px] font-semibold text-white transition-colors hover:bg-royal-600 xl:px-4 xl:text-sm"
+                className="h-10 shrink-0 whitespace-nowrap rounded-md bg-royal-700 px-3 text-[13px] font-semibold text-white transition-colors hover:bg-royal-800 xl:px-4 xl:text-sm"
               />
             </div>
             <MobileNav

@@ -4,8 +4,8 @@ import { expect, test, type Page } from "@playwright/test";
 const LOCALES = ["id", "en", "ar"] as const;
 const BREAKPOINTS = [360, 390, 768, 1024, 1440] as const;
 
-/** docs/17-B: the pinned bar settles at 60px once the header compacts. */
-const COMPACT_BAR_HEIGHT = 60;
+/** The utility bar retracts; all 76px of the identity/navigation bar remain visible. */
+const COMPACT_BAR_HEIGHT = 76;
 
 /** A route that renders the whole shell without needing seeded content. */
 const SHELL_PATH = "/prodi";

@@ -11,10 +11,20 @@ import type {PublicAcademicDirectoryItemSchema} from "@/contracts/academic";
 import type {PublicPostView} from "@/contracts/post";
 import type {AppLocale} from "@/i18n/routing";
 import {Link} from "@/i18n/navigation";
+import styles from "./home-design.module.css";
 
 type Lecturer = z.infer<typeof PublicAcademicDirectoryItemSchema>;
 type ColumnGroup = {role: "DEKAN" | "DOSEN" | "MAHASISWA"; items: readonly PublicPostView[]};
 const ROLE_KEY = {DEKAN: "dean", DOSEN: "lecturer", MAHASISWA: "student"} as const;
+
+// Existing, supplied leadership portraits; CMS media remains the first choice.
+const leadershipPortraits = [
+  {name: "Masrukhin Muhsin", url: "/images/leadership/wd1-masrukhin.webp"},
+  {name: "Endang Saeful Anwar", url: "/images/leadership/wd2-endang.webp"},
+  {name: "Ade Fakih Kurniawan", url: "/images/leadership/wd3-ade-fakih.webp"},
+  {name: "Ade Faqih Kurniawan", url: "/images/leadership/wd3-ade-fakih.webp"},
+] as const;
+const portraitFor = (lecturer: Lecturer) => lecturer.photo?.url ?? leadershipPortraits.find((portrait) => lecturer.name.includes(portrait.name))?.url;
 
 export async function AcademicVoicesSection({
   groups,
@@ -28,10 +38,12 @@ export async function AcademicVoicesSection({
   const t = await getTranslations("Home");
   const columns = groups.flatMap((group) => group.items.slice(0, 2).map((item) => ({...item, role: group.role})));
   const [featured, ...rest] = columns;
+  const portraitProfiles = lecturers.filter((lecturer) => portraitFor(lecturer));
+  const curatedLecturers = (portraitProfiles.length >= 3 ? portraitProfiles : lecturers).slice(0, 4);
   if (!featured && lecturers.length === 0) return null;
 
   return (
-    <section className="bg-slate-50 py-16 md:py-24">
+    <section className={`${styles.section} ${styles.primary} bg-white`}>
       <Container>
         <div className="mb-10 grid gap-6 lg:grid-cols-12">
           <div className="lg:col-span-8">
@@ -46,9 +58,9 @@ export async function AcademicVoicesSection({
         </div>
 
         <Reveal>
-          <div className="grid gap-10 lg:grid-cols-12">
+          <div className="grid w-full gap-10 lg:grid-cols-12">
             {featured ? (
-              <Link href={`/kolom/${featured.slug}`} className="group lg:col-span-7">
+              <Link href={`/kolom/${featured.slug}`} className={`group ${rest.length ? "lg:col-span-7" : "lg:col-span-12"}`}>
                 <div className="relative aspect-[16/10] overflow-hidden rounded-md bg-slate-200">
                   <ImageWithFallback
                     src={featured.cover?.url}
@@ -60,6 +72,7 @@ export async function AcademicVoicesSection({
                 </div>
                 <p className="mt-4 text-xs font-semibold uppercase tracking-[0.14em] text-royal-600">{t(`columnRole.${ROLE_KEY[featured.role]}`)}</p>
                 <h3 className="mt-2 text-2xl font-bold leading-snug tracking-[-0.015em] text-slate-900 group-hover:text-royal-600 md:text-[28px]">{featured.translation.value.title}</h3>
+                {featured.translation.value.excerpt ? <p className="mt-3 max-w-2xl text-base leading-7 text-slate-700">{featured.translation.value.excerpt}</p> : null}
                 <p className="mt-2 text-xs text-slate-600">{featured.authorName} · {formatJakartaPublishedDate(featured.publishedAt, locale)}</p>
               </Link>
             ) : null}
@@ -71,6 +84,7 @@ export async function AcademicVoicesSection({
                       <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-royal-600">{t(`columnRole.${ROLE_KEY[column.role]}`)}</span>
                       <span className="mt-2 block text-lg font-bold leading-snug text-slate-900 group-hover:text-royal-600 md:text-xl">{column.translation.value.title}</span>
                       <span className="mt-2 block text-xs text-slate-600">{column.authorName}</span>
+                      <time className="mt-2 block text-sm text-slate-700" dateTime={column.publishedAt.toISOString()}>{formatJakartaPublishedDate(column.publishedAt, locale)}</time>
                     </Link>
                   ))}
                 </div>
@@ -85,16 +99,17 @@ export async function AcademicVoicesSection({
               <h3 className="text-xl font-bold tracking-[-0.01em] text-slate-900 md:text-2xl">{t("lecturersTitle")}</h3>
               <Link href="/dosen" className="inline-flex min-h-11 items-center gap-1 text-xs font-semibold text-royal-700 hover:text-royal-500">{t("viewAll")}<ArrowRight aria-hidden className="size-4 rtl:rotate-180" strokeWidth={1.5} /></Link>
             </div>
-            <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {lecturers.slice(0, 4).map((lecturer, index) => (
-                <Reveal key={lecturer.id} index={index}>
-                  <Link href={`/dosen/${lecturer.slug}`} className="group flex h-full items-center gap-4 rounded-md border border-slate-200 bg-white p-5 transition-colors duration-200 hover:border-royal-400">
-                    <span className="relative size-14 shrink-0 overflow-hidden rounded-full bg-slate-200">
-                      <ImageWithFallback src={lecturer.photo?.url} alt={lecturer.photo?.isDecorative ? "" : (lecturer.photo?.alt ?? lecturer.name)} className="object-cover" sizes="56px" />
+            <div className={`mt-6 flex snap-x snap-proximity gap-6 overflow-x-auto pb-3 sm:grid sm:grid-cols-2 sm:overflow-visible ${curatedLecturers.length === 3 ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}>
+              {curatedLecturers.map((lecturer, index) => (
+                <Reveal key={lecturer.id} index={index} className="w-[min(76vw,19rem)] shrink-0 snap-start sm:w-auto">
+                  <Link href={`/dosen/${lecturer.slug}`} className="group block w-full border-b border-slate-300 pb-5">
+                    <span className="relative mx-auto block aspect-[4/3] w-full overflow-hidden rounded-sm bg-slate-100">
+                      {portraitFor(lecturer) ? <ImageWithFallback src={portraitFor(lecturer)} alt={lecturer.photo?.isDecorative ? "" : (lecturer.photo?.alt ?? lecturer.name)} className="object-cover object-[50%_25%] transition-transform duration-500 group-hover:scale-[1.03]" sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 100vw" /> : <span aria-hidden className="grid size-full place-items-center text-4xl font-semibold text-royal-800">{lecturer.name.split(" ").filter((part) => !part.includes(".")).slice(0, 2).map((part) => part[0]).join("")}</span>}
                     </span>
-                    <span>
-                      <span className="block font-bold leading-snug text-slate-900 group-hover:text-royal-700">{lecturer.name}</span>
-                      {lecturer.secondaryText ? <span className="mt-1 block text-xs leading-5 text-slate-600">{lecturer.secondaryText}</span> : null}
+                    <span className="mt-4 block">
+                      <span className="block text-xl font-semibold leading-snug text-slate-900 group-hover:text-royal-800">{lecturer.name}</span>
+                      {lecturer.secondaryText ? <span className="mt-2 block text-sm leading-6 text-slate-700">{lecturer.secondaryText}</span> : null}
+                      {lecturer.studyProgram ? <span className="mt-1 block text-sm leading-6 text-royal-800">{lecturer.studyProgram.name}</span> : null}
                     </span>
                   </Link>
                 </Reveal>

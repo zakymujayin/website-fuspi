@@ -9,6 +9,7 @@ import {ImageWithFallback} from "@/components/public/image-with-fallback";
 import type {PublicHomeSlide} from "@/features/home-nav/public-query";
 import {Link} from "@/i18n/navigation";
 import {cn} from "@/lib/utils";
+import styles from "./home-design.module.css";
 
 const AUTOPLAY_MS = 8000;
 
@@ -66,7 +67,7 @@ export function HeroSlider({slides}: {slides: readonly PublicHomeSlide[]}) {
     <section
       aria-roledescription="carousel"
       aria-label={t("heroRegion")}
-      className="relative isolate min-h-[calc(100svh-7rem)] overflow-hidden bg-navy-950"
+      className={`${styles.section} relative isolate overflow-hidden bg-navy-950 !py-0`}
       onMouseEnter={() => setInteractionPause(true)}
       onMouseLeave={() => setInteractionPause(false)}
       onFocusCapture={() => setInteractionPause(true)}
@@ -75,7 +76,7 @@ export function HeroSlider({slides}: {slides: readonly PublicHomeSlide[]}) {
       }}
     >
       {slides.map((item, index) => (
-        <div key={item.id} aria-hidden={index !== active} className={cn("absolute inset-0 transition-opacity duration-1000", index === active ? "opacity-100" : "opacity-0")}>
+        <div key={item.id} aria-hidden={index !== active} className={cn("absolute inset-0 motion-safe:transition-opacity motion-safe:duration-1000", index === active ? "opacity-100" : "opacity-0")}>
           <ImageWithFallback
             src={item.image?.url}
             alt={item.image?.isDecorative ? "" : (item.image?.alt ?? item.title)}
@@ -87,19 +88,19 @@ export function HeroSlider({slides}: {slides: readonly PublicHomeSlide[]}) {
           />
         </div>
       ))}
-      <div aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,15,42,.72)_0%,rgba(8,15,42,.52)_48%,rgba(8,15,42,.90)_100%)]" />
+      <div aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgba(8,15,42,.55)_0%,rgba(8,15,42,.72)_45%,rgba(8,15,42,.65)_100%)]" />
       <div aria-hidden className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(14,21,51,.18)_78%)]" />
 
-      <div className="relative z-10 mx-auto flex min-h-[calc(100svh-7rem)] max-w-[1280px] items-center justify-center px-5 py-24 sm:px-8 lg:px-10">
-        <div className="w-full max-w-4xl text-center text-white">
-          <p className="mx-auto mb-6 w-fit border-y border-white/25 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/85">
+      <div className="relative z-10 mx-auto flex min-h-[min(45rem,calc(100svh-7rem))] max-w-[1280px] items-center justify-center px-5 py-24 sm:px-8 lg:px-10">
+        <div className="w-full max-w-5xl text-center text-white">
+          <p className="mx-auto mb-6 max-w-xl text-sm font-semibold tracking-[0.06em] text-white">
             {t("heroEyebrow")}
           </p>
-          <h1 key={`title-${slide.id}`} className="mx-auto max-w-4xl text-[clamp(2rem,4vw,3.25rem)] font-bold leading-[1.12] tracking-[-0.015em] text-balance text-white motion-safe:animate-in motion-safe:fade-in-0 motion-safe:slide-in-from-bottom-5 motion-safe:duration-700">
+          <h1 key={`title-${slide.id}`} className="mx-auto max-w-5xl text-[clamp(1.875rem,4.5vw,4rem)] font-bold leading-[1.12] tracking-[-0.025em] text-balance text-white motion-safe:animate-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-700">
             {slide.title}
           </h1>
           {slide.subtitle ? (
-            <p key={`subtitle-${slide.id}`} className="mx-auto mt-6 max-w-2xl text-base leading-7 text-white/85 md:text-lg md:leading-8">
+            <p key={`subtitle-${slide.id}`} className="mx-auto mt-6 max-w-2xl text-lg leading-7 text-white md:text-xl md:leading-8">
               {slide.subtitle}
             </p>
           ) : null}
@@ -113,7 +114,7 @@ export function HeroSlider({slides}: {slides: readonly PublicHomeSlide[]}) {
 
       {slides.length > 1 ? (
         <div className="absolute inset-x-0 bottom-5 z-20 mx-auto flex max-w-[1280px] items-center justify-between gap-4 px-5 sm:px-8 lg:px-10">
-          <p className="text-xs tabular-nums tracking-[0.18em] text-white/75">
+          <p className="text-sm tabular-nums tracking-[0.12em] text-white">
             {String(active + 1).padStart(2, "0")} / {String(slides.length).padStart(2, "0")}
           </p>
           <div className="flex items-center gap-2">

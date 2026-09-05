@@ -1,24 +1,25 @@
-import {ArrowRight, ArrowUpRight} from "lucide-react";
+import {ArrowRight, ArrowUpRight, BookOpen, CalendarDays, Files, MessageSquare} from "lucide-react";
 import {getTranslations} from "next-intl/server";
 
 import {Reveal} from "@/components/public/reveal";
 import {Container} from "@/components/ui/container";
 import {Link} from "@/i18n/navigation";
+import styles from "./home-design.module.css";
 
 const E_LAYANAN_URL = "https://fuspi.uinbanten.ac.id/e-layanan";
 const services = [
-  {key: "sila", href: E_LAYANAN_URL, external: true},
-  {key: "ejournal", href: E_LAYANAN_URL, external: true},
-  {key: "booking", href: "/peminjaman", external: false},
-  {key: "complaints", href: "/pengaduan", external: false},
+  {key: "sila", href: E_LAYANAN_URL, external: true, icon: Files},
+  {key: "ejournal", href: E_LAYANAN_URL, external: true, icon: BookOpen},
+  {key: "booking", href: "/peminjaman", external: false, icon: CalendarDays},
+  {key: "complaints", href: "/pengaduan", external: false, icon: MessageSquare},
 ] as const;
 
 export async function ServicesSection() {
   const t = await getTranslations("Home");
-  const [featured, ...secondary] = services;
+  const tNav = await getTranslations("Nav");
 
   return (
-    <section className="bg-white py-16 md:py-24">
+    <section className={`${styles.section} border-y border-slate-200 bg-slate-100`}>
       <Container>
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -29,38 +30,27 @@ export async function ServicesSection() {
             </Link>
           </div>
           <div className="lg:col-span-8">
-            <Reveal>
-              <div className="grid gap-8 md:grid-cols-2">
-                <a href={featured.href} target="_blank" rel="noopener noreferrer" className="group flex flex-col justify-between rounded-md bg-royal-500 p-7 text-white transition-colors duration-200 hover:bg-royal-600 md:p-8">
-                  <span className="flex items-start justify-between gap-6">
-                    <span className="text-xs font-semibold uppercase tracking-[0.16em] text-white">{t("servicesEyebrow")}</span>
-                    <ArrowUpRight aria-hidden className="size-5" strokeWidth={1.5} />
-                  </span>
-                  <span>
-                    <span className="mt-10 block text-2xl font-bold leading-tight text-white md:text-3xl">{t(`service.${featured.key}.title`)}</span>
-                    <span className="mt-3 block max-w-xl text-sm leading-6 text-white md:text-[15px]">{t(`service.${featured.key}.description`)}</span>
-                  </span>
-                </a>
-                <div className="flex flex-col justify-center border-t border-slate-300">
-                  {secondary.map((service) => {
+            <Reveal className="w-full">
+                <div className="w-full border-t-2 border-royal-500">
+                  {services.map((service) => {
                     const content = (
                       <>
+                        <service.icon aria-hidden className="size-6 text-royal-800" strokeWidth={1.5} />
                         <span>
-                          <span className="block text-lg font-bold leading-snug text-slate-900">{t(`service.${service.key}.title`)}</span>
-                          <span className="mt-1.5 block max-w-xl text-sm leading-6 text-slate-600">{t(`service.${service.key}.description`)}</span>
+                          <span className="block text-xl font-semibold leading-snug text-slate-900">{t(`service.${service.key}.title`)}</span>
+                          <span className="mt-1.5 block max-w-xl text-base leading-6 text-slate-700">{t(`service.${service.key}.description`)}</span>
                         </span>
                         {service.external ? <ArrowUpRight aria-hidden className="size-4 shrink-0" strokeWidth={1.5} /> : <ArrowRight aria-hidden className="size-4 shrink-0 rtl:rotate-180" strokeWidth={1.5} />}
                       </>
                     );
-                    const className = "group grid grid-cols-[1fr_auto] items-center gap-4 border-b border-slate-300 py-5 transition-colors duration-200 hover:text-royal-600";
+                    const className = `${styles.service} group`;
                     return service.external ? (
-                      <a key={service.key} href={service.href} target="_blank" rel="noopener noreferrer" className={className}>{content}</a>
+                      <a key={service.key} href={service.href} target="_blank" rel="noopener noreferrer" className={className}>{content}<span className="sr-only">{tNav("externalLinkHint")}</span></a>
                     ) : (
                       <Link key={service.key} href={service.href} className={className}>{content}</Link>
                     );
                   })}
                 </div>
-              </div>
             </Reveal>
           </div>
         </div>

@@ -6,7 +6,7 @@ import {useState} from "react";
 import {ImageWithFallback} from "@/components/public/image-with-fallback";
 import {extractYouTubeId} from "@/components/public/video-player";
 
-export function HomeVideoGalleryItem({youtubeUrl, title}: {youtubeUrl: string; title: string}) {
+export function HomeVideoGalleryItem({youtubeUrl, title, compact = false}: {youtubeUrl: string; title: string; compact?: boolean}) {
   const [playing, setPlaying] = useState(false);
   const youtubeId = extractYouTubeId(youtubeUrl);
 
@@ -28,13 +28,13 @@ export function HomeVideoGalleryItem({youtubeUrl, title}: {youtubeUrl: string; t
         <span aria-hidden className="absolute inset-0 bg-navy-950/20" />
         <span className="absolute inset-0 grid place-items-center"><span className="grid size-12 place-items-center rounded-full bg-white text-royal-700 shadow-md"><Play aria-hidden className="size-5 translate-x-px fill-current" /></span></span>
       </span>
-      <span className="mt-3 block font-bold leading-snug text-slate-900 group-hover:text-royal-600">{title}</span>
+      <span className={`${compact ? "" : "mt-3"} block font-semibold leading-snug text-slate-900 group-hover:text-royal-800`}>{title}</span>
     </>
   );
 
   return youtubeId ? (
-    <button type="button" onClick={() => setPlaying(true)} aria-label={title} className="group w-full text-start">{visual}</button>
+    <button type="button" onClick={() => setPlaying(true)} aria-label={title} className={`group w-full text-start ${compact ? "grid grid-cols-[42%_1fr] items-center gap-4 border-b border-slate-300 pb-5" : ""}`}>{visual}</button>
   ) : (
-    <a href={youtubeUrl} target="_blank" rel="noopener noreferrer" className="group block">{visual}</a>
+    <a href={youtubeUrl} target="_blank" rel="noopener noreferrer" className={`group ${compact ? "grid grid-cols-[42%_1fr] items-center gap-4 border-b border-slate-300 pb-5" : "block"}`}>{visual}</a>
   );
 }

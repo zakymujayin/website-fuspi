@@ -6,6 +6,7 @@ import {ImageWithFallback} from "@/components/public/image-with-fallback";
 import {Container} from "@/components/ui/container";
 import type {PublicDean} from "@/features/home-nav/public-query";
 import {Link} from "@/i18n/navigation";
+import styles from "./home-design.module.css";
 
 function initialsFrom(name: string) {
   const parts = name.replace(/^(Prof\.|Dr\.|H\.|Hj\.|M\.Ag\.|S\.Ag\.)\s*/gi, "").trim().split(/\s+/);
@@ -14,10 +15,10 @@ function initialsFrom(name: string) {
 
 export function DeanWelcomeSection({dean, title, ctaLabel}: {dean: PublicDean; title: string; ctaLabel: string}) {
   return (
-    <section className="bg-slate-50 py-16 md:py-24">
+    <section className={`${styles.section} bg-slate-50`}>
       <Container>
         <div className="grid items-center gap-10 lg:grid-cols-12 lg:gap-16">
-          <div className="relative aspect-[4/5] overflow-hidden rounded-md bg-slate-200 lg:col-span-5">
+          <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden rounded-md bg-slate-200 lg:col-span-4">
             {dean.photo ? (
               <ImageWithFallback
                 src={dean.photo.url}
@@ -32,10 +33,10 @@ export function DeanWelcomeSection({dean, title, ctaLabel}: {dean: PublicDean; t
             <span aria-hidden className="absolute inset-y-0 start-0 w-1.5 bg-royal-500" />
           </div>
 
-          <div className="lg:col-span-7">
-            <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-royal-600">{title}</h2>
+          <div className="lg:col-span-8">
+            <h2 className="font-bold text-slate-900">{title}</h2>
             <blockquote className="mt-5">
-              <p className="max-w-3xl font-serif-display text-2xl leading-[1.35] text-slate-900 md:text-[2rem] md:leading-[1.3]">
+              <p className="max-w-3xl font-serif-display text-[clamp(1.375rem,2vw,1.75rem)] leading-[1.5] text-slate-900">
                 “{dean.message}”
               </p>
             </blockquote>

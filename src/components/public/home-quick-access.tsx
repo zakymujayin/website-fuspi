@@ -5,6 +5,7 @@ import {quickLinks, type ExternalLink, type NavLink} from "@/components/public/n
 import {Container} from "@/components/ui/container";
 import {Link} from "@/i18n/navigation";
 import {cn} from "@/lib/utils";
+import styles from "./home-design.module.css";
 
 function isExternal(item: NavLink | ExternalLink): item is ExternalLink {
   return "url" in item;
@@ -13,42 +14,37 @@ function isExternal(item: NavLink | ExternalLink): item is ExternalLink {
 export async function HomeQuickAccess() {
   const t = await getTranslations("Home");
   const tNav = await getTranslations("Nav");
-  const items = quickLinks.slice(0, 5);
+  const items = quickLinks;
 
   return (
-    <section aria-labelledby="quick-access-title" className="bg-white py-16 md:py-20">
+    <section aria-labelledby="quick-access-title" className={`${styles.section} border-b border-slate-200 bg-white !py-5 md:!py-6`}>
       <Container>
-        <div className="mb-8 flex items-end justify-between gap-6">
-          <h2 id="quick-access-title" className="text-2xl font-bold tracking-[-0.01em] text-slate-900 md:text-[28px]">
+        <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:gap-6">
+          <h2 id="quick-access-title" className="shrink-0 !text-base font-bold !tracking-normal text-slate-900">
             {t("quickLinksLabel")}
           </h2>
-          <span aria-hidden className="mb-2 h-px flex-1 bg-slate-200" />
-        </div>
-        <div className="grid grid-flow-dense overflow-hidden rounded-md border border-slate-300 md:grid-cols-12 md:grid-rows-2">
-          {items.map((item, index) => {
+        <div className="grid flex-1 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+          {items.map((item) => {
             const className = cn(
-              "group relative flex min-h-36 flex-col justify-between border-e border-b border-slate-300 bg-white p-6 transition-colors duration-200 hover:bg-royal-500 hover:text-white md:min-h-40",
-              index === 0 ? "md:col-span-6 md:row-span-2 md:min-h-80 md:p-9" : "md:col-span-3",
+              "group flex min-h-12 items-center justify-between gap-3 border-s border-slate-200 px-4 py-3 text-slate-900 transition-colors duration-200 hover:bg-royal-50 hover:text-royal-800",
             );
             const content = (
               <>
-                <span className="text-xs tabular-nums tracking-[0.18em] text-slate-500 transition-colors group-hover:text-white">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <span className={cn("flex items-end justify-between gap-4 font-bold", index === 0 ? "text-2xl md:text-3xl" : "text-lg")}>
+                <span className="flex w-full items-center justify-between gap-3 text-sm font-semibold">
                   {tNav(item.key)}
                   {isExternal(item)
-                    ? <ArrowUpRight aria-hidden className="size-5 shrink-0" strokeWidth={1.5} />
-                    : <ArrowRight aria-hidden className="size-5 shrink-0 rtl:rotate-180" strokeWidth={1.5} />}
+                    ? <ArrowUpRight aria-hidden className="size-4 shrink-0" strokeWidth={1.5} />
+                    : <ArrowRight aria-hidden className="size-4 shrink-0 rtl:rotate-180" strokeWidth={1.5} />}
                 </span>
               </>
             );
             return isExternal(item) ? (
-              <a key={item.key} href={item.url} target="_blank" rel="noopener noreferrer" className={className}>{content}</a>
+              <a key={item.key} href={item.url} target="_blank" rel="noopener noreferrer" className={className}>{content}<span className="sr-only">{tNav("externalLinkHint")}</span></a>
             ) : (
               <Link key={item.key} href={item.href} className={className}>{content}</Link>
             );
           })}
+        </div>
         </div>
       </Container>
     </section>

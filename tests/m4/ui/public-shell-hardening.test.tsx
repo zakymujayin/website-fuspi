@@ -75,8 +75,8 @@ describe("single header geometry", () => {
     expect(topbar).toContain("<UtilityLink");
   });
 
-  it("compacts to the 60px pinned bar as a transform, never a height change", () => {
-    expect(source).toContain("-translate-y-[3.25rem]");
+  it("retracts only the utility bar and keeps all 76px of the main bar visible", () => {
+    expect(source).toContain("-translate-y-[2.25rem]");
     expect(source).toContain("shadow-sm");
   });
 

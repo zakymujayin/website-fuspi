@@ -5,6 +5,7 @@ import {useEffect, useRef, useState} from "react";
 
 import {Container} from "@/components/ui/container";
 import type {PublicStatisticItem} from "@/features/home-nav/public-query";
+import styles from "./home-design.module.css";
 
 function useCount(target: number, enabled: boolean) {
   const [value, setValue] = useState(0);
@@ -38,10 +39,10 @@ function Stat({item, enabled, locale}: {item: PublicStatisticItem; enabled: bool
   const finalValue = `${numeric ? target.toLocaleString(locale) : item.value}${item.suffix}`;
   return (
     <div className="border-t border-white/30 pt-6" aria-label={`${item.label}: ${finalValue}`}>
-      <p aria-hidden className="text-[clamp(2.25rem,4vw,3.25rem)] font-bold leading-none tracking-[-0.02em] text-white">
-        {numeric ? animated.toLocaleString(locale) : item.value}<span className="text-royal-100">{item.suffix}</span>
+      <p aria-hidden className="text-[clamp(2.5rem,4.5vw,3.75rem)] font-bold tabular-nums leading-none tracking-[-0.02em] text-white">
+        {numeric ? animated.toLocaleString(locale) : item.value}<span className="text-white">{item.suffix}</span>
       </p>
-      <p className="mt-3 text-sm text-white">{item.label}</p>
+      <p className="mt-3 text-xl font-bold leading-snug text-white">{item.label}</p>
     </div>
   );
 }
@@ -67,17 +68,16 @@ export function StatsSection({items, title, description}: {items: readonly Publi
   if (items.length === 0) return null;
 
   return (
-    <section ref={root} className="bg-royal-500 py-16 text-white md:py-24">
+    <section ref={root} className={`${styles.section} bg-royal-500 text-white`}>
       <Container>
-        <div className="grid gap-12 lg:grid-cols-12 lg:gap-16">
+        <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white">FUSPI</p>
-            <h2 className="mt-4 max-w-sm text-[28px] font-bold leading-tight tracking-[-0.01em] text-white md:text-[34px]">
+            <h2 className="max-w-sm font-bold text-white">
               {title || t("statsTitle")}
             </h2>
-            <p className="mt-4 max-w-sm text-sm leading-6 text-white">{description || t("statsDescription")}</p>
+            <p className="mt-4 max-w-sm text-xl font-bold leading-7 text-white">{description || t("statsDescription")}</p>
           </div>
-          <div className="grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:col-span-8 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-8 gap-y-8 lg:col-span-8 lg:grid-cols-4">
             {items.map((item) => (
               <Stat key={item.id} item={item} enabled={visible} locale={locale} />
             ))}

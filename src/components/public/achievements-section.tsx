@@ -9,6 +9,8 @@ import {Container} from "@/components/ui/container";
 import type {PublicHomeAchievement} from "@/features/achievement/domain";
 import type {AppLocale} from "@/i18n/routing";
 import {Link} from "@/i18n/navigation";
+import {cn} from "@/lib/utils";
+import styles from "./home-design.module.css";
 
 const LEVEL_MESSAGE_KEY: Record<string, string> = {
   INTERNASIONAL: "internasional", NASIONAL: "nasional", REGIONAL: "regional", LOKAL: "lokal",
@@ -17,7 +19,7 @@ const LEVEL_MESSAGE_KEY: Record<string, string> = {
 async function LevelChip({levelKey}: {levelKey: string}) {
   const t = await getTranslations("Home");
   return (
-    <span className="inline-flex items-center rounded-full bg-royal-100 px-3 py-1 text-xs font-semibold uppercase tracking-[0.08em] text-royal-700">
+    <span className="inline-flex items-center border-s-2 border-royal-500 ps-3 text-sm font-semibold text-royal-800">
       {t(`achievementLevel.${LEVEL_MESSAGE_KEY[levelKey] ?? "lokal"}`)}
     </span>
   );
@@ -41,7 +43,7 @@ export async function AchievementsSection({
   if (!featured) return null;
 
   return (
-    <section className="bg-white py-16 md:py-24">
+    <section className={`${styles.section} bg-slate-100`}>
       <Container>
         <div className="mb-10 grid gap-6 lg:grid-cols-12">
           <div className="lg:col-span-8">
@@ -56,8 +58,8 @@ export async function AchievementsSection({
           </div>
         </div>
         <Reveal>
-          <div className="grid gap-10 lg:grid-cols-12">
-            <Link href={`/prestasi/${featured.slug}`} className="group lg:col-span-7">
+          <div className="grid w-full gap-10 lg:grid-cols-12">
+            <Link href={`/prestasi/${featured.slug}`} className={cn("group", rest.length ? "lg:col-span-7" : "grid items-center gap-6 lg:col-span-12 lg:grid-cols-2 lg:gap-12")}>
               <div className="relative aspect-[4/3] overflow-hidden rounded-md bg-slate-200">
                 <ImageWithFallback
                   src={featured.media?.url}
@@ -67,13 +69,17 @@ export async function AchievementsSection({
                   focalPoint={toFocalPoint(featured.media)}
                 />
               </div>
+              <div>
               <p className="mt-4">
                 <LevelChip levelKey={featured.level} />
               </p>
               <h3 className="mt-3 text-2xl font-bold leading-snug tracking-[-0.015em] text-slate-900 group-hover:text-royal-600 md:text-[28px]">{featured.title}</h3>
               <p className="mt-2 text-sm text-slate-600">{featured.studentName}</p>
+              {featured.achievedAt ? <time className="mt-3 block text-sm text-slate-700" dateTime={new Date(featured.achievedAt).toISOString()}>{formatJakartaPublishedDate(new Date(featured.achievedAt), locale)}</time> : null}
+              <span className="mt-6 inline-flex min-h-11 items-center gap-2 border-b border-royal-500 text-sm font-semibold text-royal-800">{t("readMore")}<ArrowRight aria-hidden className="size-4 rtl:rotate-180" /></span>
+              </div>
             </Link>
-            <div className="lg:col-span-5">
+            {rest.length > 0 ? <div className="lg:col-span-5">
               <div className="border-t border-slate-900">
                 {rest.map((achievement) => (
                   <Link key={achievement.id} href={`/prestasi/${achievement.slug}`} className="group block border-b border-slate-300 py-6">
@@ -86,7 +92,7 @@ export async function AchievementsSection({
                   </Link>
                 ))}
               </div>
-            </div>
+            </div> : null}
           </div>
         </Reveal>
       </Container>

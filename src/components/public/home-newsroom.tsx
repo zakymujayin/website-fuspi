@@ -11,6 +11,7 @@ import type {PublicPostView} from "@/contracts/post";
 import type {PublicContentCardSchema} from "@/contracts/public-content";
 import type {AppLocale} from "@/i18n/routing";
 import {Link} from "@/i18n/navigation";
+import styles from "./home-design.module.css";
 
 type EventCard = z.infer<typeof PublicContentCardSchema>;
 
@@ -45,7 +46,7 @@ export async function HomeNewsroom({
   if (!featured && announcements.length === 0 && events.length === 0) return null;
 
   return (
-    <section className="bg-slate-50 py-16 md:py-24">
+    <section className={`${styles.section} ${styles.primary} bg-white`}>
       <Container>
         <div className="mb-10 flex flex-wrap items-end justify-between gap-6 border-b border-slate-300 pb-6">
           <div>
@@ -59,8 +60,8 @@ export async function HomeNewsroom({
 
         {featured ? (
           <Reveal>
-            <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
-              <Link href={`/berita/${featured.slug}`} className="group lg:col-span-8">
+            <div className="grid w-full gap-8 lg:grid-cols-12 lg:gap-10">
+              <Link href={`/berita/${featured.slug}`} className="group lg:col-span-7">
                 <div className="relative aspect-[16/9] overflow-hidden rounded-md bg-slate-200">
                   <ImageWithFallback
                     src={featured.cover?.url}
@@ -78,11 +79,14 @@ export async function HomeNewsroom({
                 </h3>
                 {featured.translation.value.excerpt ? <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 md:text-[15px]">{featured.translation.value.excerpt}</p> : null}
               </Link>
-              <div className="border-t border-slate-900 lg:col-span-4">
+              <div className="border-t-2 border-royal-500 lg:col-span-5">
                 {rest.slice(0, 3).map((item) => (
-                  <Link key={item.id} href={`/berita/${item.slug}`} className="group block border-b border-slate-300 py-5">
-                    <span className="block font-semibold leading-snug text-slate-900 group-hover:text-royal-600">{item.translation.value.title}</span>
-                    <time dateTime={item.publishedAt.toISOString()} className="mt-2 block text-xs text-slate-600">{formatJakartaPublishedDate(item.publishedAt, locale)}</time>
+                  <Link key={item.id} href={`/berita/${item.slug}`} className="group grid grid-cols-[1fr_5rem] items-start gap-4 border-b border-slate-300 py-5 sm:grid-cols-[1fr_6.5rem]">
+                    <span>
+                      <span className="block text-lg font-semibold leading-snug text-slate-900 group-hover:text-royal-800">{item.translation.value.title}</span>
+                      <time dateTime={item.publishedAt.toISOString()} className="mt-3 block text-sm text-slate-700">{formatJakartaPublishedDate(item.publishedAt, locale)}</time>
+                    </span>
+                    {item.cover ? <span className="relative aspect-square overflow-hidden rounded-sm bg-slate-100"><ImageWithFallback src={item.cover.url} alt={item.cover.isDecorative ? "" : item.cover.alt} className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" sizes="104px" focalPoint={toFocalPoint(item.cover)} /></span> : null}
                   </Link>
                 ))}
               </div>
@@ -91,7 +95,7 @@ export async function HomeNewsroom({
         ) : null}
 
         {(announcements.length > 0 || events.length > 0) ? (
-          <div className="mt-16 grid gap-12 lg:grid-cols-2 lg:gap-16">
+          <div className="mt-12 grid gap-8 border-t border-slate-200 bg-slate-50 p-5 sm:p-8 lg:grid-cols-2 lg:gap-12">
             {announcements.length > 0 ? (
               <div>
                 <LedgerHeading title={t("announcementsTitle")} href="/pengumuman" label={t("viewAll")} />

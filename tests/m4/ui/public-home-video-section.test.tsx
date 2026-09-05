@@ -62,7 +62,7 @@ describe("VideoSection", () => {
     expect(markup).toContain("Kegiatan dan wisuda");
     expect(markup).toContain("Wisuda Sarjana 2026");
     expect(markup).toContain("Suasana Perkuliahan");
-    expect(markup).toContain("lg:grid-cols-3");
+    expect(markup).toContain("sm:grid-cols-2");
   });
 
   it("renders the featured player above the grid when both are present", () => {
@@ -94,7 +94,7 @@ describe("VideoSection", () => {
       path.join(process.cwd(), "src/components/public/video-section.tsx"),
       "utf8",
     );
-    expect(source).toContain("bg-slate-50"); // light section, light-first homepage
+    expect(source).toContain("bg-slate-100"); // tonal section, light-first homepage
     expect(source).not.toContain("grain"); // no texture overlay on an institutional section
     expect(source).not.toMatch(/\b(ml|mr|pl|pr|left|right)-\d/);
     expect(source).not.toMatch(/\btext-(left|right)\b/);

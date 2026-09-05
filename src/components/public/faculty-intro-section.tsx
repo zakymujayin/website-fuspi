@@ -2,11 +2,13 @@ import {ArrowRight} from "lucide-react";
 import {getTranslations} from "next-intl/server";
 import type {z} from "zod";
 
+import {ImageWithFallback} from "@/components/public/image-with-fallback";
 import {Reveal} from "@/components/public/reveal";
 import {Container} from "@/components/ui/container";
 import {institution} from "@/config/institution";
 import type {PublicAcademicDirectoryItemSchema} from "@/contracts/academic";
 import {Link} from "@/i18n/navigation";
+import styles from "./home-design.module.css";
 
 type AcademicItem = z.infer<typeof PublicAcademicDirectoryItemSchema>;
 
@@ -15,6 +17,7 @@ type AcademicItem = z.infer<typeof PublicAcademicDirectoryItemSchema>;
 const codeBySlug = new Map<string, string>(
   institution.studyPrograms.map((program) => [program.slug, program.code]),
 );
+const fieldByCode: Record<string, "quran" | "hadith" | "aqidah"> = {IAT: "quran", IH: "hadith", AFI: "aqidah"};
 
 export async function FacultyIntroSection({
   programs,
@@ -27,56 +30,64 @@ export async function FacultyIntroSection({
 }) {
   const t = await getTranslations("Home");
   const tNav = await getTranslations("Nav");
+  const orderedPrograms = institution.studyPrograms.flatMap((contract) => programs.filter((program) => program.slug === contract.slug));
 
   return (
-    <section className="bg-white py-16 md:py-24">
+    <section className={`${styles.section} ${styles.primary} ${styles.intro}`}>
       <Container>
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-royal-600">{t("introLabel")}</p>
-        <h2 className="mt-4 max-w-3xl text-[28px] font-bold leading-tight tracking-[-0.01em] text-slate-900 md:text-[34px]">
-          {title || t("introTitle")}
-        </h2>
-        <Reveal>
-          <div className="mt-6 grid gap-10 lg:grid-cols-12 lg:gap-16">
-            <div className="lg:col-span-6">
-              <p className="max-w-2xl text-base leading-7 text-slate-600">
-                {description || t("introDescription")}
-              </p>
-              <Link href="/profil" className="mt-7 inline-flex min-h-11 items-center gap-2 border-b border-royal-500 text-sm font-semibold text-royal-700 transition-colors hover:text-royal-500">
-                {t("introCtaProfile")}
-                <ArrowRight aria-hidden className="size-4 rtl:rotate-180" strokeWidth={1.5} />
-              </Link>
-            </div>
-            <div className="lg:col-span-6">
-              {programs.length > 0 ? (
-                <>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{tNav("studyPrograms")}</p>
-                  <div className="mt-4 grid gap-5 sm:grid-cols-3">
-                    {programs.map((program, index) => (
-                      <Reveal key={program.id} index={index}>
-                        <Link
-                          href={`/prodi/${program.slug}`}
-                          className="group block h-full border border-slate-200 border-t-[3px] border-t-royal-500 bg-white p-5 transition-colors duration-200 hover:border-royal-400"
-                        >
-                          <span className="text-xs font-bold uppercase tracking-[0.16em] text-royal-600">{codeBySlug.get(program.slug) ?? "S1"}</span>
-                          <span className="mt-3 block text-lg font-bold leading-snug text-slate-900 transition-colors group-hover:text-royal-700">
-                            {program.name}
-                          </span>
-                          {program.secondaryText ? (
-                            <span className="mt-2 block text-sm leading-6 text-slate-600">{program.secondaryText}</span>
-                          ) : null}
-                          <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-royal-700">
-                            {t("introCtaPrograms")}
-                            <ArrowRight aria-hidden className="size-4 rtl:rotate-180" strokeWidth={1.5} />
-                          </span>
-                        </Link>
-                      </Reveal>
-                    ))}
-                  </div>
-                </>
-              ) : null}
-            </div>
+        <div className="grid items-end gap-6 border-b border-royal-200 pb-8 md:grid-cols-2 md:gap-12">
+          <h2 className="max-w-xl font-bold text-slate-900">
+            {title || t("introTitle")}
+          </h2>
+          <div>
+            <p className="max-w-xl text-lg leading-8 text-slate-700">
+              {description || t("introDescription")}
+            </p>
+            <Link href="/profil" className="mt-3 inline-flex min-h-11 items-center gap-2 border-b border-royal-500 text-sm font-semibold text-royal-800 transition-colors hover:text-navy-950">
+              {t("introCtaProfile")}
+              <ArrowRight aria-hidden className="size-4 rtl:rotate-180" strokeWidth={1.5} />
+            </Link>
           </div>
-        </Reveal>
+        </div>
+        {orderedPrograms.length > 0 ? (
+          <>
+            <h3 className="mb-4 mt-8 text-lg font-semibold text-royal-800">{tNav("studyPrograms")}</h3>
+            <div className="border-t-2 border-royal-500">
+              {orderedPrograms.map((program, index) => (
+                <Reveal key={program.id} index={index} className="w-full">
+                  <Link
+                    href={`/prodi/${program.slug}`}
+                    className={`${styles.program} group w-full`}
+                  >
+                    <span className="text-lg font-bold text-royal-800 md:text-2xl">{codeBySlug.get(program.slug)}</span>
+                    <div className="flex items-center gap-6">
+                      {program.photo ? (
+                        <span className="relative hidden h-20 w-28 shrink-0 overflow-hidden md:block">
+                          <ImageWithFallback
+                            src={program.photo.url}
+                            alt={program.photo.isDecorative ? "" : program.photo.alt}
+                            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                            sizes="112px"
+                          />
+                        </span>
+                      ) : null}
+                      <div>
+                        <h3 className="text-slate-900 group-hover:text-royal-800">{program.name}</h3>
+                        {program.secondaryText ? (
+                          <span className="mt-2 block text-sm leading-6 text-slate-700">{program.secondaryText}</span>
+                        ) : null}
+                      </div>
+                    </div>
+                    <span className="hidden border-s border-royal-200 ps-6 text-base leading-7 text-slate-700 sm:block">
+                      {t(`advantage.${fieldByCode[codeBySlug.get(program.slug)!]}.description`)}
+                    </span>
+                    <ArrowRight aria-hidden className="size-5 text-royal-800 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" strokeWidth={1.5} />
+                  </Link>
+                </Reveal>
+              ))}
+            </div>
+          </>
+        ) : null}
       </Container>
     </section>
   );

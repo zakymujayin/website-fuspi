@@ -62,7 +62,7 @@ export function VideoPlayer({ video, className }: VideoPlayerProps) {
   }
 
   const poster = (
-    <div className="relative aspect-video overflow-hidden">
+    <div className="relative aspect-video w-full overflow-hidden">
       <ImageWithFallback
         src={video.poster?.url}
         alt={video.poster?.isDecorative ? "" : (video.poster?.alt ?? video.title)}
