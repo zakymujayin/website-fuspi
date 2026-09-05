@@ -3,7 +3,7 @@
 - Task ID: `M6-GPT-HOMEPAGE-COHERENCE`
 - Branch: `ai/gpt/m6-homepage-coherence`
 - Base SHA: `79345e5758f4f456f9ca8adaf129874111a51d69`
-- Head SHA: _see the commit created with this handoff_
+- Head SHA: `3b68fd5`
 - Scope: refinement of the approved homepage. No structural redesign, no section reordering, no backend/CMS/API/route change.
 
 ## Summary
