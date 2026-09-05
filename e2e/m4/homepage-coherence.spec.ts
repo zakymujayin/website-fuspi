@@ -48,6 +48,55 @@ test.describe("homepage heading and divider system", () => {
   });
 });
 
+test.describe("brand lockup", () => {
+  test("the header faculty name never leaves the conjunction ending a line", async ({page}) => {
+    await page.emulateMedia({reducedMotion: "reduce"});
+    await page.setViewportSize({width: 1440, height: 900});
+    await page.goto("/id");
+    const measure = await page.locator('header a[dir="ltr"] > span').nth(1).evaluate((node) => {
+      const text = (node.querySelector("span") ?? node).firstChild as Text;
+      const start = text.textContent!.indexOf(" dan ") + 1;
+      const conjunction = document.createRange();
+      conjunction.setStart(text, start);
+      conjunction.setEnd(text, start + 3);
+      const whole = document.createRange();
+      whole.selectNodeContents(text);
+      const lines = [...whole.getClientRects()];
+      return {
+        lineCount: lines.length,
+        firstLineTop: lines[0].top,
+        conjunctionTop: conjunction.getBoundingClientRect().top,
+      };
+    });
+    expect(measure.lineCount).toBe(2);
+    // "dan" joins the words below it, exactly as the footer lockup does.
+    expect(measure.conjunctionTop).toBeGreaterThan(measure.firstLineTop + 4);
+  });
+
+  test("the footer faculty name keeps the same two-line lockup", async ({page}) => {
+    await page.emulateMedia({reducedMotion: "reduce"});
+    await page.setViewportSize({width: 1440, height: 900});
+    await page.goto("/id");
+    const measure = await page.locator("footer p").first().evaluate((node) => {
+      const text = node.firstChild as Text;
+      const start = text.textContent!.indexOf(" dan ") + 1;
+      const conjunction = document.createRange();
+      conjunction.setStart(text, start);
+      conjunction.setEnd(text, start + 3);
+      const whole = document.createRange();
+      whole.selectNodeContents(text);
+      const lines = [...whole.getClientRects()];
+      return {
+        lineCount: lines.length,
+        firstLineTop: lines[0].top,
+        conjunctionTop: conjunction.getBoundingClientRect().top,
+      };
+    });
+    expect(measure.lineCount).toBe(2);
+    expect(measure.conjunctionTop).toBeGreaterThan(measure.firstLineTop + 4);
+  });
+});
+
 test.describe("facility lightbox", () => {
   test("opens every facility, navigates, and restores focus and scroll", async ({page}) => {
     await page.emulateMedia({reducedMotion: "reduce"});
@@ -214,6 +263,13 @@ test.describe("lecturer rail", () => {
     expect(firstBox!.width).toBeGreaterThan(railBox!.width / 3.6);
     expect(firstBox!.width).toBeLessThan(railBox!.width / 2.6);
 
+    // The portrait fills its card and stays a supporting element, not the
+    // whole card: clamping a tall ratio by height would narrow it instead.
+    const portrait = await cards.first().locator("div").first().boundingBox();
+    expect(Math.abs(portrait!.width - firstBox!.width)).toBeLessThan(2);
+    expect(portrait!.height).toBeLessThan(340);
+    expect(portrait!.height).toBeGreaterThan(240);
+
     const names = rail.locator('a[href*="/dosen/"] > span').first();
     await expect(names).toHaveCSS("white-space", "nowrap");
     const nameFontSize = await names.evaluate((node) => Number.parseFloat(getComputedStyle(node).fontSize));
@@ -257,6 +313,25 @@ test.describe("lecturer rail", () => {
     await expect.poll(offset).toBe(start);
     await page.keyboard.press("ArrowRight");
     await expect.poll(offset).toBe(second);
+  });
+
+  test("autoplay advances the rail without dragging the page to it", async ({page}) => {
+    await page.emulateMedia({reducedMotion: "no-preference"});
+    await page.setViewportSize({width: 1440, height: 900});
+    await page.goto("/id");
+    const rail = page.locator(RAIL);
+    await rail.scrollIntoViewIfNeeded();
+    // Park the rail below the fold: a page-level scroll would be unmissable.
+    await page.evaluate(() => window.scrollBy(0, -700));
+    await page.mouse.move(0, 0);
+    await expect(page.locator("[data-autoplay]").filter({has: rail})).toHaveAttribute("data-autoplay", "playing");
+
+    const pageBefore = await page.evaluate(() => window.scrollY);
+    const railBefore = await rail.evaluate((node) => node.scrollLeft);
+    await expect
+      .poll(() => rail.evaluate((node) => node.scrollLeft), {timeout: 20_000})
+      .toBeGreaterThan(railBefore + 200);
+    expect(await page.evaluate(() => window.scrollY)).toBe(pageBefore);
   });
 
   test("autoplay stays off under reduced motion and pauses on hover and focus", async ({page}) => {

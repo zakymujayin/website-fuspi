@@ -112,6 +112,16 @@
   }
 }
 
+/* The header wordmark is one identity lockup, like the footer's: balanced
+   lines keep "dan" attached to the words it joins instead of ending line one. */
+.brandName {
+  text-wrap: balance;
+}
+
+.brandName > * {
+  text-wrap: inherit;
+}
+
 @media (width >= 1400px) {
   .brandName {
     display: block;
@@ -800,10 +810,23 @@
   position: relative;
   overflow: hidden;
   border-radius: var(--radius);
-  /* One ratio, one crop rule, one tonal wash: source photos differ, the
-     presentation does not. */
-  aspect-ratio: 4 / 5;
+  /* One crop rule, one tonal wash: source photos differ, the presentation does
+     not. The cards are wide so long academic names stay on one line, and at a
+     tall ratio that makes the image tower over the text, so the ratio opens up
+     as the card widens and the portrait keeps a steady visual height (roughly
+     250-320px) across the whole rail.
+
+     Do not express this as a tall ratio plus `max-block-size`: clamping the
+     height of a box that has an `aspect-ratio` shrinks its width to match, and
+     the portrait ends up narrower than the card it sits in. */
+  aspect-ratio: 1 / 1;
   background: linear-gradient(180deg, var(--royal-100) 0%, var(--slate-200) 100%);
+}
+
+@media (width >= 640px) {
+  .lecturerPortrait {
+    aspect-ratio: 5 / 4;
+  }
 }
 
 .lecturerPortrait img {

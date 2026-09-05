@@ -34,7 +34,8 @@ function initialsOf(name: string) {
  * Navigable lecturer rail: roughly three profiles on desktop, two on tablet and
  * one-and-a-bit on mobile so the swipe affordance is visible. Native scroll
  * snapping does the dragging, so no gesture dependency is needed; the arrows,
- * pagination and arrow keys drive the same scroll position.
+ * pagination and arrow keys drive the same scroll position, and none of them
+ * move the page itself.
  *
  * Autoplay is opt-out by construction: it never starts under reduced motion and
  * stops for good the moment a visitor navigates by hand.
@@ -114,9 +115,17 @@ export function LecturerRail({items}: {items: readonly LecturerRailItem[]}) {
     const leading = current.cards[target * current.perView];
     if (!leading) return;
     const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-    // `block: "nearest"` keeps the page itself still; the browser resolves the
-    // snap position, writing direction and scroll padding for us.
-    leading.scrollIntoView({behavior: reduced ? "auto" : "smooth", inline: "start", block: "nearest"});
+    // Scroll the rail and nothing else. `scrollIntoView` would walk every
+    // ancestor scroller, so an autoplay tick dragged the whole page down to the
+    // rail; measuring the leading card against the rail and moving the rail's
+    // own scroll offset leaves the page where the visitor left it, while still
+    // landing exactly on a snap position in either writing direction.
+    const railBounds = current.rail.getBoundingClientRect();
+    const cardBounds = leading.getBoundingClientRect();
+    const delta = current.rtl
+      ? cardBounds.right - railBounds.right
+      : cardBounds.left - railBounds.left;
+    current.rail.scrollTo({left: current.rail.scrollLeft + delta, behavior: reduced ? "auto" : "smooth"});
     setPage(target);
   }, [items.length, metrics]);
 

@@ -66,15 +66,6 @@ export function FacilityGallery({
     setActive(index);
   }, []);
 
-  // Opened from an effect so the dialog already contains its controls when the
-  // browser moves focus into it.
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog || active === null || dialog.open) return;
-    lockScroll(true);
-    dialog.showModal();
-  }, [active, lockScroll]);
-
   const close = useCallback(() => {
     dialogRef.current?.close();
   }, []);
@@ -86,22 +77,36 @@ export function FacilityGallery({
     });
   }, [items.length]);
 
-  // Escape and the backdrop both route through the dialog's own close event, so
-  // unlocking and focus restoration happen in exactly one place.
+  const open = active !== null;
+
+  // Opening and locking are one symmetric effect keyed on whether the gallery
+  // is open at all, so stepping between images does not re-run it and no close
+  // path — button, Escape, backdrop or unmount — can strand the scroll lock.
+  // The dialog is opened from here rather than from the click handler so it
+  // already contains its controls when the browser moves focus into it.
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!open || !dialog) return;
+    if (!dialog.open) dialog.showModal();
+    lockScroll(true);
+    return () => {
+      lockScroll(false);
+      if (dialog.open) dialog.close();
+    };
+  }, [open, lockScroll]);
+
+  // Escape, the close control and the backdrop all end at the dialog's own
+  // close event, which is the single place the open state is cleared.
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
     const onClose = () => {
       setActive(null);
-      lockScroll(false);
       triggers.current[restoreTo.current]?.focus();
     };
     dialog.addEventListener("close", onClose);
-    return () => {
-      dialog.removeEventListener("close", onClose);
-      lockScroll(false);
-    };
-  }, [lockScroll]);
+    return () => dialog.removeEventListener("close", onClose);
+  }, []);
 
   const current = active === null ? null : items[active];
 
