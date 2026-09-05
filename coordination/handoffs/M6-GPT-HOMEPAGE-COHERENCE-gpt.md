@@ -134,6 +134,68 @@ Visual review completed at 1440 / 1280 / 1024 / 768 / 390 / 360 across ID, EN an
 - **Lecturer portrait backgrounds still differ** (one warm wood, two navy studio). Ratio, crop, head position, container and tonal wash are unified, which is as far as presentation can go; genuinely matching them needs re-shot or re-masked source images. Pushing the overlay harder would start altering how people look.
 - **Facility captions come from the CMS** and the longest one wraps to two lines inside the mosaic overlay at 1024px. It is legible, but a shorter caption reads better in the small tiles.
 
+## Section order (database change, applied on request)
+
+Section order is **data, not code**: `HomeSection.order` (`prisma/schema.prisma:1307`), editable at `/admin/beranda/bagian`. The `orderOf(...)` numbers in `page.tsx` are only fallbacks for a missing row.
+
+The task manifest lists section order as locked. The reviewer inspected the live order, asked for an opinion, and then explicitly authorised the change; it was applied to the **development database only**. Production still carries the old order and needs the same update (admin UI or the SQL below).
+
+Applied values:
+
+| Key | Was | Now |
+|---|---|---|
+| HERO | 0 | 0 |
+| QUICKLINK | 1 | 10 |
+| INTRO / PRODI | 4 / 5 | 20 / 21 |
+| STATS | 3 | 30 |
+| DEAN | 2 | 40 |
+| COLUMN | 15 | 50 |
+| NEWS / ANNOUNCEMENT / AGENDA | 9 / 6 / 13 | 60 / 61 / 62 |
+| ACHIEVEMENT | 16 | 70 |
+| TESTIMONIAL | 14 | 80 |
+| FACILITY | 8 | 90 |
+| VIDEO / VIDEO_GALLERY | 11 / 12 | 100 / 101 |
+| SERVICE | 7 | 110 |
+| PARTNERSHIP | 10 | 120 |
+| CTA | 17 | 130 |
+
+Rationale: the faculty's two strongest assets were buried. Academic Highlights + Dosen & Peneliti sat at position 12 (below the video gallery and partner logos) and student achievements at 13, while the partner logo strip sat at 9, interrupting the flow. The new order groups the page into identity (3-5: what we are, the numbers, the dean's voice), output (6-9: scholarship, news, student results, alumni results), place (10-11), utility and credibility (12-13), then the ask. Gaps of 10 leave room to insert a section later without renumbering everything again.
+
+Verified by reading back the rendered headings: Hero, Akses cepat, Tentang FUSPI, FUSPI dalam Angka, Sambutan Dekan, Sorotan Akademik, Berita Terbaru, Prestasi dan Inspirasi, Jejak setelah FUSPI, Sarana dan Prasarana, Galeri Video, Layanan, Kerja Sama, CTA. E2E was skipped at the reviewer's request; no code changed, so lint/typecheck/unit results above still stand.
+
+**Trap for whoever edits this next.** Three rendered sections are composed from several keys, and `orderOf` takes the **minimum** order among the visible ones:
+
+- Berita Terbaru = min(NEWS, ANNOUNCEMENT, AGENDA)
+- Tentang FUSPI = min(INTRO, PRODI)
+- Galeri Video = min(VIDEO, VIDEO_GALLERY)
+
+Before this change, ANNOUNCEMENT (6) governed the newsroom while NEWS was 9, so editing "Berita" in the admin UI moved nothing. The keys in each group are now numbered adjacently, which removes the surprise, but the rule still applies.
+
+Rollback:
+
+```sql
+UPDATE "HomeSection" SET "order" = 0 WHERE key = 'HERO';
+UPDATE "HomeSection" SET "order" = 1 WHERE key = 'QUICKLINK';
+UPDATE "HomeSection" SET "order" = 2 WHERE key = 'DEAN';
+UPDATE "HomeSection" SET "order" = 3 WHERE key = 'STATS';
+UPDATE "HomeSection" SET "order" = 4 WHERE key = 'INTRO';
+UPDATE "HomeSection" SET "order" = 5 WHERE key = 'PRODI';
+UPDATE "HomeSection" SET "order" = 6 WHERE key = 'ANNOUNCEMENT';
+UPDATE "HomeSection" SET "order" = 7 WHERE key = 'SERVICE';
+UPDATE "HomeSection" SET "order" = 8 WHERE key = 'FACILITY';
+UPDATE "HomeSection" SET "order" = 9 WHERE key = 'NEWS';
+UPDATE "HomeSection" SET "order" = 10 WHERE key = 'PARTNERSHIP';
+UPDATE "HomeSection" SET "order" = 11 WHERE key = 'VIDEO';
+UPDATE "HomeSection" SET "order" = 12 WHERE key = 'VIDEO_GALLERY';
+UPDATE "HomeSection" SET "order" = 13 WHERE key = 'AGENDA';
+UPDATE "HomeSection" SET "order" = 14 WHERE key = 'TESTIMONIAL';
+UPDATE "HomeSection" SET "order" = 15 WHERE key = 'COLUMN';
+UPDATE "HomeSection" SET "order" = 16 WHERE key = 'ACHIEVEMENT';
+UPDATE "HomeSection" SET "order" = 17 WHERE key = 'CTA';
+```
+
+Note that `prisma/seed.ts` still seeds the old order, so a reseed reverts this.
+
 ## Requested contract / dependency changes
 
 None.
