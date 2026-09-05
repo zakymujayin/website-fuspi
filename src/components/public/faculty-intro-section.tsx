@@ -10,7 +10,7 @@ import {Link} from "@/i18n/navigation";
 import styles from "./home-design.module.css";
 import {HomeSectionHeading} from "./home-section-heading";
 import {HomeSectionLink} from "./home-section-link";
-import {ManuscriptMark, ReasoningMark, TransmissionMark} from "./institutional-icons";
+import {ManuscriptMark, QuranMark, ReasoningMark} from "./institutional-icons";
 
 type AcademicItem = z.infer<typeof PublicAcademicDirectoryItemSchema>;
 
@@ -20,7 +20,8 @@ const codeBySlug = new Map<string, string>(
   institution.studyPrograms.map((program) => [program.slug, program.code]),
 );
 const fieldByCode: Record<string, "quran" | "hadith" | "aqidah"> = {IAT: "quran", IH: "hadith", AFI: "aqidah"};
-const marks = {IAT: ManuscriptMark, IH: TransmissionMark, AFI: ReasoningMark};
+// IAT gets the mushaf, IH the ruled folio (the recorded text), AFI the lattice.
+const marks = {IAT: QuranMark, IH: ManuscriptMark, AFI: ReasoningMark};
 
 /**
  * The faculty identity moment. Copy and the study programs sit side by side so
@@ -56,6 +57,7 @@ export async function FacultyIntroSection({
               accent
               action={<HomeSectionLink href="/profil">{t("introCtaProfile")}</HomeSectionLink>}
             />
+            <p dir="ltr" className={styles.introSlogan}>{t("ctaSlogan")}</p>
           </Reveal>
 
           {orderedPrograms.length > 0 ? (

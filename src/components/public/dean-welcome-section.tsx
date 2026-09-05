@@ -16,13 +16,13 @@ function initialsFrom(name: string) {
 /**
  * Leadership portrait, not a profile card: the real CMS photograph is cropped
  * 4:5 with no frame, lifted off a restrained royal offset panel carrying the
- * FUSPI motif. The message is split from the dean's own words only — the
- * closing sentence leads as the key message, the earlier sentences support it.
+ * FUSPI motif. The message is split from the dean's own words only: the opening
+ * greeting leads, then the closing sentence stands as the pull quote.
  */
 export function DeanWelcomeSection({dean, title, ctaLabel}: {dean: PublicDean; title: string; ctaLabel: string}) {
   const passages = dean.message.trim().split(/(?<=[.!?؟])\s+/u);
   const keyMessage = passages.length > 1 ? passages[passages.length - 1] : dean.message;
-  const support = passages.length > 1 ? passages.slice(0, -1).join(" ") : null;
+  const greeting = passages.length > 1 ? passages.slice(0, -1).join(" ") : null;
 
   return (
     <section className={`${styles.section} ${styles.dean}`}>
@@ -49,10 +49,10 @@ export function DeanWelcomeSection({dean, title, ctaLabel}: {dean: PublicDean; t
           <div className="lg:col-span-7">
             <Reveal index={1} className="!block">
               <HomeSectionHeading title={title} accent compact />
+              {greeting ? <p className={styles.deanGreeting}>{greeting}</p> : null}
               <blockquote>
                 <p className={`${styles.deanQuote} font-serif-display`}>“{keyMessage}”</p>
               </blockquote>
-              {support ? <p className={styles.deanSupport}>{support}</p> : null}
             </Reveal>
             <Reveal index={2} className="!block">
               <div className={styles.deanByline}>

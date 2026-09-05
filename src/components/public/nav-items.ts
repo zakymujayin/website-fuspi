@@ -160,11 +160,22 @@ export const pmbLink: ExternalLink = { key: "pmb", url: "https://pmb.uinbanten.a
 /** PPID (external FUSPI PPID site). Surfaced as a prominent header button, not the topbar. */
 export const ppidLink: ExternalLink = { key: "ppid", url: "https://fuspi-ppid.uinbanten.ac.id/" } as const;
 
+/**
+ * E-Journal lives on the same faculty e-service host the services directory
+ * already points at; the journal's own domain is not part of any frozen
+ * contract, so it is not guessed here.
+ */
+export const ejournalLink: ExternalLink = { key: "ejournal", url: "https://fuspi.uinbanten.ac.id/e-layanan" } as const;
+
+/**
+ * Homepage utility band. PPID keeps its prominent header button and its footer
+ * entry, so the band spends this slot on E-Journal instead of repeating it.
+ */
 export const quickLinks: readonly (NavLink | ExternalLink)[] = [
   { key: "services", href: "/layanan" },
   { key: "complaints", href: "/pengaduan" },
   { key: "booking", href: "/peminjaman" },
-  ppidLink,
+  ejournalLink,
   { key: "faq", href: "/faq" },
   { key: "contact", href: "/kontak" },
 ] as const;

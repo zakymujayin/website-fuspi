@@ -10,11 +10,27 @@ function Mark({children, ...props}: SVGProps<SVGSVGElement>) {
  *
  * One construction rule across the three: a 40x40 frame, 1.5 stroke, no fills,
  * and forms drawn from the same geometry as the FUSPI lattice ornament. They
- * describe the discipline (folio, chain of transmission, geometric reasoning),
- * never a devotional illustration.
+ * describe the discipline — the mushaf, the ruled folio, the geometry of
+ * reasoning — never a devotional illustration.
  */
 
-/** IAT — a ruled manuscript folio with an illuminated margin rosette. */
+/**
+ * IAT — a mushaf: bound cover, spine band, and the illuminated frame with a
+ * central medallion that Qur'anic manuscripts carry. The medallion is the same
+ * rotated square as the FUSPI lattice, so the mark belongs to the ornament.
+ */
+export function QuranMark(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Mark {...props}>
+      <path d="M9 5h22v30H9z" />
+      <path d="M13 5v30" />
+      <path d="M17 10h10v20H17z" />
+      <path d="M22 15.5 26 20l-4 4.5L18 20z" />
+    </Mark>
+  );
+}
+
+/** IH — a ruled folio with an illuminated margin rosette: the recorded text. */
 export function ManuscriptMark(props: SVGProps<SVGSVGElement>) {
   return (
     <Mark {...props}>
@@ -26,23 +42,6 @@ export function ManuscriptMark(props: SVGProps<SVGSVGElement>) {
   );
 }
 
-/**
- * IH — a chain of narrators, each carrying a line of the recorded text.
- * Drawn as three large elements on one axis so it stays legible at 36px, where
- * a converging network of small nodes collapses into a blot.
- */
-export function TransmissionMark(props: SVGProps<SVGSVGElement>) {
-  return (
-    <Mark {...props}>
-      <circle cx="12" cy="9" r="3.5" />
-      <circle cx="12" cy="20" r="3.5" />
-      <circle cx="12" cy="31" r="3.5" />
-      <path d="M12 12.5v4M12 23.5v4" />
-      <path d="M20 9h12M20 20h12M20 31h8" />
-    </Mark>
-  );
-}
-
 /** AFI — the eight-point lattice of the FUSPI ornament, reasoning outward from a centre. */
 export function ReasoningMark(props: SVGProps<SVGSVGElement>) {
   return (
@@ -50,6 +49,17 @@ export function ReasoningMark(props: SVGProps<SVGSVGElement>) {
       <path d="M20 5 35 20 20 35 5 20Z" />
       <path d="M9.5 9.5h21v21h-21z" />
       <circle cx="20" cy="20" r="4" />
+    </Mark>
+  );
+}
+
+/** E-Journal — stacked periodical issues, distinct from the single folio above. */
+export function JournalMark(props: SVGProps<SVGSVGElement>) {
+  return (
+    <Mark {...props}>
+      <path d="M7 11h17v22H7z" />
+      <path d="M11 7h17v22" />
+      <path d="M11 16h9M11 21h9M11 26h5" />
     </Mark>
   );
 }

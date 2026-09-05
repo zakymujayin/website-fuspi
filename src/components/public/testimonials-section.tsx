@@ -7,6 +7,7 @@ import {useEffect, useRef, useState} from "react";
 import {ImageWithFallback} from "@/components/public/image-with-fallback";
 import {Container} from "@/components/ui/container";
 import type {PublicContentDetail} from "@/contracts/public-content";
+import {HomeSectionHeading} from "./home-section-heading";
 import styles from "./home-design.module.css";
 
 type Testimonial = Extract<PublicContentDetail, {resource: "TESTIMONIAL"}>;
@@ -55,10 +56,11 @@ export function TestimonialsSection({items}: {items: readonly Testimonial[]}) {
       onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
       onFocusCapture={() => setFocused(true)} onBlurCapture={(event) => {if (!event.currentTarget.contains(event.relatedTarget)) setFocused(false);}}>
       <Container>
-        <div className="mb-8 grid gap-5 lg:grid-cols-2 lg:items-end">
-            <h2 id="testimonials-title" className="text-[28px] font-bold leading-tight tracking-[-0.01em] text-slate-900 md:text-[34px]">{t("testimonialsTitle")}</h2>
-            <p className="max-w-xl text-lg leading-7 text-slate-700">{t("testimonialsDescription")}</p>
-        </div>
+        <HomeSectionHeading
+          id="testimonials-title"
+          title={t("testimonialsTitle")}
+          description={t("testimonialsDescription")}
+        />
         <div className="grid gap-6 lg:grid-cols-12 lg:gap-8">
           <div className="grid grid-cols-2 lg:col-span-4 lg:block" aria-label={t("testimonialsEyebrow")}>
             {items.map((alumnus, index) => (

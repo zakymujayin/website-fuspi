@@ -174,6 +174,14 @@ test.describe("facility lightbox", () => {
     const image = dialog.locator("img");
     await expect(image).toHaveCSS("object-fit", "contain");
     await expect(image).toHaveCSS("animation-name", "none");
+    // Measure only once the bitmap is decoded: naturalWidth is 0 until then,
+    // which turns the ratio comparison below into NaN under parallel load.
+    await expect
+      .poll(() => image.evaluate((node) => {
+        const element = node as HTMLImageElement;
+        return element.complete && element.naturalWidth > 0;
+      }))
+      .toBe(true);
     const box = await image.boundingBox();
     const natural = await image.evaluate((node) => {
       const element = node as HTMLImageElement;
@@ -263,12 +271,15 @@ test.describe("lecturer rail", () => {
     expect(firstBox!.width).toBeGreaterThan(railBox!.width / 3.6);
     expect(firstBox!.width).toBeLessThan(railBox!.width / 2.6);
 
-    // The portrait fills its card and stays a supporting element, not the
-    // whole card: clamping a tall ratio by height would narrow it instead.
+    // A portrait frame, capped in width. Source photos disagree on aspect
+    // ratio, and only a portrait frame crops the wide ones inward instead of
+    // cropping the tall ones down to a head; the width cap is what keeps the
+    // picture from towering over the name (a height cap would narrow it).
     const portrait = await cards.first().locator("div").first().boundingBox();
-    expect(Math.abs(portrait!.width - firstBox!.width)).toBeLessThan(2);
-    expect(portrait!.height).toBeLessThan(340);
-    expect(portrait!.height).toBeGreaterThan(240);
+    expect(portrait!.height).toBeGreaterThan(portrait!.width);
+    expect(portrait!.width).toBeLessThanOrEqual(firstBox!.width);
+    expect(portrait!.height).toBeLessThan(400);
+    expect(portrait!.height).toBeGreaterThan(280);
 
     const names = rail.locator('a[href*="/dosen/"] > span').first();
     await expect(names).toHaveCSS("white-space", "nowrap");

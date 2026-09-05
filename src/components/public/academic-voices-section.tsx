@@ -52,6 +52,9 @@ export async function AcademicVoicesSection({
       program: lecturer.studyProgram?.name ?? null,
       photoUrl: portraitFor(lecturer),
       photoAlt: lecturer.photo?.isDecorative ? "" : (lecturer.photo?.alt ?? lecturer.name),
+      // Only meaningful for CMS media; the supplied leadership files have no
+      // media row, and the stylesheet's default crop already suits them.
+      focalPoint: lecturer.photo ? toFocalPoint(lecturer.photo) : null,
     }));
 
   if (!featured && rail.length === 0) return null;

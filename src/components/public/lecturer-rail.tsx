@@ -4,6 +4,7 @@ import {ChevronLeft, ChevronRight} from "lucide-react";
 import {useTranslations} from "next-intl";
 import {useCallback, useEffect, useRef, useState} from "react";
 
+import type {FocalPoint} from "@/components/public/focal-point";
 import {ImageWithFallback} from "@/components/public/image-with-fallback";
 import {Link} from "@/i18n/navigation";
 import styles from "./home-design.module.css";
@@ -18,6 +19,8 @@ export type LecturerRailItem = {
   program: string | null;
   photoUrl: string | null;
   photoAlt: string | null;
+  /** From the photo's CMS media row; falls back to the stylesheet's crop. */
+  focalPoint: FocalPoint | null;
 };
 
 function initialsOf(name: string) {
@@ -194,7 +197,8 @@ export function LecturerRail({items}: {items: readonly LecturerRailItem[]}) {
                   <ImageWithFallback
                     src={lecturer.photoUrl}
                     alt={lecturer.photoAlt ?? lecturer.name}
-                    sizes="(min-width: 1024px) 30vw, (min-width: 640px) 45vw, 78vw"
+                    sizes="264px"
+                    focalPoint={lecturer.focalPoint}
                   />
                 ) : (
                   <span aria-hidden className="grid size-full place-items-center text-4xl font-semibold text-royal-800">

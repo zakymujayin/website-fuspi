@@ -45,7 +45,7 @@ export async function AchievementsSection({
   if (!featured) return null;
 
   return (
-    <section className={`${styles.section} bg-slate-100`} aria-labelledby="achievements-title">
+    <section className={`${styles.section} ${styles.achievements}`} aria-labelledby="achievements-title">
       <Container>
         <HomeSectionHeading
           id="achievements-title"

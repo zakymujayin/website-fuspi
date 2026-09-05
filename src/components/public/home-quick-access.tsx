@@ -4,9 +4,9 @@ import {quickLinks, type ExternalLink, type NavLink} from "@/components/public/n
 import {Container} from "@/components/ui/container";
 import {Link} from "@/i18n/navigation";
 import styles from "./home-design.module.css";
-import {BookingMark, ContactMark, InformationMark, InquiryMark, ListeningMark, ServiceMark} from "./institutional-icons";
+import {BookingMark, ContactMark, InformationMark, InquiryMark, JournalMark, ListeningMark, ServiceMark} from "./institutional-icons";
 
-const icons = {services: ServiceMark, complaints: ListeningMark, booking: BookingMark, ppid: InformationMark, faq: InquiryMark, contact: ContactMark};
+const icons = {services: ServiceMark, complaints: ListeningMark, booking: BookingMark, ejournal: JournalMark, ppid: InformationMark, faq: InquiryMark, contact: ContactMark};
 
 function isExternal(item: NavLink | ExternalLink): item is ExternalLink {
   return "url" in item;
