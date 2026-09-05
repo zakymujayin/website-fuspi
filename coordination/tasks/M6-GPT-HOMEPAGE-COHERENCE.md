@@ -9,6 +9,21 @@
 - Forbidden: backend, CMS, API, routes, navigation registry, dependencies, global tokens, UI primitives, header, hero, statistics markup, factual content, and other tasks/leases. CTA, news, and facility layouts are locked; presentation and requested gallery affordance may be refined.
 - Existing package.json/package-lock.json/skills-lock.json changes remain excluded. Previous tasks are handed off; this is a new scoped refinement lease.
 
+## Status: CLOSED
+
+Closed on reviewer instruction after the final refinement round. All ten
+deliverables shipped, plus three rounds of reviewer-directed corrections.
+
+Four items were taken outside the original `allowed_paths`, each on an explicit
+reviewer instruction recorded in the handoff: the homepage section order
+(`HomeSection.order`, development database), `prisma/seed.ts` (so a reseed stops
+reverting that order), `src/components/public/nav-items.ts` (PPID gives up its
+quick-access slot to E-Journal), and `messages/*` label copy beyond interaction
+strings. No schema, migration, API, route, auth or dependency change was made.
+
+Open follow-ups are listed at the end of the handoff; none of them block this
+lane.
+
 ## Deliverables (10)
 
 1. Connected homepage heading/CTA family.

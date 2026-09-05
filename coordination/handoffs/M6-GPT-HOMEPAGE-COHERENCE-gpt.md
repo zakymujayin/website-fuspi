@@ -3,7 +3,8 @@
 - Task ID: `M6-GPT-HOMEPAGE-COHERENCE`
 - Branch: `ai/gpt/m6-homepage-coherence`
 - Base SHA: `79345e5758f4f456f9ca8adaf129874111a51d69`
-- Head SHA: `3b1d523`
+- Head SHA: `52d8324` (plus this handoff commit)
+- Status: **closed** on reviewer instruction; branch pushed, not merged
 - Scope: refinement of the approved homepage. No structural redesign, no section reordering, no backend/CMS/API/route change.
 
 ## Summary
@@ -124,6 +125,20 @@ Visual review completed at 1440 / 1280 / 1024 / 768 / 390 / 360 across ID, EN an
 6. **Header faculty name split as "Fakultas Ushuluddin dan / Pemikiran Islam".** It now balances to "Fakultas Ushuluddin" / "dan Pemikiran Islam", matching the footer, via `text-wrap: balance` on `.brandName` — which already lives in this module, so no header component was touched. Both lockups are asserted by measuring the conjunction's line box.
 7. **Lightbox scroll lock was order-sensitive.** Locking hung off the dialog's `close` event while unlocking ran in a separate path. It is now one symmetric effect keyed on whether the gallery is open, so stepping between images does not re-run it and no close path — button, Escape, backdrop or unmount — can strand `body { overflow: hidden }`.
 
+## Final refinement round (reviewer-directed)
+
+1. **Dean's welcome.** The greeting now opens the message, above the pull quote. The section surface is white: it sat between the quick-access band and the About band, all three a pale royal wash, which is what made the text read as part of the background rather than on it.
+2. **Study-program marks.** IAT gets a new mushaf (cover, spine band, illuminated frame, lattice medallion); the ruled folio it used to carry moves to IH, whose subject is the recorded text. `TransmissionMark` is gone — the chain-of-narrators drawing it replaced was illegible at 36px.
+3. **Lecturer portraits.** The supplied files disagree: `wd1`/`wd2` are 800x571 landscape, `wd3` is 800x1067 portrait. Under `object-fit: cover` a landscape frame crops the tall file vertically (head only) and leaves the wide ones untouched, so head scale drifted between cards. A portrait frame inverts that — the wide files crop inward, removing background rather than the person — and head scale now matches. Width is capped at 19rem so the picture does not tower over the name; a height cap is not usable, because clamping the height of a box with an `aspect-ratio` shrinks its width to match. The CMS focal point is now honoured per photo, which is the durable fix once real lecturer media exists (today every lecturer row has a null photo).
+   A square frame filling the card was built and rejected: it removes the trailing margin but reintroduces the head-scale drift, which was the actual complaint.
+4. **Testimonials.** "Jejak setelah FUSPI" becomes "Testimoni Alumni", and the section moves onto the shared heading family so its description sits under the title instead of opposite it. The eyebrow was dropped rather than kept: "Suara Alumni" above "Testimoni Alumni" stutters.
+5. **Quick access.** PPID gives up its slot to E-Journal — it keeps the prominent header button and its footer entry, so the band was repeating it. Room booking is relabelled facility booking (`Nav.booking`).
+6. **Header PPID button** reads "PPID Pelaksana" in ID and AR.
+7. **Faculty motto** set under the About accent rule in the reserved serif italic, as ornament rather than a second headline. Held in the Latin serif in every locale, since the RTL Amiri swap would be wrong for a Latin phrase.
+8. **Ornament** drawn at 168px so the lattice reads as architecture rather than texture, raised to 8-12%, and extended to the dean, achievements and alumni surfaces — the three carrying open field.
+
+**English keeps "PPID" as the acronym.** Its header row has 7px of headroom at 1440px after that choice; the longer label overflowed it by 63px and `homepage-polish.spec.ts` caught it. This is pre-existing fragility, not something this task introduced — EN had roughly 12px of headroom before the change. Measured headroom at 1440: ID 139px, AR 52px, EN 7px. Giving EN the longer label needs `site-header.tsx` to shrink the utility buttons below 2xl, which is outside this lease.
+
 ## Untested areas, risks and follow-ups
 
 - **Autoplay timing is not asserted directly.** The rail's 7s advance is covered only through its `data-autoplay` state (reduced motion, hover, focus, manual takeover). A clock-driven test like the testimonials one would close this; it was left out to keep the suite fast.
@@ -208,6 +223,14 @@ The map's 18 values were diffed against the live rows: zero mismatches, so seed 
 
 `prisma/seed.ts` sits outside this task's `allowed_paths`; the reviewer asked for the fix explicitly after being shown the reseed risk.
 
+## Open follow-ups (none blocking)
+
+1. **Production database still carries the old section order.** The final values live in `HOME_SECTION_ORDER` (`prisma/seed.ts`) and in the table above; apply them via `/admin/beranda/bagian` or SQL.
+2. **English header label.** See above — needs a `site-header.tsx` change if "PPID Pelaksana" is wanted in EN too.
+3. **Services still says "Peminjaman Ruang"** (`Home.service.booking.title`) while quick access now says "Peminjaman Fasilitas". The reviewer scoped the rename to quick access; aligning the two is a one-line copy change.
+4. **Quick access and Services overlap.** Pengaduan and Peminjaman appear in both, and the sections now sit four apart rather than ten. If the repetition shows, the fix is narrowing quick access to what Services does not cover (PPID, FAQ, Kontak), not moving sections again.
+5. **Lecturer media.** Every `Lecturer.photoMediaId` is null, so the rail runs on the three supplied leadership files. Once real photos land, set their focal points in the CMS — the rail already reads them.
+
 ## Requested contract / dependency changes
 
-None.
+None. `package.json` / `package-lock.json` / `skills-lock.json` still carry a pre-existing, uncommitted `gsap` + `@gsap/react` addition from before this lease. Nothing in this work uses GSAP, and adding a runtime dependency needs its own contract task, so those files were deliberately left out of every commit here.
