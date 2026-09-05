@@ -3,7 +3,7 @@
 - Task ID: `M6-GPT-HOMEPAGE-COHERENCE`
 - Branch: `ai/gpt/m6-homepage-coherence`
 - Base SHA: `79345e5758f4f456f9ca8adaf129874111a51d69`
-- Head SHA: `3b68fd5`
+- Head SHA: `3b1d523`
 - Scope: refinement of the approved homepage. No structural redesign, no section reordering, no backend/CMS/API/route change.
 
 ## Summary
@@ -52,7 +52,7 @@ One motif for the whole site, declared once as `--fuspi-motif`: an interlaced sq
 
 Replaces the 4-column grid that wrapped long academic names. Roughly 3 profiles on desktop, 2 on tablet, ~1.15 on mobile. Native CSS scroll-snap does the dragging, so swipe works with no new dependency. Provides previous/next, pagination, an `aria-live` position, arrow-key navigation from a focused card, and the existing "Lihat Semua" CTA. Navigation targets `scrollIntoView({inline: "start"})` on the leading card of a page rather than a computed offset, so scroll padding and snapping cannot desynchronise the indicator.
 
-Names use `white-space: nowrap` at ≥1280px (verified: "Dr. H. Endang Saeful Anwar, Lc., M.A" fits on one line at 17px) with controlled wrapping below that breakpoint. Font size was not reduced. Portraits are normalized to a 4:5 ratio, a single crop rule (`object-position: 50% 18%`) and one restrained tonal wash.
+Names use `white-space: nowrap` at ≥1280px (verified: "Dr. H. Endang Saeful Anwar, Lc., M.A" fits on one line at 17px) with controlled wrapping below that breakpoint. Font size was not reduced. Portraits share one crop rule (`object-position: 50% 18%`) and one restrained tonal wash; the ratio opens as the card widens (1:1 below 640px, 5:4 above) so the image keeps a steady 250-320px visual height instead of towering over the name on a wide card.
 
 Autoplay: 7s, never arms under `prefers-reduced-motion`, pauses on hover, on focus within, and when the tab is hidden, and stops for good once a visitor navigates by hand.
 
@@ -100,8 +100,8 @@ npm run test                        140 files, 1496 tests passed
 npm run build                       Compiled successfully, 357 static pages, 0 warnings
 npx playwright test e2e/m4/homepage-coherence.spec.ts \
   e2e/m4/homepage-curated-refinement.spec.ts \
-  e2e/m4/homepage-polish.spec.ts --project=chromium --workers=2      22 passed
-  (same three specs)              --project=mobile  --workers=1      22 passed
+  e2e/m4/homepage-polish.spec.ts --project=chromium --workers=2      25 passed
+  (same three specs)              --project=mobile  --workers=1      25 passed
 npx playwright test e2e/m4/public-shell-hardening.spec.ts \
                                     --project=chromium --workers=2   48 passed
 git diff --check                    clean
@@ -116,6 +116,13 @@ Visual review completed at 1440 / 1280 / 1024 / 768 / 390 / 360 across ID, EN an
 1. **Header brand name broke.** The CSS module rewrite dropped `.brandName` and `.searchPanel`, which belong to the public shell, not to the homepage sections. `homepage-polish.spec.ts` caught it (`class="undefined …"`, brand name hidden at ≥1400px). Both rules are restored verbatim under a labelled "Public shell" block so they are not folded into the section systems again. A class-coverage check (every `styles.*` reference resolves to a defined rule) is worth keeping in mind for any future edit to this file.
 2. **Server → client function props.** The rail and gallery initially received label formatters from their server parents, which React refuses to serialize. Both now call `useTranslations("Home")` directly, as `stats-section.tsx` does.
 3. **Lightbox image covered its own controls.** `max-block-size: 100%` did not resolve against the grid stage, so a tall photo grew over the footer and swallowed clicks on previous/next. The image is now clamped against the viewport minus the shell's chrome, which also keeps its box tight to the photo so the surrounding letterbox stays real backdrop. `homepage-coherence.spec.ts` asserts the image never overlaps a control.
+
+## Follow-up round (reported after first review)
+
+4. **Rail autoplay dragged the viewport to the section.** `scrollIntoView` walks every ancestor scroller, including the document, so each 7s tick pulled the page down to the rail even when the visitor was reading elsewhere. Navigation now measures the leading card against the rail and moves only `rail.scrollLeft`, which still lands exactly on a snap position in either writing direction. Covered by "autoplay advances the rail without dragging the page to it".
+5. **Rail portraits were too large.** A 4:5 ratio on ~395px cards produced a 494px image above a one-line name. The ratio now opens with the card (1:1 below 640px, 5:4 above), giving 247-316px across every breakpoint. Note for anyone tempted to express this as a tall ratio plus `max-block-size`: clamping the height of a box that has an `aspect-ratio` shrinks its **width** to match, so the portrait ends up narrower than the card it sits in. The spec asserts the portrait still fills its card.
+6. **Header faculty name split as "Fakultas Ushuluddin dan / Pemikiran Islam".** It now balances to "Fakultas Ushuluddin" / "dan Pemikiran Islam", matching the footer, via `text-wrap: balance` on `.brandName` — which already lives in this module, so no header component was touched. Both lockups are asserted by measuring the conjunction's line box.
+7. **Lightbox scroll lock was order-sensitive.** Locking hung off the dialog's `close` event while unlocking ran in a separate path. It is now one symmetric effect keyed on whether the gallery is open, so stepping between images does not re-run it and no close path — button, Escape, backdrop or unmount — can strand `body { overflow: hidden }`.
 
 ## Untested areas, risks and follow-ups
 
