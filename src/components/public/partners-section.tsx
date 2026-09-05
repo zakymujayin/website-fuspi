@@ -6,6 +6,7 @@ import type { PublicContentCardSchema } from "@/contracts/public-content";
 import {Container} from "@/components/ui/container";
 import styles from "./home-design.module.css";
 import {Reveal} from "./reveal";
+import {HomeSectionHeading} from "./home-section-heading";
 
 type PartnerCard = z.infer<typeof PublicContentCardSchema>;
 
@@ -18,15 +19,9 @@ export async function PartnersSection({ partners }: PartnersSectionProps) {
   if (partners.length === 0) return null;
 
   return (
-    <section className={`${styles.section} border-y border-slate-200 bg-royal-50 !py-12`} aria-labelledby="partners-title">
+    <section className={`${styles.section} ${styles.band} bg-royal-50`} aria-labelledby="partners-title">
       <Container>
-      <div className="mb-7 grid items-end gap-4 lg:grid-cols-2">
-        <div>
-          <p className="mb-2 text-sm font-semibold text-royal-800">{t("partnersLabel")}</p>
-          <h2 id="partners-title" className="!text-[clamp(1.5rem,2.2vw,1.875rem)] font-bold text-slate-900">{t("partnersTitle")}</h2>
-        </div>
-        <p className="max-w-xl text-base leading-7 text-slate-700">{t("partnersDescription")}</p>
-      </div>
+      <HomeSectionHeading id="partners-title" title={t("partnersTitle")} eyebrow={t("partnersLabel")} description={t("partnersDescription")} compact />
       <Reveal variant="fade" className="!block"><PartnersMarquee partners={partners} /></Reveal>
       </Container>
     </section>

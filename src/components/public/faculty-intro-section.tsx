@@ -2,13 +2,14 @@ import {ArrowRight} from "lucide-react";
 import {getTranslations} from "next-intl/server";
 import type {z} from "zod";
 
-import {ImageWithFallback} from "@/components/public/image-with-fallback";
 import {Reveal} from "@/components/public/reveal";
 import {Container} from "@/components/ui/container";
 import {institution} from "@/config/institution";
 import type {PublicAcademicDirectoryItemSchema} from "@/contracts/academic";
 import {Link} from "@/i18n/navigation";
 import styles from "./home-design.module.css";
+import {HomeSectionHeading} from "./home-section-heading";
+import {HomeSectionLink} from "./home-section-link";
 import {ManuscriptMark, ReasoningMark, TransmissionMark} from "./institutional-icons";
 
 type AcademicItem = z.infer<typeof PublicAcademicDirectoryItemSchema>;
@@ -21,6 +22,11 @@ const codeBySlug = new Map<string, string>(
 const fieldByCode: Record<string, "quran" | "hadith" | "aqidah"> = {IAT: "quran", IH: "hadith", AFI: "aqidah"};
 const marks = {IAT: ManuscriptMark, IH: TransmissionMark, AFI: ReasoningMark};
 
+/**
+ * The faculty identity moment. Copy and the study programs sit side by side so
+ * the section reads as one statement instead of a heading floating above a
+ * detached list, and the FUSPI lattice anchors the trailing edge.
+ */
 export async function FacultyIntroSection({
   programs,
   title,
@@ -33,68 +39,58 @@ export async function FacultyIntroSection({
   const t = await getTranslations("Home");
   const tNav = await getTranslations("Nav");
   const orderedPrograms = institution.studyPrograms.flatMap((contract) => programs.filter((program) => program.slug === contract.slug));
+  // The CMS often names this section "Tentang FUSPI", which is exactly the
+  // default eyebrow; showing both reads as a stutter, so the eyebrow yields.
+  const heading = title || t("introTitle");
+  const eyebrow = heading.trim().toLowerCase() === t("introLabel").trim().toLowerCase() ? null : t("introLabel");
 
   return (
     <section className={`${styles.section} ${styles.primary} ${styles.intro}`}>
       <Container>
-        <Reveal variant="fade" className="!block">
-        <div className="grid items-end gap-6 border-b border-royal-200 pb-8 md:grid-cols-2 md:gap-12">
-          <h2 className="max-w-xl font-bold text-slate-900">
-            {title || t("introTitle")}
-          </h2>
-          <div>
-            <p className="max-w-xl text-lg leading-8 text-slate-700">
-              {description || t("introDescription")}
-            </p>
-            <Link href="/profil" className="mt-3 inline-flex min-h-11 items-center gap-2 border-b border-royal-500 text-sm font-semibold text-royal-800 transition-colors hover:text-navy-950">
-              {t("introCtaProfile")}
-              <ArrowRight aria-hidden className="size-4 rtl:rotate-180" strokeWidth={1.5} />
-            </Link>
-          </div>
-        </div>
-        </Reveal>
-        {orderedPrograms.length > 0 ? (
-          <>
-            <h3 className="mb-4 mt-8 text-lg font-semibold text-royal-800">{tNav("studyPrograms")}</h3>
-            <div className="border-t-2 border-royal-500">
-              {orderedPrograms.map((program, index) => {
-                const Mark = marks[codeBySlug.get(program.slug) as keyof typeof marks];
-                return (
-                <Reveal key={program.id} index={index} className="w-full">
-                  <Link
-                    href={`/prodi/${program.slug}`}
-                    className={`${styles.program} group w-full`}
-                  >
-                    <span className={styles.programIdentity}><Mark className="size-10 md:size-12" /><span className="text-sm font-bold tracking-wide">{codeBySlug.get(program.slug)}</span></span>
-                    <div className="flex items-center gap-6">
-                      {program.photo ? (
-                        <span className="relative hidden h-20 w-28 shrink-0 overflow-hidden md:block">
-                          <ImageWithFallback
-                            src={program.photo.url}
-                            alt={program.photo.isDecorative ? "" : program.photo.alt}
-                            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                            sizes="112px"
-                          />
+        <div className={styles.introGrid}>
+          <Reveal variant="fade" className="!block !h-auto">
+            <HomeSectionHeading
+              eyebrow={eyebrow}
+              title={heading}
+              description={description || t("introDescription")}
+              accent
+              action={<HomeSectionLink href="/profil">{t("introCtaProfile")}</HomeSectionLink>}
+            />
+          </Reveal>
+
+          {orderedPrograms.length > 0 ? (
+            <div>
+              <HomeSectionHeading
+                as="h3"
+                title={tNav("studyPrograms")}
+                compact
+                action={<HomeSectionLink href="/prodi">{t("viewAll")}</HomeSectionLink>}
+              />
+              <div className={styles.programList}>
+                {orderedPrograms.map((program, index) => {
+                  const code = codeBySlug.get(program.slug) as keyof typeof marks;
+                  const Mark = marks[code];
+                  const summary = t(`advantage.${fieldByCode[code]}.description`);
+                  return (
+                    <Reveal key={program.id} index={index} className="!block !h-auto">
+                      <Link href={`/prodi/${program.slug}`} className={`${styles.program} group`}>
+                        <span className={styles.programIdentity}>
+                          <Mark className="size-9" />
+                          <span className={styles.programCode}>{code}</span>
                         </span>
-                      ) : null}
-                      <div>
-                        <h3 className="text-slate-900 group-hover:text-royal-800">{program.name}</h3>
-                        {program.secondaryText ? (
-                          <span className="mt-2 block text-sm leading-6 text-slate-700">{program.secondaryText}</span>
-                        ) : null}
-                      </div>
-                    </div>
-                    <span className="hidden border-s border-royal-200 ps-6 text-base leading-7 text-slate-700 sm:block">
-                      {t(`advantage.${fieldByCode[codeBySlug.get(program.slug)!]}.description`)}
-                    </span>
-                    <ArrowRight aria-hidden className="size-5 text-royal-800 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" strokeWidth={1.5} />
-                  </Link>
-                </Reveal>
-                );
-              })}
+                        <div>
+                          <h4 className="text-slate-900 transition-colors group-hover:text-royal-800">{program.name}</h4>
+                          <p className={styles.programDescription}>{summary}</p>
+                        </div>
+                        <ArrowRight aria-hidden className="size-5 text-royal-700 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" strokeWidth={1.75} />
+                      </Link>
+                    </Reveal>
+                  );
+                })}
+              </div>
             </div>
-          </>
-        ) : null}
+          ) : null}
+        </div>
       </Container>
     </section>
   );

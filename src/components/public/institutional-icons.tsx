@@ -5,15 +5,55 @@ function Mark({children, ...props}: SVGProps<SVGSVGElement>) {
   return <svg viewBox="0 0 40 40" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false" {...props}>{children}</svg>;
 }
 
+/**
+ * Study-program marks (IAT / IH / AFI).
+ *
+ * One construction rule across the three: a 40x40 frame, 1.5 stroke, no fills,
+ * and forms drawn from the same geometry as the FUSPI lattice ornament. They
+ * describe the discipline (folio, chain of transmission, geometric reasoning),
+ * never a devotional illustration.
+ */
+
+/** IAT — a ruled manuscript folio with an illuminated margin rosette. */
 export function ManuscriptMark(props: SVGProps<SVGSVGElement>) {
-  return <Mark {...props}><path d="M10 5h20v30H10zM14 10h12v5H14zM14 20h12M14 24h12M14 28h8M7 9v28h19" /><path d="m18 12 2-1 2 1-2 1z" /></Mark>;
+  return (
+    <Mark {...props}>
+      <path d="M8 6h24v28H8z" />
+      <path d="M14 6v28" />
+      <path d="M19 13h8M19 19h8M19 25h5" />
+      <path d="M11 14.5 13 16.5 11 18.5 9 16.5z" />
+    </Mark>
+  );
 }
+
+/**
+ * IH — a chain of narrators, each carrying a line of the recorded text.
+ * Drawn as three large elements on one axis so it stays legible at 36px, where
+ * a converging network of small nodes collapses into a blot.
+ */
 export function TransmissionMark(props: SVGProps<SVGSVGElement>) {
-  return <Mark {...props}><path d="M7 7h17v12H7zM11 11h9M11 15h6M24 13h8v17H20M13 19v5" /><circle cx="13" cy="28" r="4" /><circle cx="28" cy="30" r="4" /><path d="M17 28h7M13 32v4" /></Mark>;
+  return (
+    <Mark {...props}>
+      <circle cx="12" cy="9" r="3.5" />
+      <circle cx="12" cy="20" r="3.5" />
+      <circle cx="12" cy="31" r="3.5" />
+      <path d="M12 12.5v4M12 23.5v4" />
+      <path d="M20 9h12M20 20h12M20 31h8" />
+    </Mark>
+  );
 }
+
+/** AFI — the eight-point lattice of the FUSPI ornament, reasoning outward from a centre. */
 export function ReasoningMark(props: SVGProps<SVGSVGElement>) {
-  return <Mark {...props}><path d="m20 5 14 15-14 15L6 20 20 5ZM6 20h28M20 5v30M13 13h14v14H13z" /><circle cx="20" cy="20" r="3" /></Mark>;
+  return (
+    <Mark {...props}>
+      <path d="M20 5 35 20 20 35 5 20Z" />
+      <path d="M9.5 9.5h21v21h-21z" />
+      <circle cx="20" cy="20" r="4" />
+    </Mark>
+  );
 }
+
 export function ServiceMark(props: SVGProps<SVGSVGElement>) {
   return <Mark {...props}><path d="M6 35h28M9 35V18h22v17M7 18l13-8 13 8M14 23v7M20 23v7M26 23v7M20 5v5" /></Mark>;
 }

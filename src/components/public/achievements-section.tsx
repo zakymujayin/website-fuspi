@@ -11,6 +11,8 @@ import type {AppLocale} from "@/i18n/routing";
 import {Link} from "@/i18n/navigation";
 import {cn} from "@/lib/utils";
 import styles from "./home-design.module.css";
+import {HomeSectionHeading} from "./home-section-heading";
+import {HomeSectionLink} from "./home-section-link";
 
 const LEVEL_MESSAGE_KEY: Record<string, string> = {
   INTERNASIONAL: "internasional", NASIONAL: "nasional", REGIONAL: "regional", LOKAL: "lokal",
@@ -43,58 +45,71 @@ export async function AchievementsSection({
   if (!featured) return null;
 
   return (
-    <section className={`${styles.section} bg-slate-100`}>
+    <section className={`${styles.section} bg-slate-100`} aria-labelledby="achievements-title">
       <Container>
-        <div className="mb-10 grid gap-6 lg:grid-cols-12">
-          <div className="lg:col-span-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-royal-600">{t("achievementsEyebrow")}</p>
-            <h2 className="mt-3 text-[28px] font-bold tracking-[-0.01em] text-slate-900 md:text-[34px]">{title}</h2>
-          </div>
-          <div className="flex flex-col items-start justify-end lg:col-span-4">
-            {description ? <p className="max-w-md text-sm leading-6 text-slate-600">{description}</p> : null}
-            <Link href="/prestasi" className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-royal-700 hover:text-royal-500">
-              {ctaLabel}<ArrowRight aria-hidden className="size-4 rtl:rotate-180" strokeWidth={1.5} />
-            </Link>
-          </div>
-        </div>
-          <div className="grid w-full gap-10 lg:grid-cols-12">
-            <Link href={`/prestasi/${featured.slug}`} className={cn("group", rest.length ? "lg:col-span-7" : "grid items-center gap-6 lg:col-span-12 lg:grid-cols-2 lg:gap-12")}>
-              <Reveal variant="image" className="!block !h-auto">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-md bg-slate-200">
+        <HomeSectionHeading
+          id="achievements-title"
+          eyebrow={t("achievementsEyebrow")}
+          title={title}
+          description={description || t("achievementsDescription")}
+          action={<HomeSectionLink href="/prestasi">{ctaLabel}</HomeSectionLink>}
+        />
+        <div className="grid w-full gap-10 lg:grid-cols-12 lg:gap-12">
+          <Link
+            href={`/prestasi/${featured.slug}`}
+            className={cn("group", rest.length ? "lg:col-span-7" : "grid items-center gap-8 lg:col-span-12 lg:grid-cols-2 lg:gap-12")}
+          >
+            <Reveal variant="image" className="!block !h-auto">
+              <div className={`${styles.media} ${styles.ratioFeature}`}>
                 <ImageWithFallback
                   src={featured.media?.url}
                   alt={featured.media?.isDecorative ? "" : (featured.media?.alt ?? featured.title)}
-                  className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
+                  className="object-cover"
                   sizes="(min-width: 1024px) 58vw, 100vw"
                   focalPoint={toFocalPoint(featured.media)}
                 />
               </div>
-              </Reveal>
-              <Reveal index={1} className="!block !h-auto">
-              <p className="mt-4">
-                <LevelChip levelKey={featured.level} />
+            </Reveal>
+            <Reveal index={1} className="!block !h-auto">
+              <p className="mt-5"><LevelChip levelKey={featured.level} /></p>
+              <h3 className="mt-3 text-[clamp(1.5rem,2.4vw,2rem)] font-bold leading-[1.22] tracking-[-0.02em] text-slate-900 transition-colors group-hover:text-royal-800">
+                {featured.title}
+              </h3>
+              <p className={styles.academicMeta}>
+                <span className={styles.academicAuthor}>{featured.studentName}</span>
+                {featured.achievedAt ? (
+                  <time dateTime={new Date(featured.achievedAt).toISOString()}>
+                    {formatJakartaPublishedDate(new Date(featured.achievedAt), locale)}
+                  </time>
+                ) : null}
               </p>
-              <h3 className="mt-3 text-2xl font-bold leading-snug tracking-[-0.015em] text-slate-900 group-hover:text-royal-600 md:text-[28px]">{featured.title}</h3>
-              <p className="mt-2 text-sm text-slate-600">{featured.studentName}</p>
-              {featured.achievedAt ? <time className="mt-3 block text-sm text-slate-700" dateTime={new Date(featured.achievedAt).toISOString()}>{formatJakartaPublishedDate(new Date(featured.achievedAt), locale)}</time> : null}
-              <span className="mt-6 inline-flex min-h-11 items-center gap-2 border-b border-royal-500 text-sm font-semibold text-royal-800">{t("readMore")}<ArrowRight aria-hidden className="size-4 rtl:rotate-180" /></span>
-              </Reveal>
-            </Link>
-            {rest.length > 0 ? <div className="lg:col-span-5">
-              <div className="border-t border-slate-900">
-                {rest.map((achievement) => (
-                  <Link key={achievement.id} href={`/prestasi/${achievement.slug}`} className="group block border-b border-slate-300 py-6">
+              <span className={`${styles.sectionLink} mt-4`}>{t("readMore")}<ArrowRight aria-hidden className="size-4 shrink-0 rtl:rotate-180" strokeWidth={1.75} /></span>
+            </Reveal>
+          </Link>
+
+          {rest.length > 0 ? (
+            <div className={`${styles.rowList} lg:col-span-5`}>
+              {rest.map((achievement, index) => (
+                <Reveal key={achievement.id} index={index + 1} className="!block !h-auto">
+                  <Link href={`/prestasi/${achievement.slug}`} className={`${styles.rowLink} block group`}>
                     <span className="block"><LevelChip levelKey={achievement.level} /></span>
-                    <span className="mt-3 block text-xl font-bold leading-snug text-slate-900 group-hover:text-royal-600 md:text-2xl">{achievement.title}</span>
-                    <span className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-                      <span>{achievement.studentName}</span>
-                      {achievement.achievedAt ? <time dateTime={new Date(achievement.achievedAt).toISOString()}>{formatJakartaPublishedDate(new Date(achievement.achievedAt), locale)}</time> : null}
+                    <span className="mt-3 block text-xl font-bold leading-snug text-slate-900 transition-colors group-hover:text-royal-800 md:text-2xl">
+                      {achievement.title}
+                    </span>
+                    <span className={styles.academicMeta}>
+                      <span className={styles.academicAuthor}>{achievement.studentName}</span>
+                      {achievement.achievedAt ? (
+                        <time dateTime={new Date(achievement.achievedAt).toISOString()}>
+                          {formatJakartaPublishedDate(new Date(achievement.achievedAt), locale)}
+                        </time>
+                      ) : null}
                     </span>
                   </Link>
-                ))}
-              </div>
-            </div> : null}
-          </div>
+                </Reveal>
+              ))}
+            </div>
+          ) : null}
+        </div>
       </Container>
     </section>
   );

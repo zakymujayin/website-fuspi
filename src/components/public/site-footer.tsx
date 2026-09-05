@@ -40,13 +40,13 @@ export async function SiteFooter() {
           <div className={styles.footerIdentity}>
             <div className="flex items-center gap-4">
               <BrandMark tone="dark" showLabel={false} className="shrink-0 bg-transparent" />
-              <p className="max-w-xs text-lg font-semibold leading-snug text-white">{institution.name}</p>
+              <p className={styles.footerLockup}>{institution.name}</p>
             </div>
-            <address className="mt-3 max-w-sm text-sm leading-6 text-slate-200 not-italic">
+            <address className="mt-4 max-w-sm text-sm leading-6 text-slate-200 not-italic">
               <span className="mb-1 block font-medium text-white">{institution.university}</span>{CAMPUS_ADDRESS}
             </address>
             <a href="mailto:fuspi@uinbanten.ac.id" className={LINK_CLASS}>fuspi@uinbanten.ac.id</a>
-            <nav aria-label="Sosial media" className="flex gap-1">
+            <nav aria-label="Sosial media" className="mt-1 flex gap-1">
               {[
                 {href: "https://www.youtube.com/@humasuinbanten1673", label: "YouTube UIN Banten", icon: Youtube},
                 {href: "https://www.instagram.com/uinbanten", label: "Instagram UIN Banten", icon: Instagram},

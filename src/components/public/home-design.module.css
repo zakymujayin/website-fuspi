@@ -1,9 +1,39 @@
-.section {
-  padding-block: clamp(3rem, 5.5vw, 5rem);
+/* ---------------------------------------------------------------------------
+   Homepage presentation layer.
+
+   Three systems live here and every homepage section must go through them:
+
+   1. RHYTHM     .section / .primary / .band — optical vertical spacing, not one
+                 blind token. Bands (quick access, partners) stay tight; feature
+                 sections breathe.
+   2. HEADING    .sectionHeading — eyebrow / title / description stay in one
+                 column; only the CTA may move to the opposite side.
+   3. DIVIDERS   Exactly three behaviours are allowed: .headingAccent (short
+                 royal rule near an important heading), .rowList (quiet rule
+                 that helps scan repeated rows), or nothing at all. Full-width
+                 structural rules are deliberately absent.
+--------------------------------------------------------------------------- */
+
+/* One motif for the whole site: interlaced square + rotated square lattice
+   (Banten mosque geometry). Declared once, reused by every ornamented surface,
+   never redrawn per section. */
+.section,
+.footer {
+  --fuspi-motif: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='96' height='96' viewBox='0 0 96 96'%3E%3Cg fill='none' stroke='%23263a83' stroke-width='1'%3E%3Cpath d='M48 4 92 48 48 92 4 48Z'/%3E%3Cpath d='M17 17h62v62H17Z'/%3E%3Cpath d='M0 0l17 17M96 0 79 17M0 96l17-17M96 96 79 79'/%3E%3Cpath d='M0 48h4M92 48h4M48 0v4M48 92v4'/%3E%3C/g%3E%3C/svg%3E");
 }
 
+.section {
+  padding-block: clamp(3.25rem, 5vw, 4.5rem);
+}
+
+/* Feature sections (about, newsroom, academic, final CTA) get more air. */
 .primary {
-  padding-block: clamp(3.5rem, 6.5vw, 6rem);
+  padding-block: clamp(4rem, 6.2vw, 5.5rem);
+}
+
+/* Utility bands (quick access, partners) stay deliberately tight. */
+.band {
+  padding-block: clamp(2rem, 3vw, 2.75rem);
 }
 
 .section h2 {
@@ -59,61 +89,10 @@
   translate: 0 1px;
 }
 
-.intro {
-  position: relative;
-  isolation: isolate;
-  background: #e6ecfa;
-}
-
-.intro::before,
-.cta::before {
-  content: "";
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-end: 0;
-  inline-size: min(45%, 30rem);
-  block-size: 100%;
-  opacity: 0.05;
-  pointer-events: none;
-  z-index: -1;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23263a83'%3E%3Cpath d='M40 0 80 40 40 80 0 40ZM12 12H68V68H12ZM40 12 68 40 40 68 12 40Z'/%3E%3C/g%3E%3C/svg%3E");
-}
-
-.program {
-  display: grid;
-  grid-template-columns: 4.5rem minmax(0, 1fr) minmax(0, 0.75fr) auto;
-  gap: 1.5rem;
-  align-items: center;
-  padding: 1.75rem 1.5rem;
-  border-block-end: 1px solid var(--royal-200);
-  background: white;
-  transition: background-color 200ms;
-}
-
-.program:hover,
-.program:focus-visible {
-  background: #f4f6fc;
-  border-block-end-color: var(--royal-500);
-}
-
-.program h3 {
-  font-size: clamp(1.25rem, 2vw, 1.625rem);
-  line-height: 1.3;
-  font-weight: 600;
-}
-
-.programIdentity {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: .375rem;
-  color: var(--royal-800);
-}
-
-.quickAccess {
-  background: #eef2fa;
-  border-block-end: 1px solid #c8d4eb;
-}
+/* --------------------------------------------------------------------------
+   Public shell (header + search). Owned by the shell components, not by the
+   homepage sections below — do not fold these into the section systems.
+   -------------------------------------------------------------------------- */
 
 .searchPanel {
   --primary: var(--royal-950);
@@ -139,30 +118,335 @@
   }
 }
 
+/* --------------------------------------------------------------------------
+   Section heading family
+   -------------------------------------------------------------------------- */
+
+.sectionHeading {
+  display: grid;
+  gap: 1.25rem 3rem;
+  align-items: end;
+  margin-block-end: clamp(1.75rem, 2.6vw, 2.5rem);
+}
+
+.withAction {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (width >= 900px) {
+  .withAction {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+}
+
+/* Title and description are one block. They never split across columns. */
+.headingCopy {
+  max-inline-size: 46rem;
+}
+
+.eyebrow {
+  margin-block-end: 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--royal-700);
+}
+
+.headingDescription {
+  margin-block-start: 0.75rem;
+  max-inline-size: 58ch;
+  font-size: 1.0625rem;
+  line-height: 1.7;
+  color: var(--slate-700);
+}
+
+/* Divider behaviour 1: short royal accent rule, important headings only. */
+.headingAccent::after {
+  content: "";
+  display: block;
+  inline-size: 56px;
+  block-size: 3px;
+  margin-block-start: 1.25rem;
+  background: var(--royal-500);
+}
+
+.headingAction {
+  padding-block-end: 0.125rem;
+}
+
+.compactHeading {
+  margin-block-end: 1.25rem;
+}
+
+.compactHeading .headingDescription {
+  margin-block-start: 0.5rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+/* --------------------------------------------------------------------------
+   Section CTA family — one link treatment for every "view all" on the page
+   -------------------------------------------------------------------------- */
+
+.sectionLink {
+  --arrow-shift: 0.3rem;
+  --rule-origin: left;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-block-size: 2.75rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--royal-700);
+  transition: color 200ms;
+}
+
+:global([dir="rtl"]) .sectionLink {
+  --arrow-shift: -0.3rem;
+  --rule-origin: right;
+}
+
+.sectionLink::after {
+  content: "";
+  position: absolute;
+  inset-block-end: 0.625rem;
+  inset-inline: 0;
+  block-size: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transform-origin: var(--rule-origin);
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sectionLink svg {
+  transition: translate 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.sectionLink:is(:hover, :focus-visible) {
+  color: var(--royal-800);
+  text-decoration: none;
+}
+
+.sectionLink:is(:hover, :focus-visible)::after {
+  transform: scaleX(1);
+}
+
+.sectionLink:is(:hover, :focus-visible) svg {
+  translate: var(--arrow-shift);
+}
+
+/* Inline variant used inside a larger clickable card. */
+:global(.group):hover .sectionLink::after,
+:global(.group):focus-within .sectionLink::after {
+  transform: scaleX(1);
+}
+
+:global(.group):hover .sectionLink svg,
+:global(.group):focus-within .sectionLink svg {
+  translate: var(--arrow-shift);
+}
+
+/* --------------------------------------------------------------------------
+   Image treatment system — one crop/zoom/overlay language for the whole page
+   -------------------------------------------------------------------------- */
+
+.media {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: var(--slate-200);
+}
+
+.media img {
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+:global(.group):hover .media img,
+:global(.group):focus-visible .media img,
+:global(.group):focus-within .media img {
+  transform: scale(1.03);
+}
+
+/* Portrait/landscape ratios used across the page, declared once. */
+.ratioWide {
+  aspect-ratio: 16 / 9;
+}
+
+.ratioFeature {
+  aspect-ratio: 4 / 3;
+}
+
+.ratioPortrait {
+  aspect-ratio: 4 / 5;
+}
+
+/* --------------------------------------------------------------------------
+   About FUSPI
+   -------------------------------------------------------------------------- */
+
+.intro {
+  position: relative;
+  isolation: isolate;
+  background:
+    linear-gradient(180deg, #eaf0fc 0%, #e4ebfa 100%);
+}
+
+.intro::before,
+.academic::before,
+.cta::before,
+.footer::before {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  background-image: var(--fuspi-motif, none);
+  z-index: -1;
+}
+
+/* Ornament placement is deliberate, never symmetrical filler. */
+.intro::before {
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: min(42%, 34rem);
+  opacity: 0.07;
+  mask-image: linear-gradient(to left, black 30%, transparent 100%);
+}
+
+.introGrid {
+  display: grid;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (width >= 1024px) {
+  .introGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 4rem;
+  }
+}
+
+.programList {
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: white;
+  box-shadow: 0 1px 0 var(--royal-200), 0 12px 28px -22px rgb(38 58 131 / 55%);
+}
+
+.program {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+  gap: 1.25rem;
+  align-items: center;
+  padding: 1.5rem 1.5rem;
+  border-inline-start: 3px solid transparent;
+  transition: background-color 220ms, border-color 220ms;
+}
+
+/* Divider behaviour 2 again: quiet, between rows, never around the group.
+   Rows are wrapped by their reveal element, so the rule lives on the wrapper. */
+.programList > * + * {
+  border-block-start: 1px solid var(--slate-200);
+}
+
+.program:is(:hover, :focus-visible) {
+  background: #f3f6fd;
+  border-inline-start-color: var(--royal-500);
+}
+
+.program :is(h3, h4) {
+  font-size: clamp(1.125rem, 1.6vw, 1.375rem);
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.programIdentity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  color: var(--royal-700);
+  transition: color 220ms;
+}
+
+.program:is(:hover, :focus-visible) .programIdentity {
+  color: var(--royal-500);
+}
+
+.programCode {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--royal-800);
+}
+
+.programDescription {
+  margin-block-start: 0.25rem;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--slate-700);
+}
+
+/* --------------------------------------------------------------------------
+   Quick access band
+   -------------------------------------------------------------------------- */
+
+.quickAccess {
+  background: linear-gradient(180deg, #e9eefb 0%, #eff3fc 100%);
+  border-block-end: 1px solid var(--royal-200);
+}
+
+.utilityGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+@media (width >= 768px) {
+  .utilityGrid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
 .utility {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: .375rem;
-  min-block-size: 5rem;
-  padding: .5rem .75rem;
-  border-inline-start: 1px solid #bdcbe6;
+  gap: 0.5rem;
+  min-block-size: 5.25rem;
+  padding: 0.75rem 0.5rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--royal-200);
+  background: rgb(255 255 255 / 70%);
   color: var(--royal-800);
   text-align: center;
-  transition: color 200ms, background-color 200ms;
+  transition: background-color 220ms, color 220ms, border-color 220ms;
 }
 
-.utility svg {
-  transition: transform 250ms;
+.utilityIcon {
+  display: grid;
+  place-items: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border-radius: var(--radius);
+  background: var(--royal-100);
+  color: var(--royal-700);
+  transition: background-color 220ms, color 220ms, transform 220ms;
 }
 
 .utility:is(:hover, :focus-visible) {
-  background: var(--royal-800);
+  background: var(--royal-600);
+  border-color: var(--royal-600);
   color: white;
+  text-decoration: none;
 }
 
-.utility:is(:hover, :focus-visible) svg {
+.utility:is(:hover, :focus-visible) .utilityIcon {
+  background: rgb(255 255 255 / 18%);
+  color: white;
   transform: translateY(-2px);
 }
 
@@ -170,10 +454,31 @@
   .utility {
     flex-direction: row;
     justify-content: flex-start;
-    gap: .75rem;
-    min-block-size: 3.5rem;
+    gap: 0.75rem;
+    min-block-size: 3.75rem;
+    padding-inline: 0.75rem;
     text-align: start;
   }
+
+  .utilityIcon {
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Service directory
+   -------------------------------------------------------------------------- */
+
+.services {
+  background: linear-gradient(180deg, #e3eaf7 0%, #eef2f9 100%);
+}
+
+.serviceIndex {
+  overflow: hidden;
+  border-radius: var(--radius);
+  background: white;
+  box-shadow: 0 1px 0 var(--slate-200), 0 18px 40px -30px rgb(15 23 42 / 45%);
 }
 
 .service {
@@ -181,22 +486,44 @@
   grid-template-columns: 3.25rem minmax(0, 1fr) auto;
   align-items: center;
   gap: 1.25rem;
-  padding: 1.5rem 1.25rem;
-  border-block-end: 1px solid var(--slate-300);
+  padding: 1.5rem;
   border-inline-start: 3px solid transparent;
   background: white;
-  transition: background-color 200ms, border-color 200ms;
+  transition: background-color 220ms, border-color 220ms, color 220ms;
 }
 
-.service:hover,
-.service:focus-visible {
-  background: var(--royal-800);
+.serviceIndex > * + * {
+  border-block-start: 1px solid var(--slate-200);
+}
+
+/* Featured entry: the primary service reads first without becoming a card. */
+.serviceFeatured {
+  background: linear-gradient(135deg, #eef2fe 0%, #ffffff 65%);
   border-inline-start-color: var(--royal-500);
-  color: white;
+  padding-block: 1.875rem;
 }
 
-.service:is(:hover, :focus-visible) :is(span, svg) {
-  color: white;
+.serviceTitle {
+  display: block;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--slate-900);
+  transition: color 200ms;
+}
+
+.serviceFeatured .serviceTitle {
+  font-size: clamp(1.25rem, 1.7vw, 1.5rem);
+}
+
+.serviceDescription {
+  display: block;
+  margin-block-start: 0.375rem;
+  max-inline-size: 52ch;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--slate-700);
+  transition: color 200ms;
 }
 
 .serviceIcon {
@@ -204,41 +531,618 @@
   place-items: center;
   inline-size: 3.25rem;
   block-size: 3.25rem;
-  color: var(--royal-800);
-  border: 1px solid var(--royal-200);
-  background: #edf1fb;
-  transition: background-color 220ms;
+  border-radius: var(--radius);
+  color: var(--royal-700);
+  background: var(--royal-50);
+  box-shadow: inset 0 0 0 1px var(--royal-200);
+  transition: background-color 220ms, color 220ms, box-shadow 220ms;
+}
+
+.serviceArrow {
+  color: var(--royal-700);
+  transition: color 200ms, translate 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.service:is(:hover, :focus-visible) {
+  background: var(--royal-800);
+  border-inline-start-color: var(--royal-400);
+  text-decoration: none;
+}
+
+.service:is(:hover, :focus-visible) .serviceTitle,
+.service:is(:hover, :focus-visible) .serviceDescription,
+.service:is(:hover, :focus-visible) .serviceArrow {
+  color: white;
 }
 
 .service:is(:hover, :focus-visible) .serviceIcon {
-  background: transparent;
+  background: rgb(255 255 255 / 12%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 35%);
+  color: white;
 }
 
-.services {
-  background: #dfe7f5;
-  border-block: 1px solid #c8d4eb;
+.service:is(:hover, :focus-visible) .serviceArrow {
+  translate: var(--arrow-shift, 0.25rem);
 }
+
+:global([dir="rtl"]) .service {
+  --arrow-shift: -0.25rem;
+}
+
+/* --------------------------------------------------------------------------
+   Dean's welcome — leadership portrait, not a profile card
+   -------------------------------------------------------------------------- */
 
 .dean {
-  background: #f4f6fa;
+  background: linear-gradient(180deg, #f5f7fb 0%, #eef2f8 100%);
 }
 
+/* The offset panel lives inside the element's own padding so it can never push
+   past the container and create horizontal overflow at small widths. */
 .deanPortrait {
-  padding: .625rem;
-  border: 1px solid #b7c6e9;
-  border-block-start: 4px solid var(--royal-500);
-  background: #e0e7f6;
-  box-shadow: 10px 12px 0 #e0e7f6;
+  position: relative;
+  isolation: isolate;
+  padding-inline-start: 1.25rem;
+  padding-block-end: 1.25rem;
 }
+
+/* Restrained royal offset panel behind the portrait: no frame around the image
+   itself, so the crop reads as an institutional leadership photograph. */
+.deanPortrait::before {
+  content: "";
+  position: absolute;
+  inset-block: 2rem 0;
+  inset-inline: 0 45%;
+  border-radius: var(--radius);
+  background: var(--royal-500);
+  z-index: -1;
+}
+
+/* Small motif tucked into one corner of the offset panel. */
+.deanPortrait::after {
+  content: "";
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  inline-size: 8rem;
+  block-size: 5.5rem;
+  background-image: var(--fuspi-motif);
+  filter: brightness(0) invert(1);
+  opacity: 0.4;
+  border-end-start-radius: var(--radius);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.deanFrame {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  box-shadow: 0 0 0 1px rgb(38 58 131 / 12%), 0 24px 48px -34px rgb(14 21 51 / 55%);
+}
+
+.deanQuote {
+  margin-block-start: 1.5rem;
+  max-inline-size: 34ch;
+  font-size: clamp(1.5rem, 2.3vw, 2rem);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--navy-950);
+  text-wrap: balance;
+}
+
+.deanSupport {
+  margin-block-start: 1.25rem;
+  max-inline-size: 62ch;
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--slate-700);
+}
+
+.deanByline {
+  margin-block-start: 2.5rem;
+}
+
+@media (width < 1024px) {
+  .deanPortrait {
+    padding-inline-start: 0.875rem;
+    padding-block-end: 0.875rem;
+  }
+
+  .deanPortrait::before {
+    inset-inline: 0 55%;
+  }
+
+  .deanPortrait::after {
+    inline-size: 6rem;
+    block-size: 4.25rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Academic highlights + lecturer rail
+   -------------------------------------------------------------------------- */
 
 .academic {
-  background: #f0f3f9;
+  position: relative;
+  isolation: isolate;
+  background: linear-gradient(180deg, #f1f4fa 0%, #f7f9fc 100%);
+}
+
+.academic::before {
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: min(34%, 26rem);
+  block-size: min(60%, 30rem);
+  opacity: 0.06;
+  mask-image: linear-gradient(to bottom right, black 10%, transparent 85%);
 }
 
 .academicFeature {
   padding-block-end: 1.5rem;
-  border-block-end: 3px solid var(--royal-500);
 }
+
+.academicKicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--royal-700);
+}
+
+.academicKicker::before {
+  content: "";
+  inline-size: 1.75rem;
+  block-size: 2px;
+  background: var(--royal-500);
+}
+
+.academicMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-block-start: 1rem;
+  font-size: 0.875rem;
+  color: var(--slate-700);
+}
+
+.academicAuthor {
+  font-weight: 600;
+  color: var(--slate-900);
+}
+
+/* Shared secondary-list treatment: academic aside, news aside, announcements
+   and agenda all scan the same way. One quiet hairline between rows, nothing
+   above the first row and nothing below the last. */
+.rowList {
+  display: grid;
+  align-content: start;
+}
+
+.rowList > * + * {
+  border-block-start: 1px solid var(--slate-200);
+}
+
+.rowLink {
+  padding-block: 1.125rem;
+  transition: translate 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.rowLink:is(:hover, :focus-visible) {
+  translate: 0.375rem;
+}
+
+:global([dir="rtl"]) .rowLink:is(:hover, :focus-visible) {
+  translate: -0.375rem;
+}
+
+/* A full separation band so the lecturer rail never reads as an appendix of
+   the highlights grid. */
+.railDivide {
+  margin-block-start: clamp(3rem, 5vw, 4.5rem);
+  padding-block-start: clamp(2.25rem, 3.5vw, 3rem);
+  border-block-start: 1px solid var(--royal-200);
+}
+
+.rail {
+  display: flex;
+  gap: 1.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  padding-block-end: 0.5rem;
+  /* Focus rings on the cards must not be clipped by the scroll container. */
+  padding-inline: 4px;
+  margin-inline: -4px;
+}
+
+.rail::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rail {
+    scroll-behavior: auto;
+  }
+}
+
+.railItem {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  /* Mobile shows ~1.15 cards so the rail reads as swipeable. */
+  inline-size: min(78vw, 22rem);
+}
+
+@media (width >= 640px) {
+  .railItem {
+    inline-size: calc((100% - 1.5rem) / 2);
+  }
+}
+
+@media (width >= 1024px) {
+  .railItem {
+    inline-size: calc((100% - 3rem) / 3);
+  }
+}
+
+.lecturerCard {
+  display: block;
+  block-size: 100%;
+}
+
+.lecturerPortrait {
+  display: block;
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius);
+  /* One ratio, one crop rule, one tonal wash: source photos differ, the
+     presentation does not. */
+  aspect-ratio: 4 / 5;
+  background: linear-gradient(180deg, var(--royal-100) 0%, var(--slate-200) 100%);
+}
+
+.lecturerPortrait img {
+  object-fit: cover;
+  object-position: 50% 18%;
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lecturerCard:is(:hover, :focus-visible) .lecturerPortrait img {
+  transform: scale(1.03);
+}
+
+.lecturerPortrait::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgb(14 21 51 / 0%) 55%, rgb(14 21 51 / 26%) 100%),
+    linear-gradient(180deg, rgb(38 58 131 / 8%), rgb(38 58 131 / 8%));
+  pointer-events: none;
+}
+
+.lecturerName {
+  display: block;
+  margin-block-start: 1.125rem;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: var(--slate-900);
+  /* Wide cards first: a full academic name stays on one line on desktop and
+     falls back to controlled two-line wrapping on narrow viewports. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 200ms;
+}
+
+@media (width < 1280px) {
+  .lecturerName {
+    white-space: normal;
+    overflow: visible;
+    text-wrap: balance;
+  }
+}
+
+.lecturerCard:is(:hover, :focus-visible) .lecturerName {
+  color: var(--royal-800);
+}
+
+.lecturerRole {
+  display: block;
+  margin-block-start: 0.375rem;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--slate-700);
+}
+
+.lecturerProgram {
+  display: block;
+  margin-block-start: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--royal-700);
+}
+
+.railControls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.railButton {
+  display: grid;
+  place-items: center;
+  inline-size: 2.75rem;
+  block-size: 2.75rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--royal-200);
+  background: white;
+  color: var(--royal-700);
+  transition: background-color 200ms, color 200ms, border-color 200ms;
+}
+
+.railButton:is(:hover, :focus-visible):not(:disabled) {
+  background: var(--royal-700);
+  border-color: var(--royal-700);
+  color: white;
+}
+
+.railButton:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.railProgress {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.railDot {
+  inline-size: 1.5rem;
+  block-size: 3px;
+  border-radius: 999px;
+  background: var(--royal-200);
+  transition: background-color 220ms, inline-size 220ms;
+}
+
+.railDot[data-active="true"] {
+  inline-size: 2.5rem;
+  background: var(--royal-500);
+}
+
+.railDotButton {
+  display: grid;
+  place-items: center;
+  inline-size: 2rem;
+  block-size: 2.75rem;
+}
+
+/* --------------------------------------------------------------------------
+   Facilities mosaic + lightbox
+   -------------------------------------------------------------------------- */
+
+.facilityTile {
+  position: relative;
+  overflow: hidden;
+  background: var(--slate-200);
+  block-size: 100%;
+  inline-size: 100%;
+}
+
+.facilityTile img {
+  transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.facilityOpen {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-items: start end;
+  padding: 0.75rem;
+  cursor: zoom-in;
+}
+
+.facilityTile:hover img,
+.facilityTile:focus-within img {
+  transform: scale(1.04);
+}
+
+.facilityCue {
+  display: grid;
+  place-items: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border-radius: var(--radius);
+  background: rgb(14 21 51 / 72%);
+  color: white;
+  opacity: 0;
+  translate: 0 -0.25rem;
+  transition: opacity 220ms, translate 220ms, background-color 200ms;
+}
+
+.facilityOpen:hover .facilityCue,
+.facilityOpen:focus-visible .facilityCue {
+  opacity: 1;
+  translate: 0;
+}
+
+.facilityOpen:hover .facilityCue {
+  background: var(--royal-600);
+}
+
+.facilityCaption {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  z-index: 1;
+  padding: 1rem;
+  background: linear-gradient(0deg, rgb(14 21 51 / 92%) 30%, rgb(14 21 51 / 0%) 100%);
+  color: white;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  block-size: 100%;
+  max-block-size: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: rgb(8 12 28 / 97%);
+  color: white;
+  overflow: hidden;
+}
+
+.lightbox::backdrop {
+  background: rgb(8 12 28 / 82%);
+}
+
+.lightboxShell {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  block-size: 100%;
+  padding: max(0.75rem, env(safe-area-inset-top)) 0.75rem max(0.75rem, env(safe-area-inset-bottom));
+  gap: 0.75rem;
+}
+
+.lightboxBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-inline: 0.25rem;
+}
+
+.lightboxCount {
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+  color: rgb(255 255 255 / 72%);
+}
+
+.lightboxStage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-block-size: 0;
+}
+
+/* Sized against the viewport minus the shell's own chrome rather than against a
+   percentage of the stage: a percentage height here does not always resolve, and
+   an unclamped portrait photo grows over the footer controls and swallows their
+   clicks. Keeping the box tight to the image also leaves the surrounding
+   letterbox as real backdrop, so clicking beside the photo still closes. */
+.lightboxImage {
+  max-inline-size: calc(100vw - 1.5rem);
+  max-block-size: calc(100dvh - 10rem);
+  inline-size: auto;
+  block-size: auto;
+  object-fit: contain;
+  border-radius: var(--radius);
+}
+
+@media (width < 640px) {
+  .lightboxImage {
+    max-block-size: calc(100dvh - 12.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lightboxImage {
+    animation: lightbox-in 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .lightbox[open] {
+    animation: lightbox-fade 240ms ease-out both;
+  }
+}
+
+@keyframes lightbox-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes lightbox-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.lightboxFooter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+  padding-inline: 0.25rem;
+  min-block-size: 3rem;
+}
+
+.lightboxTitle {
+  font-size: clamp(1rem, 1.6vw, 1.25rem);
+  font-weight: 600;
+  line-height: 1.4;
+  color: white;
+  text-wrap: balance;
+}
+
+.lightboxButton {
+  display: grid;
+  place-items: center;
+  inline-size: 3rem;
+  block-size: 3rem;
+  border-radius: var(--radius);
+  border: 1px solid rgb(255 255 255 / 24%);
+  background: rgb(255 255 255 / 8%);
+  color: white;
+  transition: background-color 200ms, border-color 200ms;
+}
+
+.lightboxButton:is(:hover, :focus-visible):not(:disabled) {
+  background: var(--royal-600);
+  border-color: var(--royal-500);
+}
+
+.lightboxButton:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.lightbox :is(a, button):focus-visible {
+  outline: 3px solid var(--royal-400);
+  outline-offset: 3px;
+}
+
+.lightboxNav {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* --------------------------------------------------------------------------
+   Final CTA
+   -------------------------------------------------------------------------- */
 
 .cta {
   position: relative;
@@ -247,9 +1151,17 @@
 }
 
 .cta::before {
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: min(46%, 32rem);
   filter: brightness(0) invert(1);
-  opacity: .06;
+  opacity: 0.07;
+  mask-image: linear-gradient(to left, black 25%, transparent 100%);
 }
+
+/* --------------------------------------------------------------------------
+   Alumni voices
+   -------------------------------------------------------------------------- */
 
 .alumni {
   background: #e6ecfa;
@@ -260,9 +1172,12 @@
   inline-size: 100%;
   padding: 1rem 1.25rem;
   text-align: start;
-  border-block-end: 1px solid var(--royal-200);
   border-inline-start: 3px solid transparent;
-  transition: background-color 200ms;
+  transition: background-color 200ms, border-color 200ms;
+}
+
+.alumniChoice + .alumniChoice {
+  border-block-start: 1px solid var(--royal-200);
 }
 
 .alumniChoice[aria-pressed="true"] {
@@ -288,26 +1203,59 @@
 
 @media (prefers-reduced-motion: no-preference) {
   .alumniStory[aria-hidden="false"] {
-    animation: story-enter 500ms cubic-bezier(.22, 1, .36, 1) both;
+    animation: story-enter 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 }
 
 @keyframes story-enter {
-  from {opacity: 0; transform: translateY(8px);}
-  to {opacity: 1; transform: translateY(0);}
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
+/* --------------------------------------------------------------------------
+   Footer
+   -------------------------------------------------------------------------- */
+
 .footer {
+  position: relative;
+  isolation: isolate;
   background: var(--navy-950);
   color: var(--slate-100);
+}
+
+.footer::before {
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: min(38%, 28rem);
+  filter: brightness(0) invert(1);
+  opacity: 0.05;
+  mask-image: linear-gradient(to right, black 20%, transparent 100%);
 }
 
 .footerGrid {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(0, 2.1fr) minmax(0, 1.1fr);
   align-items: start;
-  gap: 1.5rem;
-  padding-block: 2.5rem;
+  gap: 1.75rem;
+  padding-block: 2.75rem;
+}
+
+/* One identity lockup: the faculty name wraps into balanced lines, so the
+   conjunction can never be left hanging alone on a line of its own. */
+.footerLockup {
+  max-inline-size: 22ch;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+  color: white;
+  text-wrap: balance;
 }
 
 .footerNavigation {
@@ -319,13 +1267,13 @@
 .footerQuickLinks {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: .75rem;
+  column-gap: 0.75rem;
 }
 
 .footerChannels {
   grid-column: 1 / -1;
-  border-block-start: 1px solid var(--slate-600);
-  padding-block-start: .5rem;
+  border-block-start: 1px solid rgb(255 255 255 / 14%);
+  padding-block-start: 0.625rem;
 }
 
 .footer a:hover {
@@ -336,9 +1284,11 @@
 
 .footer h2 {
   margin-block-end: 0.75rem;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 700;
-  color: white;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 82%);
 }
 
 @media (width < 1024px) {
@@ -361,13 +1311,13 @@
   .program {
     grid-template-columns: 2.75rem minmax(0, 1fr) auto;
     gap: 0.75rem;
-    padding: 1.25rem 0.875rem;
+    padding: 1.25rem 1rem;
   }
 
   .service {
     grid-template-columns: 2.5rem minmax(0, 1fr) auto;
-    gap: 0.75rem;
-    padding-inline: 0.5rem;
+    gap: 0.875rem;
+    padding: 1.25rem 1rem;
   }
 
   .serviceIcon {
@@ -388,13 +1338,14 @@
   .footerLocation {
     grid-row: 2;
   }
-
 }
 
 @media (prefers-reduced-motion: reduce) {
   .section *,
   .section *::before,
-  .footer * {
+  .footer *,
+  .lightbox,
+  .lightbox * {
     animation: none !important;
     transition: none !important;
   }
