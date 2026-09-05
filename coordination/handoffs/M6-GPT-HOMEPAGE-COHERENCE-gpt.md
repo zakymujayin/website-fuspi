@@ -146,9 +146,9 @@ Applied values:
 |---|---|---|
 | HERO | 0 | 0 |
 | QUICKLINK | 1 | 10 |
-| INTRO / PRODI | 4 / 5 | 20 / 21 |
-| STATS | 3 | 30 |
-| DEAN | 2 | 40 |
+| DEAN | 2 | 20 |
+| INTRO / PRODI | 4 / 5 | 30 / 31 |
+| STATS | 3 | 40 |
 | COLUMN | 15 | 50 |
 | NEWS / ANNOUNCEMENT / AGENDA | 9 / 6 / 13 | 60 / 61 / 62 |
 | ACHIEVEMENT | 16 | 70 |
@@ -159,9 +159,11 @@ Applied values:
 | PARTNERSHIP | 10 | 120 |
 | CTA | 17 | 130 |
 
-Rationale: the faculty's two strongest assets were buried. Academic Highlights + Dosen & Peneliti sat at position 12 (below the video gallery and partner logos) and student achievements at 13, while the partner logo strip sat at 9, interrupting the flow. The new order groups the page into identity (3-5: what we are, the numbers, the dean's voice), output (6-9: scholarship, news, student results, alumni results), place (10-11), utility and credibility (12-13), then the ask. Gaps of 10 leave room to insert a section later without renumbering everything again.
+Rationale: the faculty's two strongest assets were buried. Academic Highlights + Dosen & Peneliti sat at position 12 (below the video gallery and partner logos) and student achievements at 13, while the partner logo strip sat at 9, interrupting the flow. The new order groups the page into welcome and identity (3-5: the dean's address, what the faculty is, the numbers), output (6-9: scholarship, news, student results, alumni results), place (10-11), utility and credibility (12-13), then the ask. Gaps of 10 leave room to insert a section later without renumbering everything again.
 
-Verified by reading back the rendered headings: Hero, Akses cepat, Tentang FUSPI, FUSPI dalam Angka, Sambutan Dekan, Sorotan Akademik, Berita Terbaru, Prestasi dan Inspirasi, Jejak setelah FUSPI, Sarana dan Prasarana, Galeri Video, Layanan, Kerja Sama, CTA. E2E was skipped at the reviewer's request; no code changed, so lint/typecheck/unit results above still stand.
+The reviewer kept **Sambutan Dekan directly after Akses cepat**, ahead of Tentang FUSPI, which is the usual Indonesian institutional convention of opening with the leadership address. That was a deliberate call on their part, applied in a second pass (DEAN 40 to 20, INTRO/PRODI 20/21 to 30/31, STATS 30 to 40); the earlier draft of this handoff described the identity-first variant.
+
+Verified by reading back the rendered headings: Hero, Akses cepat, Sambutan Dekan, Tentang FUSPI, FUSPI dalam Angka, Sorotan Akademik, Berita Terbaru, Prestasi dan Inspirasi, Jejak setelah FUSPI, Sarana dan Prasarana, Galeri Video, Layanan, Kerja Sama, CTA. E2E was skipped at the reviewer's request; no code changed, so lint/typecheck/unit results above still stand.
 
 **Trap for whoever edits this next.** Three rendered sections are composed from several keys, and `orderOf` takes the **minimum** order among the visible ones:
 
