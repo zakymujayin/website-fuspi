@@ -8,6 +8,7 @@ import type {PublicHomeFacility} from "@/features/facility/domain";
 import {Link} from "@/i18n/navigation";
 import {cn} from "@/lib/utils";
 import styles from "./home-design.module.css";
+import {Reveal} from "./reveal";
 
 export async function FacilitiesSection({items}: {items: readonly PublicHomeFacility[]}) {
   const t = await getTranslations("Home");
@@ -29,7 +30,8 @@ export async function FacilitiesSection({items}: {items: readonly PublicHomeFaci
         </div>
         <div className={cn("grid grid-flow-dense overflow-hidden rounded-md bg-slate-300", bento ? "grid-cols-2 grid-rows-4 gap-px md:grid-cols-4 md:grid-rows-2" : "gap-px sm:grid-cols-2 lg:grid-cols-4")}>
           {visible.map((facility, index) => (
-            <article key={facility.id} className={cn("group relative overflow-hidden bg-slate-200", bento && index === 0 ? "col-span-2 row-span-2 min-h-80 md:min-h-[32rem]" : bento ? "min-h-48 md:min-h-0" : "aspect-[4/3]")}>
+            <Reveal key={facility.id} variant="image" index={index} className={cn(bento && index === 0 ? "col-span-2 row-span-2 min-h-80 md:min-h-[32rem]" : bento ? "min-h-48 md:min-h-0" : "aspect-[4/3]")}>
+            <article className="group relative w-full overflow-hidden bg-slate-200">
               <ImageWithFallback
                 src={facility.image?.url}
                 alt={facility.image?.isDecorative ? "" : (facility.image?.alt ?? facility.caption)}
@@ -40,6 +42,7 @@ export async function FacilitiesSection({items}: {items: readonly PublicHomeFaci
               <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-navy-950 via-transparent to-transparent" />
               <h3 className={cn("absolute inset-x-0 bottom-0 bg-navy-950/90 p-4 font-bold leading-snug text-white", index === 0 ? "text-2xl md:p-6 md:text-3xl" : "text-lg")}>{facility.caption}</h3>
             </article>
+            </Reveal>
           ))}
         </div>
       </Container>

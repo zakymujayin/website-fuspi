@@ -7,6 +7,7 @@ import {Container} from "@/components/ui/container";
 import {institution} from "@/config/institution";
 import {Link} from "@/i18n/navigation";
 import styles from "./home-design.module.css";
+import {Reveal} from "./reveal";
 
 const CAMPUS_ADDRESS = "Kampus 2 — Jl. Syekh Nawawi Al-Bantani, Kp. Andamui, Kec. Curug, Kota Serang, Banten 42171";
 const MAP_LINK = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${CAMPUS_ADDRESS} UIN Sultan Maulana Hasanuddin Banten`)}`;
@@ -17,11 +18,11 @@ function isExternal(item: NavLink | ExternalLink): item is ExternalLink {
   return "url" in item;
 }
 
-function FooterNav({title, children}: {title: string; children: React.ReactNode}) {
+function FooterNav({title, children, compact = false}: {title: string; children: React.ReactNode; compact?: boolean}) {
   return (
     <nav aria-label={title}>
       <h2>{title}</h2>
-      <ul>{children}</ul>
+      <ul className={compact ? styles.footerQuickLinks : undefined}>{children}</ul>
     </nav>
   );
 }
@@ -34,17 +35,18 @@ export async function SiteFooter() {
   return (
     <footer className={styles.footer}>
       <Container>
+        <Reveal variant="fade" className="!block">
         <div className={styles.footerGrid}>
           <div className={styles.footerIdentity}>
             <div className="flex items-center gap-4">
               <BrandMark tone="dark" showLabel={false} className="shrink-0 bg-transparent" />
               <p className="max-w-xs text-lg font-semibold leading-snug text-white">{institution.name}</p>
             </div>
-            <address className="mt-5 max-w-sm text-sm leading-6 text-slate-200 not-italic">
-              <span className="mb-2 block font-medium text-white">{institution.university}</span>{CAMPUS_ADDRESS}
+            <address className="mt-3 max-w-sm text-sm leading-6 text-slate-200 not-italic">
+              <span className="mb-1 block font-medium text-white">{institution.university}</span>{CAMPUS_ADDRESS}
             </address>
             <a href="mailto:fuspi@uinbanten.ac.id" className={LINK_CLASS}>fuspi@uinbanten.ac.id</a>
-            <nav aria-label="Sosial media" className="mt-3 flex gap-1">
+            <nav aria-label="Sosial media" className="flex gap-1">
               {[
                 {href: "https://www.youtube.com/@humasuinbanten1673", label: "YouTube UIN Banten", icon: Youtube},
                 {href: "https://www.instagram.com/uinbanten", label: "Instagram UIN Banten", icon: Instagram},
@@ -56,7 +58,8 @@ export async function SiteFooter() {
               ))}
             </nav>
           </div>
-          <FooterNav title={t("quickLinks")}>
+          <div className={styles.footerNavigation}>
+          <FooterNav title={t("quickLinks")} compact>
             {quickLinks.map((item) => (
               <li key={item.key}>
                 {isExternal(item) ? (
@@ -65,13 +68,15 @@ export async function SiteFooter() {
               </li>
             ))}
           </FooterNav>
-          <div className="flex flex-col gap-5">
           <FooterNav title={tNav("studyPrograms")}>
             {studyProgramLinks.map((item) => <li key={item.key}><Link href={item.href} className={LINK_CLASS}>{tNav(item.key)}</Link></li>)}
           </FooterNav>
-          <FooterNav title={tNav("contentLabel")}>
-            {contentNav.map((item) => <li key={item.key} className="inline-block me-4"><Link href={item.href} className={LINK_CLASS}>{tNav(item.key)}</Link></li>)}
-          </FooterNav>
+          <nav aria-label={tNav("contentLabel")} className={styles.footerChannels}>
+            <h2 className="sr-only">{tNav("contentLabel")}</h2>
+            <ul className="flex flex-wrap gap-x-4">
+              {contentNav.map((item) => <li key={item.key}><Link href={item.href} className={LINK_CLASS}>{tNav(item.key)}</Link></li>)}
+            </ul>
+          </nav>
           </div>
           <div className={styles.footerLocation}>
             <h2>{t("openMap")}</h2>
@@ -85,6 +90,7 @@ export async function SiteFooter() {
             </div>
           </div>
         </div>
+        </Reveal>
         <div className="flex flex-col gap-2 border-t border-slate-600 py-4 text-sm text-slate-200 md:flex-row md:items-center md:justify-between md:gap-6">
           <p className="text-center md:text-start">© {new Date().getFullYear()} {institution.name}</p>
           <nav aria-label={t("legalLabel")} className="flex flex-wrap justify-center gap-x-5 md:justify-end">

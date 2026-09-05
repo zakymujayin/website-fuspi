@@ -45,8 +45,9 @@ export async function SiteHeader() {
               />
             </div>
             <DesktopNav primary={primaryNav} />
-            <div className="hidden shrink-0 items-center gap-1 xl:flex">
+            <div className="flex shrink-0 items-center gap-1">
               <HeaderSearch />
+              <div className="hidden items-center gap-1 xl:flex">
               <UtilityLink
                 url={ppidLink.url}
                 label={t(ppidLink.key)}
@@ -61,7 +62,7 @@ export async function SiteHeader() {
                 showIcon={false}
                 className="h-10 shrink-0 whitespace-nowrap rounded-md bg-royal-700 px-3 text-[13px] font-semibold text-white transition-colors hover:bg-royal-800 xl:px-4 xl:text-sm"
               />
-            </div>
+              </div>
             <MobileNav
               primary={primaryNav}
               content={contentNav}
@@ -69,6 +70,7 @@ export async function SiteHeader() {
               actions={[ppidLink, pmbLink]}
               externalHint={externalHint}
             />
+            </div>
           </div>
         </div>
       </div>

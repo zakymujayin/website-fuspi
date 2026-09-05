@@ -2,6 +2,7 @@ import {ImageWithFallback} from "@/components/public/image-with-fallback";
 import {institution} from "@/config/institution";
 import type {PublicSiteSetting} from "@/features/home-nav/public-query";
 import {Link} from "@/i18n/navigation";
+import styles from "./home-design.module.css";
 
 export function IdentityBadges({
   logo,
@@ -23,7 +24,7 @@ export function IdentityBadges({
           <ImageWithFallback src="/images/brand/uin-logo-navy.png" alt={institution.university} className="object-contain" sizes="56px" loading="eager" />
         </span>
       )}
-      <span className="max-w-44 sm:max-w-48 lg:hidden min-[1400px]:block">
+      <span className={`${styles.brandName} max-w-36 sm:max-w-48 lg:hidden min-[1400px]:block`}>
         <span className="block text-sm font-semibold leading-tight text-navy-950">{institution.name}</span>
       </span>
       <span className="hidden items-center gap-2 border-s border-slate-200 ps-3 2xl:flex">

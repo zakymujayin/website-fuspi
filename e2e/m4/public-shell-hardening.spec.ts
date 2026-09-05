@@ -88,8 +88,14 @@ const documentMetrics = (page: Page) =>
   });
 
 const scrollTo = async (page: Page, y: number) => {
-  await page.evaluate((target) => window.scrollTo(0, target), y);
-  await page.waitForFunction((target) => window.scrollY >= target, y);
+  // Compact footers can make a short shell route less than 400px scrollable.
+  // Verify the reachable scroll position, not an impossible document offset.
+  const reachable = await page.evaluate((target) => {
+    const offset = Math.min(target, document.documentElement.scrollHeight - innerHeight);
+    window.scrollTo(0, offset);
+    return offset;
+  }, y);
+  await page.waitForFunction((target) => window.scrollY >= target - 1, reachable);
   // The scroll listener commits React state asynchronously, so settle on the
   // resulting attribute before any geometry is read.
   await expect(page.locator("header")).toHaveAttribute(
@@ -124,6 +130,13 @@ const openDrawer = async (page: Page, locale: keyof typeof OPEN_MENU) => {
 
   return drawer;
 };
+
+/** Audit settled UI, not a partially transparent entrance-animation frame. */
+const settleEntranceMotion = (page: Page) => page.waitForFunction(() =>
+  document.getAnimations().every(animation =>
+    animation.playState !== "running" || animation.effect?.getComputedTiming().iterations === Infinity,
+  ),
+);
 
 /**
  * Computed transition duration of both drawer elements, in seconds, one entry
@@ -586,6 +599,7 @@ test.describe("public shell hardening — landmarks and axe", () => {
     test(`${locale}: axe WCAG A/AA over the whole shell`, async ({ page }) => {
       await page.setViewportSize({ width: 1440, height: 900 });
       await page.goto(`/${locale}${SHELL_PATH}`);
+      await settleEntranceMotion(page);
 
       const results = await new AxeBuilder({ page })
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
@@ -599,6 +613,7 @@ test.describe("public shell hardening — landmarks and axe", () => {
       await page.goto(`/${locale}${SHELL_PATH}`);
       await openDrawer(page, locale);
 
+      await settleEntranceMotion(page);
       const results = await new AxeBuilder({ page })
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
         .analyze();
@@ -611,6 +626,7 @@ test.describe("public shell hardening — landmarks and axe", () => {
       await scrollTo(page, 300);
       await expect(page.locator("header")).toHaveAttribute("data-compact", "true");
 
+      await settleEntranceMotion(page);
       const results = await new AxeBuilder({ page })
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
         .analyze();

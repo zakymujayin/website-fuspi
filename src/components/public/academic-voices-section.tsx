@@ -43,7 +43,7 @@ export async function AcademicVoicesSection({
   if (!featured && lecturers.length === 0) return null;
 
   return (
-    <section className={`${styles.section} ${styles.primary} bg-white`}>
+    <section className={`${styles.section} ${styles.primary} ${styles.academic}`}>
       <Container>
         <div className="mb-10 grid gap-6 lg:grid-cols-12">
           <div className="lg:col-span-8">
@@ -57,10 +57,10 @@ export async function AcademicVoicesSection({
           </div>
         </div>
 
-        <Reveal>
           <div className="grid w-full gap-10 lg:grid-cols-12">
             {featured ? (
-              <Link href={`/kolom/${featured.slug}`} className={`group ${rest.length ? "lg:col-span-7" : "lg:col-span-12"}`}>
+              <Reveal variant="image" className={rest.length ? "lg:col-span-7" : "lg:col-span-12"}>
+              <Link href={`/kolom/${featured.slug}`} className={`group w-full ${styles.academicFeature}`}>
                 <div className="relative aspect-[16/10] overflow-hidden rounded-md bg-slate-200">
                   <ImageWithFallback
                     src={featured.cover?.url}
@@ -75,23 +75,25 @@ export async function AcademicVoicesSection({
                 {featured.translation.value.excerpt ? <p className="mt-3 max-w-2xl text-base leading-7 text-slate-700">{featured.translation.value.excerpt}</p> : null}
                 <p className="mt-2 text-xs text-slate-600">{featured.authorName} · {formatJakartaPublishedDate(featured.publishedAt, locale)}</p>
               </Link>
+              </Reveal>
             ) : null}
             {rest.length > 0 ? (
               <div className="lg:col-span-5">
                 <div className="border-t border-slate-900">
-                  {rest.slice(0, 3).map((column) => (
-                    <Link key={column.id} href={`/kolom/${column.slug}`} className="group block border-b border-slate-300 py-5">
+                  {rest.slice(0, 3).map((column, index) => (
+                    <Reveal key={column.id} index={index + 1} className="!block !h-auto">
+                    <Link href={`/kolom/${column.slug}`} className="group block border-b border-slate-300 py-5">
                       <span className="block text-xs font-semibold uppercase tracking-[0.14em] text-royal-600">{t(`columnRole.${ROLE_KEY[column.role]}`)}</span>
                       <span className="mt-2 block text-lg font-bold leading-snug text-slate-900 group-hover:text-royal-600 md:text-xl">{column.translation.value.title}</span>
                       <span className="mt-2 block text-xs text-slate-600">{column.authorName}</span>
                       <time className="mt-2 block text-sm text-slate-700" dateTime={column.publishedAt.toISOString()}>{formatJakartaPublishedDate(column.publishedAt, locale)}</time>
                     </Link>
+                    </Reveal>
                   ))}
                 </div>
               </div>
             ) : null}
           </div>
-        </Reveal>
 
         {lecturers.length > 0 ? (
           <div className="mt-16">

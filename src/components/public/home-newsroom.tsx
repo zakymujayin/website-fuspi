@@ -59,9 +59,9 @@ export async function HomeNewsroom({
         </div>
 
         {featured ? (
-          <Reveal>
             <div className="grid w-full gap-8 lg:grid-cols-12 lg:gap-10">
-              <Link href={`/berita/${featured.slug}`} className="group lg:col-span-7">
+              <Reveal variant="image" className="lg:col-span-7">
+              <Link href={`/berita/${featured.slug}`} className="group w-full">
                 <div className="relative aspect-[16/9] overflow-hidden rounded-md bg-slate-200">
                   <ImageWithFallback
                     src={featured.cover?.url}
@@ -79,19 +79,21 @@ export async function HomeNewsroom({
                 </h3>
                 {featured.translation.value.excerpt ? <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 md:text-[15px]">{featured.translation.value.excerpt}</p> : null}
               </Link>
+              </Reveal>
               <div className="border-t-2 border-royal-500 lg:col-span-5">
-                {rest.slice(0, 3).map((item) => (
-                  <Link key={item.id} href={`/berita/${item.slug}`} className="group grid grid-cols-[1fr_5rem] items-start gap-4 border-b border-slate-300 py-5 sm:grid-cols-[1fr_6.5rem]">
+                {rest.slice(0, 3).map((item, index) => (
+                  <Reveal key={item.id} index={index + 1} className="!block !h-auto">
+                  <Link href={`/berita/${item.slug}`} className="group grid grid-cols-[1fr_5rem] items-start gap-4 border-b border-slate-300 py-5 sm:grid-cols-[1fr_6.5rem]">
                     <span>
                       <span className="block text-lg font-semibold leading-snug text-slate-900 group-hover:text-royal-800">{item.translation.value.title}</span>
                       <time dateTime={item.publishedAt.toISOString()} className="mt-3 block text-sm text-slate-700">{formatJakartaPublishedDate(item.publishedAt, locale)}</time>
                     </span>
                     {item.cover ? <span className="relative aspect-square overflow-hidden rounded-sm bg-slate-100"><ImageWithFallback src={item.cover.url} alt={item.cover.isDecorative ? "" : item.cover.alt} className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" sizes="104px" focalPoint={toFocalPoint(item.cover)} /></span> : null}
                   </Link>
+                  </Reveal>
                 ))}
               </div>
             </div>
-          </Reveal>
         ) : null}
 
         {(announcements.length > 0 || events.length > 0) ? (

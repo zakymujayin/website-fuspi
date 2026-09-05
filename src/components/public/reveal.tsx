@@ -1,63 +1,62 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {useEffect, useRef, type CSSProperties, type ReactNode} from "react";
+import {cn} from "@/lib/utils";
+import styles from "./reveal.module.css";
 
-import { cn } from "@/lib/utils";
+let observer: IntersectionObserver | undefined;
+const pending = new Map<Element, () => void>();
 
-type RevealProps = {
+function observe(node: Element, reveal: () => void) {
+  observer ??= new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) pending.get(entry.target)?.();
+    }
+  }, {threshold: 0, rootMargin: "0px 0px -32px 0px"});
+  pending.set(node, reveal);
+  observer.observe(node);
+  return () => {
+    observer?.unobserve(node);
+    pending.delete(node);
+    if (!pending.size) {
+      observer?.disconnect();
+      observer = undefined;
+    }
+  };
+}
+
+/** Visible SSR/no-JS baseline; one shared observer, no off-screen expiry timer. */
+export function Reveal({children, index = 0, className, variant = "lift"}: {
   children: ReactNode;
-  /** Stagger position within a group — each step adds ~70ms of delay. */
   index?: number;
   className?: string;
-};
-
-/**
- * Fades/lifts children in once they scroll into view. Same IntersectionObserver
- * shape as the stats counter, generalized so card grids don't all mount at once.
- *
- * Never stays hidden: reduced motion skips the animation outright, and a
- * bounded fallback timer forces visibility if the observer never reports an
- * intersection (odd viewport timing, a stitched/headless capture, a ref that
- * mounts already off-screen in a zero-height parent) so content can't get
- * stuck invisible the way it did before this existed.
- */
-export function Reveal({ children, index = 0, className }: RevealProps) {
+  variant?: "lift" | "image" | "fade";
+}) {
   const ref = useRef<HTMLDivElement>(null);
-  const [inView, setInView] = useState(false);
-
   useEffect(() => {
     const node = ref.current;
-    if (!node) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -10% 0px" },
-    );
-    observer.observe(node);
-    const fallback = window.setTimeout(() => setInView(true), 1200);
+    if (!node || !window.IntersectionObserver) return;
+    const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
+    // Never delay content already visible on initial load, including the LCP.
+    if (preference.matches || node.getBoundingClientRect().top < window.innerHeight) return;
+    node.dataset.revealState = "pending";
+    const finish = () => {
+      node.dataset.revealState = "visible";
+      stop?.();
+    };
+    const stop = observe(node, finish);
+    const onPreference = () => {if (preference.matches) finish();};
+    preference.addEventListener("change", onPreference);
+    node.addEventListener("focusin", finish);
     return () => {
-      observer.disconnect();
-      window.clearTimeout(fallback);
+      stop?.();
+      preference.removeEventListener("change", onPreference);
+      node.removeEventListener("focusin", finish);
     };
   }, []);
 
   return (
-    <div
-      ref={ref}
-      className={cn(
-        // Only ever hidden/offset under motion-safe: with no preference set,
-        // reduced motion never applies these, so content is always visible
-        // by default and this can never get stuck invisible.
-        "flex h-full opacity-100 motion-safe:transition-all motion-safe:duration-500 motion-safe:ease-out",
-        inView ? "translate-y-0" : "motion-safe:translate-y-5 motion-safe:opacity-0",
-        className,
-      )}
-      style={{ transitionDelay: `${index * 70}ms` }}
-    >
+    <div ref={ref} data-reveal={variant} className={cn("flex h-full", styles.reveal, className)} style={{"--reveal-delay": `${Math.min(Math.max(index, 0), 5) * 70}ms`} as CSSProperties}>
       {children}
     </div>
   );

@@ -6,15 +6,16 @@ import {useEffect, useRef, useState} from "react";
 import {Container} from "@/components/ui/container";
 import type {PublicStatisticItem} from "@/features/home-nav/public-query";
 import styles from "./home-design.module.css";
+import {Reveal} from "./reveal";
 
 function useCount(target: number, enabled: boolean) {
-  const [value, setValue] = useState(0);
+  const [value, setValue] = useState(target);
   const completed = useRef(false);
 
   useEffect(() => {
     if (!enabled || completed.current) return;
-    completed.current = true;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      completed.current = true;
       const reducedFrame = requestAnimationFrame(() => setValue(target));
       return () => cancelAnimationFrame(reducedFrame);
     }
@@ -24,6 +25,7 @@ function useCount(target: number, enabled: boolean) {
       const progress = Math.min((now - started) / 1200, 1);
       setValue(Math.round(target * (1 - Math.pow(1 - progress, 3))));
       if (progress < 1) frame = requestAnimationFrame(animate);
+      else completed.current = true;
     };
     frame = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(frame);
@@ -70,6 +72,7 @@ export function StatsSection({items, title, description}: {items: readonly Publi
   return (
     <section ref={root} className={`${styles.section} bg-royal-500 text-white`}>
       <Container>
+        <Reveal variant="fade" className="!block">
         <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-12">
           <div className="lg:col-span-4">
             <h2 className="max-w-sm font-bold text-white">
@@ -83,6 +86,7 @@ export function StatsSection({items, title, description}: {items: readonly Publi
             ))}
           </div>
         </div>
+        </Reveal>
       </Container>
     </section>
   );

@@ -11,7 +11,7 @@ export async function HomeCtaSection() {
   const tNav = await getTranslations("Nav");
 
   return (
-    <section className={`${styles.section} ${styles.primary} bg-royal-500 text-white`}>
+    <section className={`${styles.section} ${styles.primary} ${styles.cta} text-white`}>
       <Container>
         <div className="grid items-center gap-8 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-7">

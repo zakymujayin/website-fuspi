@@ -57,9 +57,9 @@ export async function AchievementsSection({
             </Link>
           </div>
         </div>
-        <Reveal>
           <div className="grid w-full gap-10 lg:grid-cols-12">
             <Link href={`/prestasi/${featured.slug}`} className={cn("group", rest.length ? "lg:col-span-7" : "grid items-center gap-6 lg:col-span-12 lg:grid-cols-2 lg:gap-12")}>
+              <Reveal variant="image" className="!block !h-auto">
               <div className="relative aspect-[4/3] overflow-hidden rounded-md bg-slate-200">
                 <ImageWithFallback
                   src={featured.media?.url}
@@ -69,7 +69,8 @@ export async function AchievementsSection({
                   focalPoint={toFocalPoint(featured.media)}
                 />
               </div>
-              <div>
+              </Reveal>
+              <Reveal index={1} className="!block !h-auto">
               <p className="mt-4">
                 <LevelChip levelKey={featured.level} />
               </p>
@@ -77,7 +78,7 @@ export async function AchievementsSection({
               <p className="mt-2 text-sm text-slate-600">{featured.studentName}</p>
               {featured.achievedAt ? <time className="mt-3 block text-sm text-slate-700" dateTime={new Date(featured.achievedAt).toISOString()}>{formatJakartaPublishedDate(new Date(featured.achievedAt), locale)}</time> : null}
               <span className="mt-6 inline-flex min-h-11 items-center gap-2 border-b border-royal-500 text-sm font-semibold text-royal-800">{t("readMore")}<ArrowRight aria-hidden className="size-4 rtl:rotate-180" /></span>
-              </div>
+              </Reveal>
             </Link>
             {rest.length > 0 ? <div className="lg:col-span-5">
               <div className="border-t border-slate-900">
@@ -94,7 +95,6 @@ export async function AchievementsSection({
               </div>
             </div> : null}
           </div>
-        </Reveal>
       </Container>
     </section>
   );

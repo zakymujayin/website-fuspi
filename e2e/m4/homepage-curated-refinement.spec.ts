@@ -42,7 +42,7 @@ test("alumni choices and previous/next controls update the same story", async ({
   await choices.nth(1).click();
   await expect(choices.nth(1)).toHaveAttribute("aria-pressed", "true");
   await expect(choices.first()).toHaveAttribute("aria-pressed", "false");
-  const selectedName = await region.locator("cite > span").first().textContent();
+  const selectedName = await region.locator('blockquote[aria-hidden="false"] cite > span').first().textContent();
   expect(names[1]).toContain(selectedName);
   await region.getByRole("button", {name: "Testimoni sebelumnya"}).click();
   await expect(choices.first()).toHaveAttribute("aria-pressed", "true");

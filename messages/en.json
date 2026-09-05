@@ -1,4 +1,25 @@
 {
+  "SiteSearch": {
+    "title": "Site search",
+    "description": "Find study programs, lecturers, documents, events, services, and partnerships.",
+    "scope": "Content type",
+    "hint": "Choose a content type, then enter a keyword.",
+    "loading": "Searching content…",
+    "error": "Search could not be loaded. Please try again.",
+    "empty": "No matching results. Try another keyword or content type.",
+    "count": "{count} results found",
+    "pages": "Search result pages",
+    "previous": "Previous",
+    "next": "Next",
+    "resource": {
+      "STUDY_PROGRAM": "Study programs",
+      "LECTURER": "Lecturers",
+      "DOCUMENT": "Documents",
+      "EVENT": "Events",
+      "SERVICE": "Services",
+      "PARTNERSHIP": "Partnerships"
+    }
+  },
   "M0": {
     "title": "The FUSPI website foundation is ready",
     "description": "This scaffold validates multilingual routing, writing direction, and quality gates before the three AI lanes begin.",

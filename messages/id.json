@@ -1,4 +1,25 @@
 {
+  "SiteSearch": {
+    "title": "Pencarian situs",
+    "description": "Temukan program studi, dosen, dokumen, agenda, layanan, dan kerja sama.",
+    "scope": "Jenis konten",
+    "hint": "Pilih jenis konten, lalu masukkan kata kunci.",
+    "loading": "Mencari konten…",
+    "error": "Pencarian belum dapat dimuat. Silakan coba lagi.",
+    "empty": "Tidak ada hasil yang sesuai. Coba kata kunci atau jenis konten lain.",
+    "count": "{count} hasil ditemukan",
+    "pages": "Halaman hasil pencarian",
+    "previous": "Sebelumnya",
+    "next": "Berikutnya",
+    "resource": {
+      "STUDY_PROGRAM": "Program studi",
+      "LECTURER": "Dosen",
+      "DOCUMENT": "Dokumen",
+      "EVENT": "Agenda",
+      "SERVICE": "Layanan",
+      "PARTNERSHIP": "Kerja sama"
+    }
+  },
   "M0": {
     "title": "Fondasi website FUSPI siap dikembangkan",
     "description": "Scaffold ini memvalidasi routing multibahasa, arah tulisan, dan quality gate sebelum tiga lane AI mulai bekerja.",

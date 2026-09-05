@@ -19,7 +19,7 @@ export async function ServicesSection() {
   const tNav = await getTranslations("Nav");
 
   return (
-    <section className={`${styles.section} border-y border-slate-200 bg-slate-100`}>
+    <section className={`${styles.section} ${styles.services}`}>
       <Container>
         <div className="grid gap-10 lg:grid-cols-12 lg:gap-16">
           <div className="lg:col-span-4">
@@ -30,12 +30,11 @@ export async function ServicesSection() {
             </Link>
           </div>
           <div className="lg:col-span-8">
-            <Reveal className="w-full">
                 <div className="w-full border-t-2 border-royal-500">
-                  {services.map((service) => {
+                  {services.map((service, index) => {
                     const content = (
                       <>
-                        <service.icon aria-hidden className="size-6 text-royal-800" strokeWidth={1.5} />
+                        <span className={styles.serviceIcon}><service.icon aria-hidden className="size-6" strokeWidth={1.5} /></span>
                         <span>
                           <span className="block text-xl font-semibold leading-snug text-slate-900">{t(`service.${service.key}.title`)}</span>
                           <span className="mt-1.5 block max-w-xl text-base leading-6 text-slate-700">{t(`service.${service.key}.description`)}</span>
@@ -43,15 +42,14 @@ export async function ServicesSection() {
                         {service.external ? <ArrowUpRight aria-hidden className="size-4 shrink-0" strokeWidth={1.5} /> : <ArrowRight aria-hidden className="size-4 shrink-0 rtl:rotate-180" strokeWidth={1.5} />}
                       </>
                     );
-                    const className = `${styles.service} group`;
-                    return service.external ? (
-                      <a key={service.key} href={service.href} target="_blank" rel="noopener noreferrer" className={className}>{content}<span className="sr-only">{tNav("externalLinkHint")}</span></a>
+                    const className = `${styles.service} group w-full`;
+                    return <Reveal key={service.key} index={index} className="w-full">{service.external ? (
+                      <a href={service.href} target="_blank" rel="noopener noreferrer" className={className}>{content}<span className="sr-only">{tNav("externalLinkHint")}</span></a>
                     ) : (
-                      <Link key={service.key} href={service.href} className={className}>{content}</Link>
-                    );
+                      <Link href={service.href} className={className}>{content}</Link>
+                    )}</Reveal>;
                   })}
                 </div>
-            </Reveal>
           </div>
         </div>
       </Container>

@@ -5,6 +5,7 @@ import { PartnersMarquee } from "@/components/public/partners-marquee";
 import type { PublicContentCardSchema } from "@/contracts/public-content";
 import {Container} from "@/components/ui/container";
 import styles from "./home-design.module.css";
+import {Reveal} from "./reveal";
 
 type PartnerCard = z.infer<typeof PublicContentCardSchema>;
 
@@ -26,7 +27,7 @@ export async function PartnersSection({ partners }: PartnersSectionProps) {
         </div>
         <p className="max-w-xl text-base leading-7 text-slate-700">{t("partnersDescription")}</p>
       </div>
-      <PartnersMarquee partners={partners} />
+      <Reveal variant="fade" className="!block"><PartnersMarquee partners={partners} /></Reveal>
       </Container>
     </section>
   );
